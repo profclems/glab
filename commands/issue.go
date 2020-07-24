@@ -3,6 +3,7 @@ package commands
 import (
 	"bufio"
 	"fmt"
+	. "github.com/logrusorgru/aurora"
 	"net/url"
 	"os"
 	"strings"
@@ -16,14 +17,11 @@ type IssueInfo struct {
 func CreateIssue(map[string]string)  {
 	reader := bufio.NewReader(os.Stdin)
 
-	fmt.Println("Issue Details")
-	fmt.Println("--------------------------------")
-	fmt.Print("Title"+"\n"+"-> ")
+	fmt.Print(Cyan("Title"+"\n"+"-> "))
 	issueTitle, _ := reader.ReadString('\n')
 	issueTitle = strings.Replace(issueTitle, "\n", "", -1)
 	fmt.Println()
-	fmt.Println("Enter Issue Description")
-	fmt.Println("info: Type `exit` to close")
+	fmt.Println(Cyan("Enter Issue Description"), Yellow("[info: Type `exit` to close]"))
 	var issueDescription string
 	for {
 		fmt.Print("-> ")
@@ -37,8 +35,11 @@ func CreateIssue(map[string]string)  {
 		issueDescription += "\n"+input
 
 	}
-	reqBody := fmt.Sprintf("{\"title\":\"%s\",\"description\":\"%s\"}",issueTitle, interface{}(url.ParseRequestURI(issueDescription)))
-	fmt.Println(reqBody)
+	params := url.Values{}
+	params.Add("title", issueTitle)
+	params.Add("description", issueDescription)
+	reqBody := params.Encode()
+	fmt.Println(Green("Creating Issue {"+issueTitle+"}..."))
 	MakeRequest(reqBody,"projects/"+GetEnv("GITLAB_PROJECT_ID")+"/issues","POST")
 }
 
@@ -46,12 +47,7 @@ func ExecIssue(cmdArgs map[string]string)  {
 	commandList := map[string]func(map[string]string) {
 		"create" : CreateIssue,
 	}
-	commandList["create"](cmdArgs)
-	/*
-	urls := map[string]string {
-		"contributions"
+	if CommandArgExists(cmdArgs, "create") {
+		commandList["create"](cmdArgs)
 	}
-	*/
-
-	//MakeRequest(`{}`,"projects/20131402/issues/1","GET")
 }
