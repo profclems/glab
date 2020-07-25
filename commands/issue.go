@@ -11,13 +11,6 @@ import (
 	"strings"
 )
 
-type IssueInfo struct {
-	Title   string  `json:"title"`
-	Name string `json:"description"`
-	IssueId string `json:"iid"`
-	State string `json:"state"`
-}
-
 func DisplayIssue(hm map[string]interface{})  {
 	duration := TimeAgo(hm["created_at"])
 	if hm["state"] == "opened" {
@@ -27,11 +20,17 @@ func DisplayIssue(hm map[string]interface{})  {
 	}
 }
 
-func CreateIssue(map[string]string)  {
+func CreateIssue(cmdArgs map[string]string, _ map[int]string)  {
 	reader := bufio.NewReader(os.Stdin)
-
 	fmt.Print(Cyan("Title"+"\n"+"-> "))
 	issueTitle, _ := reader.ReadString('\n')
+	var issueLabel string
+	if !CommandArgExists(cmdArgs, "labels") || !CommandArgExists(cmdArgs, "label") {
+		fmt.Print(Cyan("Label(s) [Comma Separated]"+"\n"+"-> "))
+		issueLabel, _ = reader.ReadString('\n')
+	} else {
+		issueLabel = strings.Trim(cmdArgs["label"],"[] ")
+	}
 	issueTitle = strings.Replace(issueTitle, "\n", "", -1)
 	fmt.Println()
 	fmt.Println(Cyan("Enter Issue Description"), Yellow("[info: Type `exit` to close]"))
@@ -47,9 +46,38 @@ func CreateIssue(map[string]string)  {
 		issueDescription += "\n"+input
 
 	}
+	fmt.Print(Cyan("Due Date"))
+	fmt.Print(Yellow("(Format: YYYY-MM-DD)"+"\n"+"-> "))
+	issueDue, _ := reader.ReadString('\n')
 	params := url.Values{}
 	params.Add("title", issueTitle)
 	params.Add("description", issueDescription)
+	params.Add("labels", issueLabel)
+	params.Add("due_date", issueDue)
+	if CommandArgExists(cmdArgs, "confidential") {
+		params.Add("confidential", "true")
+	}
+	if CommandArgExists(cmdArgs, "weight") {
+		params.Add("weight", cmdArgs["weight"])
+	}
+	if CommandArgExists(cmdArgs, "mr") {
+		params.Add("merge_request_to_resolve_discussions_of", cmdArgs["mr"])
+	}
+	if CommandArgExists(cmdArgs, "milestone") {
+		params.Add("milestone_id", cmdArgs["milestone"])
+	}
+	if CommandArgExists(cmdArgs, "epic") {
+		params.Add("epic_id", cmdArgs["epic"])
+	}
+	if CommandArgExists(cmdArgs, "assigns") {
+		params.Add("epic_id", cmdArgs["epic"])
+		assignId := cmdArgs["assigns"]
+		arrIds := strings.Split(strings.Trim(assignId,"[] "), ",")
+		for _, i2 := range arrIds {
+			params.Add("assignee_ids[]", i2)
+		}
+	}
+
 	reqBody := params.Encode()
 	fmt.Println(Yellow("Creating Issue {"+issueTitle+"}..."))
 	resp := MakeRequest(reqBody,"projects/"+GetEnv("GITLAB_PROJECT_ID")+"/issues","POST")
@@ -72,15 +100,29 @@ func CreateIssue(map[string]string)  {
 	}
 }
 
-func ListIssues(cmdArgs map[string]string)  {
-	var queryStrings = "?state="
+func ListIssues(cmdArgs map[string]string, _ map[int]string)  {
+	var queryStrings = "state="
 	if CommandArgExists(cmdArgs, "all") {
 		queryStrings = ""
 	} else if CommandArgExists(cmdArgs, "closed") {
-		queryStrings += "closed"
+		queryStrings += "closed&"
 	} else {
-		queryStrings += "opened"
+		queryStrings += "opened&"
 	}
+	if CommandArgExists(cmdArgs, "label") || CommandArgExists(cmdArgs, "labels")  {
+		queryStrings += "labels="+cmdArgs["label"]+"&"
+	}
+	if CommandArgExists(cmdArgs, "milestone")  {
+		queryStrings += "milestone="+cmdArgs["milestone"]+"&"
+	}
+	if CommandArgExists(cmdArgs, "confidential")  {
+		queryStrings += "confidential="+cmdArgs["confidential"]
+	}
+	queryStrings = strings.Trim(queryStrings,"& ")
+	if len(queryStrings) > 0 {
+		queryStrings = "?"+queryStrings
+	}
+	fmt.Println(queryStrings)
 	resp := MakeRequest("{}","projects/"+GetEnv("GITLAB_PROJECT_ID")+"/issues"+queryStrings,"GET")
 	//fmt.Println(resp)
 	if resp["responseCode"]==200 {
@@ -100,17 +142,41 @@ func ListIssues(cmdArgs map[string]string)  {
 		} else {
 			/* not string */
 		}
+	} else {
+		fmt.Println(resp)
 	}
 }
 
-func ExecIssue(cmdArgs map[string]string)  {
-	commandList := map[string]func(map[string]string) {
+func DeleteIssue(cmdArgs map[string]string, arrFlags map[int]string)  {
+	issueId := strings.Trim(arrFlags[1]," ")
+	if CommandArgExists(cmdArgs, issueId) {
+		arrIds := strings.Split(strings.Trim(issueId,"[] "), ",")
+		for _, i2 := range arrIds {
+			fmt.Println("Deleting Issue #"+i2)
+			queryStrings := "/"+i2
+			resp := MakeRequest("{}","projects/"+GetEnv("GITLAB_PROJECT_ID")+"/issues"+queryStrings,"DELETE")
+			if resp["responseCode"]==204 {
+				bodyString := resp["responseMessage"]
+				fmt.Println(bodyString)
+				fmt.Println(Green("Issue Deleted Successfully"))
+			} else if resp["responseCode"]==404 {
+				fmt.Println(Red("Issue does not exist"))
+			} else {
+				fmt.Println(Red("Could not complete request."))
+			}
+			fmt.Println()
+		}
+	} else {
+		fmt.Println(Red("Invalid command"))
+		fmt.Println("Usage: glab issue delete <issue-id>")
+	}
+}
+
+func ExecIssue(cmdArgs map[string]string, arrCmd map[int]string)  {
+	commandList := map[interface{}]func(map[string]string,map[int]string) {
 		"create" : CreateIssue,
 		"list" : ListIssues,
+		"delete" : DeleteIssue,
 	}
-	if CommandArgExists(cmdArgs, "create") {
-		commandList["create"](cmdArgs)
-	} else {
-		commandList["list"](cmdArgs)
-	}
+	commandList[arrCmd[0]](cmdArgs, arrCmd)
 }

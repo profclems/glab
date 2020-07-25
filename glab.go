@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-func Version(_ map[string]string)  {
+func Version(_ map[string]string, _ map[int]string)  {
 	version := "v0.1.0"
 	fmt.Println("GLab version", version)
 	fmt.Println("https://github.com/profclems/glab")
@@ -32,22 +32,22 @@ func OpenFile(filename string)  {
 	}
 }
 
-func Issue(cmdArgs map[string]string)  {
-	commands.ExecIssue(cmdArgs)
+func Issue(cmdArgs map[string]string, arrCmd map[int]string)  {
+	commands.ExecIssue(cmdArgs, arrCmd)
 	return
 }
 
-func MergeRequest(cmdArgs map[string]string)  {
+func MergeRequest(cmdArgs map[string]string, arrCmd map[int]string)  {
 	commands.MakeRequest(`{}`,"projects/20131402/issues/1","GET")
 	return
 }
 
-func Help(args map[string]string) {
+func Help(args map[string]string, arrCmd map[int]string) {
 	OpenFile("./utils/help.txt")
 	return
 }
 
-func Config(cmdArgs map[string]string)  {
+func Config(cmdArgs map[string]string, arrCmd map[int]string)  {
 	if commands.CommandArgExists(cmdArgs, "uri") {
 		commands.SetEnv("GITLAB_URI", cmdArgs["uri"])
 	}
@@ -60,8 +60,8 @@ func Config(cmdArgs map[string]string)  {
 	fmt.Println("Environment variable(s) updated")
 }
 
-func Exec(cmd string, cmdArgs map[string]string)  {
-	commandList := map[string]func(map[string]string) {
+func Exec(cmd string, cmdArgs map[string]string, arrCmd map[int]string)  {
+	commandList := map[string]func(map[string]string, map[int]string) {
 		"issue": Issue,
 		"mr" : MergeRequest,
 		"help" : Help,
@@ -72,7 +72,7 @@ func Exec(cmd string, cmdArgs map[string]string)  {
 	}
 	cmd = strings.Trim(cmd, " ")
 	if cmd == "" {
-		Help(cmdArgs)
+		Help(cmdArgs, arrCmd)
 		return
 	}
 	if commands.CommandExists(commandList, cmd) {
@@ -83,11 +83,11 @@ func Exec(cmd string, cmdArgs map[string]string)  {
 				return
 			}
 		}
-		commandList[cmd](cmdArgs)
+		commandList[cmd](cmdArgs, arrCmd)
 	} else {
 		fmt.Println(cmd, ":command not found")
 		fmt.Println()
-		Help(cmdArgs)
+		Help(cmdArgs, arrCmd)
 	}
 	return
 }

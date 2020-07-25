@@ -42,7 +42,7 @@ func SetEnv(key string, value string) string {
 	return value
 }
 
-func CommandExists(mapArr map[string]func(map[string]string), key string) bool {
+func CommandExists(mapArr map[string]func(map[string]string,map[int]string), key string) bool {
 	if _, ok := mapArr[key]; ok {
 		return true
 	} else {
@@ -103,10 +103,6 @@ func MakeRequest(payload string, url string, method string) map[string]interface
 	}
 	bodyString := string(bodyBytes)
 
-	if resp.StatusCode != http.StatusCreated && resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusAccepted {
-		fmt.Println("An error occurred connecting to remote host")
-		fmt.Print(resp.StatusCode, ": ", bodyString)
-	}
 	m := make(map[string]interface{})
 	m["responseCode"] = resp.StatusCode
 	m["responseMessage"] = bodyString

@@ -11,10 +11,12 @@ func main() {
 	args := os.Args
 	cmdArgs := args[1:]
 
+	arr := make(map[string]string)
+	arrCmd := make(map[int]string)
+
 	// check if command was passed
 	if len(cmdArgs) == 0 {
-		arr := make(map[string]string)
-		glab.Help(arr)
+		glab.Help(arr, arrCmd)
 		return
 	}
 
@@ -22,7 +24,6 @@ func main() {
 	argLen := len(cmdArgs)
 
 	// Parse the arguments in a map
-	arr := make(map[string]string)
 	for i:=1; i < argLen; i++ {
 		sp := strings.Split(strings.TrimLeft(cmdArgs[i], "--"), "=")
 		if len(sp) > 0  {
@@ -31,10 +32,11 @@ func main() {
 			} else {
 				arr[sp[0]] = "true"
 			}
+			arrCmd[(i-1)] = sp[0]
 		}
 	}
 
 	// Execute Command
-	glab.Exec(cmd, arr)
+	glab.Exec(cmd, arr, arrCmd)
 }
 
