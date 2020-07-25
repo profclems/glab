@@ -1,33 +1,32 @@
 # GLab
-A custom Gitlab Cli tool written in Go (golang)
-Work seamlessly with Gitlab from the command line.
+A custom Gitlab Cli tool written in Go (golang) to help work seamlessly with Gitlab from the command line.
 
-## USAGE
+## Usage
   ```bash
   glab <command> <subcommand> [flags]
   ```
 
-## CORE COMMANDS
+## Core Commands
   ```bash
   issue:      Create and view issues
   repo:       Create, clone, fork, and view repositories
   mr:         Create, view, approve and merge merge requests
   ```
 
-## ADDITIONAL COMMANDS
+## Additional Commands
   
   ```bash
   config:     Manage configuration for gh
   help:       Help about any command
   ```
 
-## FLAGS
+## Flags
   ```bash
   --help      Show help for command
   --version   Show glab version
   ```
 
-## EXAMPLES
+## Examples
   ```bash
   $ glab issue create
   $ glab issue list --closed
@@ -35,7 +34,7 @@ Work seamlessly with Gitlab from the command line.
   $ glab pr checkout 321
   ```
 
-## ENVIRONMENT VARIABLES
+## Envronment Variables
   ```bash
   GITLAB_TOKEN: an authentication token for API requests. Setting this avoids being
   prompted to authenticate and overrides any previously stored credentials.
@@ -46,12 +45,12 @@ Work seamlessly with Gitlab from the command line.
   GITLAB_URI: specify the url of the gitlab server if self hosted (eg: gitlab.example.com)
   ```
   
-## LEARN MORE
+## Learn More
   Use "glab <command> <subcommand> --help" for more information about a command.
   Read the manual at https://glab.clementsam.tech
 
-## FEEDBACK
-  Open an issue using “glab issue create -R profclems/glab”
+## Free
+  Open an issue using “glab issue create -R profclems/glab” to submit an issue on through Gitlab or open a PR on Github
 
 
 Built with ❤ by Clement Sam <https://clementsam.tech>
