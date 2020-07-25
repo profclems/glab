@@ -49,8 +49,8 @@ A custom Gitlab Cli tool written in Go (golang) to help work seamlessly with Git
   Use "glab <command> --help" for more information about a command.
   Read the manual at https://glab.clementsam.tech
 
-## Free
-  Open an issue using “glab issue create -R profclems/glab” to submit an issue on through Gitlab or open a PR on Github
+## Feedback
+  Open an issue using `glab issue create -R profclems/glab` to submit an issue on through Gitlab or open a PR on Github
 
 
 Built with ❤ by Clement Sam <https://clementsam.tech>
