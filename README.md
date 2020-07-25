@@ -46,7 +46,7 @@ A custom Gitlab Cli tool written in Go (golang) to help work seamlessly with Git
   ```
   
 ## Learn More
-  Use "glab <command> <subcommand> --help" for more information about a command.
+  Use "glab <command> --help" for more information about a command.
   Read the manual at https://glab.clementsam.tech
 
 ## Free
