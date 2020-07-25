@@ -3,16 +3,18 @@ package commands
 import (
 	"bytes"
 	_ "bytes"
-	"encoding/json"
 	"fmt"
 	_ "fmt"
 	"github.com/joho/godotenv"
+	"io"
 	"io/ioutil"
 	_ "io/ioutil"
 	"log"
+	"math"
 	"net/http"
 	_ "net/http"
 	"os"
+	"time"
 )
 
 func GetEnv(key string) string {
@@ -56,10 +58,32 @@ func CommandArgExists(mapArr map[string]string, key string) bool {
 	}
 }
 
-func MakeRequest(payload string, url string, method string) []string {
+func TimeAgo(timeVal interface{}) string  {
+	//now := time.Now().Format(time.RFC3339)
+	layout := "2006-01-02T15:04:05.000Z"
+	then, _ := time.Parse(layout, timeVal.(string))
+	totalSeconds := time.Since(then).Seconds()
+
+	if totalSeconds < 60 {
+		return fmt.Sprint(totalSeconds, "secs ago")
+	} else if totalSeconds >= 60 && totalSeconds < (60*60){
+		return fmt.Sprint(math.Round(totalSeconds/60), "mins ago")
+	} else if totalSeconds >= (60*60) && totalSeconds < (60*3600){
+		return fmt.Sprint(math.Round(totalSeconds/(60*60)), "hrs ago")
+	} else if totalSeconds >= (60*3600) && totalSeconds < (60*60*3600){
+		return fmt.Sprint(math.Round(totalSeconds/(60*3600)), "days ago")
+	}
+	return ""
+}
+
+func MakeRequest(payload string, url string, method string) map[string]interface{} {
 
 	url = GetEnv("GITLAB_URI")+"/api/"+GetEnv("API_VERSION")+"/"+url
-	reader := bytes.NewReader([]byte(payload))
+	var reader io.Reader
+	if payload != "" && payload != "{}" {
+		reader = bytes.NewReader([]byte(payload))
+	}
+
 	request, err := http.NewRequest(method, url, reader)
 	if err != nil{
 		log.Fatal("Error: ", err)
@@ -79,19 +103,13 @@ func MakeRequest(payload string, url string, method string) []string {
 	}
 	bodyString := string(bodyBytes)
 
-	if resp.StatusCode == http.StatusCreated || resp.StatusCode == http.StatusOK || resp.StatusCode == http.StatusAccepted {
-		fmt.Println()
-	} else {
+	if resp.StatusCode != http.StatusCreated && resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusAccepted {
 		fmt.Println("An error occurred connecting to remote host")
 		fmt.Print(resp.StatusCode, ": ", bodyString)
 	}
-	var arr []string
 	m := make(map[string]interface{})
-	err = json.Unmarshal([]byte(bodyString), &m)
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println(m)
-	return arr
+	m["responseCode"] = resp.StatusCode
+	m["responseMessage"] = bodyString
+	return m
 }
 

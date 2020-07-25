@@ -36,3 +36,6 @@ LEARN MORE
 
 FEEDBACK
   Open an issue using “glab issue create -R profclems/glab”
+
+
+Built with ❤ by Clement Sam <https://clementsam.tech>

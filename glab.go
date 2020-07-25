@@ -11,8 +11,11 @@ import (
 
 func Version(_ map[string]string)  {
 	version := "v0.1.0"
-	fmt.Println("Glab version", version)
+	fmt.Println("GLab version", version)
 	fmt.Println("https://github.com/profclems/glab")
+	fmt.Println()
+	fmt.Println("Made with ❤ by Clement Sam <https://clementsam.tech>")
+	fmt.Println()
 }
 
 func OpenFile(filename string)  {
