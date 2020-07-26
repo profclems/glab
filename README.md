@@ -19,7 +19,7 @@ Download a binary suitable for your OS at https://github.com/profclems/glab/rele
 ## Additional Commands
   
   ```bash
-  config:     Manage configuration for gh
+  config:     Manage configuration for glab
   help:       Help about any command
   ```
 
