@@ -1,5 +1,8 @@
-# GLab
-A custom Gitlab Cli tool written in Go (golang) to help work seamlessly with Gitlab from the command line.
+# GLab [Currently BETA]
+An open source custom Gitlab Cli tool written in Go (golang) to help work seamlessly with Gitlab from the command line.
+
+## Installation
+Download a binary suitable for your OS at https://github.com/profclems/glab/releases.
 
 ## Usage
   ```bash
