@@ -9,9 +9,37 @@ import (
 	"net/url"
 	"os"
 	"strings"
+	"text/tabwriter"
 )
 
+func DisplayMultipleIssues(m []interface{})  {
+	// initialize tabwriter
+	w := new(tabwriter.Writer)
+
+	// minwidth, tabwidth, padding, padchar, flags
+	w.Init(os.Stdout, 8, 8, 0, '\t', 0)
+
+	defer w.Flush()
+	for i:=0; i < len(m); i++ {
+		hm := m[i].(map[string]interface{})
+		labels := hm["labels"]
+		duration := TimeAgo(hm["created_at"])
+		if hm["state"] == "opened" {
+			_, _ = fmt.Fprintln(w, Green(fmt.Sprint(" #", hm["iid"])), "\t", hm["title"], "\t", Magenta(labels), "\t", Magenta(duration))
+		} else {
+			_, _ = fmt.Fprintln(w, Red(fmt.Sprint(" #", hm["iid"])), "\t", hm["title"], "\t", Magenta(labels), "\t", Magenta(duration))
+		}
+	}
+}
+
 func DisplayIssue(hm map[string]interface{})  {
+	// initialize tabwriter
+	w := new(tabwriter.Writer)
+
+	// minwidth, tabwidth, padding, padchar, flags
+	w.Init(os.Stdout, 8, 8, 0, '\t', 0)
+
+	defer w.Flush()
 	duration := TimeAgo(hm["created_at"])
 	if hm["state"] == "opened" {
 		fmt.Println(Green(fmt.Sprint("#",hm["iid"])), hm["title"], Magenta(duration))
@@ -93,6 +121,7 @@ func CreateIssue(cmdArgs map[string]string, _ map[int]string)  {
 			if err != nil {
 				log.Fatal(err)
 			}
+
 			DisplayIssue(m)
 		} else {
 			/* not string */
@@ -122,7 +151,6 @@ func ListIssues(cmdArgs map[string]string, _ map[int]string)  {
 	if len(queryStrings) > 0 {
 		queryStrings = "?"+queryStrings
 	}
-	fmt.Println(queryStrings)
 	resp := MakeRequest("{}","projects/"+GetEnv("GITLAB_PROJECT_ID")+"/issues"+queryStrings,"GET")
 	//fmt.Println(resp)
 	if resp["responseCode"]==200 {
@@ -135,15 +163,14 @@ func ListIssues(cmdArgs map[string]string, _ map[int]string)  {
 				log.Fatal(err)
 			}
 			fmt.Println()
-			for i:=0; i < len(m); i++ {
-				hm := m[i].(map[string]interface{})
-				DisplayIssue(hm)
-			}
+
+			DisplayMultipleIssues(m)
+
 		} else {
 			/* not string */
 		}
 	} else {
-		fmt.Println(resp)
+		fmt.Println(resp["responseCode"], resp["responseMessage"])
 	}
 }
 
@@ -172,11 +199,63 @@ func DeleteIssue(cmdArgs map[string]string, arrFlags map[int]string)  {
 	}
 }
 
+func SubscribeIssue(cmdArgs map[string]string, arrFlags map[int]string)  {
+	mergeId := strings.Trim(arrFlags[1]," ")
+	if CommandArgExists(cmdArgs, mergeId) {
+		arrIds := strings.Split(strings.Trim(mergeId,"[] "), ",")
+		for _, i2 := range arrIds {
+			fmt.Println("Subscribing Issue #"+i2)
+			queryStrings := "/"+i2+"/subscribe"
+			resp := MakeRequest("{}","projects/"+GetEnv("GITLAB_PROJECT_ID")+"/issues"+queryStrings,"POST")
+			if resp["responseCode"]==204 {
+				bodyString := resp["responseMessage"]
+				fmt.Println(bodyString)
+				fmt.Println(Green("You have successfully subscribe to issue #"+i2))
+			} else if resp["responseCode"]==404 {
+				fmt.Println(Red("Issue does not exist"))
+			} else {
+				fmt.Println(Red("Could not complete request."))
+			}
+			fmt.Println()
+		}
+	} else {
+		fmt.Println(Red("Invalid command"))
+		fmt.Println("Usage: glab issue subscribe <issue-id>")
+	}
+}
+
+func UnsubscribeIssue(cmdArgs map[string]string, arrFlags map[int]string)  {
+	mergeId := strings.Trim(arrFlags[1]," ")
+	if CommandArgExists(cmdArgs, mergeId) {
+		arrIds := strings.Split(strings.Trim(mergeId,"[] "), ",")
+		for _, i2 := range arrIds {
+			fmt.Println("Unsubscribing Issue #"+i2)
+			queryStrings := "/"+i2+"/unsubscribe"
+			resp := MakeRequest("{}","projects/"+GetEnv("GITLAB_PROJECT_ID")+"/issues"+queryStrings,"POST")
+			if resp["responseCode"]==204 {
+				bodyString := resp["responseMessage"]
+				fmt.Println(bodyString)
+				fmt.Println(Green("You have successfully unsubscribe to issue #"+i2))
+			} else if resp["responseCode"]==404 {
+				fmt.Println(Red("Issue does not exist"))
+			} else {
+				fmt.Println(Red("Could not complete request."))
+			}
+			fmt.Println()
+		}
+	} else {
+		fmt.Println(Red("Invalid command"))
+		fmt.Println("Usage: glab issue unsubscribe <issue-id>")
+	}
+}
+
 func ExecIssue(cmdArgs map[string]string, arrCmd map[int]string)  {
 	commandList := map[interface{}]func(map[string]string,map[int]string) {
 		"create" : CreateIssue,
 		"list" : ListIssues,
 		"delete" : DeleteIssue,
+		"subscribe" : SubscribeIssue,
+		"unsubscribe" : UnsubscribeIssue,
 	}
 	commandList[arrCmd[0]](cmdArgs, arrCmd)
 }
