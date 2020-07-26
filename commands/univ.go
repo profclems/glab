@@ -20,10 +20,10 @@ import (
 func GetEnv(key string) string {
 
 	// load .env file
-	err := godotenv.Load(".env")
+	err := godotenv.Load("./config/.env")
 
 	if err != nil {
-		log.Fatalf("Error loading .env file")
+		log.Fatalf("Error loading .env file.\nRun glab config init to set up your environment")
 	}
 
 	return os.Getenv(key)
@@ -78,7 +78,7 @@ func TimeAgo(timeVal interface{}) string  {
 
 func MakeRequest(payload string, url string, method string) map[string]interface{} {
 
-	url = GetEnv("GITLAB_URI")+"/api/"+GetEnv("API_VERSION")+"/"+url
+	url = GetEnv("GITLAB_URI")+"/api/v4/"+url
 	var reader io.Reader
 	if payload != "" && payload != "{}" {
 		reader = bytes.NewReader([]byte(payload))

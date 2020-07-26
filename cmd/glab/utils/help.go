@@ -1,4 +1,10 @@
-Work seamlessly with Gitlab from the command line.
+package utils
+
+import "fmt"
+
+func PrintHelpHelp()  {
+
+	fmt.Println(`Work seamlessly with Gitlab from the command line.
 
 USAGE
   glab <command> <subcommand> [flags]
@@ -38,4 +44,6 @@ FEEDBACK
   Open an issue using “glab issue create -R profclems/glab”
 
 
-Built with ❤ by Clement Sam <https://clementsam.tech>
+Built with ❤ by Clement Sam <https://clementsam.tech>`)
+
+}
