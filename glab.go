@@ -41,7 +41,7 @@ func Issue(cmdArgs map[string]string, arrCmd map[int]string)  {
 }
 
 func MergeRequest(cmdArgs map[string]string, arrCmd map[int]string)  {
-	fmt.Println(commands.MakeRequest(`{}`,"projects/20131402/issues/1","GET"))
+	commands.ExecMergeRequest(cmdArgs, arrCmd)
 	return
 }
 
