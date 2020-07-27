@@ -1,41 +1,51 @@
-# GLab [Currently BETA]
-An open source custom Gitlab Cli tool written in Go (golang) to help work seamlessly with Gitlab from the command line.
-
-## Installation
-Download a binary suitable for your OS at https://github.com/profclems/glab/releases.
+# GLab
+GLab open source custom Gitlab Cli tool written in Go (golang) to help work seamlessly with Gitlab from the command line.
 
 ## Usage
   ```bash
   glab <command> <subcommand> [flags]
   ```
 
-## Core Commands
-  ```bash
-  issue:      Create, view and manage issues
-  repo:       Create, manage repositories
-  mr:         Create, view, approve and merge merge requests
-  ```
+### Core Commands
 
-## Additional Commands
-  
-  ```bash
-  config:     Manage configuration for glab
-  help:       Help about any command
-  ```
+- `glab mr [list, create, close, reopen, delete]`
+- `glab issue [list, create, close, reopen, delete]`
+- `glab config [set]`
+- `glab help`
 
-## Flags
-  ```bash
-  --help      Show help for command
-  --version   Show glab version
-  ```
 
-## Examples
+### Examples
   ```bash
-  $ glab issue create
+  $ glab issue create --title="This is an issue title" --description="This is a really long description"
   $ glab issue list --closed
-  $ glab repo clone profclems/glab
-  $ glab pr checkout 321
   ```
+
+## Installation
+Download a binary suitable for your OS at https://github.com/profclems/glab/releases/latest.
+
+### Windows
+Available as an installable executable file or a Portable archived file in tar and zip formats at the [releases page](https://github.com/profclems/glab/releases/latest).
+Download and install now at the [releases page](https://github.com/profclems/glab/releases/latest).
+
+The installable executable file sets the PATH automatically.
+
+### Linux
+Download the zip, unzip and install:
+
+1. Download the `.zip` file from the [releases page][]
+2. `unzip glab-*-linux-amd64.zip` to unzip the downloaded file 
+3. `sudo cp glab-*-linux-amd64/glab /usr/bin` to move to the bin path so you can execute `glab` globally
+
+Or download the tar ball, untar and install:
+
+1. Download the `.tar.gz` file from the [releases page][]
+2. `unzip glab-*-linux-amd64.tar.gz` to unzip the downloaded file 
+3. `sudo cp glab-*-linux-amd64/glab /usr/bin`
+
+### MacOS
+1. Download the `.tar.gz` or `.zip` file from the [releases page][] and unzip or untar
+2. ls /usr/local/bin/ || sudo mkdir /usr/local/bin/; to make sure the bin folder exists
+3. `sudo cp glab-*-darwin-amd64/glab /usr/bin`
 
 ## Envronment Variables
   ```bash
@@ -53,7 +63,7 @@ Download a binary suitable for your OS at https://github.com/profclems/glab/rele
   Read the manual at https://glab.clementsam.tech
 
 ## Feedback
-  Open an issue using `glab issue create -R profclems/glab` to submit an issue on through Gitlab or open a PR on Github
+  Open an issue on Github
 
 
 Built with ❤ by Clement Sam <https://clementsam.tech>
