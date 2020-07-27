@@ -10,7 +10,7 @@ GLab open source custom Gitlab Cli tool written in Go (golang) to help work seam
 
 - `glab mr [list, create, close, reopen, delete]`
 - `glab issue [list, create, close, reopen, delete]`
-- `glab config [set]`
+- `glab config`
 - `glab help`
 
 
