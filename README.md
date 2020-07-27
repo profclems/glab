@@ -11,8 +11,8 @@ Download a binary suitable for your OS at https://github.com/profclems/glab/rele
 
 ## Core Commands
   ```bash
-  issue:      Create and view issues
-  repo:       Create, clone, fork, and view repositories
+  issue:      Create, view and manage issues
+  repo:       Create, manage repositories
   mr:         Create, view, approve and merge merge requests
   ```
 

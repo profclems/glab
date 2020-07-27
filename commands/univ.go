@@ -65,6 +65,9 @@ func TimeAgo(timeVal interface{}) string  {
 	totalSeconds := time.Since(then).Seconds()
 
 	if totalSeconds < 60 {
+		if totalSeconds < 1{
+			totalSeconds = 0
+		}
 		return fmt.Sprint(totalSeconds, "secs ago")
 	} else if totalSeconds >= 60 && totalSeconds < (60*60){
 		return fmt.Sprint(math.Round(totalSeconds/60), "mins ago")
