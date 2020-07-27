@@ -15,9 +15,9 @@ import (
 func DisplayMergeRequest(hm map[string]interface{})  {
 	duration := TimeAgo(hm["created_at"])
 	if hm["state"] == "opened" {
-		fmt.Println(Green(fmt.Sprint("#",hm["iid"])), hm["title"], Magenta(duration))
+		fmt.Println(Green(fmt.Sprint("#",hm["iid"])), hm["title"], Cyan("("+hm["source_branch"].(string)+")"), Magenta(duration))
 	} else {
-		fmt.Println(Red(fmt.Sprint("#",hm["iid"])), hm["title"], Magenta(duration))
+		fmt.Println(Red(fmt.Sprint("#",hm["iid"])), hm["title"], Cyan("("+hm["source_branch"].(string)+")"), Magenta(duration))
 	}
 }
 
@@ -36,9 +36,9 @@ func DisplayMultipleMergeRequests(m []interface{})  {
 			labels := hm["labels"]
 			duration := TimeAgo(hm["created_at"])
 			if hm["state"] == "opened" {
-				_, _ = fmt.Fprintln(w, Green(fmt.Sprint(" #", hm["iid"])), "\t", hm["title"], "\t", Magenta(labels), "\t", Magenta(duration))
+				_, _ = fmt.Fprintln(w, Green(fmt.Sprint(" #", hm["iid"])), "\t", hm["title"], "\t", Magenta(labels), "\t", Cyan("("+hm["source_branch"].(string)+")"), Magenta(duration))
 			} else {
-				_, _ = fmt.Fprintln(w, Red(fmt.Sprint(" #", hm["iid"])), "\t", hm["title"], "\t", Magenta(labels), "\t", Magenta(duration))
+				_, _ = fmt.Fprintln(w, Red(fmt.Sprint(" #", hm["iid"])), "\t", hm["title"], "\t", Magenta(labels), "\t", Cyan("("+hm["source_branch"].(string)+")"), Magenta(duration))
 			}
 		}
 	} else {
@@ -417,6 +417,7 @@ func ExecMergeRequest(cmdArgs map[string]string, arrCmd map[int]string)  {
 	commandList := map[interface{}]func(map[string]string,map[int]string) {
 		"create" : CreateMergeRequest,
 		"list" : ListMergeRequests,
+		"ls" : ListMergeRequests,
 		"delete" : DeleteMergeRequest,
 		"subscribe" : SubscribeMergeRequest,
 		"unsubscribe" : UnsubscribeMergeRequest,
@@ -426,5 +427,9 @@ func ExecMergeRequest(cmdArgs map[string]string, arrCmd map[int]string)  {
 		"reopen" : ChangeMergeRequestState,
 		"issues" : IssuesRelatedMergeRequest,
 	}
-	commandList[arrCmd[0]](cmdArgs, arrCmd)
+	if _, ok := commandList[arrCmd[0]]; ok {
+		commandList[arrCmd[0]](cmdArgs, arrCmd)
+	} else {
+		fmt.Println(arrCmd[0]+":","Invalid Command")
+	}
 }
