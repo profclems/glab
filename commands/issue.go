@@ -20,26 +20,24 @@ func DisplayMultipleIssues(m []interface{})  {
 	w.Init(os.Stdout, 8, 8, 0, '\t', 0)
 
 	defer w.Flush()
-	for i:=0; i < len(m); i++ {
-		hm := m[i].(map[string]interface{})
-		labels := hm["labels"]
-		duration := TimeAgo(hm["created_at"])
-		if hm["state"] == "opened" {
-			_, _ = fmt.Fprintln(w, Green(fmt.Sprint(" #", hm["iid"])), "\t", hm["title"], "\t", Magenta(labels), "\t", Magenta(duration))
-		} else {
-			_, _ = fmt.Fprintln(w, Red(fmt.Sprint(" #", hm["iid"])), "\t", hm["title"], "\t", Magenta(labels), "\t", Magenta(duration))
+	if len(m) > 0 {
+		fmt.Printf("Showing issues %d of %d on %s\n\n", len(m), len(m), GetEnv("GITLAB_REPO"))
+		for i := 0; i < len(m); i++ {
+			hm := m[i].(map[string]interface{})
+			labels := hm["labels"]
+			duration := TimeAgo(hm["created_at"])
+			if hm["state"] == "opened" {
+				_, _ = fmt.Fprintln(w, Green(fmt.Sprint("#", hm["iid"])), "\t", hm["title"], "\t", Magenta(labels), "\t", Magenta(duration))
+			} else {
+				_, _ = fmt.Fprintln(w, Red(fmt.Sprint("#", hm["iid"])), "\t", hm["title"], "\t", Magenta(labels), "\t", Magenta(duration))
+			}
 		}
+	} else {
+		fmt.Println("No Issues available on "+GetEnv("GITLAB_REPO"))
 	}
 }
 
 func DisplayIssue(hm map[string]interface{})  {
-	// initialize tabwriter
-	w := new(tabwriter.Writer)
-
-	// minwidth, tabwidth, padding, padchar, flags
-	w.Init(os.Stdout, 8, 8, 0, '\t', 0)
-
-	defer w.Flush()
 	duration := TimeAgo(hm["created_at"])
 	if hm["state"] == "opened" {
 		fmt.Println(Green(fmt.Sprint("#",hm["iid"])), hm["title"], Magenta(duration))
@@ -50,10 +48,16 @@ func DisplayIssue(hm map[string]interface{})  {
 
 func CreateIssue(cmdArgs map[string]string, _ map[int]string)  {
 	reader := bufio.NewReader(os.Stdin)
-	fmt.Print(Cyan("Title"+"\n"+"-> "))
-	issueTitle, _ := reader.ReadString('\n')
+	var issueTitle string
 	var issueLabel string
-	if !CommandArgExists(cmdArgs, "labels") || !CommandArgExists(cmdArgs, "label") {
+	var issueDescription string
+	if !CommandArgExists(cmdArgs, "title") {
+		fmt.Print(Cyan("Title"+"\n"+"-> "))
+		issueTitle, _ = reader.ReadString('\n')
+	} else {
+		issueTitle = strings.Trim(cmdArgs["title"]," ")
+	}
+	if !CommandArgExists(cmdArgs, "label") {
 		fmt.Print(Cyan("Label(s) [Comma Separated]"+"\n"+"-> "))
 		issueLabel, _ = reader.ReadString('\n')
 	} else {
@@ -61,18 +65,20 @@ func CreateIssue(cmdArgs map[string]string, _ map[int]string)  {
 	}
 	issueTitle = strings.Replace(issueTitle, "\n", "", -1)
 	fmt.Println()
-	fmt.Println(Cyan("Enter Issue Description"), Yellow("[info: Type `exit` to close]"))
-	var issueDescription string
-	for {
-		fmt.Print(Cyan("-> "))
-		input, _ := reader.ReadString('\n')
-		// convert CRLF to LF
-		input = strings.Replace(input, "\n", "", -1)
-		if strings.Compare("exit", input) == 0 {
-			break
+	if !CommandArgExists(cmdArgs, "description") {
+		fmt.Println(Cyan("Description"), Yellow("[info: Type `exit` to close]"))
+		for {
+			fmt.Print(Cyan("-> "))
+			input, _ := reader.ReadString('\n')
+			// convert CRLF to LF
+			input = strings.Replace(input, "\n", "", -1)
+			if strings.Compare("exit", input) == 0 {
+				break
+			}
+			issueDescription += "\n" + input
 		}
-		issueDescription += "\n"+input
-
+	} else {
+		issueDescription = strings.Trim(cmdArgs["description"]," ")
 	}
 	fmt.Print(Cyan("Due Date"))
 	fmt.Print(Yellow("(Format: YYYY-MM-DD)"+"\n"+"-> "))
@@ -96,6 +102,9 @@ func CreateIssue(cmdArgs map[string]string, _ map[int]string)  {
 	}
 	if CommandArgExists(cmdArgs, "epic") {
 		params.Add("epic_id", cmdArgs["epic"])
+	}
+	if CommandArgExists(cmdArgs, "resolved-by-merge-request") {
+		params.Add("merge_request_to_resolve_discussions_of", cmdArgs["resolved-by-merge"])
 	}
 	if CommandArgExists(cmdArgs, "assigns") {
 		params.Add("epic_id", cmdArgs["epic"])
@@ -123,6 +132,7 @@ func CreateIssue(cmdArgs map[string]string, _ map[int]string)  {
 			}
 
 			DisplayIssue(m)
+			fmt.Println()
 		} else {
 			/* not string */
 		}
@@ -165,6 +175,7 @@ func ListIssues(cmdArgs map[string]string, _ map[int]string)  {
 			fmt.Println()
 
 			DisplayMultipleIssues(m)
+			fmt.Println()
 
 		} else {
 			/* not string */
@@ -249,6 +260,45 @@ func UnsubscribeIssue(cmdArgs map[string]string, arrFlags map[int]string)  {
 	}
 }
 
+
+func ChangeIssueState(cmdArgs map[string]string, arrFlags map[int]string)  {
+	issueId := strings.Trim(arrFlags[1]," ")
+	if CommandArgExists(cmdArgs, issueId) {
+		reqType := arrFlags[0]
+		params := url.Values{}
+		issueMessage := ""
+		if reqType=="close" {
+			params.Add("state_event","close")
+			issueMessage = "closed"
+		} else if reqType=="link-merge-request" || reqType=="mr" || reqType=="link-mr" {
+			params.Add("merge_request_to_resolve_discussions_of",cmdArgs[arrFlags[2]])
+			params.Add("add_labels","")
+			issueMessage = "linked"
+		} else {
+			params.Add("state_event","reopen")
+			issueMessage = "opened"
+		}
+		arrIds := strings.Split(strings.Trim(issueId,"[] "), ",")
+		reqBody := params.Encode()
+		for _, i2 := range arrIds {
+			fmt.Println("...")
+			resp := MakeRequest(reqBody,"projects/"+GetEnv("GITLAB_PROJECT_ID")+"/issues/"+i2,"PUT")
+			if resp["responseCode"]==200 {
+				fmt.Println(Green("You have successfully "+issueMessage+" to issue with id #"+i2))
+			} else if resp["responseCode"]==404 {
+				fmt.Println(Red("Issue does not exist"))
+			} else {
+				fmt.Println("Could not complete request")
+				fmt.Println(resp["responseCode"], resp["responseMessage"])
+			}
+			fmt.Println()
+		}
+	} else {
+		fmt.Println(Red("Invalid command"))
+		fmt.Println("Usage: glab issue <state> <merge-id>")
+	}
+}
+
 func ExecIssue(cmdArgs map[string]string, arrCmd map[int]string)  {
 	commandList := map[interface{}]func(map[string]string,map[int]string) {
 		"create" : CreateIssue,
@@ -256,6 +306,11 @@ func ExecIssue(cmdArgs map[string]string, arrCmd map[int]string)  {
 		"delete" : DeleteIssue,
 		"subscribe" : SubscribeIssue,
 		"unsubscribe" : UnsubscribeIssue,
+		"open" : ChangeIssueState,
+		"close" : ChangeIssueState,
+		"mr" : ChangeIssueState,
+		"link-mr" : ChangeIssueState,
+		"link-merge-request" : ChangeIssueState,
 	}
 	commandList[arrCmd[0]](cmdArgs, arrCmd)
 }

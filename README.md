@@ -8,8 +8,8 @@ A custom Gitlab Cli tool written in Go (golang) to help work seamlessly with Git
 
 ## Core Commands
   ```bash
-  issue:      Create and view issues
-  repo:       Create, clone, fork, and view repositories
+  issue:      Create, view and manage issues
+  repo:       Create, manage repositories
   mr:         Create, view, approve and merge merge requests
   ```
 
