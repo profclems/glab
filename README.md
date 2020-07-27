@@ -34,18 +34,18 @@ Download the zip, unzip and install:
 
 1. Download the `.zip` file from the [releases page][]
 2. `unzip glab-*-linux-amd64.zip` to unzip the downloaded file 
-3. `sudo cp glab-*-linux-amd64/glab /usr/bin` to move to the bin path so you can execute `glab` globally
+3. `sudo mv glab-*-linux-amd64/glab /usr/bin` to move to the bin path so you can execute `glab` globally
 
 Or download the tar ball, untar and install:
 
 1. Download the `.tar.gz` file from the [releases page][]
 2. `unzip glab-*-linux-amd64.tar.gz` to unzip the downloaded file 
-3. `sudo cp glab-*-linux-amd64/glab /usr/bin`
+3. `sudo mv glab-*-linux-amd64/glab /usr/bin`
 
 ### MacOS
 1. Download the `.tar.gz` or `.zip` file from the [releases page][] and unzip or untar
 2. ls /usr/local/bin/ || sudo mkdir /usr/local/bin/; to make sure the bin folder exists
-3. `sudo cp glab-*-darwin-amd64/glab /usr/bin`
+3. `sudo mv glab-*-darwin-amd64/glab /usr/bin`
 
 ### Building From Source
 If a supported binary for your OS is not found at the [releases page][], you can build from source:
