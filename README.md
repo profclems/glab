@@ -62,8 +62,8 @@ If a supported binary for your OS is not found at the [releases page](https://gi
 2. Clone this repository
 
    ```sh
-   $ git clone https://github.com/cli/cli.git gh-cli
-   $ cd gh-cli
+   $ git clone https://github.com/profclems/glab.git glab-cli
+   $ cd glab-cli
    ```
 
 3. Build the project
@@ -72,14 +72,14 @@ If a supported binary for your OS is not found at the [releases page](https://gi
    $ make build
    ```
 
-4. Move the resulting `bin/gh` executable to somewhere in your PATH
+4. Move the resulting `bin/glab` executable to somewhere in your PATH
 
    ```sh
-   $ sudo mv ./bin/gh /usr/local/bin/
+   $ sudo mv ./bin/glab /usr/local/bin/
    ```
    or
    ```sh
-   $ sudo mv ./bin/gh /usr/bin/
+   $ sudo mv ./bin/glab /usr/bin/
    ```
 
 4. Run `glab help` to check if it worked.
