@@ -10,7 +10,7 @@ GLab open source custom Gitlab Cli tool written in Go (golang) to help work seam
 
 - `glab mr [list, create, close, reopen, delete]`
 - `glab issue [list, create, close, reopen, delete]`
-- `glab config [set]`
+- `glab config`
 - `glab help`
 
 
@@ -32,20 +32,58 @@ The installable executable file sets the PATH automatically.
 ### Linux
 Download the zip, unzip and install:
 
-1. Download the `.zip` file from the [releases page][]
+1. Download the `.zip` file from the [releases page](https://github.com/profclems/glab/releases/latest)
 2. `unzip glab-*-linux-amd64.zip` to unzip the downloaded file 
-3. `sudo cp glab-*-linux-amd64/glab /usr/bin` to move to the bin path so you can execute `glab` globally
+3. `sudo mv glab-*-linux-amd64/glab /usr/bin` to move to the bin path so you can execute `glab` globally
 
 Or download the tar ball, untar and install:
 
-1. Download the `.tar.gz` file from the [releases page][]
+1. Download the `.tar.gz` file from the [releases page](https://github.com/profclems/glab/releases/latest)
 2. `unzip glab-*-linux-amd64.tar.gz` to unzip the downloaded file 
-3. `sudo cp glab-*-linux-amd64/glab /usr/bin`
+3. `sudo mv glab-*-linux-amd64/glab /usr/bin`
 
 ### MacOS
-1. Download the `.tar.gz` or `.zip` file from the [releases page][] and unzip or untar
+1. Download the `.tar.gz` or `.zip` file from the [releases page](https://github.com/profclems/glab/releases/latest) and unzip or untar
 2. ls /usr/local/bin/ || sudo mkdir /usr/local/bin/; to make sure the bin folder exists
-3. `sudo cp glab-*-darwin-amd64/glab /usr/bin`
+3. `sudo mv glab-*-darwin-amd64/glab /usr/bin`
+
+### Building From Source
+If a supported binary for your OS is not found at the [releases page](https://github.com/profclems/glab/releases/latest), you can build from source:
+
+1. Verify that you have Go 1.13.8+ installed
+
+   ```sh
+   $ go version
+   go version go1.14
+   ```
+
+   If `go` is not installed, follow instructions on [the Go website](https://golang.org/doc/install).
+
+2. Clone this repository
+
+   ```sh
+   $ git clone https://github.com/profclems/glab.git glab-cli
+   $ cd glab-cli
+   ```
+
+3. Build the project
+
+   ```
+   $ make build
+   ```
+
+4. Move the resulting `bin/glab` executable to somewhere in your PATH
+
+   ```sh
+   $ sudo mv ./bin/glab /usr/local/bin/
+   ```
+   or
+   ```sh
+   $ sudo mv ./bin/glab /usr/bin/
+   ```
+
+4. Run `glab help` to check if it worked.
+
 
 ## Setting Up
 After successfull installation, run:
@@ -70,11 +108,11 @@ glab config --token=sometoken --url=https://gitlab.com --pid=someprojectid --rep
   ```
   
 ## Learn More
-  Use "glab <command> --help" for more information about a command.
-  Read the manual at https://glab.clementsam.tech
+Use "glab <command> --help" for more information about a command.
+Read the manual at https://clementsam.tech/glab
 
-## Feedback
-  Open an issue on Github
+## Contributions
+Thanks for considering contributing to this project. Feel free to open an issue or submit a pull request!
 
 
 Built with ❤ by Clement Sam <https://clementsam.tech>
