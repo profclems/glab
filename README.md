@@ -47,6 +47,44 @@ Or download the tar ball, untar and install:
 2. ls /usr/local/bin/ || sudo mkdir /usr/local/bin/; to make sure the bin folder exists
 3. `sudo cp glab-*-darwin-amd64/glab /usr/bin`
 
+### Building From Source
+If a supported binary for your OS is not found at the [releases page][], you can build from source:
+
+1. Verify that you have Go 1.13.8+ installed
+
+   ```sh
+   $ go version
+   go version go1.14
+   ```
+
+   If `go` is not installed, follow instructions on [the Go website](https://golang.org/doc/install).
+
+2. Clone this repository
+
+   ```sh
+   $ git clone https://github.com/cli/cli.git gh-cli
+   $ cd gh-cli
+   ```
+
+3. Build the project
+
+   ```
+   $ make build
+   ```
+
+4. Move the resulting `bin/gh` executable to somewhere in your PATH
+
+   ```sh
+   $ sudo mv ./bin/gh /usr/local/bin/
+   ```
+   or
+   ```sh
+   $ sudo mv ./bin/gh /usr/bin/
+   ```
+
+4. Run `glab help` to check if it worked.
+
+
 ## Setting Up
 After successfull installation, run:
 ```bash
@@ -70,11 +108,11 @@ glab config --token=sometoken --url=https://gitlab.com --pid=someprojectid --rep
   ```
   
 ## Learn More
-  Use "glab <command> --help" for more information about a command.
-  Read the manual at https://glab.clementsam.tech
+Use "glab <command> --help" for more information about a command.
+Read the manual at https://clementsam.tech/glab
 
-## Feedback
-  Open an issue on Github
+## Contributions
+Thanks for considering contributing to this project. Feel free to open an issue or submit a pull request!
 
 
 Built with ❤ by Clement Sam <https://clementsam.tech>
