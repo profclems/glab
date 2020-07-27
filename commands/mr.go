@@ -417,6 +417,7 @@ func ExecMergeRequest(cmdArgs map[string]string, arrCmd map[int]string)  {
 	commandList := map[interface{}]func(map[string]string,map[int]string) {
 		"create" : CreateMergeRequest,
 		"list" : ListMergeRequests,
+		"ls" : ListMergeRequests,
 		"delete" : DeleteMergeRequest,
 		"subscribe" : SubscribeMergeRequest,
 		"unsubscribe" : UnsubscribeMergeRequest,
@@ -426,5 +427,9 @@ func ExecMergeRequest(cmdArgs map[string]string, arrCmd map[int]string)  {
 		"reopen" : ChangeMergeRequestState,
 		"issues" : IssuesRelatedMergeRequest,
 	}
-	commandList[arrCmd[0]](cmdArgs, arrCmd)
+	if _, ok := commandList[arrCmd[0]]; ok {
+		commandList[arrCmd[0]](cmdArgs, arrCmd)
+	} else {
+		fmt.Println(arrCmd[0]+":","Invalid Command")
+	}
 }

@@ -303,6 +303,7 @@ func ExecIssue(cmdArgs map[string]string, arrCmd map[int]string)  {
 	commandList := map[interface{}]func(map[string]string,map[int]string) {
 		"create" : CreateIssue,
 		"list" : ListIssues,
+		"ls" : ListIssues,
 		"delete" : DeleteIssue,
 		"subscribe" : SubscribeIssue,
 		"unsubscribe" : UnsubscribeIssue,
@@ -312,5 +313,9 @@ func ExecIssue(cmdArgs map[string]string, arrCmd map[int]string)  {
 		"link-mr" : ChangeIssueState,
 		"link-merge-request" : ChangeIssueState,
 	}
-	commandList[arrCmd[0]](cmdArgs, arrCmd)
+	if _, ok := commandList[arrCmd[0]]; ok {
+		commandList[arrCmd[0]](cmdArgs, arrCmd)
+	} else {
+		fmt.Println(arrCmd[0]+":","Invalid Command")
+	}
 }
