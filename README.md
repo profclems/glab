@@ -47,6 +47,17 @@ Or download the tar ball, untar and install:
 2. ls /usr/local/bin/ || sudo mkdir /usr/local/bin/; to make sure the bin folder exists
 3. `sudo cp glab-*-darwin-amd64/glab /usr/bin`
 
+## Setting Up
+After successfull installation, run:
+```bash
+glab config --token=<YOUR-GITLAB-ACCESS-TOKEN> --url=https://gitlab.com --pid=<YOUR-GITLAB-PROJECT-ID> --repo=OWNER/REPO
+```
+### Example
+```bash
+glab config --token=sometoken --url=https://gitlab.com --pid=someprojectid --repo=profclems/glab
+```
+**NB**: Change gitlab.com to company or group's gitlab url if self-hosted
+
 ## Envronment Variables
   ```bash
   GITLAB_TOKEN: an authentication token for API requests. Setting this avoids being
