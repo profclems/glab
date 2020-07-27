@@ -66,6 +66,13 @@ If a supported binary for your OS is not found at the [releases page](https://gi
    $ cd glab-cli
    ```
 
+   or 
+
+   ```sh
+   $ git clone https://gitlab.com/profclems/glab.git
+   $ cd glab-cli
+   ```
+
 3. Build the project
 
    ```
