@@ -15,9 +15,9 @@ import (
 func DisplayMergeRequest(hm map[string]interface{})  {
 	duration := TimeAgo(hm["created_at"])
 	if hm["state"] == "opened" {
-		fmt.Println(Green(fmt.Sprint("#",hm["iid"])), hm["title"], Magenta(duration))
+		fmt.Println(Green(fmt.Sprint("#",hm["iid"])), hm["title"], Cyan("("+hm["source_branch"].(string)+")"), Magenta(duration))
 	} else {
-		fmt.Println(Red(fmt.Sprint("#",hm["iid"])), hm["title"], Magenta(duration))
+		fmt.Println(Red(fmt.Sprint("#",hm["iid"])), hm["title"], Cyan("("+hm["source_branch"].(string)+")"), Magenta(duration))
 	}
 }
 
@@ -36,9 +36,9 @@ func DisplayMultipleMergeRequests(m []interface{})  {
 			labels := hm["labels"]
 			duration := TimeAgo(hm["created_at"])
 			if hm["state"] == "opened" {
-				_, _ = fmt.Fprintln(w, Green(fmt.Sprint(" #", hm["iid"])), "\t", hm["title"], "\t", Magenta(labels), "\t", Magenta(duration))
+				_, _ = fmt.Fprintln(w, Green(fmt.Sprint(" #", hm["iid"])), "\t", hm["title"], "\t", Magenta(labels), "\t", Cyan("("+hm["source_branch"].(string)+")"), Magenta(duration))
 			} else {
-				_, _ = fmt.Fprintln(w, Red(fmt.Sprint(" #", hm["iid"])), "\t", hm["title"], "\t", Magenta(labels), "\t", Magenta(duration))
+				_, _ = fmt.Fprintln(w, Red(fmt.Sprint(" #", hm["iid"])), "\t", hm["title"], "\t", Magenta(labels), "\t", Cyan("("+hm["source_branch"].(string)+")"), Magenta(duration))
 			}
 		}
 	} else {
