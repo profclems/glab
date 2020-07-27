@@ -4,7 +4,7 @@ build:
 	go build -o bin/glab cmd/glab/main.go
 
 run:
-	go run cmd/glab/main.go
+	go run cmd/glab/main.go $(var)
 
 push:
 	git push origin $(git branch | sed -n -e 's/^\* \(.*\)/\1/p')
