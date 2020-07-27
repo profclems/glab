@@ -32,23 +32,23 @@ The installable executable file sets the PATH automatically.
 ### Linux
 Download the zip, unzip and install:
 
-1. Download the `.zip` file from the [releases page][]
+1. Download the `.zip` file from the [releases page](https://github.com/profclems/glab/releases/latest)
 2. `unzip glab-*-linux-amd64.zip` to unzip the downloaded file 
 3. `sudo mv glab-*-linux-amd64/glab /usr/bin` to move to the bin path so you can execute `glab` globally
 
 Or download the tar ball, untar and install:
 
-1. Download the `.tar.gz` file from the [releases page][]
+1. Download the `.tar.gz` file from the [releases page](https://github.com/profclems/glab/releases/latest)
 2. `unzip glab-*-linux-amd64.tar.gz` to unzip the downloaded file 
 3. `sudo mv glab-*-linux-amd64/glab /usr/bin`
 
 ### MacOS
-1. Download the `.tar.gz` or `.zip` file from the [releases page][] and unzip or untar
+1. Download the `.tar.gz` or `.zip` file from the [releases page](https://github.com/profclems/glab/releases/latest) and unzip or untar
 2. ls /usr/local/bin/ || sudo mkdir /usr/local/bin/; to make sure the bin folder exists
 3. `sudo mv glab-*-darwin-amd64/glab /usr/bin`
 
 ### Building From Source
-If a supported binary for your OS is not found at the [releases page][], you can build from source:
+If a supported binary for your OS is not found at the [releases page](https://github.com/profclems/glab/releases/latest), you can build from source:
 
 1. Verify that you have Go 1.13.8+ installed
 
