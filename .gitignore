@@ -16,3 +16,4 @@
 cmd/glab/config/.env
 cmd/glab/bin
 cmd/glab/bin/*
+bin
