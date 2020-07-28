@@ -73,8 +73,9 @@ h1, h2, h3, h4, h5, h6 {
  */
 
 .container {
-  max-width: 28rem;
+  max-width: fit-content;
 }
+/*
 @media (min-width: 38em) {
   .container {
     max-width: 32rem;
@@ -85,6 +86,8 @@ h1, h2, h3, h4, h5, h6 {
     max-width: 38rem;
   }
 }
+
+ */
 
 
 /*
