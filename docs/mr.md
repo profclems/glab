@@ -171,4 +171,4 @@ glab mr delete 67,34,21
 ## Links
 [Installation Guide]({{ '/installation' | absolute_url }})
 
-[Managing Merge Requests]({{ '/mr' | absolute_url }})
+[Managing Issues]({{ '/issues' | absolute_url }})
