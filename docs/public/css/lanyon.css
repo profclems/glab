@@ -41,11 +41,11 @@ body {
 }
 
 html {
-  font-family: "PT Serif", Georgia, "Times New Roman", serif;
+  font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: "PT Sans", Helvetica, Arial, sans-serif;
+  font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";
   font-weight: 400;
   color: #313131;
   letter-spacing: -.025rem;
@@ -73,9 +73,9 @@ h1, h2, h3, h4, h5, h6 {
  */
 
 .container {
-  max-width: fit-content;
+  max-width: 45rem;
 }
-/*
+
 @media (min-width: 38em) {
   .container {
     max-width: 32rem;
@@ -87,7 +87,7 @@ h1, h2, h3, h4, h5, h6 {
   }
 }
 
- */
+
 
 
 /*
