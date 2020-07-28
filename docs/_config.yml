@@ -1,7 +1,7 @@
 # Setup
 title:               GLab
 tagline:             'A Gitlab Cli Tool'
-description:         'A reserved <a href="https://jekyllrb.com" target="_blank">Jekyll</a> theme that places the utmost gravity on content with a hidden drawer. Made by <a href="https://twitter.com/mdo" target="_blank">@mdo</a>.'
+description:         'An open source gitlab cli to help you work seamlessly with GitLab . Made with ❤ <a href="https://clementsam.tech" target="_blank">@Clems</a>.'
 url:                 https://clementsam.tech/glab
 baseurl:             ''
 paginate:            5
