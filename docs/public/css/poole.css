@@ -147,10 +147,10 @@ abbr[title] {
   border-bottom: 1px dotted #e5e5e5;
 }
 
-/* Code
+/* Code */
 code,
 pre {
-  font-family: Menlo, Monaco, "Courier New", monospace;
+  font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
 }
 code {
   padding: .25em .5em;
@@ -178,7 +178,7 @@ pre code {
   color: inherit;
   background-color: transparent;
 }
-*/
+
 /* Pygments via Jekyll */
 .highlight {
   margin-bottom: 1rem;
