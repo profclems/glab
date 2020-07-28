@@ -1,0 +1,24 @@
+# Setup
+title:               GLab
+tagline:             'A Gitlab Cli Tool'
+description:         'An open source gitlab cli to help you work seamlessly with GitLab . Made with ❤ <a href="https://clementsam.tech" target="_blank">@Clems</a>.'
+url:                 https://clementsam.tech/glab
+baseurl:             ''
+paginate:            5
+permalink:           pretty
+github:
+  repo: https://github.com/profclems/glab
+
+# About/contact
+author:
+  name:              Clement Sam
+  url:               https://clementsam.tech
+  email:             clementsam75@gmail.com
+
+# Gems
+plugins:
+  - jekyll-paginate
+
+# Custom vars
+version:             1.5.1
+google_analytics_id: #UA-XXXX-Y
