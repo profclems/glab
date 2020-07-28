@@ -36,7 +36,7 @@ $ glab mr unsubscribe 45
 $ glab mr subscribe 45
   ```
 
-## Creating an merge request
+## Creating merge requests
 ### Usage
   ```bash
 glab mr create [flags]
@@ -49,7 +49,7 @@ glab mr create [flags]
 --source          Supply the source branch. Otherwise, you will prompt for one. (--source="string")
 --target          Supply the target branch. Otherwise, you will prompt for one. (--target="string")
 --label           Add label by name. Multiple labels should be comma separated. Otherwise, you will prompt for one, though optional (--label="string,string")
---assigns         Assign issue to people by their ID. Multiple values should be comma separated (--assigns=value,value)
+--assigns         Assign merge request to people by their ID. Multiple values should be comma separated (--assigns=value,value)
 --milestone       Add the merge request to a milestone by id. (--milestone=value)
 --weight          Set weight of merge request
 --epic          
@@ -57,8 +57,17 @@ glab mr create [flags]
 --remove-source-branch
 
   ```
+## Merging/Approving Merge Requests
+### Usage
+  ```bash
+glab mr merge <mrID>         
+  ```
+### Example
+```sh
+glab mr merge 56
+```
 
-## Listing Issues
+## Listing Merge Requests
 ### Usage
   ```bash
 glab mr list [flags]
@@ -83,7 +92,7 @@ glab mr list --closed
 glab mr list --all
 ```
 
-## Closing Issues
+## Closing Merge Requests
 ### Usage
 To close a single merge request
   ```bash
@@ -100,7 +109,7 @@ glab mr close 23
 glab mr close 67,34,21
 ```
 
-## Reopening Issues
+## Reopening Merge Requests
 ### Usage
 To reopen a single merge request
   ```bash
@@ -117,7 +126,7 @@ glab mr reopen 23
 glab mr reopen 67,34,21
 ```
 
-## Subscribe to an Issues
+## Subscribe to Merge Requests
 ### Usage
 To subscribe to a single merge request
   ```bash
@@ -134,7 +143,7 @@ glab mr subscribe 23
 glab mr subscribe 67,34,21
 ```
 
-## Unsubscribe to an Issues
+## Unsubscribe to Merge Requests
 ### Usage
 To unsubscribe to a single merge request
   ```bash
@@ -151,7 +160,7 @@ glab mr unsubscribe 23
 glab mr unsubscribe 67,34,21
 ```
 
-## Deleting Issues
+## Deleting Merge Requests
 ### Usage
 To delete to a single merge request
   ```bash
