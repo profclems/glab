@@ -1,3 +1,3 @@
-This folder is used for documentation related to developing GLab.
+#GLab Documentation
 
-The docs has been moved to the master branch
+### This folder is used for the documentation related to using GLab.
