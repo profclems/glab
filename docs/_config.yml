@@ -6,6 +6,8 @@ url:                 https://clementsam.tech/glab
 baseurl:             ''
 paginate:            5
 permalink:           pretty
+github:
+  repo: https://github.com/profclems/glab
 
 # About/contact
 author:
