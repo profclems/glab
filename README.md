@@ -122,12 +122,16 @@ Read the documentation at https://clementsam.tech/glab
 
 
 ## Contributions
-Thanks for considering contributing to this project. 
-Please read the [contibutions guide]('./.github/contributions.md') and Feel free to open an issue or submit a pull request!
+Thanks for considering contributing to this project!
+
+Please read the [contibutions guide](.github/contributions.md) and [Code of conduct](.github/CODE_OF_CONDUCT.md). 
+
+Feel free to open an issue or submit a pull request!
 
 
 ## License
-[MIT]('LICENSE')
+[MIT](LICENSE)
 
 
+## Author
 Built with ❤ by [Clement Sam](https://clementsam.tech)
