@@ -10,11 +10,10 @@ builds:
   - main: ./cmd/glab
     env:
       - CGO_ENABLED=0
+    ldflags:
+      - -s -w -X glab.version={{.Version}} -X glab.commit={{.Commit}} -X glab.build={{time "01/02/2006"}}
   - <<: &build_defaults
       binary: bin/glab
-      main: ./cmd/glab
-      ldflags:
-        - -s -w -X glab.version={{.Version}} -X main.commit={{.Commit}} -X glab.date={{.Date}}
     id: macos
     goos: [darwin]
     goarch: [amd64]
