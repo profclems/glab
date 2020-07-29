@@ -24,19 +24,18 @@ func main() {
 	argLen := len(cmdArgs)
 
 	// Parse the arguments in a map
-	for i:=1; i < argLen; i++ {
+	for i := 1; i < argLen; i++ {
 		sp := strings.Split(strings.TrimLeft(cmdArgs[i], "-"), "=")
-		if len(sp) > 0  {
+		if len(sp) > 0 {
 			if len(sp) > 1 {
 				arr[sp[0]] = sp[1]
 			} else {
 				arr[sp[0]] = "true"
 			}
-			arrCmd[(i-1)] = sp[0]
+			arrCmd[(i - 1)] = sp[0]
 		}
 	}
 
 	// Execute Command
 	glab.Exec(cmd, arr, arrCmd)
 }
-
