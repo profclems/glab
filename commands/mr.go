@@ -141,12 +141,11 @@ func CreateMergeRequest(cmdArgs map[string]string, _ map[int]string) {
 		}
 	}
 
-
 	if CommandArgExists(cmdArgs, "create-branch") {
 		minParams := url.Values{}
-		minParams.Add("branch",sourceBranch)
-		minParams.Add("ref",targetBranch)
-		MakeRequest(minParams.Encode(), "projects/" + GetEnv("GITLAB_PROJECT_ID") + "/repository/branches", "POST")
+		minParams.Add("branch", sourceBranch)
+		minParams.Add("ref", targetBranch)
+		MakeRequest(minParams.Encode(), "projects/"+GetEnv("GITLAB_PROJECT_ID")+"/repository/branches", "POST")
 	}
 
 	reqBody := params.Encode()
