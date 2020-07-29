@@ -118,10 +118,12 @@ glab config --token=sometoken --url=https://gitlab.com --pid=someprojectid --rep
   
 ## Learn More
 Use "glab <command> --help" for more information about a command.
-Read the manual at https://clementsam.tech/glab
+Read the documentation at https://clementsam.tech/glab
+
 
 ## Contributions
-Thanks for considering contributing to this project. Feel free to open an issue or submit a pull request!
+Thanks for considering contributing to this project. 
+Please read the [contibutions guide]('./.github/contributions.md') and Feel free to open an issue or submit a pull request!
 
 
-Built with ❤ by Clement Sam <https://clementsam.tech>
+Built with ❤ by [Clement Sam](https://clementsam.tech)
