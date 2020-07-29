@@ -18,3 +18,5 @@ cmd/glab/bin
 cmd/glab/bin/*
 bin
 config
+dist
+cmd/glab/dist

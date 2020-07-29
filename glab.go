@@ -12,9 +12,17 @@ import (
 	"strings"
 )
 
-func Version(_ map[string]string, _ map[int]string) {
-	version := "v1.5.2"
+var (
+	version	string
+	build  	string
+	commit  string
+)
+
+func PrintVersion(_ map[string]string, _ map[int]string) {
+	fmt.Println()
 	fmt.Println("GLab version", version)
+	fmt.Println("Build:", build)
+	fmt.Println("Commit:", commit)
 	fmt.Println("https://github.com/profclems/glab")
 	fmt.Println()
 	fmt.Println("Made with ❤ by Clement Sam <https://clementsam.tech>")
@@ -111,9 +119,9 @@ func Exec(cmd string, cmdArgs map[string]string, arrCmd map[int]string) {
 		"mr":        MergeRequest,
 		"help":      Help,
 		"config":    Config,
-		"version":   Version,
-		"--version": Version,
-		"-v":        Version,
+		"version":   PrintVersion,
+		"--version": PrintVersion,
+		"-v":        PrintVersion,
 	}
 	cmd = strings.Trim(cmd, " ")
 	if cmd == "" {
