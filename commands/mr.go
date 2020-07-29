@@ -4,7 +4,7 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
-	. "github.com/logrusorgru/aurora"
+	"github.com/logrusorgru/aurora"
 	"log"
 	"net/url"
 	"os"
@@ -15,9 +15,9 @@ import (
 func DisplayMergeRequest(hm map[string]interface{})  {
 	duration := TimeAgo(hm["created_at"])
 	if hm["state"] == "opened" {
-		fmt.Println(Green(fmt.Sprint("#",hm["iid"])), hm["title"], Cyan("("+hm["source_branch"].(string)+")"), Magenta(duration))
+		fmt.Println(aurora.Green(fmt.Sprint("#",hm["iid"])), hm["title"], aurora.Cyan("("+hm["source_branch"].(string)+")"), aurora.Magenta(duration))
 	} else {
-		fmt.Println(Red(fmt.Sprint("#",hm["iid"])), hm["title"], Cyan("("+hm["source_branch"].(string)+")"), Magenta(duration))
+		fmt.Println(aurora.Red(fmt.Sprint("#",hm["iid"])), hm["title"], aurora.Cyan("("+hm["source_branch"].(string)+")"), aurora.Magenta(duration))
 	}
 }
 
@@ -36,9 +36,9 @@ func DisplayMultipleMergeRequests(m []interface{})  {
 			labels := hm["labels"]
 			duration := TimeAgo(hm["created_at"])
 			if hm["state"] == "opened" {
-				_, _ = fmt.Fprintln(w, Green(fmt.Sprint(" #", hm["iid"])), "\t", hm["title"], "\t", Magenta(labels), "\t", Cyan("("+hm["source_branch"].(string)+")"), Magenta(duration))
+				_, _ = fmt.Fprintln(w, aurora.Green(fmt.Sprint(" #", hm["iid"])), "\t", hm["title"], "\t", aurora.Magenta(labels), "\t", aurora.Cyan("("+hm["source_branch"].(string)+")"), aurora.Magenta(duration))
 			} else {
-				_, _ = fmt.Fprintln(w, Red(fmt.Sprint(" #", hm["iid"])), "\t", hm["title"], "\t", Magenta(labels), "\t", Cyan("("+hm["source_branch"].(string)+")"), Magenta(duration))
+				_, _ = fmt.Fprintln(w, aurora.Red(fmt.Sprint(" #", hm["iid"])), "\t", hm["title"], "\t", aurora.Magenta(labels), "\t", aurora.Cyan("("+hm["source_branch"].(string)+")"), aurora.Magenta(duration))
 			}
 		}
 	} else {
@@ -54,26 +54,26 @@ func CreateMergeRequest(cmdArgs map[string]string, _ map[int]string)  {
 	var mergeLabel string
 	var mergeDescription string
 	if !CommandArgExists(cmdArgs, "title") {
-		fmt.Print(Cyan("Title"+"\n"+"-> "))
+		fmt.Print(aurora.Cyan("Title"+"\n"+"-> "))
 		mergeTitle, _ = reader.ReadString('\n')
 	} else {
 		mergeTitle = strings.Trim(cmdArgs["title"]," ")
 	}
 	if !CommandArgExists(cmdArgs, "label") {
-		fmt.Print(Cyan("Label(s) [Comma Separated]"+"\n"+"-> "))
+		fmt.Print(aurora.Cyan("Label(s) [Comma Separated]"+"\n"+"-> "))
 		mergeLabel, _ = reader.ReadString('\n')
 	} else {
 		mergeLabel = strings.Trim(cmdArgs["label"],"[] ")
 	}
-	mergeTitle = strings.Replace(mergeTitle, "\n", "", -1)
+	mergeTitle = strings.ReplaceAll(mergeTitle, "\n", "")
 	fmt.Println()
 	if !CommandArgExists(cmdArgs, "description") {
-		fmt.Println(Cyan("Description"), Yellow("[info: Type `exit` to close]"))
+		fmt.Println(aurora.Cyan("Description"), aurora.Yellow("[info: Type `exit` to close]"))
 		for {
-			fmt.Print(Cyan("-> "))
+			fmt.Print(aurora.Cyan("-> "))
 			input, _ := reader.ReadString('\n')
 			// convert CRLF to LF
-			input = strings.Replace(input, "\n", "", -1)
+			input = strings.ReplaceAll(input, "\n", "")
 			if strings.Compare("exit", input) == 0 {
 				break
 			}
@@ -83,21 +83,21 @@ func CreateMergeRequest(cmdArgs map[string]string, _ map[int]string)  {
 		mergeDescription = strings.Trim(cmdArgs["description"]," ")
 	}
 	if !CommandArgExists(cmdArgs, "source") {
-		fmt.Print(Cyan("Source Branch"))
-		fmt.Print(Yellow("-> "))
+		fmt.Print(aurora.Cyan("Source Branch"))
+		fmt.Print(aurora.Yellow("-> "))
 		sourceBranch, _ = reader.ReadString('\n')
 	} else {
 		sourceBranch = strings.Trim(cmdArgs["source"],"[] ")
 	}
 	if !CommandArgExists(cmdArgs, "target") {
-		fmt.Print(Cyan("Target Branch"))
-		fmt.Print(Yellow("-> "))
+		fmt.Print(aurora.Cyan("Target Branch"))
+		fmt.Print(aurora.Yellow("-> "))
 		targetBranch, _ = reader.ReadString('\n')
 	} else {
 		targetBranch = strings.Trim(cmdArgs["target"],"[] ")
 	}
-	targetBranch = strings.Replace(targetBranch, "\n", "", -1)
-	sourceBranch = strings.Replace(sourceBranch, "\n", "", -1)
+	targetBranch = strings.ReplaceAll(targetBranch, "\n", "")
+	sourceBranch = strings.ReplaceAll(sourceBranch, "\n", "")
 	params := url.Values{}
 	params.Add("title", mergeTitle)
 	params.Add("description", mergeDescription)
@@ -138,13 +138,13 @@ func CreateMergeRequest(cmdArgs map[string]string, _ map[int]string)  {
 	}
 
 	reqBody := params.Encode()
-	fmt.Println(Yellow("Creating Merge Request {"+mergeTitle+"}..."))
+	fmt.Println(aurora.Yellow("Creating Merge Request {"+mergeTitle+"}..."))
 	resp := MakeRequest(reqBody,"projects/"+GetEnv("GITLAB_PROJECT_ID")+"/merge_requests","POST")
 
 	if resp["responseCode"]==201 {
 		bodyString := resp["responseMessage"]
 
-		fmt.Println(Green("Merge Request created successfully"))
+		fmt.Println(aurora.Green("Merge Request created successfully"))
 		if _, ok := bodyString.(string); ok {
 			/* act on str */
 			m := make(map[string]interface{})
@@ -154,8 +154,6 @@ func CreateMergeRequest(cmdArgs map[string]string, _ map[int]string)  {
 			}
 			DisplayMergeRequest(m)
 			fmt.Println()
-		} else {
-			/* not string */
 		}
 	} else {
 		fmt.Println(resp["responseCode"], resp["responseMessage"])
@@ -185,13 +183,13 @@ func AcceptMergeRequest(cmdArgs map[string]string, arrFlags map[int]string)   {
 	}
 
 	reqBody := params.Encode()
-	fmt.Println(Yellow("Accepting Merge Request #"+mergeId+"..."))
+	fmt.Println(aurora.Yellow("Accepting Merge Request #"+mergeId+"..."))
 	resp := MakeRequest(reqBody,"projects/"+GetEnv("GITLAB_PROJECT_ID")+"/merge_requests/"+mergeId+"/merge","PUT")
 
 	if resp["responseCode"]==200 {
 		bodyString := resp["responseMessage"]
 
-		fmt.Println(Green("Merge Request accepted successfully"))
+		fmt.Println(aurora.Green("Merge Request accepted successfully"))
 		if _, ok := bodyString.(string); ok {
 			/* act on str */
 			m := make(map[string]interface{})
@@ -201,8 +199,6 @@ func AcceptMergeRequest(cmdArgs map[string]string, arrFlags map[int]string)   {
 			}
 			DisplayMergeRequest(m)
 			fmt.Println()
-		} else {
-			/* not string */
 		}
 	} else if resp["responseCode"]==405 {
 		fmt.Println("Merge request cannot be merged")
@@ -251,8 +247,6 @@ func ListMergeRequests(cmdArgs map[string]string, _ map[int]string)  {
 			fmt.Println()
 			DisplayMultipleMergeRequests(m)
 			fmt.Println()
-		} else {
-			/* not string */
 		}
 	} else {
 		fmt.Println(resp)
@@ -296,8 +290,6 @@ func IssuesRelatedMergeRequest(cmdArgs map[string]string, arrFlags map[int]strin
 			fmt.Println()
 			DisplayMultipleIssues(m)
 			fmt.Println()
-		} else {
-			/* not string */
 		}
 	} else {
 		fmt.Println(resp)
@@ -315,16 +307,16 @@ func DeleteMergeRequest(cmdArgs map[string]string, arrFlags map[int]string)  {
 			if resp["responseCode"]==204 {
 				bodyString := resp["responseMessage"]
 				fmt.Println(bodyString)
-				fmt.Println(Green("Merge Request Deleted Successfully"))
+				fmt.Println(aurora.Green("Merge Request Deleted Successfully"))
 			} else if resp["responseCode"]==404 {
-				fmt.Println(Red("Merge Request does not exist"))
+				fmt.Println(aurora.Red("Merge Request does not exist"))
 			} else {
-				fmt.Println(Red("Could not complete request."))
+				fmt.Println(aurora.Red("Could not complete request."))
 			}
 			fmt.Println()
 		}
 	} else {
-		fmt.Println(Red("Invalid command"))
+		fmt.Println(aurora.Red("Invalid command"))
 		fmt.Println("Usage: glab merge delete <merge-id>")
 	}
 }
@@ -340,16 +332,16 @@ func SubscribeMergeRequest(cmdArgs map[string]string, arrFlags map[int]string)  
 			if resp["responseCode"]==204 {
 				bodyString := resp["responseMessage"]
 				fmt.Println(bodyString)
-				fmt.Println(Green("You have successfully subscribe to merge request with id #"+i2))
+				fmt.Println(aurora.Green("You have successfully subscribe to merge request with id #"+i2))
 			} else if resp["responseCode"]==404 {
-				fmt.Println(Red("Merge Request does not exist"))
+				fmt.Println(aurora.Red("Merge Request does not exist"))
 			} else {
-				fmt.Println(Red("Could not complete request."))
+				fmt.Println(aurora.Red("Could not complete request."))
 			}
 			fmt.Println()
 		}
 	} else {
-		fmt.Println(Red("Invalid command"))
+		fmt.Println(aurora.Red("Invalid command"))
 		fmt.Println("Usage: glab merge delete <merge-id>")
 	}
 }
@@ -365,16 +357,16 @@ func UnsubscribeMergeRequest(cmdArgs map[string]string, arrFlags map[int]string)
 			if resp["responseCode"]==204 {
 				bodyString := resp["responseMessage"]
 				fmt.Println(bodyString)
-				fmt.Println(Green("You have successfully unsubscribed to merge request with id #"+i2))
+				fmt.Println(aurora.Green("You have successfully unsubscribed to merge request with id #"+i2))
 			} else if resp["responseCode"]==404 {
-				fmt.Println(Red("Merge Request does not exist"))
+				fmt.Println(aurora.Red("Merge Request does not exist"))
 			} else {
-				fmt.Println(Red("Could not complete request."))
+				fmt.Println(aurora.Red("Could not complete request."))
 			}
 			fmt.Println()
 		}
 	} else {
-		fmt.Println(Red("Invalid command"))
+		fmt.Println(aurora.Red("Invalid command"))
 		fmt.Println("Usage: glab mr unsubscribe <merge-id>")
 	}
 }
@@ -398,9 +390,9 @@ func ChangeMergeRequestState(cmdArgs map[string]string, arrFlags map[int]string)
 			fmt.Println("...")
 			resp := MakeRequest(reqBody,"projects/"+GetEnv("GITLAB_PROJECT_ID")+"/merge_requests/"+i2,"PUT")
 			if resp["responseCode"]==200 {
-				fmt.Println(Green("You have successfully "+mergeMessage+" to merge request with id #"+i2))
+				fmt.Println(aurora.Green("You have successfully "+mergeMessage+" to merge request with id #"+i2))
 			} else if resp["responseCode"]==404 {
-				fmt.Println(Red("Merge Request does not exist"))
+				fmt.Println(aurora.Red("Merge Request does not exist"))
 			} else {
 				fmt.Println("Could not complete request")
 				fmt.Println(resp["responseCode"], resp["responseMessage"])
@@ -408,7 +400,7 @@ func ChangeMergeRequestState(cmdArgs map[string]string, arrFlags map[int]string)
 			fmt.Println()
 		}
 	} else {
-		fmt.Println(Red("Invalid command"))
+		fmt.Println(aurora.Red("Invalid command"))
 		fmt.Println("Usage: glab mr <state> <merge-id>")
 	}
 }

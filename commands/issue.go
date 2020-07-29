@@ -4,7 +4,7 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
-	. "github.com/logrusorgru/aurora"
+	"github.com/logrusorgru/aurora"
 	"log"
 	"net/url"
 	"os"
@@ -27,9 +27,9 @@ func DisplayMultipleIssues(m []interface{})  {
 			labels := hm["labels"]
 			duration := TimeAgo(hm["created_at"])
 			if hm["state"] == "opened" {
-				_, _ = fmt.Fprintln(w, Green(fmt.Sprint("#", hm["iid"])), "\t", hm["title"], "\t", Magenta(labels), "\t", Magenta(duration))
+				_, _ = fmt.Fprintln(w, aurora.Green(fmt.Sprint("#", hm["iid"])), "\t", hm["title"], "\t", aurora.Magenta(labels), "\t", aurora.Magenta(duration))
 			} else {
-				_, _ = fmt.Fprintln(w, Red(fmt.Sprint("#", hm["iid"])), "\t", hm["title"], "\t", Magenta(labels), "\t", Magenta(duration))
+				_, _ = fmt.Fprintln(w, aurora.Red(fmt.Sprint("#", hm["iid"])), "\t", hm["title"], "\t", aurora.Magenta(labels), "\t", aurora.Magenta(duration))
 			}
 		}
 	} else {
@@ -40,9 +40,9 @@ func DisplayMultipleIssues(m []interface{})  {
 func DisplayIssue(hm map[string]interface{})  {
 	duration := TimeAgo(hm["created_at"])
 	if hm["state"] == "opened" {
-		fmt.Println(Green(fmt.Sprint("#",hm["iid"])), hm["title"], Magenta(duration))
+		fmt.Println(aurora.Green(fmt.Sprint("#",hm["iid"])), hm["title"], aurora.Magenta(duration))
 	} else {
-		fmt.Println(Red(fmt.Sprint("#",hm["iid"])), hm["title"], Magenta(duration))
+		fmt.Println(aurora.Red(fmt.Sprint("#",hm["iid"])), hm["title"], aurora.Magenta(duration))
 	}
 }
 
@@ -52,26 +52,26 @@ func CreateIssue(cmdArgs map[string]string, _ map[int]string)  {
 	var issueLabel string
 	var issueDescription string
 	if !CommandArgExists(cmdArgs, "title") {
-		fmt.Print(Cyan("Title"+"\n"+"-> "))
+		fmt.Print(aurora.Cyan("Title"+"\n"+"-> "))
 		issueTitle, _ = reader.ReadString('\n')
 	} else {
 		issueTitle = strings.Trim(cmdArgs["title"]," ")
 	}
 	if !CommandArgExists(cmdArgs, "label") {
-		fmt.Print(Cyan("Label(s) [Comma Separated]"+"\n"+"-> "))
+		fmt.Print(aurora.Cyan("Label(s) [Comma Separated]"+"\n"+"-> "))
 		issueLabel, _ = reader.ReadString('\n')
 	} else {
 		issueLabel = strings.Trim(cmdArgs["label"],"[] ")
 	}
-	issueTitle = strings.Replace(issueTitle, "\n", "", -1)
+	issueTitle = strings.ReplaceAll(issueTitle, "\n", "")
 	fmt.Println()
 	if !CommandArgExists(cmdArgs, "description") {
-		fmt.Println(Cyan("Description"), Yellow("[info: Type `exit` to close]"))
+		fmt.Println(aurora.Cyan("Description"), aurora.Yellow("[info: Type `exit` to close]"))
 		for {
-			fmt.Print(Cyan("-> "))
+			fmt.Print(aurora.Cyan("-> "))
 			input, _ := reader.ReadString('\n')
 			// convert CRLF to LF
-			input = strings.Replace(input, "\n", "", -1)
+			input = strings.ReplaceAll(input, "\n", "")
 			if strings.Compare("exit", input) == 0 {
 				break
 			}
@@ -80,8 +80,8 @@ func CreateIssue(cmdArgs map[string]string, _ map[int]string)  {
 	} else {
 		issueDescription = strings.Trim(cmdArgs["description"]," ")
 	}
-	fmt.Print(Cyan("Due Date"))
-	fmt.Print(Yellow("(Format: YYYY-MM-DD)"+"\n"+"-> "))
+	fmt.Print(aurora.Cyan("Due Date"))
+	fmt.Print(aurora.Yellow("(Format: YYYY-MM-DD)"+"\n"+"-> "))
 	issueDue, _ := reader.ReadString('\n')
 	params := url.Values{}
 	params.Add("title", issueTitle)
@@ -116,13 +116,13 @@ func CreateIssue(cmdArgs map[string]string, _ map[int]string)  {
 	}
 
 	reqBody := params.Encode()
-	fmt.Println(Yellow("Creating Issue {"+issueTitle+"}..."))
+	fmt.Println(aurora.Yellow("Creating Issue {"+issueTitle+"}..."))
 	resp := MakeRequest(reqBody,"projects/"+GetEnv("GITLAB_PROJECT_ID")+"/issues","POST")
 
 	if resp["responseCode"]==201 {
 		bodyString := resp["responseMessage"]
 
-		fmt.Println(Green("Issue created successfully"))
+		fmt.Println(aurora.Green("Issue created successfully"))
 		if _, ok := bodyString.(string); ok {
 			/* act on str */
 			m := make(map[string]interface{})
@@ -133,8 +133,6 @@ func CreateIssue(cmdArgs map[string]string, _ map[int]string)  {
 
 			DisplayIssue(m)
 			fmt.Println()
-		} else {
-			/* not string */
 		}
 	}
 }
@@ -177,8 +175,6 @@ func ListIssues(cmdArgs map[string]string, _ map[int]string)  {
 			DisplayMultipleIssues(m)
 			fmt.Println()
 
-		} else {
-			/* not string */
 		}
 	} else {
 		fmt.Println(resp["responseCode"], resp["responseMessage"])
@@ -196,16 +192,16 @@ func DeleteIssue(cmdArgs map[string]string, arrFlags map[int]string)  {
 			if resp["responseCode"]==204 {
 				bodyString := resp["responseMessage"]
 				fmt.Println(bodyString)
-				fmt.Println(Green("Issue Deleted Successfully"))
+				fmt.Println(aurora.Green("Issue Deleted Successfully"))
 			} else if resp["responseCode"]==404 {
-				fmt.Println(Red("Issue does not exist"))
+				fmt.Println(aurora.Red("Issue does not exist"))
 			} else {
-				fmt.Println(Red("Could not complete request."))
+				fmt.Println(aurora.Red("Could not complete request."))
 			}
 			fmt.Println()
 		}
 	} else {
-		fmt.Println(Red("Invalid command"))
+		fmt.Println(aurora.Red("Invalid command"))
 		fmt.Println("Usage: glab issue delete <issue-id>")
 	}
 }
@@ -221,16 +217,16 @@ func SubscribeIssue(cmdArgs map[string]string, arrFlags map[int]string)  {
 			if resp["responseCode"]==204 {
 				bodyString := resp["responseMessage"]
 				fmt.Println(bodyString)
-				fmt.Println(Green("You have successfully subscribe to issue #"+i2))
+				fmt.Println(aurora.Green("You have successfully subscribe to issue #"+i2))
 			} else if resp["responseCode"]==404 {
-				fmt.Println(Red("Issue does not exist"))
+				fmt.Println(aurora.Red("Issue does not exist"))
 			} else {
-				fmt.Println(Red("Could not complete request."))
+				fmt.Println(aurora.Red("Could not complete request."))
 			}
 			fmt.Println()
 		}
 	} else {
-		fmt.Println(Red("Invalid command"))
+		fmt.Println(aurora.Red("Invalid command"))
 		fmt.Println("Usage: glab issue subscribe <issue-id>")
 	}
 }
@@ -246,16 +242,16 @@ func UnsubscribeIssue(cmdArgs map[string]string, arrFlags map[int]string)  {
 			if resp["responseCode"]==204 {
 				bodyString := resp["responseMessage"]
 				fmt.Println(bodyString)
-				fmt.Println(Green("You have successfully unsubscribe to issue #"+i2))
+				fmt.Println(aurora.Green("You have successfully unsubscribe to issue #"+i2))
 			} else if resp["responseCode"]==404 {
-				fmt.Println(Red("Issue does not exist"))
+				fmt.Println(aurora.Red("Issue does not exist"))
 			} else {
-				fmt.Println(Red("Could not complete request."))
+				fmt.Println(aurora.Red("Could not complete request."))
 			}
 			fmt.Println()
 		}
 	} else {
-		fmt.Println(Red("Invalid command"))
+		fmt.Println(aurora.Red("Invalid command"))
 		fmt.Println("Usage: glab issue unsubscribe <issue-id>")
 	}
 }
@@ -284,9 +280,9 @@ func ChangeIssueState(cmdArgs map[string]string, arrFlags map[int]string)  {
 			fmt.Println("...")
 			resp := MakeRequest(reqBody,"projects/"+GetEnv("GITLAB_PROJECT_ID")+"/issues/"+i2,"PUT")
 			if resp["responseCode"]==200 {
-				fmt.Println(Green("You have successfully "+issueMessage+" to issue with id #"+i2))
+				fmt.Println(aurora.Green("You have successfully "+issueMessage+" to issue with id #"+i2))
 			} else if resp["responseCode"]==404 {
-				fmt.Println(Red("Issue does not exist"))
+				fmt.Println(aurora.Red("Issue does not exist"))
 			} else {
 				fmt.Println("Could not complete request")
 				fmt.Println(resp["responseCode"], resp["responseMessage"])
@@ -294,7 +290,7 @@ func ChangeIssueState(cmdArgs map[string]string, arrFlags map[int]string)  {
 			fmt.Println()
 		}
 	} else {
-		fmt.Println(Red("Invalid command"))
+		fmt.Println(aurora.Red("Invalid command"))
 		fmt.Println("Usage: glab issue <state> <merge-id>")
 	}
 }

@@ -29,7 +29,7 @@ func GetEnv(key string) string {
 	return os.Getenv(key)
 }
 
-func SetEnv(key string, value string) string {
+func SetEnv(key, value string) string {
 
 	// load .env file
 	env, err := godotenv.Unmarshal(key+"="+value)
@@ -79,7 +79,7 @@ func TimeAgo(timeVal interface{}) string  {
 	return ""
 }
 
-func MakeRequest(payload string, url string, method string) map[string]interface{} {
+func MakeRequest(payload, url, method string) map[string]interface{} {
 
 	url = GetEnv("GITLAB_URI")+"/api/v4/"+url
 	var reader io.Reader

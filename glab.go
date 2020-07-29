@@ -3,7 +3,7 @@ package glab
 import (
 	"bufio"
 	"fmt"
-	. "github.com/logrusorgru/aurora"
+	"github.com/logrusorgru/aurora"
 	"glab/cmd/glab/utils"
 	"glab/commands"
 	"io/ioutil"
@@ -37,21 +37,18 @@ func OpenFile(filename string)  {
 
 func Issue(cmdArgs map[string]string, arrCmd map[int]string)  {
 	commands.ExecIssue(cmdArgs, arrCmd)
-	return
 }
 
 func MergeRequest(cmdArgs map[string]string, arrCmd map[int]string)  {
 	commands.ExecMergeRequest(cmdArgs, arrCmd)
-	return
 }
 
 func Help(args map[string]string, arrCmd map[int]string) {
 	//OpenFile("./utils/help.go")
 	utils.PrintHelpHelp()
-	return
 }
 
-func ConfigEnv(key string, value string)  {
+func ConfigEnv(key, value string)  {
 	data, _ := ioutil.ReadFile("./config/.env")
 
 	file := string(data)
@@ -98,12 +95,12 @@ func Config(cmdArgs map[string]string, arrCmd map[int]string)  {
 			ConfigEnv(cmdHelpList[arrCmd[i]], cmdArgs[arrCmd[i]])
 			isUpdated = true
 		} else {
-			fmt.Println(Red(arrCmd[i]+": command not found"))
+			fmt.Println(aurora.Red(arrCmd[i]+": command not found"))
 		}
 	}
 
 	if isUpdated {
-		fmt.Println(Green("Environment variable(s) updated"))
+		fmt.Println(aurora.Green("Environment variable(s) updated"))
 	}
 	fmt.Println() //ending space
 }
@@ -121,7 +118,6 @@ func Exec(cmd string, cmdArgs map[string]string, arrCmd map[int]string)  {
 	cmd = strings.Trim(cmd, " ")
 	if cmd == "" {
 		Help(cmdArgs, arrCmd)
-		return
 	}
 	if commands.CommandExists(commandList, cmd) {
 
@@ -135,7 +131,6 @@ func Exec(cmd string, cmdArgs map[string]string, arrCmd map[int]string)  {
 				}
 				//OpenFile("./utils/"+cmd+".txt")
 				cmdHelpList[cmd]()
-				return
 			}
 		}
 		commandList[cmd](cmdArgs, arrCmd)
@@ -144,5 +139,4 @@ func Exec(cmd string, cmdArgs map[string]string, arrCmd map[int]string)  {
 		fmt.Println()
 		Help(cmdArgs, arrCmd)
 	}
-	return
 }
