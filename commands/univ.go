@@ -14,6 +14,7 @@ import (
 	"net/http"
 	_ "net/http"
 	"os"
+	"regexp"
 	"time"
 )
 
@@ -40,6 +41,15 @@ func SetEnv(key, value string) string {
 	}
 
 	return value
+}
+
+func ReplaceNonAlphaNumericChars(words, replaceWith string) string {
+	reg, err := regexp.Compile("[^A-Za-z0-9]+")
+	if err != nil {
+		log.Fatal(err)
+	}
+	newStr := reg.ReplaceAllString(words, replaceWith)
+	return newStr
 }
 
 func CommandExists(mapArr map[string]func(map[string]string, map[int]string), key string) bool {
@@ -106,5 +116,6 @@ func MakeRequest(payload, url, method string) map[string]interface{} {
 	m := make(map[string]interface{})
 	m["responseCode"] = resp.StatusCode
 	m["responseMessage"] = bodyString
+
 	return m
 }

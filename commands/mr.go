@@ -83,9 +83,13 @@ func CreateMergeRequest(cmdArgs map[string]string, _ map[int]string) {
 		mergeDescription = strings.Trim(cmdArgs["description"], " ")
 	}
 	if !CommandArgExists(cmdArgs, "source") {
-		fmt.Print(aurora.Cyan("Source Branch"))
-		fmt.Print(aurora.Yellow("-> "))
-		sourceBranch, _ = reader.ReadString('\n')
+		if CommandArgExists(cmdArgs, "create-branch") {
+			sourceBranch = ReplaceNonAlphaNumericChars(mergeTitle, "-")
+		} else {
+			fmt.Print(aurora.Cyan("Source Branch"))
+			fmt.Print(aurora.Yellow("-> "))
+			sourceBranch, _ = reader.ReadString('\n')
+		}
 	} else {
 		sourceBranch = strings.Trim(cmdArgs["source"], "[] ")
 	}
@@ -135,6 +139,14 @@ func CreateMergeRequest(cmdArgs map[string]string, _ map[int]string) {
 		for _, i2 := range arrIds {
 			params.Add("assignee_ids[]", i2)
 		}
+	}
+
+
+	if CommandArgExists(cmdArgs, "create-branch") {
+		minParams := url.Values{}
+		minParams.Add("branch",sourceBranch)
+		minParams.Add("ref",targetBranch)
+		MakeRequest(minParams.Encode(), "projects/" + GetEnv("GITLAB_PROJECT_ID") + "/repository/branches", "POST")
 	}
 
 	reqBody := params.Encode()
