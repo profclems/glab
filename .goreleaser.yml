@@ -14,6 +14,7 @@ builds:
       - -s -w -X glab.version={{.Version}} -X glab.commit={{.Commit}} -X glab.build={{time "01/02/2006"}}
   - <<: &build_defaults
       binary: bin/glab
+      main: ./cmd/glab
     id: macos
     goos: [darwin]
     goarch: [amd64]
