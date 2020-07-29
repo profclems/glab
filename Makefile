@@ -10,6 +10,7 @@ push:
 	git push origin $(git branch | sed -n -e 's/^\* \(.*\)/\1/p')
 
 compileall:
-	mkdir ./bin && mkdir ./bin/$(GLAB_VERSION)
-	cp cmd/glab/main.go ./bin/$(GLAB_VERSION)/glab
-	./scripts/compile-all-plaforms.bash ./bin/$(GLAB_VERSION)/glab
+	mkdir -p ./bin
+	mkdir -p ./bin/$(GLAB_VERSION)
+	cp cmd/glab/main.go ./bin/$(GLAB_VERSION)/glab.go
+	./scripts/compile-all-plaforms.bash ./bin/$(GLAB_VERSION)/glab.go

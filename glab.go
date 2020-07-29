@@ -13,7 +13,7 @@ import (
 )
 
 func Version(_ map[string]string, _ map[int]string) {
-	version := "v1.5.1"
+	version := "v1.5.2"
 	fmt.Println("GLab version", version)
 	fmt.Println("https://github.com/profclems/glab")
 	fmt.Println()
