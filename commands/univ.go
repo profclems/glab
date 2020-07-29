@@ -32,8 +32,8 @@ func GetEnv(key string) string {
 func SetEnv(key, value string) string {
 
 	// load .env file
-	env, err := godotenv.Unmarshal(key+"="+value)
-	err = godotenv.Write(env, "./.env")
+	env, _ := godotenv.Unmarshal(key+"="+value)
+	err := godotenv.Write(env, "./.env")
 
 	if err != nil {
 		log.Fatalf("Error writing .env file")
@@ -100,10 +100,7 @@ func MakeRequest(payload, url, method string) map[string]interface{} {
 	}
 	defer resp.Body.Close()
 
-	bodyBytes, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		log.Fatal(err)
-	}
+	bodyBytes, _ := ioutil.ReadAll(resp.Body)
 	bodyString := string(bodyBytes)
 
 	m := make(map[string]interface{})

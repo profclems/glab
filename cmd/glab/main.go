@@ -25,7 +25,7 @@ func main() {
 
 	// Parse the arguments in a map
 	for i:=1; i < argLen; i++ {
-		sp := strings.Split(strings.TrimLeft(cmdArgs[i], "--"), "=")
+		sp := strings.Split(strings.TrimLeft(cmdArgs[i], "-"), "=")
 		if len(sp) > 0  {
 			if len(sp) > 1 {
 				arr[sp[0]] = sp[1]
