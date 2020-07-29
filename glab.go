@@ -13,8 +13,8 @@ import (
 )
 
 var (
-	version	string
-	build  	string
+	version string
+	build   string
 	commit  string
 )
 
