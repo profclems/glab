@@ -2,9 +2,7 @@ project_name: glab
 
 before:
   hooks:
-    # You may remove this if you don't use go modules.
     - go mod download
-    # you may remove this if you don't need go generate
     - go generate ./...
 builds:
   - main: ./cmd/glab
@@ -28,6 +26,7 @@ builds:
     id: windows
     goos: [windows]
     goarch: [386, amd64]
+
 archives:
   - replacements:
       darwin: Darwin
@@ -35,6 +34,44 @@ archives:
       windows: Windows
       386: i386
       amd64: x86_64
+
+  - id: nix
+    builds: [macos, linux]
+    <<: &archive_defaults
+      name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}"
+    wrap_in_directory: true
+    replacements:
+      darwin: macOS
+    format: tar.gz
+
+  - id: windows
+    builds: [windows]
+    <<: *archive_defaults
+    wrap_in_directory: false
+    format: zip
+
+scoop:
+  url_template: "http://github.com/profclems/glab/releases/{{ .Tag }}/{{ .ArtifactName }}"
+
+  # Repository to push the app manifest to.
+  bucket:
+    owner: profclems
+    name: glab
+    # Optionally a token can be provided, if it differs from the token provided to GoReleaser
+    token: "{{ .Env.SCOOP_BUCKET_GITHUB_TOKEN }}"
+
+  commit_author:
+    name: profclems
+    email: clementsam75@gmail.com
+
+  commit_msg_template: "Scoop update for {{ .ProjectName }} version {{ .Tag }}"
+  homepage: "https://github.com/profclems/glab"
+  description: "An open source gitlab cli tool"
+  license: MIT
+  persist:
+    - "config"
+    - ".env"
+
 checksum:
   name_template: 'checksums.txt'
 snapshot:

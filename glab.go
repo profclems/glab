@@ -1,14 +1,10 @@
 package glab
 
 import (
-	"bufio"
 	"fmt"
 	"github.com/logrusorgru/aurora"
 	"glab/cmd/glab/utils"
 	"glab/commands"
-	"io/ioutil"
-	"log"
-	"os"
 	"strings"
 )
 
@@ -29,20 +25,6 @@ func PrintVersion(_ map[string]string, _ map[int]string) {
 	fmt.Println()
 }
 
-func OpenFile(filename string) {
-	file, err := os.Open(filename)
-	if err != nil {
-		log.Fatal("Error:", err)
-	}
-	defer file.Close()
-
-	scanner := bufio.NewScanner(file)
-
-	for scanner.Scan() {
-		fmt.Println(scanner.Text())
-	}
-}
-
 func Issue(cmdArgs map[string]string, arrCmd map[int]string) {
 	commands.ExecIssue(cmdArgs, arrCmd)
 }
@@ -56,37 +38,6 @@ func Help(args map[string]string, arrCmd map[int]string) {
 	utils.PrintHelpHelp()
 }
 
-func ConfigEnv(key, value string) {
-	data, _ := ioutil.ReadFile("./config/.env")
-
-	file := string(data)
-	line := 0
-	temp := strings.Split(file, "\n")
-	newData := ""
-	keyExists := false
-	newConfig := key + "=" + (value) + "\n"
-	for _, item := range temp {
-		//fmt.Println("[",line,"]",item)
-		env := strings.Split(item, "=")
-		justString := fmt.Sprint(item)
-		if env[0] == key {
-			newData += newConfig
-			keyExists = true
-		} else {
-			newData += justString + "\n"
-		}
-		line++
-	}
-	if !keyExists {
-		newData += newConfig
-	}
-	_ = os.Mkdir("./config", 0700)
-	f, _ := os.Create("./config/.env") // Create a writer
-	w := bufio.NewWriter(f)
-	_, _ = w.WriteString(strings.Trim(newData, "\n"))
-	_ = w.Flush()
-}
-
 func Config(cmdArgs map[string]string, arrCmd map[int]string) {
 	cmdHelpList := map[string]string{
 		"uri":   "GITLAB_URI",
@@ -96,14 +47,18 @@ func Config(cmdArgs map[string]string, arrCmd map[int]string) {
 		"pid":   "GITLAB_PROJECT_ID",
 	}
 	isUpdated := false
-
+	if arrCmd[0] == "global" {
+		commands.UseGlobalConfig = true
+	}
 	fmt.Println() //Upper Space
 	for i := 0; i < len(arrCmd); i++ {
 		if commands.CommandArgExists(cmdArgs, arrCmd[i]) && commands.CommandArgExists(cmdHelpList, arrCmd[i]) {
-			ConfigEnv(cmdHelpList[arrCmd[i]], cmdArgs[arrCmd[i]])
+			commands.SetEnv(cmdHelpList[arrCmd[i]], cmdArgs[arrCmd[i]])
 			isUpdated = true
 		} else {
-			fmt.Println(aurora.Red(arrCmd[i] + ": command not found"))
+			if arrCmd[0] != "global" {
+				fmt.Println(aurora.Red(arrCmd[i] + ": invalid flag"))
+			}
 		}
 	}
 
