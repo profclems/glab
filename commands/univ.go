@@ -17,12 +17,12 @@ import (
 )
 
 var (
-	UseGlobalConfig bool
-	GlobalPathDir,_ 		= filepath.Abs(filepath.Dir(os.Args[0]))
+	UseGlobalConfig         bool
+	GlobalPathDir, _        = filepath.Abs(filepath.Dir(os.Args[0]))
 	ConfigFileFileParentDir = ".glab-cli"
-	ConfigFileFileDir       = ConfigFileFileParentDir+"/config"
-	ConfigFile              = ConfigFileFileDir +"/.env"
-	GlobalConfigFile        = GlobalPathDir+"/"+ConfigFileFileDir +"/.env"
+	ConfigFileFileDir       = ConfigFileFileParentDir + "/config"
+	ConfigFile              = ConfigFileFileDir + "/.env"
+	GlobalConfigFile        = GlobalPathDir + "/" + ConfigFileFileDir + "/.env"
 )
 
 func GetEnv(key string) string {
@@ -38,7 +38,7 @@ func GetEnv(key string) string {
 			}
 		}
 	}
-	return  env
+	return env
 }
 
 func SetEnv(key, value string) {
@@ -79,7 +79,7 @@ func SetEnv(key, value string) {
 	w := bufio.NewWriter(f)
 	_, _ = w.WriteString(strings.Trim(newData, "\n"))
 	_ = w.Flush()
-	if GetKeyValueInFile(".gitignore",ConfigFileFileParentDir) == "NOTFOUND" {
+	if GetKeyValueInFile(".gitignore", ConfigFileFileParentDir) == "NOTFOUND" {
 		ReadAndAppend(".gitignore", ConfigFileFileParentDir)
 	}
 }
@@ -90,7 +90,7 @@ func ReadAndAppend(file, text string) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	if _, err := f.Write([]byte("\n"+text)); err != nil {
+	if _, err := f.Write([]byte("\n" + text)); err != nil {
 		log.Fatal(err)
 	}
 	if err := f.Close(); err != nil {
