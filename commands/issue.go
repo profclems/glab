@@ -12,7 +12,7 @@ import (
 	"text/tabwriter"
 )
 
-func DisplayMultipleIssues(m []interface{}) {
+func displayMultipleIssues(m []interface{}) {
 	// initialize tabwriter
 	w := new(tabwriter.Writer)
 
@@ -37,7 +37,7 @@ func DisplayMultipleIssues(m []interface{}) {
 	}
 }
 
-func DisplayIssue(hm map[string]interface{}) {
+func displayIssue(hm map[string]interface{}) {
 	duration := TimeAgo(hm["created_at"])
 	if hm["state"] == "opened" {
 		fmt.Println(aurora.Green(fmt.Sprint("#", hm["iid"])), hm["title"], aurora.Magenta(duration))
@@ -46,7 +46,7 @@ func DisplayIssue(hm map[string]interface{}) {
 	}
 }
 
-func CreateIssue(cmdArgs map[string]string, _ map[int]string) {
+func createIssue(cmdArgs map[string]string, _ map[int]string) {
 	reader := bufio.NewReader(os.Stdin)
 	var issueTitle string
 	var issueLabel string
@@ -131,13 +131,13 @@ func CreateIssue(cmdArgs map[string]string, _ map[int]string) {
 				log.Fatal(err)
 			}
 
-			DisplayIssue(m)
+			displayIssue(m)
 			fmt.Println()
 		}
 	}
 }
 
-func ListIssues(cmdArgs map[string]string, _ map[int]string) {
+func listIssues(cmdArgs map[string]string, _ map[int]string) {
 	var queryStrings = "state="
 	if CommandArgExists(cmdArgs, "all") {
 		queryStrings = ""
@@ -172,7 +172,7 @@ func ListIssues(cmdArgs map[string]string, _ map[int]string) {
 			}
 			fmt.Println()
 
-			DisplayMultipleIssues(m)
+			displayMultipleIssues(m)
 			fmt.Println()
 
 		}
@@ -181,7 +181,7 @@ func ListIssues(cmdArgs map[string]string, _ map[int]string) {
 	}
 }
 
-func DeleteIssue(cmdArgs map[string]string, arrFlags map[int]string) {
+func deleteIssue(cmdArgs map[string]string, arrFlags map[int]string) {
 	issueId := strings.Trim(arrFlags[1], " ")
 	if CommandArgExists(cmdArgs, issueId) {
 		arrIds := strings.Split(strings.Trim(issueId, "[] "), ",")
@@ -206,7 +206,7 @@ func DeleteIssue(cmdArgs map[string]string, arrFlags map[int]string) {
 	}
 }
 
-func SubscribeIssue(cmdArgs map[string]string, arrFlags map[int]string) {
+func subscribeIssue(cmdArgs map[string]string, arrFlags map[int]string) {
 	mergeId := strings.Trim(arrFlags[1], " ")
 	if CommandArgExists(cmdArgs, mergeId) {
 		arrIds := strings.Split(strings.Trim(mergeId, "[] "), ",")
@@ -231,7 +231,7 @@ func SubscribeIssue(cmdArgs map[string]string, arrFlags map[int]string) {
 	}
 }
 
-func UnsubscribeIssue(cmdArgs map[string]string, arrFlags map[int]string) {
+func unsubscribeIssue(cmdArgs map[string]string, arrFlags map[int]string) {
 	mergeId := strings.Trim(arrFlags[1], " ")
 	if CommandArgExists(cmdArgs, mergeId) {
 		arrIds := strings.Split(strings.Trim(mergeId, "[] "), ",")
@@ -256,7 +256,7 @@ func UnsubscribeIssue(cmdArgs map[string]string, arrFlags map[int]string) {
 	}
 }
 
-func ChangeIssueState(cmdArgs map[string]string, arrFlags map[int]string) {
+func changeIssueState(cmdArgs map[string]string, arrFlags map[int]string) {
 	issueId := strings.Trim(arrFlags[1], " ")
 	if CommandArgExists(cmdArgs, issueId) {
 		reqType := arrFlags[0]
@@ -294,19 +294,20 @@ func ChangeIssueState(cmdArgs map[string]string, arrFlags map[int]string) {
 	}
 }
 
+// ExecIssue is exported
 func ExecIssue(cmdArgs map[string]string, arrCmd map[int]string) {
 	commandList := map[interface{}]func(map[string]string, map[int]string){
-		"create":             CreateIssue,
-		"list":               ListIssues,
-		"ls":                 ListIssues,
-		"delete":             DeleteIssue,
-		"subscribe":          SubscribeIssue,
-		"unsubscribe":        UnsubscribeIssue,
-		"open":               ChangeIssueState,
-		"close":              ChangeIssueState,
-		"mr":                 ChangeIssueState,
-		"link-mr":            ChangeIssueState,
-		"link-merge-request": ChangeIssueState,
+		"create":             createIssue,
+		"list":               listIssues,
+		"ls":                 listIssues,
+		"delete":             deleteIssue,
+		"subscribe":          subscribeIssue,
+		"unsubscribe":        unsubscribeIssue,
+		"open":               changeIssueState,
+		"close":              changeIssueState,
+		"mr":                 changeIssueState,
+		"link-mr":            changeIssueState,
+		"link-merge-request": changeIssueState,
 	}
 	if _, ok := commandList[arrCmd[0]]; ok {
 		commandList[arrCmd[0]](cmdArgs, arrCmd)

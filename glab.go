@@ -14,7 +14,7 @@ var (
 	commit  string
 )
 
-func PrintVersion(_ map[string]string, _ map[int]string) {
+func printVersion(_ map[string]string, _ map[int]string) {
 	fmt.Println()
 	fmt.Println("GLab version", version)
 	fmt.Println("Build:", build)
@@ -25,20 +25,20 @@ func PrintVersion(_ map[string]string, _ map[int]string) {
 	fmt.Println()
 }
 
-func Issue(cmdArgs map[string]string, arrCmd map[int]string) {
+func issue(cmdArgs map[string]string, arrCmd map[int]string) {
 	commands.ExecIssue(cmdArgs, arrCmd)
 }
 
-func MergeRequest(cmdArgs map[string]string, arrCmd map[int]string) {
+func mergeRequest(cmdArgs map[string]string, arrCmd map[int]string) {
 	commands.ExecMergeRequest(cmdArgs, arrCmd)
 }
 
+// Help is exported
 func Help(args map[string]string, arrCmd map[int]string) {
-	//OpenFile("./utils/help.go")
 	utils.PrintHelpHelp()
 }
 
-func Config(cmdArgs map[string]string, arrCmd map[int]string) {
+func config(cmdArgs map[string]string, arrCmd map[int]string) {
 	cmdHelpList := map[string]string{
 		"uri":   "GITLAB_URI",
 		"url":   "GITLAB_URI",
@@ -68,15 +68,16 @@ func Config(cmdArgs map[string]string, arrCmd map[int]string) {
 	fmt.Println() //ending space
 }
 
+// Exec is exported
 func Exec(cmd string, cmdArgs map[string]string, arrCmd map[int]string) {
 	commandList := map[string]func(map[string]string, map[int]string){
-		"issue":     Issue,
-		"mr":        MergeRequest,
+		"issue":     issue,
+		"mr":        mergeRequest,
 		"help":      Help,
-		"config":    Config,
-		"version":   PrintVersion,
-		"--version": PrintVersion,
-		"-v":        PrintVersion,
+		"config":    config,
+		"version":   printVersion,
+		"--version": printVersion,
+		"-v":        printVersion,
 	}
 	cmd = strings.Trim(cmd, " ")
 	if cmd == "" {

@@ -12,7 +12,7 @@ import (
 	"text/tabwriter"
 )
 
-func DisplayMergeRequest(hm map[string]interface{}) {
+func displayMergeRequest(hm map[string]interface{}) {
 	duration := TimeAgo(hm["created_at"])
 	if hm["state"] == "opened" {
 		fmt.Println(aurora.Green(fmt.Sprint("#", hm["iid"])), hm["title"], aurora.Cyan("("+hm["source_branch"].(string)+")"), aurora.Magenta(duration))
@@ -46,7 +46,7 @@ func DisplayMultipleMergeRequests(m []interface{}) {
 	}
 }
 
-func CreateMergeRequest(cmdArgs map[string]string, _ map[int]string) {
+func createMergeRequest(cmdArgs map[string]string, _ map[int]string) {
 	reader := bufio.NewReader(os.Stdin)
 	var sourceBranch string
 	var targetBranch string
@@ -163,7 +163,7 @@ func CreateMergeRequest(cmdArgs map[string]string, _ map[int]string) {
 			if err != nil {
 				log.Fatal(err)
 			}
-			DisplayMergeRequest(m)
+			displayMergeRequest(m)
 			fmt.Println()
 		}
 	} else {
@@ -171,7 +171,7 @@ func CreateMergeRequest(cmdArgs map[string]string, _ map[int]string) {
 	}
 }
 
-func AcceptMergeRequest(cmdArgs map[string]string, arrFlags map[int]string) {
+func acceptMergeRequest(cmdArgs map[string]string, arrFlags map[int]string) {
 	mergeId := strings.Trim(arrFlags[1], " ")
 	params := url.Values{}
 	if CommandArgExists(cmdArgs, "message") {
@@ -208,7 +208,7 @@ func AcceptMergeRequest(cmdArgs map[string]string, arrFlags map[int]string) {
 			if err != nil {
 				log.Fatal(err)
 			}
-			DisplayMergeRequest(m)
+			displayMergeRequest(m)
 			fmt.Println()
 		}
 	} else if resp["responseCode"] == 405 {
@@ -222,7 +222,7 @@ func AcceptMergeRequest(cmdArgs map[string]string, arrFlags map[int]string) {
 	}
 }
 
-func ListMergeRequests(cmdArgs map[string]string, _ map[int]string) {
+func listMergeRequests(cmdArgs map[string]string, _ map[int]string) {
 	var queryStrings = "state="
 	if CommandArgExists(cmdArgs, "all") {
 		queryStrings = ""
@@ -264,7 +264,7 @@ func ListMergeRequests(cmdArgs map[string]string, _ map[int]string) {
 	}
 }
 
-func IssuesRelatedMergeRequest(cmdArgs map[string]string, arrFlags map[int]string) {
+func issuesRelatedMergeRequest(cmdArgs map[string]string, arrFlags map[int]string) {
 	var queryStrings = "state="
 	mergeId := strings.Trim(arrFlags[1], " ")
 	if CommandArgExists(cmdArgs, "all") {
@@ -299,7 +299,7 @@ func IssuesRelatedMergeRequest(cmdArgs map[string]string, arrFlags map[int]strin
 				log.Fatal(err)
 			}
 			fmt.Println()
-			DisplayMultipleIssues(m)
+			displayMultipleIssues(m)
 			fmt.Println()
 		}
 	} else {
@@ -307,7 +307,7 @@ func IssuesRelatedMergeRequest(cmdArgs map[string]string, arrFlags map[int]strin
 	}
 }
 
-func DeleteMergeRequest(cmdArgs map[string]string, arrFlags map[int]string) {
+func deleteMergeRequest(cmdArgs map[string]string, arrFlags map[int]string) {
 	mergeId := strings.Trim(arrFlags[1], " ")
 	if CommandArgExists(cmdArgs, mergeId) {
 		arrIds := strings.Split(strings.Trim(mergeId, "[] "), ",")
@@ -332,7 +332,7 @@ func DeleteMergeRequest(cmdArgs map[string]string, arrFlags map[int]string) {
 	}
 }
 
-func SubscribeMergeRequest(cmdArgs map[string]string, arrFlags map[int]string) {
+func subscribeMergeRequest(cmdArgs map[string]string, arrFlags map[int]string) {
 	mergeId := strings.Trim(arrFlags[1], " ")
 	if CommandArgExists(cmdArgs, mergeId) {
 		arrIds := strings.Split(strings.Trim(mergeId, "[] "), ",")
@@ -357,7 +357,7 @@ func SubscribeMergeRequest(cmdArgs map[string]string, arrFlags map[int]string) {
 	}
 }
 
-func UnsubscribeMergeRequest(cmdArgs map[string]string, arrFlags map[int]string) {
+func unsubscribeMergeRequest(cmdArgs map[string]string, arrFlags map[int]string) {
 	mergeId := strings.Trim(arrFlags[1], " ")
 	if CommandArgExists(cmdArgs, mergeId) {
 		arrIds := strings.Split(strings.Trim(mergeId, "[] "), ",")
@@ -382,7 +382,7 @@ func UnsubscribeMergeRequest(cmdArgs map[string]string, arrFlags map[int]string)
 	}
 }
 
-func ChangeMergeRequestState(cmdArgs map[string]string, arrFlags map[int]string) {
+func changeMergeRequestState(cmdArgs map[string]string, arrFlags map[int]string) {
 	mergeId := strings.Trim(arrFlags[1], " ")
 	if CommandArgExists(cmdArgs, mergeId) {
 		reqType := arrFlags[0]
@@ -416,19 +416,20 @@ func ChangeMergeRequestState(cmdArgs map[string]string, arrFlags map[int]string)
 	}
 }
 
+// ExecMergeRequest is exported
 func ExecMergeRequest(cmdArgs map[string]string, arrCmd map[int]string) {
 	commandList := map[interface{}]func(map[string]string, map[int]string){
-		"create":      CreateMergeRequest,
-		"list":        ListMergeRequests,
-		"ls":          ListMergeRequests,
-		"delete":      DeleteMergeRequest,
-		"subscribe":   SubscribeMergeRequest,
-		"unsubscribe": UnsubscribeMergeRequest,
-		"accept":      AcceptMergeRequest,
-		"merge":       AcceptMergeRequest,
-		"close":       ChangeMergeRequestState,
-		"reopen":      ChangeMergeRequestState,
-		"issues":      IssuesRelatedMergeRequest,
+		"create":      createMergeRequest,
+		"list":        listMergeRequests,
+		"ls":          listMergeRequests,
+		"delete":      deleteMergeRequest,
+		"subscribe":   subscribeMergeRequest,
+		"unsubscribe": unsubscribeMergeRequest,
+		"accept":      acceptMergeRequest,
+		"merge":       acceptMergeRequest,
+		"close":       changeMergeRequestState,
+		"reopen":      changeMergeRequestState,
+		"issues":      issuesRelatedMergeRequest,
 	}
 	if _, ok := commandList[arrCmd[0]]; ok {
 		commandList[arrCmd[0]](cmdArgs, arrCmd)
