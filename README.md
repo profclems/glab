@@ -1,3 +1,5 @@
+[![Gitter](https://badges.gitter.im/glabcli/community.svg)](https://gitter.im/glabcli/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
+
 # GLab
 GLab open source custom Gitlab Cli tool written in Go (golang) to help work seamlessly with Gitlab from the command line.
 
