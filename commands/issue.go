@@ -108,8 +108,8 @@ func createIssue(cmdArgs map[string]string, _ map[int]string) {
 	}
 	if CommandArgExists(cmdArgs, "assigns") {
 		params.Add("epic_id", cmdArgs["epic"])
-		assignId := cmdArgs["assigns"]
-		arrIds := strings.Split(strings.Trim(assignId, "[] "), ",")
+		assignID := cmdArgs["assigns"]
+		arrIds := strings.Split(strings.Trim(assignID, "[] "), ",")
 		for _, i2 := range arrIds {
 			params.Add("assignee_ids[]", i2)
 		}
@@ -182,9 +182,9 @@ func listIssues(cmdArgs map[string]string, _ map[int]string) {
 }
 
 func deleteIssue(cmdArgs map[string]string, arrFlags map[int]string) {
-	issueId := strings.Trim(arrFlags[1], " ")
-	if CommandArgExists(cmdArgs, issueId) {
-		arrIds := strings.Split(strings.Trim(issueId, "[] "), ",")
+	issueID := strings.Trim(arrFlags[1], " ")
+	if CommandArgExists(cmdArgs, issueID) {
+		arrIds := strings.Split(strings.Trim(issueID, "[] "), ",")
 		for _, i2 := range arrIds {
 			fmt.Println("Deleting Issue #" + i2)
 			queryStrings := "/" + i2
@@ -207,9 +207,9 @@ func deleteIssue(cmdArgs map[string]string, arrFlags map[int]string) {
 }
 
 func subscribeIssue(cmdArgs map[string]string, arrFlags map[int]string) {
-	mergeId := strings.Trim(arrFlags[1], " ")
-	if CommandArgExists(cmdArgs, mergeId) {
-		arrIds := strings.Split(strings.Trim(mergeId, "[] "), ",")
+	mergeID := strings.Trim(arrFlags[1], " ")
+	if CommandArgExists(cmdArgs, mergeID) {
+		arrIds := strings.Split(strings.Trim(mergeID, "[] "), ",")
 		for _, i2 := range arrIds {
 			fmt.Println("Subscribing Issue #" + i2)
 			queryStrings := "/" + i2 + "/subscribe"
@@ -232,9 +232,9 @@ func subscribeIssue(cmdArgs map[string]string, arrFlags map[int]string) {
 }
 
 func unsubscribeIssue(cmdArgs map[string]string, arrFlags map[int]string) {
-	mergeId := strings.Trim(arrFlags[1], " ")
-	if CommandArgExists(cmdArgs, mergeId) {
-		arrIds := strings.Split(strings.Trim(mergeId, "[] "), ",")
+	mergeID := strings.Trim(arrFlags[1], " ")
+	if CommandArgExists(cmdArgs, mergeID) {
+		arrIds := strings.Split(strings.Trim(mergeID, "[] "), ",")
 		for _, i2 := range arrIds {
 			fmt.Println("Unsubscribing Issue #" + i2)
 			queryStrings := "/" + i2 + "/unsubscribe"
@@ -257,8 +257,8 @@ func unsubscribeIssue(cmdArgs map[string]string, arrFlags map[int]string) {
 }
 
 func changeIssueState(cmdArgs map[string]string, arrFlags map[int]string) {
-	issueId := strings.Trim(arrFlags[1], " ")
-	if CommandArgExists(cmdArgs, issueId) {
+	issueID := strings.Trim(arrFlags[1], " ")
+	if CommandArgExists(cmdArgs, issueID) {
 		reqType := arrFlags[0]
 		params := url.Values{}
 		issueMessage := ""
@@ -273,7 +273,7 @@ func changeIssueState(cmdArgs map[string]string, arrFlags map[int]string) {
 			params.Add("state_event", "reopen")
 			issueMessage = "opened"
 		}
-		arrIds := strings.Split(strings.Trim(issueId, "[] "), ",")
+		arrIds := strings.Split(strings.Trim(issueID, "[] "), ",")
 		reqBody := params.Encode()
 		for _, i2 := range arrIds {
 			fmt.Println("...")

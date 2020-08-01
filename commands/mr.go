@@ -21,7 +21,7 @@ func displayMergeRequest(hm map[string]interface{}) {
 	}
 }
 
-func DisplayMultipleMergeRequests(m []interface{}) {
+func displayMultipleMergeRequests(m []interface{}) {
 	// initialize tabwriter
 	w := new(tabwriter.Writer)
 
@@ -134,8 +134,8 @@ func createMergeRequest(cmdArgs map[string]string, _ map[int]string) {
 	}
 	if CommandArgExists(cmdArgs, "assigns") {
 		params.Add("epic_id", cmdArgs["epic"])
-		assignId := cmdArgs["assigns"]
-		arrIds := strings.Split(strings.Trim(assignId, "[] "), ",")
+		assignID := cmdArgs["assigns"]
+		arrIds := strings.Split(strings.Trim(assignID, "[] "), ",")
 		for _, i2 := range arrIds {
 			params.Add("assignee_ids[]", i2)
 		}
@@ -172,7 +172,7 @@ func createMergeRequest(cmdArgs map[string]string, _ map[int]string) {
 }
 
 func acceptMergeRequest(cmdArgs map[string]string, arrFlags map[int]string) {
-	mergeId := strings.Trim(arrFlags[1], " ")
+	mergeID := strings.Trim(arrFlags[1], " ")
 	params := url.Values{}
 	if CommandArgExists(cmdArgs, "message") {
 		params.Add("merge_commit_message", cmdArgs["message"])
@@ -194,8 +194,8 @@ func acceptMergeRequest(cmdArgs map[string]string, arrFlags map[int]string) {
 	}
 
 	reqBody := params.Encode()
-	fmt.Println(aurora.Yellow("Accepting Merge Request #" + mergeId + "..."))
-	resp := MakeRequest(reqBody, "projects/"+GetEnv("GITLAB_PROJECT_ID")+"/merge_requests/"+mergeId+"/merge", "PUT")
+	fmt.Println(aurora.Yellow("Accepting Merge Request #" + mergeID + "..."))
+	resp := MakeRequest(reqBody, "projects/"+GetEnv("GITLAB_PROJECT_ID")+"/merge_requests/"+mergeID+"/merge", "PUT")
 
 	if resp["responseCode"] == 200 {
 		bodyString := resp["responseMessage"]
@@ -256,7 +256,7 @@ func listMergeRequests(cmdArgs map[string]string, _ map[int]string) {
 				log.Fatal(err)
 			}
 			fmt.Println()
-			DisplayMultipleMergeRequests(m)
+			displayMultipleMergeRequests(m)
 			fmt.Println()
 		}
 	} else {
@@ -266,7 +266,7 @@ func listMergeRequests(cmdArgs map[string]string, _ map[int]string) {
 
 func issuesRelatedMergeRequest(cmdArgs map[string]string, arrFlags map[int]string) {
 	var queryStrings = "state="
-	mergeId := strings.Trim(arrFlags[1], " ")
+	mergeID := strings.Trim(arrFlags[1], " ")
 	if CommandArgExists(cmdArgs, "all") {
 		queryStrings = ""
 	} else if CommandArgExists(cmdArgs, "closed") {
@@ -287,7 +287,7 @@ func issuesRelatedMergeRequest(cmdArgs map[string]string, arrFlags map[int]strin
 	if len(queryStrings) > 0 {
 		queryStrings = "?" + queryStrings
 	}
-	resp := MakeRequest("{}", "projects/"+GetEnv("GITLAB_PROJECT_ID")+"/merge_requests/"+mergeId+"/closes_issues"+queryStrings, "GET")
+	resp := MakeRequest("{}", "projects/"+GetEnv("GITLAB_PROJECT_ID")+"/merge_requests/"+mergeID+"/closes_issues"+queryStrings, "GET")
 	//fmt.Println(resp)
 	if resp["responseCode"] == 200 {
 		bodyString := resp["responseMessage"]
@@ -308,9 +308,9 @@ func issuesRelatedMergeRequest(cmdArgs map[string]string, arrFlags map[int]strin
 }
 
 func deleteMergeRequest(cmdArgs map[string]string, arrFlags map[int]string) {
-	mergeId := strings.Trim(arrFlags[1], " ")
-	if CommandArgExists(cmdArgs, mergeId) {
-		arrIds := strings.Split(strings.Trim(mergeId, "[] "), ",")
+	mergeID := strings.Trim(arrFlags[1], " ")
+	if CommandArgExists(cmdArgs, mergeID) {
+		arrIds := strings.Split(strings.Trim(mergeID, "[] "), ",")
 		for _, i2 := range arrIds {
 			fmt.Println("Deleting Merge Request #" + i2)
 			queryStrings := "/" + i2
@@ -333,9 +333,9 @@ func deleteMergeRequest(cmdArgs map[string]string, arrFlags map[int]string) {
 }
 
 func subscribeMergeRequest(cmdArgs map[string]string, arrFlags map[int]string) {
-	mergeId := strings.Trim(arrFlags[1], " ")
-	if CommandArgExists(cmdArgs, mergeId) {
-		arrIds := strings.Split(strings.Trim(mergeId, "[] "), ",")
+	mergeID := strings.Trim(arrFlags[1], " ")
+	if CommandArgExists(cmdArgs, mergeID) {
+		arrIds := strings.Split(strings.Trim(mergeID, "[] "), ",")
 		for _, i2 := range arrIds {
 			fmt.Println("Subscribing Merge Request #" + i2)
 			queryStrings := "/" + i2 + "/subscribe"
@@ -358,9 +358,9 @@ func subscribeMergeRequest(cmdArgs map[string]string, arrFlags map[int]string) {
 }
 
 func unsubscribeMergeRequest(cmdArgs map[string]string, arrFlags map[int]string) {
-	mergeId := strings.Trim(arrFlags[1], " ")
-	if CommandArgExists(cmdArgs, mergeId) {
-		arrIds := strings.Split(strings.Trim(mergeId, "[] "), ",")
+	mergeID := strings.Trim(arrFlags[1], " ")
+	if CommandArgExists(cmdArgs, mergeID) {
+		arrIds := strings.Split(strings.Trim(mergeID, "[] "), ",")
 		for _, i2 := range arrIds {
 			fmt.Println("Unsubscribing Merge Request #" + i2)
 			queryStrings := "/" + i2 + "/unsubscribe"
@@ -383,8 +383,8 @@ func unsubscribeMergeRequest(cmdArgs map[string]string, arrFlags map[int]string)
 }
 
 func changeMergeRequestState(cmdArgs map[string]string, arrFlags map[int]string) {
-	mergeId := strings.Trim(arrFlags[1], " ")
-	if CommandArgExists(cmdArgs, mergeId) {
+	mergeID := strings.Trim(arrFlags[1], " ")
+	if CommandArgExists(cmdArgs, mergeID) {
 		reqType := arrFlags[0]
 		params := url.Values{}
 		mergeMessage := ""
@@ -395,7 +395,7 @@ func changeMergeRequestState(cmdArgs map[string]string, arrFlags map[int]string)
 			params.Add("state_event", "reopen")
 			mergeMessage = "opened"
 		}
-		arrIds := strings.Split(strings.Trim(mergeId, "[] "), ",")
+		arrIds := strings.Split(strings.Trim(mergeID, "[] "), ",")
 		reqBody := params.Encode()
 		for _, i2 := range arrIds {
 			fmt.Println("...")
