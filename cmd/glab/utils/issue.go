@@ -3,7 +3,7 @@ package utils
 import "fmt"
 
 // PrintHelpIssue : display issue command help
-func PrintHelpIssue()  {
+func PrintHelpIssue() {
 
 	fmt.Println(`Issue Help`)
 
