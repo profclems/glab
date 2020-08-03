@@ -45,7 +45,7 @@ func displayIssue(hm *gitlab.Issue) {
 }
 
 func createIssue(cmdArgs map[string]string, _ map[int]string) {
-	l := &gitlab.CreateIssueOptions {}
+	l := &gitlab.CreateIssueOptions{}
 	reader := bufio.NewReader(os.Stdin)
 	var issueTitle string
 	var issueLabel string
@@ -99,7 +99,7 @@ func createIssue(cmdArgs map[string]string, _ map[int]string) {
 		l.MilestoneID = gitlab.Int(stringToInt(cmdArgs["milestone"]))
 	}
 	if CommandArgExists(cmdArgs, "resolved-by-merge-request") {
-		l.MergeRequestToResolveDiscussionsOf  = gitlab.Int(stringToInt(cmdArgs["resolved-by-merge"]))
+		l.MergeRequestToResolveDiscussionsOf = gitlab.Int(stringToInt(cmdArgs["resolved-by-merge"]))
 	}
 	if CommandArgExists(cmdArgs, "assigns") {
 		assignID := cmdArgs["assigns"]
@@ -128,7 +128,7 @@ func listIssues(cmdArgs map[string]string, _ map[int]string) {
 		state = "opened"
 	}
 
-	l := &gitlab.ListProjectIssuesOptions {
+	l := &gitlab.ListProjectIssuesOptions{
 		State: gitlab.String(state),
 	}
 	if CommandArgExists(cmdArgs, "label") || CommandArgExists(cmdArgs, "labels") {
@@ -269,15 +269,15 @@ func changeIssueState(cmdArgs map[string]string, arrFlags map[int]string) {
 // ExecIssue is exported
 func ExecIssue(cmdArgs map[string]string, arrCmd map[int]string) {
 	commandList := map[interface{}]func(map[string]string, map[int]string){
-		"create":             createIssue,
-		"list":               listIssues,
-		"ls":                 listIssues,
-		"delete":             deleteIssue,
-		"subscribe":          subscribeIssue,
-		"unsubscribe":        unsubscribeIssue,
-		"open":               changeIssueState,
-		"reopen":               changeIssueState,
-		"close":              changeIssueState,
+		"create":      createIssue,
+		"list":        listIssues,
+		"ls":          listIssues,
+		"delete":      deleteIssue,
+		"subscribe":   subscribeIssue,
+		"unsubscribe": unsubscribeIssue,
+		"open":        changeIssueState,
+		"reopen":      changeIssueState,
+		"close":       changeIssueState,
 	}
 	if _, ok := commandList[arrCmd[0]]; ok {
 		commandList[arrCmd[0]](cmdArgs, arrCmd)
