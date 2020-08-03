@@ -21,8 +21,6 @@ func displayMergeRequest(hm *gitlab.MergeRequest) {
 	}
 }
 
-
-
 func displayAllMergeRequests(m []*gitlab.MergeRequest) {
 	// initialize tabwriter
 	w := new(tabwriter.Writer)
@@ -180,10 +178,7 @@ func acceptMergeRequest(cmdArgs map[string]string, arrFlags map[int]string) {
 		l.SHA = gitlab.String(cmdArgs["sha"])
 	}
 	git, repo := InitGitlabClient()
-	mr, resp, err := git.MergeRequests.AcceptMergeRequest(repo, stringToInt(mergeID), l)
-	if err != nil {
-		log.Fatal(err)
-	}
+	mr, resp, _ := git.MergeRequests.AcceptMergeRequest(repo, stringToInt(mergeID), l)
 
 	fmt.Println(aurora.Yellow("Accepting Merge Request #" + mergeID + "..."))
 
@@ -210,16 +205,38 @@ func approveMergeRequest(cmdArgs map[string]string, arrFlags map[int]string) {
 
 	fmt.Println(aurora.Yellow("Approving Merge Request #" + mergeID + "..."))
 	git, repo := InitGitlabClient()
-	_, resp, err := git.MergeRequestApprovals.ApproveMergeRequest(repo, stringToInt(mergeID), l)
-	if err != nil {
-		log.Fatal(err)
+	_, resp, _ := git.MergeRequestApprovals.ApproveMergeRequest(repo, stringToInt(mergeID), l)
+	if resp != nil {
+		if resp.StatusCode == 201 {
+			fmt.Println(aurora.Green("Merge Request approved successfully"))
+		} else if resp.StatusCode == 405 {
+			fmt.Println("Merge request cannot be approved")
+		} else if resp.StatusCode == 401 {
+			fmt.Println("Merge request already approved or you don't have enough permission to approve this merge request")
+		} else {
+			fmt.Println(resp.Status)
+		}
+	} else {
+		fmt.Println(resp)
 	}
-	if resp.StatusCode == 200 {
-		fmt.Println(aurora.Green("Merge Request approved successfully"))
-	} else if resp.StatusCode == 405 {
-		fmt.Println("Merge request cannot be approved")
-	} else if resp.StatusCode == 401 {
-		fmt.Println("You don't have enough permission to approve this merge request")
+}
+
+func revokeMergeRequest(cmdArgs map[string]string, arrFlags map[int]string) {
+	mergeID := strings.Trim(arrFlags[1], " ")
+
+	fmt.Println(aurora.Yellow("Revoking approval for Merge Request #" + mergeID + "..."))
+	git, repo := InitGitlabClient()
+	resp, _ := git.MergeRequestApprovals.UnapproveMergeRequest(repo, stringToInt(mergeID))
+	if resp != nil {
+		if resp.StatusCode == 201 {
+			fmt.Println(aurora.Green("Merge Request approval revoked successfully"))
+		} else if resp.StatusCode == 405 {
+			fmt.Println("Merge request cannot be unapproved")
+		} else if resp.StatusCode == 401 {
+			fmt.Println("Merge request already unapproved or you don't have enough permission to unapprove this merge request")
+		} else {
+			fmt.Println(resp.Status)
+		}
 	} else {
 		fmt.Println(resp)
 	}
@@ -264,6 +281,26 @@ func issuesRelatedMergeRequest(cmdArgs map[string]string, arrFlags map[int]strin
 		log.Fatal(err)
 	}
 	displayAllIssues(mr)
+}
+
+func updateMergeRequest(cmdArgs map[string]string, arrFlags map[int]string) {
+	mergeID := strings.Trim(arrFlags[1], " ")
+	l := &gitlab.UpdateMergeRequestOptions {}
+	if CommandArgExists(cmdArgs, "title") {
+		l.Title = gitlab.String(cmdArgs["title"])
+	}
+	if CommandArgExists(cmdArgs, "lock-discussion") {
+		l.DiscussionLocked = gitlab.Bool(true)
+	}
+	if CommandArgExists(cmdArgs, "description") {
+		l.Description = gitlab.String(cmdArgs["description"])
+	}
+	git, repo := InitGitlabClient()
+	mr, _, err := git.MergeRequests.UpdateMergeRequest(repo, stringToInt(mergeID), l)
+	if err != nil {
+		log.Fatal(err)
+	}
+	displayMergeRequest(mr)
 }
 
 
@@ -356,10 +393,7 @@ func changeMergeRequestState(cmdArgs map[string]string, arrFlags map[int]string)
 		arrIds := strings.Split(strings.Trim(mergeID, "[] "), ",")
 		for _, i2 := range arrIds {
 			fmt.Println("Updating Merge request...")
-			mr, resp, err := git.MergeRequests.UpdateMergeRequest(repo, stringToInt(i2), l)
-			if err != nil {
-				log.Fatal(err)
-			}
+			mr, resp, _ := git.MergeRequests.UpdateMergeRequest(repo, stringToInt(i2), l)
 			if resp.StatusCode == 200 {
 				fmt.Println(aurora.Green("You have successfully updated merge request #" + i2))
 				displayMergeRequest(mr)
@@ -390,6 +424,8 @@ func ExecMergeRequest(cmdArgs map[string]string, arrCmd map[int]string) {
 		"reopen":      changeMergeRequestState,
 		"issues":      issuesRelatedMergeRequest,
 		"approve":     approveMergeRequest,
+		"revoke":      revokeMergeRequest,
+		"update":      updateMergeRequest,
 	}
 	if _, ok := commandList[arrCmd[0]]; ok {
 		commandList[arrCmd[0]](cmdArgs, arrCmd)
