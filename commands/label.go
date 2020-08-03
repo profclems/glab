@@ -39,7 +39,6 @@ func createLabel(cmdArgs map[string]string, _ map[int]string) {
 	log.Printf("Created label: %s\nWith color: %s\n", label.Name, label.Color)
 }
 
-
 func listLabels(cmdArgs map[string]string, _ map[int]string) {
 	git, repo := InitGitlabClient()
 	// List all labels
@@ -57,9 +56,9 @@ func listLabels(cmdArgs map[string]string, _ map[int]string) {
 // ExecRepo is ...
 func ExecLabel(cmdArgs map[string]string, arrCmd map[int]string) {
 	commandList := map[interface{}]func(map[string]string, map[int]string){
-		"create":      	createLabel,
-		"new":     		createLabel,
-		"list":        	listLabels,
+		"create": createLabel,
+		"new":    createLabel,
+		"list":   listLabels,
 	}
 	if _, ok := commandList[arrCmd[0]]; ok {
 		commandList[arrCmd[0]](cmdArgs, arrCmd)
@@ -67,4 +66,3 @@ func ExecLabel(cmdArgs map[string]string, arrCmd map[int]string) {
 		fmt.Println(arrCmd[0]+":", "Invalid Command")
 	}
 }
-
