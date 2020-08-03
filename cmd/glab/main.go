@@ -1,7 +1,9 @@
 package main
 
 import (
+	"fmt"
 	"glab"
+	"glab/commands"
 	"os"
 	"strings"
 )
@@ -35,7 +37,10 @@ func main() {
 			arrCmd[(i - 1)] = sp[0]
 		}
 	}
-
+	// Set Global Env Path
+	commands.SetGlobalPathDir()
+	fmt.Println() //Upper Space
 	// Execute Command
 	glab.Exec(cmd, arr, arrCmd)
+	fmt.Println() //ending space
 }

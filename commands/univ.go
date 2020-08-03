@@ -4,14 +4,17 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
+	"github.com/tcnksm/go-gitconfig"
+	"github.com/xanzy/go-gitlab"
 	"io"
 	"io/ioutil"
 	"log"
 	"math"
 	"net/http"
 	"os"
-	"path/filepath"
+	"os/user"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -19,12 +22,51 @@ import (
 var (
 	// UseGlobalConfig : use the global configuration file
 	UseGlobalConfig         bool
-	globalPathDir, _        = filepath.Abs(filepath.Dir(os.Args[0]))
+	globalPathDir        	= ""
 	configFileFileParentDir = ".glab-cli"
 	configFileFileDir       = configFileFileParentDir + "/config"
 	configFile              = configFileFileDir + "/.env"
-	globalConfigFile        = globalPathDir + "/" + configFileFileDir + "/.env"
+	globalConfigFile        = configFile
 )
+
+func SetGlobalPathDir() string  {
+	usr, err := user.Current()
+	if err != nil {
+		log.Fatal( err )
+	}
+	globalPathDir = usr.HomeDir
+	globalConfigFile  = globalPathDir + "/" + globalConfigFile
+	return globalPathDir
+}
+
+func getRepo() string {
+	gitlab, err := gitconfig.Entire("remote."+GetEnv("GIT_REMOTE_URL_VAR")+".url")
+	if err != nil {
+		log.Fatal("Could not find remote url for gitlab")
+	}
+	repoBaseUrl := strings.Trim(GetEnv("GITLAB_URI"), "/ ")
+	repoBaseUrl = strings.TrimPrefix(repoBaseUrl, "https://")
+	repoBaseUrl = strings.TrimPrefix(repoBaseUrl, "http://")
+	repo :=  strings.TrimSuffix(gitlab, ".git")
+	repo = strings.TrimPrefix(repo, repoBaseUrl)
+	repo = strings.TrimPrefix(repo, "https://"+repoBaseUrl)
+	repo = strings.TrimPrefix(repo, "http://"+repoBaseUrl)
+	repo = strings.TrimPrefix(repo, "git@"+repoBaseUrl+":")
+	return strings.Trim(repo, "/")
+}
+
+// InitGitlabClient : creates client
+func InitGitlabClient() (*gitlab.Client, string)  {
+	git, err := gitlab.NewClient(GetEnv("GITLAB_TOKEN"), gitlab.WithBaseURL(strings.TrimRight(GetEnv("GITLAB_URI"),"/") + "/api/v4"))
+	if err != nil {
+		log.Fatalf("Failed to create client: %v", err)
+	}
+	return git, getRepo()
+}
+
+func VariableExists(key string) string  {
+	return GetKeyValueInFile(configFile, key)
+}
 
 // GetEnv : returns env variable value
 func GetEnv(key string) string {
@@ -148,13 +190,20 @@ func CommandArgExists(mapArr map[string]string, key string) bool {
 	return false
 }
 
+func stringToInt(str string) int {
+	strInt, err := strconv.Atoi(str)
+	if err != nil {
+		return 0
+	}
+	return strInt
+}
+
 // TimeAgo is ...
-func TimeAgo(timeVal interface{}) string {
+func TimeAgo(timeVal time.Time) string {
 	//now := time.Now().Format(time.RFC3339)
 	layout := "2006-01-02T15:04:05.000Z"
-	then, _ := time.Parse(layout, timeVal.(string))
+	then, _ := time.Parse(layout, timeVal.Format("2006-01-02T15:04:05.000Z"))
 	totalSeconds := time.Since(then).Seconds()
-
 	if totalSeconds < 60 {
 		if totalSeconds < 1 {
 			totalSeconds = 0

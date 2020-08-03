@@ -2,17 +2,16 @@ package commands
 
 import (
 	"bufio"
-	"encoding/json"
 	"fmt"
 	"github.com/logrusorgru/aurora"
+	"github.com/xanzy/go-gitlab"
 	"log"
-	"net/url"
 	"os"
 	"strings"
 	"text/tabwriter"
 )
 
-func displayMultipleIssues(m []interface{}) {
+func displayAllIssues(m []*gitlab.Issue) {
 	// initialize tabwriter
 	w := new(tabwriter.Writer)
 
@@ -21,32 +20,32 @@ func displayMultipleIssues(m []interface{}) {
 
 	defer w.Flush()
 	if len(m) > 0 {
-		fmt.Printf("Showing issues %d of %d on %s\n\n", len(m), len(m), GetEnv("GITLAB_REPO"))
-		for i := 0; i < len(m); i++ {
-			hm := m[i].(map[string]interface{})
-			labels := hm["labels"]
-			duration := TimeAgo(hm["created_at"])
-			if hm["state"] == "opened" {
-				_, _ = fmt.Fprintln(w, aurora.Green(fmt.Sprint("#", hm["iid"])), "\t", hm["title"], "\t", aurora.Magenta(labels), "\t", aurora.Magenta(duration))
+		fmt.Printf("Showing issues %d of %d on %s\n\n", len(m), len(m), getRepo())
+		for _, issue := range m {
+			labels := issue.Labels
+			duration := TimeAgo(*issue.CreatedAt)
+			if issue.State == "opened" {
+				_, _ = fmt.Fprintln(w, aurora.Green(fmt.Sprint("#", issue.IID)), "\t", issue.Title, "\t", aurora.Magenta(labels), "\t", aurora.Magenta(duration))
 			} else {
-				_, _ = fmt.Fprintln(w, aurora.Red(fmt.Sprint("#", hm["iid"])), "\t", hm["title"], "\t", aurora.Magenta(labels), "\t", aurora.Magenta(duration))
+				_, _ = fmt.Fprintln(w, aurora.Red(fmt.Sprint("#", issue.IID)), "\t", issue.Title, "\t", aurora.Magenta(labels), "\t", aurora.Magenta(duration))
 			}
 		}
 	} else {
-		fmt.Println("No Issues available on " + GetEnv("GITLAB_REPO"))
+		fmt.Println("No Issues available on " + getRepo())
 	}
 }
 
-func displayIssue(hm map[string]interface{}) {
-	duration := TimeAgo(hm["created_at"])
-	if hm["state"] == "opened" {
-		fmt.Println(aurora.Green(fmt.Sprint("#", hm["iid"])), hm["title"], aurora.Magenta(duration))
+func displayIssue(hm *gitlab.Issue) {
+	duration := TimeAgo(*hm.CreatedAt)
+	if hm.State == "opened" {
+		fmt.Println(aurora.Green(fmt.Sprint("#", hm.IID)), hm.Title, aurora.Magenta(duration))
 	} else {
-		fmt.Println(aurora.Red(fmt.Sprint("#", hm["iid"])), hm["title"], aurora.Magenta(duration))
+		fmt.Println(aurora.Red(fmt.Sprint("#", hm.IID)), hm.Title, aurora.Magenta(duration))
 	}
 }
 
 func createIssue(cmdArgs map[string]string, _ map[int]string) {
+	l := &gitlab.CreateIssueOptions {}
 	reader := bufio.NewReader(os.Stdin)
 	var issueTitle string
 	var issueLabel string
@@ -82,123 +81,99 @@ func createIssue(cmdArgs map[string]string, _ map[int]string) {
 	}
 	fmt.Print(aurora.Cyan("Due Date"))
 	fmt.Print(aurora.Yellow("(Format: YYYY-MM-DD)" + "\n" + "-> "))
-	issueDue, _ := reader.ReadString('\n')
-	params := url.Values{}
-	params.Add("title", issueTitle)
-	params.Add("description", issueDescription)
-	params.Add("labels", issueLabel)
-	params.Add("due_date", issueDue)
+	//issueDue, _ := reader.ReadString('\n')
+	l.Title = gitlab.String(issueTitle)
+	l.Labels = &gitlab.Labels{issueLabel}
+	l.Description = &issueDescription
+	l.DueDate = &gitlab.ISOTime{}
 	if CommandArgExists(cmdArgs, "confidential") {
-		params.Add("confidential", "true")
+		l.Confidential = gitlab.Bool(true)
 	}
 	if CommandArgExists(cmdArgs, "weight") {
-		params.Add("weight", cmdArgs["weight"])
+		l.Weight = gitlab.Int(stringToInt(cmdArgs["weight"]))
 	}
 	if CommandArgExists(cmdArgs, "mr") {
-		params.Add("merge_request_to_resolve_discussions_of", cmdArgs["mr"])
+		l.MergeRequestToResolveDiscussionsOf = gitlab.Int(stringToInt(cmdArgs["mr"]))
 	}
 	if CommandArgExists(cmdArgs, "milestone") {
-		params.Add("milestone_id", cmdArgs["milestone"])
-	}
-	if CommandArgExists(cmdArgs, "epic") {
-		params.Add("epic_id", cmdArgs["epic"])
+		l.MilestoneID = gitlab.Int(stringToInt(cmdArgs["milestone"]))
 	}
 	if CommandArgExists(cmdArgs, "resolved-by-merge-request") {
-		params.Add("merge_request_to_resolve_discussions_of", cmdArgs["resolved-by-merge"])
+		l.MergeRequestToResolveDiscussionsOf  = gitlab.Int(stringToInt(cmdArgs["resolved-by-merge"]))
 	}
 	if CommandArgExists(cmdArgs, "assigns") {
-		params.Add("epic_id", cmdArgs["epic"])
 		assignID := cmdArgs["assigns"]
 		arrIds := strings.Split(strings.Trim(assignID, "[] "), ",")
-		for _, i2 := range arrIds {
-			params.Add("assignee_ids[]", i2)
+		var t2 []int
+
+		for _, i := range arrIds {
+			j := stringToInt(i)
+			t2 = append(t2, j)
 		}
+		l.AssigneeIDs = t2
 	}
-
-	reqBody := params.Encode()
-	fmt.Println(aurora.Yellow("Creating Issue {" + issueTitle + "}..."))
-	resp := MakeRequest(reqBody, "projects/"+GetEnv("GITLAB_PROJECT_ID")+"/issues", "POST")
-
-	if resp["responseCode"] == 201 {
-		bodyString := resp["responseMessage"]
-
-		fmt.Println(aurora.Green("Issue created successfully"))
-		if _, ok := bodyString.(string); ok {
-			/* act on str */
-			m := make(map[string]interface{})
-			err := json.Unmarshal([]byte(bodyString.(string)), &m)
-			if err != nil {
-				log.Fatal(err)
-			}
-
-			displayIssue(m)
-			fmt.Println()
-		}
+	git, repo := InitGitlabClient()
+	issue, _, err := git.Issues.CreateIssue(repo, l)
+	if err != nil {
+		log.Fatal(err)
 	}
+	displayIssue(issue)
 }
 
 func listIssues(cmdArgs map[string]string, _ map[int]string) {
-	var queryStrings = "state="
-	if CommandArgExists(cmdArgs, "all") {
-		queryStrings = ""
-	} else if CommandArgExists(cmdArgs, "closed") {
-		queryStrings += "closed&"
+	var state = "all"
+	if CommandArgExists(cmdArgs, "closed") {
+		state = "closed"
 	} else {
-		queryStrings += "opened&"
+		state = "opened"
+	}
+
+	l := &gitlab.ListProjectIssuesOptions {
+		State: gitlab.String(state),
 	}
 	if CommandArgExists(cmdArgs, "label") || CommandArgExists(cmdArgs, "labels") {
-		queryStrings += "labels=" + cmdArgs["label"] + "&"
+		label := gitlab.Labels{
+			cmdArgs["label"],
+		}
+		l.Labels = label
 	}
 	if CommandArgExists(cmdArgs, "milestone") {
-		queryStrings += "milestone=" + cmdArgs["milestone"] + "&"
+		l.Milestone = gitlab.String(cmdArgs["milestone"])
 	}
 	if CommandArgExists(cmdArgs, "confidential") {
-		queryStrings += "confidential=" + cmdArgs["confidential"]
-	}
-	queryStrings = strings.Trim(queryStrings, "& ")
-	if len(queryStrings) > 0 {
-		queryStrings = "?" + queryStrings
-	}
-	resp := MakeRequest("{}", "projects/"+GetEnv("GITLAB_PROJECT_ID")+"/issues"+queryStrings, "GET")
-	//fmt.Println(resp)
-	if resp["responseCode"] == 200 {
-		bodyString := resp["responseMessage"]
-		if _, ok := bodyString.(string); ok {
-			/* act on str */
-			var m []interface{}
-			err := json.Unmarshal([]byte(bodyString.(string)), &m)
-			if err != nil {
-				log.Fatal(err)
-			}
-			fmt.Println()
-
-			displayMultipleIssues(m)
-			fmt.Println()
-
+		var confidential bool
+		if cmdArgs["confidential"] == "true" {
+			confidential = true
 		}
-	} else {
-		fmt.Println(resp["responseCode"], resp["responseMessage"])
+		l.Confidential = gitlab.Bool(confidential)
 	}
+
+	git, repo := InitGitlabClient()
+	// Create new label
+	issues, _, err := git.Issues.ListProjectIssues(repo, l)
+	if err != nil {
+		log.Fatal(err)
+	}
+	displayAllIssues(issues)
+
 }
 
 func deleteIssue(cmdArgs map[string]string, arrFlags map[int]string) {
 	issueID := strings.Trim(arrFlags[1], " ")
+	git, repo := InitGitlabClient()
+
 	if CommandArgExists(cmdArgs, issueID) {
 		arrIds := strings.Split(strings.Trim(issueID, "[] "), ",")
 		for _, i2 := range arrIds {
 			fmt.Println("Deleting Issue #" + i2)
-			queryStrings := "/" + i2
-			resp := MakeRequest("{}", "projects/"+GetEnv("GITLAB_PROJECT_ID")+"/issues"+queryStrings, "DELETE")
-			if resp["responseCode"] == 204 {
-				bodyString := resp["responseMessage"]
-				fmt.Println(bodyString)
+			issue, _ := git.Issues.DeleteIssue(repo, stringToInt(i2))
+			if issue.StatusCode == 204 {
 				fmt.Println(aurora.Green("Issue Deleted Successfully"))
-			} else if resp["responseCode"] == 404 {
+			} else if issue.StatusCode == 404 {
 				fmt.Println(aurora.Red("Issue does not exist"))
 			} else {
 				fmt.Println(aurora.Red("Could not complete request."))
 			}
-			fmt.Println()
 		}
 	} else {
 		fmt.Println(aurora.Red("Invalid command"))
@@ -208,22 +183,23 @@ func deleteIssue(cmdArgs map[string]string, arrFlags map[int]string) {
 
 func subscribeIssue(cmdArgs map[string]string, arrFlags map[int]string) {
 	mergeID := strings.Trim(arrFlags[1], " ")
+	git, repo := InitGitlabClient()
 	if CommandArgExists(cmdArgs, mergeID) {
 		arrIds := strings.Split(strings.Trim(mergeID, "[] "), ",")
 		for _, i2 := range arrIds {
 			fmt.Println("Subscribing Issue #" + i2)
-			queryStrings := "/" + i2 + "/subscribe"
-			resp := MakeRequest("{}", "projects/"+GetEnv("GITLAB_PROJECT_ID")+"/issues"+queryStrings, "POST")
-			if resp["responseCode"] == 204 {
-				bodyString := resp["responseMessage"]
+			issue, resp, _ := git.Issues.SubscribeToIssue(repo, stringToInt(i2), nil)
+
+			if resp.StatusCode == 204 {
+				bodyString := resp.Body
 				fmt.Println(bodyString)
 				fmt.Println(aurora.Green("You have successfully subscribe to issue #" + i2))
-			} else if resp["responseCode"] == 404 {
+				displayIssue(issue)
+			} else if resp.StatusCode == 404 {
 				fmt.Println(aurora.Red("Issue does not exist"))
 			} else {
-				fmt.Println(aurora.Red("Could not complete request."))
+				fmt.Println(aurora.Red("Could not complete request."), resp.Status)
 			}
-			fmt.Println()
 		}
 	} else {
 		fmt.Println(aurora.Red("Invalid command"))
@@ -233,22 +209,23 @@ func subscribeIssue(cmdArgs map[string]string, arrFlags map[int]string) {
 
 func unsubscribeIssue(cmdArgs map[string]string, arrFlags map[int]string) {
 	mergeID := strings.Trim(arrFlags[1], " ")
+	git, repo := InitGitlabClient()
 	if CommandArgExists(cmdArgs, mergeID) {
 		arrIds := strings.Split(strings.Trim(mergeID, "[] "), ",")
 		for _, i2 := range arrIds {
 			fmt.Println("Unsubscribing Issue #" + i2)
-			queryStrings := "/" + i2 + "/unsubscribe"
-			resp := MakeRequest("{}", "projects/"+GetEnv("GITLAB_PROJECT_ID")+"/issues"+queryStrings, "POST")
-			if resp["responseCode"] == 204 {
-				bodyString := resp["responseMessage"]
+			issue, resp, _ := git.Issues.UnsubscribeFromIssue(repo, stringToInt(i2))
+
+			if resp.StatusCode == 204 {
+				bodyString := resp.Body
 				fmt.Println(bodyString)
 				fmt.Println(aurora.Green("You have successfully unsubscribe to issue #" + i2))
-			} else if resp["responseCode"] == 404 {
+				displayIssue(issue)
+			} else if resp.StatusCode == 404 {
 				fmt.Println(aurora.Red("Issue does not exist"))
 			} else {
-				fmt.Println(aurora.Red("Could not complete request."))
+				fmt.Println(aurora.Red("Could not complete request."), resp.Status)
 			}
-			fmt.Println()
 		}
 	} else {
 		fmt.Println(aurora.Red("Invalid command"))
@@ -258,35 +235,30 @@ func unsubscribeIssue(cmdArgs map[string]string, arrFlags map[int]string) {
 
 func changeIssueState(cmdArgs map[string]string, arrFlags map[int]string) {
 	issueID := strings.Trim(arrFlags[1], " ")
+	git, repo := InitGitlabClient()
 	if CommandArgExists(cmdArgs, issueID) {
 		reqType := arrFlags[0]
-		params := url.Values{}
-		issueMessage := ""
+		l := &gitlab.UpdateIssueOptions{}
 		if reqType == "close" {
-			params.Add("state_event", "close")
-			issueMessage = "closed"
-		} else if reqType == "link-merge-request" || reqType == "mr" || reqType == "link-mr" {
-			params.Add("merge_request_to_resolve_discussions_of", cmdArgs[arrFlags[2]])
-			params.Add("add_labels", "")
-			issueMessage = "linked"
+			l.StateEvent = gitlab.String("close")
 		} else {
-			params.Add("state_event", "reopen")
-			issueMessage = "opened"
+			l.StateEvent = gitlab.String("reopen")
 		}
 		arrIds := strings.Split(strings.Trim(issueID, "[] "), ",")
-		reqBody := params.Encode()
 		for _, i2 := range arrIds {
-			fmt.Println("...")
-			resp := MakeRequest(reqBody, "projects/"+GetEnv("GITLAB_PROJECT_ID")+"/issues/"+i2, "PUT")
-			if resp["responseCode"] == 200 {
-				fmt.Println(aurora.Green("You have successfully " + issueMessage + " to issue with id #" + i2))
-			} else if resp["responseCode"] == 404 {
+			fmt.Println("Updating Issue")
+			issue, resp, err := git.Issues.UpdateIssue(repo, stringToInt(i2), l)
+			if err != nil {
+				log.Fatal(err)
+			}
+			if resp.StatusCode == 200 {
+				fmt.Println(aurora.Green("You have successfully updated issue #" + i2))
+				displayIssue(issue)
+			} else if resp.StatusCode == 404 {
 				fmt.Println(aurora.Red("Issue does not exist"))
 			} else {
-				fmt.Println("Could not complete request")
-				fmt.Println(resp["responseCode"], resp["responseMessage"])
+				fmt.Println("Could not complete request: ", resp)
 			}
-			fmt.Println()
 		}
 	} else {
 		fmt.Println(aurora.Red("Invalid command"))
@@ -304,10 +276,8 @@ func ExecIssue(cmdArgs map[string]string, arrCmd map[int]string) {
 		"subscribe":          subscribeIssue,
 		"unsubscribe":        unsubscribeIssue,
 		"open":               changeIssueState,
+		"reopen":               changeIssueState,
 		"close":              changeIssueState,
-		"mr":                 changeIssueState,
-		"link-mr":            changeIssueState,
-		"link-merge-request": changeIssueState,
 	}
 	if _, ok := commandList[arrCmd[0]]; ok {
 		commandList[arrCmd[0]](cmdArgs, arrCmd)

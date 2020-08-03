@@ -25,14 +25,6 @@ func printVersion(_ map[string]string, _ map[int]string) {
 	fmt.Println()
 }
 
-func issue(cmdArgs map[string]string, arrCmd map[int]string) {
-	commands.ExecIssue(cmdArgs, arrCmd)
-}
-
-func mergeRequest(cmdArgs map[string]string, arrCmd map[int]string) {
-	commands.ExecMergeRequest(cmdArgs, arrCmd)
-}
-
 // Help is exported
 func Help(args map[string]string, arrCmd map[int]string) {
 	utils.PrintHelpHelp()
@@ -45,12 +37,24 @@ func config(cmdArgs map[string]string, arrCmd map[int]string) {
 		"token": "GITLAB_TOKEN",
 		"repo":  "GITLAB_REPO",
 		"pid":   "GITLAB_PROJECT_ID",
+		"remote-var":   "GIT_REMOTE_URL_VAR",
+		"origin":   "GIT_REMOTE_URL_VAR",
+		"origin-var":   "GIT_REMOTE_URL_VAR",
 	}
-	isUpdated := false
+
+	commands.UseGlobalConfig = true
+	if commands.VariableExists("GITLAB_URI")=="NOTFOUND" || commands.VariableExists("GITLAB_URI")=="OK" {
+		commands.SetEnv("GITLAB_URI", "https://gitlab.com")
+	}
+	if commands.VariableExists("GIT_REMOTE_URL_VAR")=="NOTFOUND" || commands.VariableExists("GIT_REMOTE_URL_VAR")=="OK" {
+		commands.SetEnv("GIT_REMOTE_URL_VAR", "origin")
+	}
+	commands.UseGlobalConfig = false
+
+	var isUpdated bool
 	if arrCmd[0] == "global" {
 		commands.UseGlobalConfig = true
 	}
-	fmt.Println() //Upper Space
 	for i := 0; i < len(arrCmd); i++ {
 		if commands.CommandArgExists(cmdArgs, arrCmd[i]) && commands.CommandArgExists(cmdHelpList, arrCmd[i]) {
 			commands.SetEnv(cmdHelpList[arrCmd[i]], cmdArgs[arrCmd[i]])
@@ -65,14 +69,14 @@ func config(cmdArgs map[string]string, arrCmd map[int]string) {
 	if isUpdated {
 		fmt.Println(aurora.Green("Environment variable(s) updated"))
 	}
-	fmt.Println() //ending space
 }
 
 // Exec is exported
 func Exec(cmd string, cmdArgs map[string]string, arrCmd map[int]string) {
-	commandList := map[string]func(map[string]string, map[int]string){
-		"issue":     issue,
-		"mr":        mergeRequest,
+	commandList := map[string]func(map[string]string, map[int]string) {
+		"issue":     commands.ExecIssue,
+		"mr":        commands.ExecMergeRequest,
+		"label":     commands.ExecLabel,
 		"help":      Help,
 		"config":    config,
 		"version":   printVersion,
@@ -87,13 +91,12 @@ func Exec(cmd string, cmdArgs map[string]string, arrCmd map[int]string) {
 
 		if len(cmdArgs) > 0 {
 			if cmdArgs["help"] == "true" {
-				cmdHelpList := map[string]func(){
+				cmdHelpList := map[string]func() {
 					"help":  utils.PrintHelpHelp,
 					"issue": utils.PrintHelpIssue,
 					"mr":    utils.PrintHelpMr,
 					"repo":  utils.PrintHelpRepo,
 				}
-				//OpenFile("./utils/"+cmd+".txt")
 				cmdHelpList[cmd]()
 			}
 		}
