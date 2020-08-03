@@ -285,7 +285,7 @@ func issuesRelatedMergeRequest(cmdArgs map[string]string, arrFlags map[int]strin
 
 func updateMergeRequest(cmdArgs map[string]string, arrFlags map[int]string) {
 	mergeID := strings.Trim(arrFlags[1], " ")
-	l := &gitlab.UpdateMergeRequestOptions {}
+	l := &gitlab.UpdateMergeRequestOptions{}
 	if CommandArgExists(cmdArgs, "title") {
 		l.Title = gitlab.String(cmdArgs["title"])
 	}
