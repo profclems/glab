@@ -22,32 +22,32 @@ import (
 var (
 	// UseGlobalConfig : use the global configuration file
 	UseGlobalConfig         bool
-	globalPathDir        	= ""
+	globalPathDir           = ""
 	configFileFileParentDir = ".glab-cli"
 	configFileFileDir       = configFileFileParentDir + "/config"
 	configFile              = configFileFileDir + "/.env"
 	globalConfigFile        = configFile
 )
 
-func SetGlobalPathDir() string  {
+func SetGlobalPathDir() string {
 	usr, err := user.Current()
 	if err != nil {
-		log.Fatal( err )
+		log.Fatal(err)
 	}
 	globalPathDir = usr.HomeDir
-	globalConfigFile  = globalPathDir + "/" + globalConfigFile
+	globalConfigFile = globalPathDir + "/" + globalConfigFile
 	return globalPathDir
 }
 
 func getRepo() string {
-	gitlab, err := gitconfig.Entire("remote."+GetEnv("GIT_REMOTE_URL_VAR")+".url")
+	gitlab, err := gitconfig.Entire("remote." + GetEnv("GIT_REMOTE_URL_VAR") + ".url")
 	if err != nil {
 		log.Fatal("Could not find remote url for gitlab")
 	}
 	repoBaseUrl := strings.Trim(GetEnv("GITLAB_URI"), "/ ")
 	repoBaseUrl = strings.TrimPrefix(repoBaseUrl, "https://")
 	repoBaseUrl = strings.TrimPrefix(repoBaseUrl, "http://")
-	repo :=  strings.TrimSuffix(gitlab, ".git")
+	repo := strings.TrimSuffix(gitlab, ".git")
 	repo = strings.TrimPrefix(repo, repoBaseUrl)
 	repo = strings.TrimPrefix(repo, "https://"+repoBaseUrl)
 	repo = strings.TrimPrefix(repo, "http://"+repoBaseUrl)
@@ -56,15 +56,15 @@ func getRepo() string {
 }
 
 // InitGitlabClient : creates client
-func InitGitlabClient() (*gitlab.Client, string)  {
-	git, err := gitlab.NewClient(GetEnv("GITLAB_TOKEN"), gitlab.WithBaseURL(strings.TrimRight(GetEnv("GITLAB_URI"),"/") + "/api/v4"))
+func InitGitlabClient() (*gitlab.Client, string) {
+	git, err := gitlab.NewClient(GetEnv("GITLAB_TOKEN"), gitlab.WithBaseURL(strings.TrimRight(GetEnv("GITLAB_URI"), "/")+"/api/v4"))
 	if err != nil {
 		log.Fatalf("Failed to create client: %v", err)
 	}
 	return git, getRepo()
 }
 
-func VariableExists(key string) string  {
+func VariableExists(key string) string {
 	return GetKeyValueInFile(configFile, key)
 }
 

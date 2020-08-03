@@ -32,21 +32,21 @@ func Help(args map[string]string, arrCmd map[int]string) {
 
 func config(cmdArgs map[string]string, arrCmd map[int]string) {
 	cmdHelpList := map[string]string{
-		"uri":   "GITLAB_URI",
-		"url":   "GITLAB_URI",
-		"token": "GITLAB_TOKEN",
-		"repo":  "GITLAB_REPO",
-		"pid":   "GITLAB_PROJECT_ID",
-		"remote-var":   "GIT_REMOTE_URL_VAR",
-		"origin":   "GIT_REMOTE_URL_VAR",
-		"origin-var":   "GIT_REMOTE_URL_VAR",
+		"uri":        "GITLAB_URI",
+		"url":        "GITLAB_URI",
+		"token":      "GITLAB_TOKEN",
+		"repo":       "GITLAB_REPO",
+		"pid":        "GITLAB_PROJECT_ID",
+		"remote-var": "GIT_REMOTE_URL_VAR",
+		"origin":     "GIT_REMOTE_URL_VAR",
+		"origin-var": "GIT_REMOTE_URL_VAR",
 	}
 
 	commands.UseGlobalConfig = true
-	if commands.VariableExists("GITLAB_URI")=="NOTFOUND" || commands.VariableExists("GITLAB_URI")=="OK" {
+	if commands.VariableExists("GITLAB_URI") == "NOTFOUND" || commands.VariableExists("GITLAB_URI") == "OK" {
 		commands.SetEnv("GITLAB_URI", "https://gitlab.com")
 	}
-	if commands.VariableExists("GIT_REMOTE_URL_VAR")=="NOTFOUND" || commands.VariableExists("GIT_REMOTE_URL_VAR")=="OK" {
+	if commands.VariableExists("GIT_REMOTE_URL_VAR") == "NOTFOUND" || commands.VariableExists("GIT_REMOTE_URL_VAR") == "OK" {
 		commands.SetEnv("GIT_REMOTE_URL_VAR", "origin")
 	}
 	commands.UseGlobalConfig = false
@@ -73,7 +73,7 @@ func config(cmdArgs map[string]string, arrCmd map[int]string) {
 
 // Exec is exported
 func Exec(cmd string, cmdArgs map[string]string, arrCmd map[int]string) {
-	commandList := map[string]func(map[string]string, map[int]string) {
+	commandList := map[string]func(map[string]string, map[int]string){
 		"issue":     commands.ExecIssue,
 		"mr":        commands.ExecMergeRequest,
 		"label":     commands.ExecLabel,
@@ -91,7 +91,7 @@ func Exec(cmd string, cmdArgs map[string]string, arrCmd map[int]string) {
 
 		if len(cmdArgs) > 0 {
 			if cmdArgs["help"] == "true" {
-				cmdHelpList := map[string]func() {
+				cmdHelpList := map[string]func(){
 					"help":  utils.PrintHelpHelp,
 					"issue": utils.PrintHelpIssue,
 					"mr":    utils.PrintHelpMr,

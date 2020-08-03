@@ -21,8 +21,6 @@ func displayMergeRequest(hm *gitlab.MergeRequest) {
 	}
 }
 
-
-
 func displayAllMergeRequests(m []*gitlab.MergeRequest) {
 	// initialize tabwriter
 	w := new(tabwriter.Writer)
@@ -48,7 +46,7 @@ func displayAllMergeRequests(m []*gitlab.MergeRequest) {
 }
 
 func createMergeRequest(cmdArgs map[string]string, _ map[int]string) {
-	l := &gitlab.CreateMergeRequestOptions {}
+	l := &gitlab.CreateMergeRequestOptions{}
 	reader := bufio.NewReader(os.Stdin)
 	var sourceBranch string
 	var targetBranch string
@@ -136,13 +134,13 @@ func createMergeRequest(cmdArgs map[string]string, _ map[int]string) {
 	git, repo := InitGitlabClient()
 	if CommandArgExists(cmdArgs, "create-branch") {
 		lb := &gitlab.CreateBranchOptions{
-			Branch:  gitlab.String(sourceBranch),
-			Ref: gitlab.String(targetBranch),
+			Branch: gitlab.String(sourceBranch),
+			Ref:    gitlab.String(targetBranch),
 		}
 		fmt.Println("Creating related branch...")
 		branch, resp, _ := git.Branches.CreateBranch(repo, lb)
 		if resp.StatusCode == 201 {
-			fmt.Println("Branch created: ",branch.WebURL)
+			fmt.Println("Branch created: ", branch.WebURL)
 		} else {
 			fmt.Println("Error creating branch: ", resp.Status)
 		}
@@ -233,7 +231,7 @@ func listMergeRequests(cmdArgs map[string]string, _ map[int]string) {
 		state = "opened"
 	}
 
-	l := &gitlab.ListProjectMergeRequestsOptions {
+	l := &gitlab.ListProjectMergeRequestsOptions{
 		State: gitlab.String(state),
 	}
 	if CommandArgExists(cmdArgs, "label") || CommandArgExists(cmdArgs, "labels") {
@@ -257,7 +255,7 @@ func listMergeRequests(cmdArgs map[string]string, _ map[int]string) {
 
 func issuesRelatedMergeRequest(cmdArgs map[string]string, arrFlags map[int]string) {
 	mergeID := strings.Trim(arrFlags[1], " ")
-	l := &gitlab.GetIssuesClosedOnMergeOptions {}
+	l := &gitlab.GetIssuesClosedOnMergeOptions{}
 	git, repo := InitGitlabClient()
 	mr, _, err := git.MergeRequests.GetIssuesClosedOnMerge(repo, stringToInt(mergeID), l)
 	if err != nil {
@@ -265,7 +263,6 @@ func issuesRelatedMergeRequest(cmdArgs map[string]string, arrFlags map[int]strin
 	}
 	displayAllIssues(mr)
 }
-
 
 func deleteMergeRequest(cmdArgs map[string]string, arrFlags map[int]string) {
 	mergeID := strings.Trim(arrFlags[1], " ")
