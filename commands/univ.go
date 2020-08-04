@@ -17,22 +17,23 @@ import (
 )
 
 var (
+	// UseGlobalConfig : use the global configuration file
 	UseGlobalConfig         bool
-	GlobalPathDir, _        = filepath.Abs(filepath.Dir(os.Args[0]))
-	ConfigFileFileParentDir = ".glab-cli"
-	ConfigFileFileDir       = ConfigFileFileParentDir + "/config"
-	ConfigFile              = ConfigFileFileDir + "/.env"
-	GlobalConfigFile        = GlobalPathDir + "/" + ConfigFileFileDir + "/.env"
+	globalPathDir, _        = filepath.Abs(filepath.Dir(os.Args[0]))
+	configFileFileParentDir = ".glab-cli"
+	configFileFileDir       = configFileFileParentDir + "/config"
+	configFile              = configFileFileDir + "/.env"
+	globalConfigFile        = globalPathDir + "/" + configFileFileDir + "/.env"
 )
 
+// GetEnv : returns env variable value
 func GetEnv(key string) string {
 	env := os.Getenv(key)
-	// load .env file
 
 	if len(env) == 0 {
-		env = GetKeyValueInFile(ConfigFile, key)
+		env = GetKeyValueInFile(configFile, key)
 		if env == "NOTFOUND" || env == "OK" {
-			env = GetKeyValueInFile(GlobalConfigFile, key)
+			env = GetKeyValueInFile(globalConfigFile, key)
 			if env == "NOTFOUND" || env == "OK" {
 				log.Fatal("Configuration not set for ", key)
 			}
@@ -41,14 +42,15 @@ func GetEnv(key string) string {
 	return env
 }
 
+// SetEnv : sets env variable
 func SetEnv(key, value string) {
-	cFile := ConfigFile
-	cFileFileParentDir := ConfigFileFileParentDir
-	cFileDir := ConfigFileFileDir
+	cFile := configFile
+	cFileFileParentDir := configFileFileParentDir
+	cFileDir := configFileFileDir
 	if UseGlobalConfig {
-		cFileFileParentDir = GlobalPathDir + "/" + cFileFileParentDir
-		cFileDir = GlobalPathDir + "/" + ConfigFileFileDir
-		cFile = GlobalConfigFile
+		cFileFileParentDir = globalPathDir + "/" + cFileFileParentDir
+		cFileDir = globalPathDir + "/" + configFileFileDir
+		cFile = globalConfigFile
 	}
 	data, _ := ioutil.ReadFile(cFile)
 
@@ -79,11 +81,12 @@ func SetEnv(key, value string) {
 	w := bufio.NewWriter(f)
 	_, _ = w.WriteString(strings.Trim(newData, "\n"))
 	_ = w.Flush()
-	if GetKeyValueInFile(".gitignore", ConfigFileFileParentDir) == "NOTFOUND" {
-		ReadAndAppend(".gitignore", ConfigFileFileParentDir)
+	if GetKeyValueInFile(".gitignore", configFileFileParentDir) == "NOTFOUND" {
+		ReadAndAppend(".gitignore", configFileFileParentDir)
 	}
 }
 
+// ReadAndAppend : appends string to file
 func ReadAndAppend(file, text string) {
 	// If the file doesn't exist, create it, or append to the file
 	f, err := os.OpenFile(file, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
@@ -98,6 +101,7 @@ func ReadAndAppend(file, text string) {
 	}
 }
 
+// ReplaceNonAlphaNumericChars : Replaces non alpha-numeric values with provided char/string
 func ReplaceNonAlphaNumericChars(words, replaceWith string) string {
 	reg, err := regexp.Compile("[^A-Za-z0-9]+")
 	if err != nil {
@@ -107,6 +111,7 @@ func ReplaceNonAlphaNumericChars(words, replaceWith string) string {
 	return newStr
 }
 
+// GetKeyValueInFile : returns env variable value
 func GetKeyValueInFile(filePath, key string) string {
 	data, _ := ioutil.ReadFile(filePath)
 
@@ -119,31 +124,31 @@ func GetKeyValueInFile(filePath, key string) string {
 		if env[0] == key {
 			if len(env) > 1 {
 				return env[1]
-			} else {
-				return "OK"
 			}
+			return "OK"
 		}
 		line++
 	}
 	return "NOTFOUND"
 }
 
+// CommandExists : checks if string is available in the defined commands
 func CommandExists(mapArr map[string]func(map[string]string, map[int]string), key string) bool {
 	if _, ok := mapArr[key]; ok {
 		return true
-	} else {
-		return false
 	}
+	return false
 }
 
+// CommandArgExists : checks if string is available in the defined command flags
 func CommandArgExists(mapArr map[string]string, key string) bool {
 	if _, ok := mapArr[key]; ok {
 		return true
-	} else {
-		return false
 	}
+	return false
 }
 
+// TimeAgo is ...
 func TimeAgo(timeVal interface{}) string {
 	//now := time.Now().Format(time.RFC3339)
 	layout := "2006-01-02T15:04:05.000Z"
@@ -165,6 +170,7 @@ func TimeAgo(timeVal interface{}) string {
 	return ""
 }
 
+// MakeRequest is ...
 func MakeRequest(payload, url, method string) map[string]interface{} {
 
 	url = GetEnv("GITLAB_URI") + "/api/v4/" + url

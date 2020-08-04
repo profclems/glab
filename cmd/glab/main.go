@@ -25,12 +25,12 @@ func main() {
 
 	// Parse the arguments in a map
 	for i := 1; i < argLen; i++ {
-		sp := strings.Split(strings.TrimLeft(cmdArgs[i], "-"), "=")
+		sp := strings.Split(strings.TrimLeft(cmdArgs[i], "-"), "=") // Trim preceding dashes and split key and value into map
 		if len(sp) > 0 {
 			if len(sp) > 1 {
 				arr[sp[0]] = sp[1]
 			} else {
-				arr[sp[0]] = "true"
+				arr[sp[0]] = "true" // set flags with empty values to true
 			}
 			arrCmd[(i - 1)] = sp[0]
 		}

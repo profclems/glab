@@ -2,7 +2,8 @@ package utils
 
 import "fmt"
 
-func PrintHelpIssue()  {
+// PrintHelpIssue : display issue command help
+func PrintHelpIssue() {
 
 	fmt.Println(`Issue Help`)
 
