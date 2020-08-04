@@ -48,9 +48,9 @@ func displayMultiplePiplines(m []pipline) {
 	}
 }
 func deletePipeline(cmdArgs map[string]string, arrFlags map[int]string) {
-	issueID := strings.Trim(arrFlags[1], " ")
-	if CommandArgExists(cmdArgs, issueID) {
-		arrIds := strings.Split(strings.Trim(issueID, "[] "), ",")
+	pipelineID := strings.Trim(arrFlags[1], " ")
+	if CommandArgExists(cmdArgs, pipelineID) {
+		arrIds := strings.Split(strings.Trim(pipelineID, "[] "), ",")
 		for _, i2 := range arrIds {
 			fmt.Println("Deleting Pipeline #" + i2)
 			queryStrings := "/" + i2
