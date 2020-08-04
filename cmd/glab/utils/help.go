@@ -14,6 +14,7 @@ CORE COMMANDS
   issue:      Create, view and manage issues
   repo:       Create, manage repositories
   mr:         Create, view, approve and merge merge requests
+  pipeline:         view ,delete  piplines
 
 ADDITIONAL COMMANDS
   config:     Manage configuration for glab
