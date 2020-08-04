@@ -2,7 +2,8 @@ package utils
 
 import "fmt"
 
-func PrintHelpHelp()  {
+// PrintHelpHelp is exported
+func PrintHelpHelp() {
 
 	fmt.Println(`Work seamlessly with Gitlab from the command line.
 

@@ -20,3 +20,4 @@ bin
 config
 dist
 cmd/glab/dist
+.glab-cli

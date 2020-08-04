@@ -1,24 +1,20 @@
 package glab
 
 import (
-	"bufio"
 	"fmt"
 	"github.com/logrusorgru/aurora"
 	"glab/cmd/glab/utils"
 	"glab/commands"
-	"io/ioutil"
-	"log"
-	"os"
 	"strings"
 )
 
 var (
-	version	string
-	build  	string
+	version string
+	build   string
 	commit  string
 )
 
-func PrintVersion(_ map[string]string, _ map[int]string) {
+func printVersion(_ map[string]string, _ map[int]string) {
 	fmt.Println()
 	fmt.Println("GLab version", version)
 	fmt.Println("Build:", build)
@@ -29,99 +25,63 @@ func PrintVersion(_ map[string]string, _ map[int]string) {
 	fmt.Println()
 }
 
-func OpenFile(filename string) {
-	file, err := os.Open(filename)
-	if err != nil {
-		log.Fatal("Error:", err)
-	}
-	defer file.Close()
-
-	scanner := bufio.NewScanner(file)
-
-	for scanner.Scan() {
-		fmt.Println(scanner.Text())
-	}
-}
-
-func Issue(cmdArgs map[string]string, arrCmd map[int]string) {
-	commands.ExecIssue(cmdArgs, arrCmd)
-}
-
-func MergeRequest(cmdArgs map[string]string, arrCmd map[int]string) {
-	commands.ExecMergeRequest(cmdArgs, arrCmd)
-}
-
+// Help is exported
 func Help(args map[string]string, arrCmd map[int]string) {
-	//OpenFile("./utils/help.go")
 	utils.PrintHelpHelp()
 }
 
-func ConfigEnv(key, value string) {
-	data, _ := ioutil.ReadFile("./config/.env")
-
-	file := string(data)
-	line := 0
-	temp := strings.Split(file, "\n")
-	newData := ""
-	keyExists := false
-	newConfig := key + "=" + (value) + "\n"
-	for _, item := range temp {
-		//fmt.Println("[",line,"]",item)
-		env := strings.Split(item, "=")
-		justString := fmt.Sprint(item)
-		if env[0] == key {
-			newData += newConfig
-			keyExists = true
-		} else {
-			newData += justString + "\n"
-		}
-		line++
-	}
-	if !keyExists {
-		newData += newConfig
-	}
-	_ = os.Mkdir("./config", 0700)
-	f, _ := os.Create("./config/.env") // Create a writer
-	w := bufio.NewWriter(f)
-	_, _ = w.WriteString(strings.Trim(newData, "\n"))
-	_ = w.Flush()
-}
-
-func Config(cmdArgs map[string]string, arrCmd map[int]string) {
+func config(cmdArgs map[string]string, arrCmd map[int]string) {
 	cmdHelpList := map[string]string{
-		"uri":   "GITLAB_URI",
-		"url":   "GITLAB_URI",
-		"token": "GITLAB_TOKEN",
-		"repo":  "GITLAB_REPO",
-		"pid":   "GITLAB_PROJECT_ID",
+		"uri":        "GITLAB_URI",
+		"url":        "GITLAB_URI",
+		"token":      "GITLAB_TOKEN",
+		"repo":       "GITLAB_REPO",
+		"pid":        "GITLAB_PROJECT_ID",
+		"remote-var": "GIT_REMOTE_URL_VAR",
+		"origin":     "GIT_REMOTE_URL_VAR",
+		"origin-var": "GIT_REMOTE_URL_VAR",
 	}
-	isUpdated := false
 
-	fmt.Println() //Upper Space
+	commands.UseGlobalConfig = true
+	if commands.VariableExists("GITLAB_URI") == "NOTFOUND" || commands.VariableExists("GITLAB_URI") == "OK" {
+		commands.SetEnv("GITLAB_URI", "https://gitlab.com")
+	}
+	if commands.VariableExists("GIT_REMOTE_URL_VAR") == "NOTFOUND" || commands.VariableExists("GIT_REMOTE_URL_VAR") == "OK" {
+		commands.SetEnv("GIT_REMOTE_URL_VAR", "origin")
+	}
+	commands.UseGlobalConfig = false
+
+	var isUpdated bool
+	if arrCmd[0] == "global" {
+		commands.UseGlobalConfig = true
+	}
 	for i := 0; i < len(arrCmd); i++ {
 		if commands.CommandArgExists(cmdArgs, arrCmd[i]) && commands.CommandArgExists(cmdHelpList, arrCmd[i]) {
-			ConfigEnv(cmdHelpList[arrCmd[i]], cmdArgs[arrCmd[i]])
+			commands.SetEnv(cmdHelpList[arrCmd[i]], cmdArgs[arrCmd[i]])
 			isUpdated = true
 		} else {
-			fmt.Println(aurora.Red(arrCmd[i] + ": command not found"))
+			if arrCmd[0] != "global" {
+				fmt.Println(aurora.Red(arrCmd[i] + ": invalid flag"))
+			}
 		}
 	}
 
 	if isUpdated {
 		fmt.Println(aurora.Green("Environment variable(s) updated"))
 	}
-	fmt.Println() //ending space
 }
 
+// Exec is exported
 func Exec(cmd string, cmdArgs map[string]string, arrCmd map[int]string) {
 	commandList := map[string]func(map[string]string, map[int]string){
-		"issue":     Issue,
-		"mr":        MergeRequest,
+		"issue":     commands.ExecIssue,
+		"mr":        commands.ExecMergeRequest,
+		"label":     commands.ExecLabel,
 		"help":      Help,
-		"config":    Config,
-		"version":   PrintVersion,
-		"--version": PrintVersion,
-		"-v":        PrintVersion,
+		"config":    config,
+		"version":   printVersion,
+		"--version": printVersion,
+		"-v":        printVersion,
 	}
 	cmd = strings.Trim(cmd, " ")
 	if cmd == "" {
@@ -137,7 +97,6 @@ func Exec(cmd string, cmdArgs map[string]string, arrCmd map[int]string) {
 					"mr":    utils.PrintHelpMr,
 					"repo":  utils.PrintHelpRepo,
 				}
-				//OpenFile("./utils/"+cmd+".txt")
 				cmdHelpList[cmd]()
 			}
 		}

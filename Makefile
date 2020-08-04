@@ -16,8 +16,8 @@ ifndef CGO_LDFLAGS
     export CGO_LDFLAGS := $(LDFLAGS)
 endif
 
-GO_LDFLAGS := -X github.com/cli/cli/command.Version=$(GLAB_VERSION) $(GO_LDFLAGS)
-GO_LDFLAGS := -X github.com/cli/cli/command.BuildDate=$(BUILD_DATE) $(GO_LDFLAGS)
+GO_LDFLAGS := -X glab.version=$(GLAB_VERSION) $(GO_LDFLAGS)
+GO_LDFLAGS := -X glab.build=$(BUILD_DATE) $(GO_LDFLAGS)
 
 build:
 	go build -trimpath -ldflags "$(GO_LDFLAGS)" -o ./bin/glab ./cmd/glab
@@ -33,6 +33,11 @@ rt: #Test release
 
 release:
 	goreleaser $(var)
+
+undocommit:
+	git push origin -d $(GLAB_VERSION)
+	git tag --delete $(GLAB_VERSION)
+	git revert $(git log -1 --format="%H")
 
 compileall:
 	mkdir -p ./bin
