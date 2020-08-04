@@ -2,7 +2,7 @@ package utils
 
 import "fmt"
 
-func PrintHelpIssue()  {
+func PrintHelpIssue() {
 
 	fmt.Println(`Issue Help`)
 
