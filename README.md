@@ -29,6 +29,12 @@ GLab open source custom Gitlab Cli tool written in Go (golang) to help work seam
 ## Installation
 Download a binary suitable for your OS at https://github.com/profclems/glab/releases/latest.
 
+### Quick Install (Bash)
+```sh
+curl -s https://raw.githubusercontent.com/profclems/glab/trunk/scripts/quick_install.sh | sudo bash
+```
+*Installs into `usr/local/bin`*
+
 ### Windows
 Available as an installable executable file or a Portable archived file in tar and zip formats at the [releases page](https://github.com/profclems/glab/releases/latest).
 Download and install now at the [releases page](https://github.com/profclems/glab/releases/latest).
@@ -99,25 +105,33 @@ If a supported binary for your OS is not found at the [releases page](https://gi
 
 
 ## Setting Up
-After successfull installation, run:
-```bash
+**To set configuration for current directory (must be a git repository)**
+```sh
+glab config --token=<YOUR-GITLAB-ACCESS-TOKEN> --url=https://gitlab.com
+```
+**To set configuration globally**
+```sh
+glab config global --token=<YOUR-GITLAB-ACCESS-TOKEN> --url=https://gitlab.com
+```
+**For initial releases up to v1.6.1**
+```sh
 glab config --token=<YOUR-GITLAB-ACCESS-TOKEN> --url=https://gitlab.com --pid=<YOUR-GITLAB-PROJECT-ID> --repo=OWNER/REPO
 ```
 ### Example
-```bash
+```sh
 glab config --token=sometoken --url=https://gitlab.com --pid=someprojectid --repo=profclems/glab
 ```
 **NB**: Change gitlab.com to company or group's gitlab url if self-hosted
 
 ## Envronment Variables
-  ```bash
+  ```sh
   GITLAB_TOKEN: an authentication token for API requests. Setting this avoids being
   prompted to authenticate and overrides any previously stored credentials.
 
   GITLAB_REPO: specify the Gitlab repository in "OWNER/REPO" format for commands that
-  otherwise operate on a local repository.
+  otherwise operate on a local repository. (Depreciated in v1.6.2) 
 
-  GITLAB_URI: specify the url of the gitlab server if self hosted (eg: gitlab.example.com)
+  GITLAB_URI: specify the url of the gitlab server if self hosted (eg: https://gitlab.example.com). Default is https://github.com
   ```
   
 ## Learn More

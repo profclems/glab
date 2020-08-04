@@ -2,9 +2,9 @@ package commands
 
 import (
 	"bufio"
-	"encoding/json"
 	"fmt"
 	"github.com/logrusorgru/aurora"
+	"github.com/xanzy/go-gitlab"
 	"log"
 	"net/url"
 	"os"
@@ -12,16 +12,16 @@ import (
 	"text/tabwriter"
 )
 
-func displayMergeRequest(hm map[string]interface{}) {
-	duration := TimeAgo(hm["created_at"])
-	if hm["state"] == "opened" {
-		fmt.Println(aurora.Green(fmt.Sprint("#", hm["iid"])), hm["title"], aurora.Cyan("("+hm["source_branch"].(string)+")"), aurora.Magenta(duration))
+func displayMergeRequest(hm *gitlab.MergeRequest) {
+	duration := TimeAgo(*hm.CreatedAt)
+	if hm.State == "opened" {
+		fmt.Println(aurora.Green(fmt.Sprint("#", hm.IID)), hm.Title, aurora.Cyan("("+hm.SourceBranch+")"), aurora.Magenta(duration))
 	} else {
-		fmt.Println(aurora.Red(fmt.Sprint("#", hm["iid"])), hm["title"], aurora.Cyan("("+hm["source_branch"].(string)+")"), aurora.Magenta(duration))
+		fmt.Println(aurora.Red(fmt.Sprint("#", hm.IID)), hm.Title, aurora.Cyan("("+hm.SourceBranch+")"), aurora.Magenta(duration))
 	}
 }
 
-func displayMultipleMergeRequests(m []interface{}) {
+func displayAllMergeRequests(m []*gitlab.MergeRequest) {
 	// initialize tabwriter
 	w := new(tabwriter.Writer)
 
@@ -30,23 +30,23 @@ func displayMultipleMergeRequests(m []interface{}) {
 
 	defer w.Flush()
 	if len(m) > 0 {
-		fmt.Printf("Showing merge requests %d of %d on %s\n\n", len(m), len(m), GetEnv("GITLAB_REPO"))
-		for i := 0; i < len(m); i++ {
-			hm := m[i].(map[string]interface{})
-			labels := hm["labels"]
-			duration := TimeAgo(hm["created_at"])
-			if hm["state"] == "opened" {
-				_, _ = fmt.Fprintln(w, aurora.Green(fmt.Sprint(" #", hm["iid"])), "\t", hm["title"], "\t", aurora.Magenta(labels), "\t", aurora.Cyan("("+hm["source_branch"].(string)+")"), aurora.Magenta(duration))
+		fmt.Printf("Showing mergeRequests %d of %d on %s\n\n", len(m), len(m), getRepo())
+		for _, issue := range m {
+			labels := issue.Labels
+			duration := TimeAgo(*issue.CreatedAt)
+			if issue.State == "opened" {
+				_, _ = fmt.Fprintln(w, aurora.Green(fmt.Sprint("#", issue.IID)), "\t", issue.Title, "\t", aurora.Magenta(labels), "\t", aurora.Magenta(duration))
 			} else {
-				_, _ = fmt.Fprintln(w, aurora.Red(fmt.Sprint(" #", hm["iid"])), "\t", hm["title"], "\t", aurora.Magenta(labels), "\t", aurora.Cyan("("+hm["source_branch"].(string)+")"), aurora.Magenta(duration))
+				_, _ = fmt.Fprintln(w, aurora.Red(fmt.Sprint("#", issue.IID)), "\t", issue.Title, "\t", aurora.Magenta(labels), "\t", aurora.Magenta(duration))
 			}
 		}
 	} else {
-		fmt.Println("No merge requests available on " + GetEnv("GITLAB_REPO"))
+		fmt.Println("No Merge Requests available on " + getRepo())
 	}
 }
 
 func createMergeRequest(cmdArgs map[string]string, _ map[int]string) {
+	l := &gitlab.CreateMergeRequestOptions{}
 	reader := bufio.NewReader(os.Stdin)
 	var sourceBranch string
 	var targetBranch string
@@ -102,313 +102,305 @@ func createMergeRequest(cmdArgs map[string]string, _ map[int]string) {
 	}
 	targetBranch = strings.ReplaceAll(targetBranch, "\n", "")
 	sourceBranch = strings.ReplaceAll(sourceBranch, "\n", "")
-	params := url.Values{}
-	params.Add("title", mergeTitle)
-	params.Add("description", mergeDescription)
-	params.Add("labels", mergeLabel)
-	params.Add("source_branch", sourceBranch)
-	params.Add("target_branch", targetBranch)
-	if CommandArgExists(cmdArgs, "confidential") {
-		params.Add("confidential", "true")
-	}
-	if CommandArgExists(cmdArgs, "weight") {
-		params.Add("weight", cmdArgs["weight"])
-	}
-	if CommandArgExists(cmdArgs, "mr") {
-		params.Add("merge_request_to_resolve_discussions_of", cmdArgs["mr"])
-	}
+	l.Title = gitlab.String(mergeTitle)
+	l.Description = gitlab.String(mergeDescription)
+	l.Labels = &gitlab.Labels{mergeLabel}
+	l.SourceBranch = gitlab.String(sourceBranch)
+	l.TargetBranch = gitlab.String(targetBranch)
 	if CommandArgExists(cmdArgs, "milestone") {
-		params.Add("milestone_id", cmdArgs["milestone"])
-	}
-	if CommandArgExists(cmdArgs, "epic") {
-		params.Add("epic_id", cmdArgs["epic"])
+		l.MilestoneID = gitlab.Int(stringToInt(cmdArgs["milestone"]))
 	}
 	if CommandArgExists(cmdArgs, "allow-collaboration") {
-		params.Add("allow_collaboration", cmdArgs["allow-collaboration"])
+		l.AllowCollaboration = gitlab.Bool(true)
 	}
 	if CommandArgExists(cmdArgs, "remove-source-branch") {
-		params.Add("remove_source_branch", cmdArgs["remove-source-branch"])
+		l.RemoveSourceBranch = gitlab.Bool(true)
 	}
 	if CommandArgExists(cmdArgs, "target-project") {
-		params.Add("target_project_id", cmdArgs["target-project"])
+		l.TargetProjectID = gitlab.Int(stringToInt(cmdArgs["target-project"]))
 	}
 	if CommandArgExists(cmdArgs, "assigns") {
-		params.Add("epic_id", cmdArgs["epic"])
 		assignID := cmdArgs["assigns"]
 		arrIds := strings.Split(strings.Trim(assignID, "[] "), ",")
-		for _, i2 := range arrIds {
-			params.Add("assignee_ids[]", i2)
+		var t2 []int
+
+		for _, i := range arrIds {
+			j := stringToInt(i)
+			t2 = append(t2, j)
 		}
+		l.AssigneeIDs = t2
 	}
 
+	git, repo := InitGitlabClient()
 	if CommandArgExists(cmdArgs, "create-branch") {
-		minParams := url.Values{}
-		minParams.Add("branch", sourceBranch)
-		minParams.Add("ref", targetBranch)
-		MakeRequest(minParams.Encode(), "projects/"+GetEnv("GITLAB_PROJECT_ID")+"/repository/branches", "POST")
-	}
-
-	reqBody := params.Encode()
-	fmt.Println(aurora.Yellow("Creating Merge Request {" + mergeTitle + "}..."))
-	resp := MakeRequest(reqBody, "projects/"+GetEnv("GITLAB_PROJECT_ID")+"/merge_requests", "POST")
-
-	if resp["responseCode"] == 201 {
-		bodyString := resp["responseMessage"]
-
-		fmt.Println(aurora.Green("Merge Request created successfully"))
-		if _, ok := bodyString.(string); ok {
-			/* act on str */
-			m := make(map[string]interface{})
-			err := json.Unmarshal([]byte(bodyString.(string)), &m)
-			if err != nil {
-				log.Fatal(err)
-			}
-			displayMergeRequest(m)
-			fmt.Println()
+		lb := &gitlab.CreateBranchOptions{
+			Branch: gitlab.String(sourceBranch),
+			Ref:    gitlab.String(targetBranch),
 		}
-	} else {
-		fmt.Println(resp["responseCode"], resp["responseMessage"])
+		fmt.Println("Creating related branch...")
+		branch, resp, _ := git.Branches.CreateBranch(repo, lb)
+		if resp.StatusCode == 201 {
+			fmt.Println("Branch created: ", branch.WebURL)
+		} else {
+			fmt.Println("Error creating branch: ", resp.Status)
+		}
+
 	}
+
+	mr, _, err := git.MergeRequests.CreateMergeRequest(repo, l)
+	if err != nil {
+		log.Fatal(err)
+	}
+	displayMergeRequest(mr)
 }
 
 func acceptMergeRequest(cmdArgs map[string]string, arrFlags map[int]string) {
 	mergeID := strings.Trim(arrFlags[1], " ")
 	params := url.Values{}
+	l := &gitlab.AcceptMergeRequestOptions{}
 	if CommandArgExists(cmdArgs, "message") {
-		params.Add("merge_commit_message", cmdArgs["message"])
+		l.MergeCommitMessage = gitlab.String(cmdArgs["message"])
 	}
 	if CommandArgExists(cmdArgs, "squash-message") {
-		params.Add("squash_commit_message", cmdArgs["squash-message"])
+		l.SquashCommitMessage = gitlab.String(cmdArgs["squash-message"])
 	}
 	if CommandArgExists(cmdArgs, "squash") {
-		params.Add("squash", cmdArgs["squash"])
+		l.Squash = gitlab.Bool(true)
 	}
 	if CommandArgExists(cmdArgs, "remove-source-branch") {
-		params.Add("should_remove_source_branch", cmdArgs["remove-source-branch"])
+		l.ShouldRemoveSourceBranch = gitlab.Bool(true)
 	}
 	if CommandArgExists(cmdArgs, "when-pipeline-succeed") {
-		params.Add("merge_when_pipeline_succeed", cmdArgs["when-pipeline-succeed"])
+		l.MergeWhenPipelineSucceeds = gitlab.Bool(true)
 	}
 	if CommandArgExists(cmdArgs, "sha") {
 		params.Add("sha", cmdArgs["sha"])
+		l.SHA = gitlab.String(cmdArgs["sha"])
 	}
+	git, repo := InitGitlabClient()
+	mr, resp, _ := git.MergeRequests.AcceptMergeRequest(repo, stringToInt(mergeID), l)
 
-	reqBody := params.Encode()
 	fmt.Println(aurora.Yellow("Accepting Merge Request #" + mergeID + "..."))
-	resp := MakeRequest(reqBody, "projects/"+GetEnv("GITLAB_PROJECT_ID")+"/merge_requests/"+mergeID+"/merge", "PUT")
 
-	if resp["responseCode"] == 200 {
-		bodyString := resp["responseMessage"]
-
+	if resp.StatusCode == 200 {
 		fmt.Println(aurora.Green("Merge Request accepted successfully"))
-		if _, ok := bodyString.(string); ok {
-			/* act on str */
-			m := make(map[string]interface{})
-			err := json.Unmarshal([]byte(bodyString.(string)), &m)
-			if err != nil {
-				log.Fatal(err)
-			}
-			displayMergeRequest(m)
-			fmt.Println()
-		}
-	} else if resp["responseCode"] == 405 {
+		displayMergeRequest(mr)
+	} else if resp.StatusCode == 405 {
 		fmt.Println("Merge request cannot be merged")
-	} else if resp["responseCode"] == 401 {
+	} else if resp.StatusCode == 401 {
 		fmt.Println("You don't have enough permission to accept this merge request")
-	} else if resp["responseCode"] == 406 {
+	} else if resp.StatusCode == 406 {
 		fmt.Println("Branch cannot be merged. There are merge conflicts.")
 	} else {
-		fmt.Println(resp["responseCode"], resp["responseMessage"])
+		fmt.Println(resp)
+	}
+}
+
+func approveMergeRequest(cmdArgs map[string]string, arrFlags map[int]string) {
+	mergeID := strings.Trim(arrFlags[1], " ")
+	l := &gitlab.ApproveMergeRequestOptions{}
+	if CommandArgExists(cmdArgs, "sha") {
+		l.SHA = gitlab.String(cmdArgs["sha"])
+	}
+
+	fmt.Println(aurora.Yellow("Approving Merge Request #" + mergeID + "..."))
+	git, repo := InitGitlabClient()
+	_, resp, _ := git.MergeRequestApprovals.ApproveMergeRequest(repo, stringToInt(mergeID), l)
+	if resp != nil {
+		if resp.StatusCode == 201 {
+			fmt.Println(aurora.Green("Merge Request approved successfully"))
+		} else if resp.StatusCode == 405 {
+			fmt.Println("Merge request cannot be approved")
+		} else if resp.StatusCode == 401 {
+			fmt.Println("Merge request already approved or you don't have enough permission to approve this merge request")
+		} else {
+			fmt.Println(resp.Status)
+		}
+	} else {
+		fmt.Println(resp)
+	}
+}
+
+func revokeMergeRequest(cmdArgs map[string]string, arrFlags map[int]string) {
+	mergeID := strings.Trim(arrFlags[1], " ")
+
+	fmt.Println(aurora.Yellow("Revoking approval for Merge Request #" + mergeID + "..."))
+	git, repo := InitGitlabClient()
+	resp, _ := git.MergeRequestApprovals.UnapproveMergeRequest(repo, stringToInt(mergeID))
+	if resp != nil {
+		if resp.StatusCode == 201 {
+			fmt.Println(aurora.Green("Merge Request approval revoked successfully"))
+		} else if resp.StatusCode == 405 {
+			fmt.Println("Merge request cannot be unapproved")
+		} else if resp.StatusCode == 401 {
+			fmt.Println("Merge request already unapproved or you don't have enough permission to unapprove this merge request")
+		} else {
+			fmt.Println(resp.Status)
+		}
+	} else {
+		fmt.Println(resp)
 	}
 }
 
 func listMergeRequests(cmdArgs map[string]string, _ map[int]string) {
-	var queryStrings = "state="
-	if CommandArgExists(cmdArgs, "all") {
-		queryStrings = ""
-	} else if CommandArgExists(cmdArgs, "closed") {
-		queryStrings += "closed&"
+	var state = "all"
+	if CommandArgExists(cmdArgs, "closed") {
+		state = "closed"
 	} else {
-		queryStrings += "opened&"
+		state = "opened"
+	}
+
+	l := &gitlab.ListProjectMergeRequestsOptions{
+		State: gitlab.String(state),
 	}
 	if CommandArgExists(cmdArgs, "label") || CommandArgExists(cmdArgs, "labels") {
-		queryStrings += "labels=" + cmdArgs["label"] + "&"
+		label := gitlab.Labels{
+			cmdArgs["label"],
+		}
+		l.Labels = &label
 	}
 	if CommandArgExists(cmdArgs, "milestone") {
-		queryStrings += "milestone=" + cmdArgs["milestone"] + "&"
+		l.Milestone = gitlab.String(cmdArgs["milestone"])
 	}
-	if CommandArgExists(cmdArgs, "confidential") {
-		queryStrings += "confidential=" + cmdArgs["confidential"]
+
+	git, repo := InitGitlabClient()
+	// Create new label
+	mergeRequests, _, err := git.MergeRequests.ListProjectMergeRequests(repo, l)
+	if err != nil {
+		log.Fatal(err)
 	}
-	queryStrings = strings.Trim(queryStrings, "& ")
-	if len(queryStrings) > 0 {
-		queryStrings = "?" + queryStrings
-	}
-	resp := MakeRequest("{}", "projects/"+GetEnv("GITLAB_PROJECT_ID")+"/merge_requests"+queryStrings, "GET")
-	//fmt.Println(resp)
-	if resp["responseCode"] == 200 {
-		bodyString := resp["responseMessage"]
-		if _, ok := bodyString.(string); ok {
-			/* act on str */
-			var m []interface{}
-			err := json.Unmarshal([]byte(bodyString.(string)), &m)
-			if err != nil {
-				log.Fatal(err)
-			}
-			fmt.Println()
-			displayMultipleMergeRequests(m)
-			fmt.Println()
-		}
-	} else {
-		fmt.Println(resp)
-	}
+	displayAllMergeRequests(mergeRequests)
 }
 
 func issuesRelatedMergeRequest(cmdArgs map[string]string, arrFlags map[int]string) {
-	var queryStrings = "state="
 	mergeID := strings.Trim(arrFlags[1], " ")
-	if CommandArgExists(cmdArgs, "all") {
-		queryStrings = ""
-	} else if CommandArgExists(cmdArgs, "closed") {
-		queryStrings += "closed&"
-	} else {
-		queryStrings += "opened&"
+	l := &gitlab.GetIssuesClosedOnMergeOptions{}
+	git, repo := InitGitlabClient()
+	mr, _, err := git.MergeRequests.GetIssuesClosedOnMerge(repo, stringToInt(mergeID), l)
+	if err != nil {
+		log.Fatal(err)
 	}
-	if CommandArgExists(cmdArgs, "label") || CommandArgExists(cmdArgs, "labels") {
-		queryStrings += "labels=" + cmdArgs["label"] + "&"
+	displayAllIssues(mr)
+}
+
+func updateMergeRequest(cmdArgs map[string]string, arrFlags map[int]string) {
+	mergeID := strings.Trim(arrFlags[1], " ")
+	l := &gitlab.UpdateMergeRequestOptions{}
+	if CommandArgExists(cmdArgs, "title") {
+		l.Title = gitlab.String(cmdArgs["title"])
 	}
-	if CommandArgExists(cmdArgs, "milestone") {
-		queryStrings += "milestone=" + cmdArgs["milestone"] + "&"
+	if CommandArgExists(cmdArgs, "lock-discussion") {
+		l.DiscussionLocked = gitlab.Bool(true)
 	}
-	if CommandArgExists(cmdArgs, "confidential") {
-		queryStrings += "confidential=" + cmdArgs["confidential"]
+	if CommandArgExists(cmdArgs, "description") {
+		l.Description = gitlab.String(cmdArgs["description"])
 	}
-	queryStrings = strings.Trim(queryStrings, "& ")
-	if len(queryStrings) > 0 {
-		queryStrings = "?" + queryStrings
+	git, repo := InitGitlabClient()
+	mr, _, err := git.MergeRequests.UpdateMergeRequest(repo, stringToInt(mergeID), l)
+	if err != nil {
+		log.Fatal(err)
 	}
-	resp := MakeRequest("{}", "projects/"+GetEnv("GITLAB_PROJECT_ID")+"/merge_requests/"+mergeID+"/closes_issues"+queryStrings, "GET")
-	//fmt.Println(resp)
-	if resp["responseCode"] == 200 {
-		bodyString := resp["responseMessage"]
-		if _, ok := bodyString.(string); ok {
-			/* act on str */
-			var m []interface{}
-			err := json.Unmarshal([]byte(bodyString.(string)), &m)
-			if err != nil {
-				log.Fatal(err)
-			}
-			fmt.Println()
-			displayMultipleIssues(m)
-			fmt.Println()
-		}
-	} else {
-		fmt.Println(resp)
-	}
+	displayMergeRequest(mr)
 }
 
 func deleteMergeRequest(cmdArgs map[string]string, arrFlags map[int]string) {
 	mergeID := strings.Trim(arrFlags[1], " ")
+	git, repo := InitGitlabClient()
+
 	if CommandArgExists(cmdArgs, mergeID) {
 		arrIds := strings.Split(strings.Trim(mergeID, "[] "), ",")
 		for _, i2 := range arrIds {
 			fmt.Println("Deleting Merge Request #" + i2)
-			queryStrings := "/" + i2
-			resp := MakeRequest("{}", "projects/"+GetEnv("GITLAB_PROJECT_ID")+"/merge_requests"+queryStrings, "DELETE")
-			if resp["responseCode"] == 204 {
-				bodyString := resp["responseMessage"]
-				fmt.Println(bodyString)
+			issue, _ := git.MergeRequests.DeleteMergeRequest(repo, stringToInt(i2))
+			if issue.StatusCode == 204 {
 				fmt.Println(aurora.Green("Merge Request Deleted Successfully"))
-			} else if resp["responseCode"] == 404 {
+			} else if issue.StatusCode == 404 {
 				fmt.Println(aurora.Red("Merge Request does not exist"))
 			} else {
 				fmt.Println(aurora.Red("Could not complete request."))
 			}
-			fmt.Println()
 		}
 	} else {
 		fmt.Println(aurora.Red("Invalid command"))
-		fmt.Println("Usage: glab merge delete <merge-id>")
+		fmt.Println("Usage: glab issue delete <issue-id>")
 	}
 }
 
 func subscribeMergeRequest(cmdArgs map[string]string, arrFlags map[int]string) {
 	mergeID := strings.Trim(arrFlags[1], " ")
+	git, repo := InitGitlabClient()
 	if CommandArgExists(cmdArgs, mergeID) {
 		arrIds := strings.Split(strings.Trim(mergeID, "[] "), ",")
 		for _, i2 := range arrIds {
 			fmt.Println("Subscribing Merge Request #" + i2)
-			queryStrings := "/" + i2 + "/subscribe"
-			resp := MakeRequest("{}", "projects/"+GetEnv("GITLAB_PROJECT_ID")+"/merge_requests"+queryStrings, "POST")
-			if resp["responseCode"] == 204 {
-				bodyString := resp["responseMessage"]
+			issue, resp, _ := git.MergeRequests.SubscribeToMergeRequest(repo, stringToInt(i2), nil)
+
+			if resp.StatusCode == 204 {
+				bodyString := resp.Body
 				fmt.Println(bodyString)
-				fmt.Println(aurora.Green("You have successfully subscribe to merge request with id #" + i2))
-			} else if resp["responseCode"] == 404 {
-				fmt.Println(aurora.Red("Merge Request does not exist"))
+				fmt.Println(aurora.Green("You have successfully subscribe to merge request #" + i2))
+				displayMergeRequest(issue)
+			} else if resp.StatusCode == 404 {
+				fmt.Println(aurora.Red("MergeRequest does not exist"))
 			} else {
-				fmt.Println(aurora.Red("Could not complete request."))
+				fmt.Println(aurora.Red("Could not complete request."), resp.Status)
 			}
-			fmt.Println()
 		}
 	} else {
 		fmt.Println(aurora.Red("Invalid command"))
-		fmt.Println("Usage: glab merge delete <merge-id>")
+		fmt.Println("Usage: glab issue subscribe <issue-id>")
 	}
 }
 
 func unsubscribeMergeRequest(cmdArgs map[string]string, arrFlags map[int]string) {
 	mergeID := strings.Trim(arrFlags[1], " ")
+	git, repo := InitGitlabClient()
 	if CommandArgExists(cmdArgs, mergeID) {
 		arrIds := strings.Split(strings.Trim(mergeID, "[] "), ",")
 		for _, i2 := range arrIds {
 			fmt.Println("Unsubscribing Merge Request #" + i2)
-			queryStrings := "/" + i2 + "/unsubscribe"
-			resp := MakeRequest("{}", "projects/"+GetEnv("GITLAB_PROJECT_ID")+"/merge_requests"+queryStrings, "POST")
-			if resp["responseCode"] == 204 {
-				bodyString := resp["responseMessage"]
+			issue, resp, _ := git.MergeRequests.UnsubscribeFromMergeRequest(repo, stringToInt(i2))
+
+			if resp.StatusCode == 204 {
+				bodyString := resp.Body
 				fmt.Println(bodyString)
-				fmt.Println(aurora.Green("You have successfully unsubscribed to merge request with id #" + i2))
-			} else if resp["responseCode"] == 404 {
-				fmt.Println(aurora.Red("Merge Request does not exist"))
+				fmt.Println(aurora.Green("You have successfully unsubscribe to issue #" + i2))
+				displayMergeRequest(issue)
+			} else if resp.StatusCode == 404 {
+				fmt.Println(aurora.Red("MergeRequest does not exist"))
 			} else {
-				fmt.Println(aurora.Red("Could not complete request."))
+				fmt.Println(aurora.Red("Could not complete request."), resp.Status)
 			}
-			fmt.Println()
 		}
 	} else {
 		fmt.Println(aurora.Red("Invalid command"))
-		fmt.Println("Usage: glab mr unsubscribe <merge-id>")
+		fmt.Println("Usage: glab issue unsubscribe <issue-id>")
 	}
 }
 
 func changeMergeRequestState(cmdArgs map[string]string, arrFlags map[int]string) {
 	mergeID := strings.Trim(arrFlags[1], " ")
+	git, repo := InitGitlabClient()
 	if CommandArgExists(cmdArgs, mergeID) {
 		reqType := arrFlags[0]
-		params := url.Values{}
-		mergeMessage := ""
+		l := &gitlab.UpdateMergeRequestOptions{}
 		if reqType == "close" {
-			params.Add("state_event", "close")
-			mergeMessage = "closed"
+			l.StateEvent = gitlab.String("close")
 		} else {
-			params.Add("state_event", "reopen")
-			mergeMessage = "opened"
+			l.StateEvent = gitlab.String("reopen")
 		}
 		arrIds := strings.Split(strings.Trim(mergeID, "[] "), ",")
-		reqBody := params.Encode()
 		for _, i2 := range arrIds {
-			fmt.Println("...")
-			resp := MakeRequest(reqBody, "projects/"+GetEnv("GITLAB_PROJECT_ID")+"/merge_requests/"+i2, "PUT")
-			if resp["responseCode"] == 200 {
-				fmt.Println(aurora.Green("You have successfully " + mergeMessage + " to merge request with id #" + i2))
-			} else if resp["responseCode"] == 404 {
-				fmt.Println(aurora.Red("Merge Request does not exist"))
+			fmt.Println("Updating Merge request...")
+			mr, resp, _ := git.MergeRequests.UpdateMergeRequest(repo, stringToInt(i2), l)
+			if resp.StatusCode == 200 {
+				fmt.Println(aurora.Green("You have successfully updated merge request #" + i2))
+				displayMergeRequest(mr)
+			} else if resp.StatusCode == 404 {
+				fmt.Println(aurora.Red("MergeRequest does not exist"))
 			} else {
-				fmt.Println("Could not complete request")
-				fmt.Println(resp["responseCode"], resp["responseMessage"])
+				fmt.Println("Could not complete request: ", resp)
 			}
-			fmt.Println()
 		}
 	} else {
 		fmt.Println(aurora.Red("Invalid command"))
@@ -430,6 +422,9 @@ func ExecMergeRequest(cmdArgs map[string]string, arrCmd map[int]string) {
 		"close":       changeMergeRequestState,
 		"reopen":      changeMergeRequestState,
 		"issues":      issuesRelatedMergeRequest,
+		"approve":     approveMergeRequest,
+		"revoke":      revokeMergeRequest,
+		"update":      updateMergeRequest,
 	}
 	if _, ok := commandList[arrCmd[0]]; ok {
 		commandList[arrCmd[0]](cmdArgs, arrCmd)
