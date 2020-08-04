@@ -2,10 +2,12 @@ package glab
 
 import (
 	"fmt"
-	"github.com/logrusorgru/aurora"
+	"strings"
+
 	"glab/cmd/glab/utils"
 	"glab/commands"
-	"strings"
+
+	"github.com/logrusorgru/aurora"
 )
 
 var (
@@ -59,10 +61,8 @@ func config(cmdArgs map[string]string, arrCmd map[int]string) {
 		if commands.CommandArgExists(cmdArgs, arrCmd[i]) && commands.CommandArgExists(cmdHelpList, arrCmd[i]) {
 			commands.SetEnv(cmdHelpList[arrCmd[i]], cmdArgs[arrCmd[i]])
 			isUpdated = true
-		} else {
-			if arrCmd[0] != "global" {
-				fmt.Println(aurora.Red(arrCmd[i] + ": invalid flag"))
-			}
+		} else if arrCmd[0] != "global" {
+			fmt.Println(aurora.Red(arrCmd[i] + ": invalid flag"))
 		}
 	}
 

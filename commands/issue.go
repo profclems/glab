@@ -3,12 +3,13 @@ package commands
 import (
 	"bufio"
 	"fmt"
-	"github.com/logrusorgru/aurora"
-	"github.com/xanzy/go-gitlab"
 	"log"
 	"os"
 	"strings"
 	"text/tabwriter"
+
+	"github.com/logrusorgru/aurora"
+	"github.com/xanzy/go-gitlab"
 )
 
 func displayAllIssues(m []*gitlab.Issue) {

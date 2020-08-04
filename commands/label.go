@@ -3,11 +3,12 @@ package commands
 import (
 	"bufio"
 	"fmt"
-	"github.com/logrusorgru/aurora"
-	"github.com/xanzy/go-gitlab"
 	"log"
 	"os"
 	"strings"
+
+	"github.com/logrusorgru/aurora"
+	"github.com/xanzy/go-gitlab"
 )
 
 func createLabel(cmdArgs map[string]string, _ map[int]string) {

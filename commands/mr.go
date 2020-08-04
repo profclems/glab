@@ -3,13 +3,14 @@ package commands
 import (
 	"bufio"
 	"fmt"
-	"github.com/logrusorgru/aurora"
-	"github.com/xanzy/go-gitlab"
 	"log"
 	"net/url"
 	"os"
 	"strings"
 	"text/tabwriter"
+
+	"github.com/logrusorgru/aurora"
+	"github.com/xanzy/go-gitlab"
 )
 
 func displayMergeRequest(hm *gitlab.MergeRequest) {

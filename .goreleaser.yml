@@ -36,12 +36,13 @@ archives:
       amd64: x86_64
 
   - id: nix
-    builds: [macos]
+    builds: [macos, linux]
     <<: &archive_defaults
       name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}"
     wrap_in_directory: true
     replacements:
       darwin: macOS
+      linux: Linux
     format: tar.gz
 
   - id: windows
@@ -57,8 +58,6 @@ scoop:
   bucket:
     owner: profclems
     name: glab
-    # Optionally a token can be provided, if it differs from the token provided to GoReleaser
-    token: "{{ .Env.SCOOP_BUCKET_GITHUB_TOKEN }}"
 
   commit_author:
     name: profclems
@@ -69,7 +68,7 @@ scoop:
   description: "An open source gitlab cli tool"
   license: MIT
   persist:
-    - "config"
+    - ".glab-cli"
     - ".env"
 
 checksum:

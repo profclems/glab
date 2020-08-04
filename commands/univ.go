@@ -4,8 +4,6 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
-	"github.com/tcnksm/go-gitconfig"
-	"github.com/xanzy/go-gitlab"
 	"io"
 	"io/ioutil"
 	"log"
@@ -17,6 +15,9 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/tcnksm/go-gitconfig"
+	"github.com/xanzy/go-gitlab"
 )
 
 var (
