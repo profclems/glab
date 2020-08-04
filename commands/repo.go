@@ -4,10 +4,9 @@ func getRepoContributors() {
 	MakeRequest(`{}`, "projects/20131402/issues/1", "GET")
 }
 
-func newBranch() {
+func NewBranch() {
 
 }
 
-// ExecRepo is ...
 func ExecRepo(cmdArgs map[string]string) {
 }

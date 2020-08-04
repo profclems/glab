@@ -29,10 +29,6 @@ func issue(cmdArgs map[string]string, arrCmd map[int]string) {
 	commands.ExecIssue(cmdArgs, arrCmd)
 }
 
-func pipeline(cmdArgs map[string]string, arrCmd map[int]string) {
-	commands.ExecPipeline(cmdArgs, arrCmd)
-}
-
 func mergeRequest(cmdArgs map[string]string, arrCmd map[int]string) {
 	commands.ExecMergeRequest(cmdArgs, arrCmd)
 }
@@ -76,7 +72,6 @@ func config(cmdArgs map[string]string, arrCmd map[int]string) {
 func Exec(cmd string, cmdArgs map[string]string, arrCmd map[int]string) {
 	commandList := map[string]func(map[string]string, map[int]string){
 		"issue":     issue,
-		"pipeline": pipeline,
 		"mr":        mergeRequest,
 		"help":      Help,
 		"config":    config,
