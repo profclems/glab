@@ -52,7 +52,7 @@ archives:
     format: zip
 
 scoop:
-  url_template: "http://github.com/profclems/glab/releases/{{ .Tag }}/{{ .ArtifactName }}"
+  url_template: "http://github.com/profclems/glab/releases/download/{{ .Tag }}/{{ .ArtifactName }}"
   # Repository to push the app manifest to.
   bucket:
     owner: profclems
@@ -81,7 +81,7 @@ brews:
     tap:
       owner: profclems
       name: homebrew-tap
-    url_template: "http://github.com/profclems/glab/releases/{{ .Tag }}/{{ .ArtifactName }}"
+    url_template: "http://github.com/profclems/glab/releases/download/{{ .Tag }}/{{ .ArtifactName }}"
     # Packages your package depends on.
     homepage: "https://github.com/profclems/glab"
     dependencies:
