@@ -5,13 +5,13 @@
 
 Hi! Thanks for your interest in contributing to this project!
 
-To encourage active collaboration, pull requests are strongly encounraged, not just bug reports. "Bug reports" may also be sent in the form of a pull request containing a failing test.
+To encourage active collaboration, pull requests are strongly encouraged, not just bug reports. "Bug reports" may also be sent in the form of a pull request containing a failing test.
 
 Please do:
 
 * open an issue if things aren't working as expected
 * open an issue to propose a significant change
-* open an issue to propose a fearure
+* open an issue to propose a feature
 * open a pull request to fix a bug
 * open a pull request to fix documentation about a command
 * open a pull request if your issue is marked as relevant by a community member after having discussed the issue
