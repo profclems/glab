@@ -33,6 +33,7 @@ Read the [documentation](https://clementsam.tech/glab) for more information on t
 Download a binary suitable for your OS at the [releases page](https://github.com/profclems/glab/releases/latest).
 
 ### Quick Install (Bash)
+You can install or update `glab` with:
 ```sh
 curl -s https://raw.githubusercontent.com/profclems/glab/trunk/scripts/quick_install.sh | sudo bash
 ```
