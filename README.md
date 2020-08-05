@@ -151,7 +151,7 @@ glab config --token=sometoken --url=https://gitlab.com --pid=someprojectid --rep
 ```
 **NB**: Change gitlab.com to company or group's gitlab url if self-hosted
 
-## Envronment Variables
+## Environment Variables
   ```sh
   GITLAB_TOKEN: an authentication token for API requests. Setting this avoids being
   prompted to authenticate and overrides any previously stored credentials.
@@ -165,7 +165,7 @@ glab config --token=sometoken --url=https://gitlab.com --pid=someprojectid --rep
 ## Contributions
 Thanks for considering contributing to this project!
 
-Please read the [contibutions guide](.github/contributions.md) and [Code of conduct](.github/CODE_OF_CONDUCT.md). 
+Please read the [contributions guide](.github/contributions.md) and [Code of conduct](.github/CODE_OF_CONDUCT.md). 
 
 Feel free to open an issue or submit a pull request!
 
