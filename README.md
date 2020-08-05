@@ -27,8 +27,7 @@ GLab open source custom Gitlab Cli tool written in Go (golang) to help work seam
   ```
   
 ## Learn More
-Use "glab <command> --help" for more information about a command.
-Read the documentation at [here](https://clementsam.tech/glab)
+Read the documentation [here](https://clementsam.tech/glab).
 
 ## Installation
 Download a binary suitable for your OS at https://github.com/profclems/glab/releases/latest.
