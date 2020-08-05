@@ -1,7 +1,7 @@
 # Setup
 title:               GLab
 tagline:             'A Gitlab Cli Tool'
-description:         'An open source gitlab cli to help you work seamlessly with GitLab . Made with ❤ <a href="https://clementsam.tech" target="_blank">@Clems</a>.'
+description:         'An open source gitlab cli to help you work seamlessly with GitLab . Made with ❤ by <a href="https://clementsam.tech" target="_blank">@Clems</a>.'
 url:                 https://clementsam.tech/glab
 baseurl:             ''
 paginate:            5
@@ -20,5 +20,5 @@ plugins:
   - jekyll-paginate
 
 # Custom vars
-version:             1.5.1
-google_analytics_id: #UA-XXXX-Y
+version:             1.7.0
+google_analytics_id: UA-65416043-4
