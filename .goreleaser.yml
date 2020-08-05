@@ -114,11 +114,6 @@ nfpms:
       - git
     # Override default /usr/local/bin destination for binaries
     bindir: /usr/local/bin
-    epoch: 1
-    release: 1
-    meta: true
-    empty_folders:
-      - ~/.glab-cli/config
 
 checksum:
   name_template: 'checksums.txt'
