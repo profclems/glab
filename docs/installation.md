@@ -4,7 +4,7 @@ title: Installation
 ---
 
 ## Installation
-Download a binary suitable for your OS at https://github.com/profclems/glab/releases/latest.
+Download a binary suitable for your OS at the [releases page](https://github.com/profclems/glab/releases/latest).
 
 ### Quick Install (Bash)
 ```sh
@@ -13,25 +13,49 @@ curl -s https://raw.githubusercontent.com/profclems/glab/trunk/scripts/quick_ins
 *Installs into `usr/local/bin`*
 
 ### Windows
-Available as an installable executable file or a Portable archived file in tar and zip formats at the [releases page](https://github.com/profclems/glab/releases/latest).
+Available for download on scoop or manually as an installable executable file or a Portable archived file in tar and zip formats at the [releases page](https://github.com/profclems/glab/releases/latest).
 Download and install now at the [releases page](https://github.com/profclems/glab/releases/latest).
 
 The installable executable file sets the PATH automatically.
 
+#### Scoop
+```sh
+scoop bucket add profclems-bucket https://github.com/profclems/scoop-bucket.git
+scoop install glab
+```
+
 ### Linux
-Download the zip, unzip and install:
+Downloads available via linuxbrew (homebrew) and tar balls
 
-1. Download the `.zip` file from the [releases page](https://github.com/profclems/glab/releases/latest)
-2. `unzip glab-*-linux-amd64.zip` to unzip the downloaded file 
-3. `sudo mv glab-*-linux-amd64/glab /usr/bin` to move to the bin path so you can execute `glab` globally
+#### Linuxbrew (Homebrew)
+```sh
+brew install profclems/tap/glab
+```
+Updating:
+```sh
+brew upgrade glab
+```
 
-Or download the tar ball, untar and install:
+#### Manual Installation
+Download the tar ball, untar and install:
 
 1. Download the `.tar.gz` file from the [releases page](https://github.com/profclems/glab/releases/latest)
 2. `unzip glab-*-linux-amd64.tar.gz` to unzip the downloaded file 
 3. `sudo mv glab-*-linux-amd64/glab /usr/bin`
 
 ### MacOS
+`glab` is available via Homebrew or you can manually install
+
+#### Homebrew
+```sh
+brew install profclems/tap/glab
+```
+Updating:
+```sh
+brew upgrade glab
+```
+
+#### Installing manually
 1. Download the `.tar.gz` or `.zip` file from the [releases page](https://github.com/profclems/glab/releases/latest) and unzip or untar
 2. ls /usr/local/bin/ || sudo mkdir /usr/local/bin/; to make sure the bin folder exists
 3. `sudo mv glab-*-darwin-amd64/glab /usr/bin`
@@ -80,36 +104,6 @@ If a supported binary for your OS is not found at the [releases page](https://gi
 
 4. Run `glab help` to check if it worked.
 
-
-## Setting Up
-**To set configuration for current directory (must be a git repository)**
-```sh
-glab config --token=<YOUR-GITLAB-ACCESS-TOKEN> --url=https://gitlab.com
-```
-**To set configuration globally**
-```sh
-glab config global --token=<YOUR-GITLAB-ACCESS-TOKEN> --url=https://gitlab.com
-```
-**For initial releases up to v1.6.1**
-```sh
-glab config --token=<YOUR-GITLAB-ACCESS-TOKEN> --url=https://gitlab.com --pid=<YOUR-GITLAB-PROJECT-ID> --repo=OWNER/REPO
-```
-### Example
-```sh
-glab config --token=sometoken --url=https://gitlab.com --pid=someprojectid --repo=profclems/glab
-```
-**NB**: Change gitlab.com to company or group's gitlab url if self-hosted
-
-## Envronment Variables
-  ```sh
-  GITLAB_TOKEN: an authentication token for API requests. Setting this avoids being
-  prompted to authenticate and overrides any previously stored credentials.
-
-  GITLAB_REPO: specify the Gitlab repository in "OWNER/REPO" format for commands that
-  otherwise operate on a local repository. (Depreciated in v1.6.2) 
-
-  GITLAB_URI: specify the url of the gitlab server if self hosted (eg: https://gitlab.example.com). Default is https://github.com
-  ```
   
 ## Links
 [Issues]({{ '/issues' | absolute_url }})
