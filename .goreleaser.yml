@@ -20,7 +20,7 @@ builds:
   - <<: *build_defaults
     id: linux
     goos: [linux]
-    goarch: [386, amd64, arm64]
+    goarch: [386, amd64]
 
   - <<: *build_defaults
     id: windows
@@ -53,16 +53,13 @@ archives:
 
 scoop:
   url_template: "http://github.com/profclems/glab/releases/{{ .Tag }}/{{ .ArtifactName }}"
-
   # Repository to push the app manifest to.
   bucket:
     owner: profclems
-    name: glab
-
+    name: scoop-glab
   commit_author:
-    name: profclems
+    name: Clement Sam
     email: clementsam75@gmail.com
-
   commit_msg_template: "Scoop update for {{ .ProjectName }} version {{ .Tag }}"
   homepage: "https://github.com/profclems/glab"
   description: "An open source gitlab cli tool"
@@ -70,6 +67,58 @@ scoop:
   persist:
     - ".glab-cli"
     - ".env"
+
+brews:
+  - name: glab
+    ids:
+      - nix
+    description: "An open source gitlab cli tool"
+    commit_author:
+      name: Clement Sam
+      email: clementsam75@gmail.com
+    folder: Formula
+    goarm: 6
+    tap:
+      owner: profclems
+      name: homebrew-tap
+    url_template: "http://github.com/profclems/glab/releases/{{ .Tag }}/{{ .ArtifactName }}"
+    # Packages your package depends on.
+    homepage: "https://github.com/profclems/glab"
+    dependencies:
+      - name: git
+    test: |
+      system "#{bin}/glab --version"
+nfpms:
+  -
+    id: foo
+    package_name: glab
+    file_name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+
+    # Build IDs for the builds you want to create NFPM packages for.
+    # Defaults to all builds.
+
+    replacements:
+      amd64: x86_64
+      386: i386
+      darwin: macOS
+      linux: Linux
+    vendor: Clement Sam
+    homepage: https://github.com/profclems/glab
+    maintainer: Clement Sam <clementsam75@gmail.com>
+    description: An open source gitlab cli tool
+    license: MIT
+    formats:
+      - deb
+      - rpm
+    dependencies:
+      - git
+    # Override default /usr/local/bin destination for binaries
+    bindir: /usr/local/bin
+    epoch: 1
+    release: 1
+    meta: true
+    empty_folders:
+      - ~/.glab-cli/config
 
 checksum:
   name_template: 'checksums.txt'

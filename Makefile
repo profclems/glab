@@ -31,16 +31,8 @@ test:
 rt: #Test release
 	goreleaser --snapshot --skip-publish --rm-dist
 
+rtdebug: #Test release
+	goreleaser --snapshot --skip-publish --rm-dist --debug
+
 release:
 	goreleaser $(var)
-
-undocommit:
-	git push origin -d $(GLAB_VERSION)
-	git tag --delete $(GLAB_VERSION)
-	git revert $(git log -1 --format="%H")
-
-compileall:
-	mkdir -p ./bin
-	mkdir -p ./bin/$(GLAB_VERSION)
-	cp cmd/glab/main.go ./bin/$(GLAB_VERSION)/glab.go
-	./scripts/compile-all-plaforms.bash ./bin/$(GLAB_VERSION)/glab.go
