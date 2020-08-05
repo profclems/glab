@@ -7,25 +7,32 @@ assignees: ''
 
 ---
 
-**Describe the bug**
-A clear and concise description of what the bug is.
+<!--- Provide a general summary of the issue in the Title above -->
 
-**To Reproduce**
-Steps to reproduce the behavior:
-1. Go to '...'
-2. Type '...'
-3. See error
+**Description**
+<!--- Provide a more detailed introduction to the issue itself, and why you consider it to be a bug -->
 
-**Expected behavior**
-A clear and concise description of what you expected to happen.
+**Expected Behavior**
+<!--- Tell us what should happen -->
 
-**Screenshots**
-If applicable, add screenshots to help explain your problem.
+**Actual Behavior**
+<!--- Tell us what happens instead -->
 
-**Software Info(please complete the following information):**
- - OS: [e.g. MacOS]
- - Architechure [e.g. arm64]
- - Version [e.g. Glab v0.1.0]
+**Possible Fix**
+<!--- Not obligatory, but suggest a fix or reason for the bug -->
 
-**Additional context**
-Add any other context about the problem here.
+**Steps to Reproduce**
+<!--- Provide a link to a live example, or an unambiguous set of steps to -->
+<!--- reproduce this bug. Include code to reproduce, if relevant -->
+1.
+2.
+3.
+4.
+
+**Context**
+<!--- How has this bug affected you? What were you trying to accomplish? -->
+
+**Your Environment**
+<!--- Include as many relevant details about the environment you experienced the bug in -->
+* Version used:
+* Operating System and version:
