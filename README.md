@@ -30,7 +30,7 @@ GLab open source custom Gitlab Cli tool written in Go (golang) to help work seam
 Read the documentation [here](https://clementsam.tech/glab).
 
 ## Installation
-Download a binary suitable for your OS at https://github.com/profclems/glab/releases/latest.
+Download a binary suitable for your OS at the [releases page](https://github.com/profclems/glab/releases/latest).
 
 ### Quick Install (Bash)
 ```sh
