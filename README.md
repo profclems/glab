@@ -25,6 +25,10 @@ GLab open source custom Gitlab Cli tool written in Go (golang) to help work seam
   $ glab issue create --title="This is an issue title" --description="This is a really long description"
   $ glab issue list --closed
   ```
+  
+## Learn More
+Use "glab <command> --help" for more information about a command.
+Read the documentation at [here](https://clementsam.tech/glab)
 
 ## Installation
 Download a binary suitable for your OS at https://github.com/profclems/glab/releases/latest.
@@ -133,11 +137,6 @@ glab config --token=sometoken --url=https://gitlab.com --pid=someprojectid --rep
 
   GITLAB_URI: specify the url of the gitlab server if self hosted (eg: https://gitlab.example.com). Default is https://github.com
   ```
-  
-## Learn More
-Use "glab <command> --help" for more information about a command.
-Read the documentation at https://clementsam.tech/glab
-
 
 ## Contributions
 Thanks for considering contributing to this project!
