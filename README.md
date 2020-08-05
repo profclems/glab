@@ -153,3 +153,5 @@ Feel free to open an issue or submit a pull request!
 
 ## Author
 Built with ❤ by [Clement Sam](https://clementsam.tech)
+
+[![image](https://cdn.buymeacoffee.com/buttons/default-green.png)](https://www.buymeacoffee.com/profclems)
