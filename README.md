@@ -165,7 +165,7 @@ glab config --token=sometoken --url=https://gitlab.com --pid=someprojectid --rep
 ## Contributions
 Thanks for considering contributing to this project!
 
-Please read the [contributions guide](.github/contributions.md) and [Code of conduct](.github/CODE_OF_CONDUCT.md). 
+Please read the [contributions guide](.github/CONTRIBUTING.md) and [Code of conduct](.github/CODE_OF_CONDUCT.md). 
 
 Feel free to open an issue or submit a pull request!
 
