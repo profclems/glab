@@ -155,11 +155,14 @@ glab config --token=sometoken --url=https://gitlab.com --pid=someprojectid --rep
   ```sh
   GITLAB_TOKEN: an authentication token for API requests. Setting this avoids being
   prompted to authenticate and overrides any previously stored credentials.
+  Can be set with `glab config --token=<YOUR-GITLAB-ACCESS-TOKEN>`
 
   GITLAB_REPO: specify the Gitlab repository in "OWNER/REPO" format for commands that
   otherwise operate on a local repository. (Depreciated in v1.6.2) 
+  Can be set with `glab config --repo=OWNER/REPO`
 
-  GITLAB_URI: specify the url of the gitlab server if self hosted (eg: https://gitlab.example.com). Default is https://github.com
+  GITLAB_URI: specify the url of the gitlab server if self hosted (eg: https://gitlab.example.com). Default is https://gitlab.com.
+  Can be set with `git config --url=gitlab.example.com`
   ```
 
 ## Contributions
