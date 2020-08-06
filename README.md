@@ -15,7 +15,7 @@ GLab is an open source Gitlab Cli tool written in Go (golang) to help work seaml
 
 - `glab mr [list, create, close, reopen, delete]`
 - `glab issue [list, create, close, reopen, delete]`
-- `glab pipline [list, delete]`
+- `glab pipeline [list, delete]`
 - `glab config`
 - `glab help`
 
