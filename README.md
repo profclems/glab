@@ -162,7 +162,7 @@ glab config --token=sometoken --url=https://gitlab.com --pid=someprojectid --rep
   Can be set with `glab config --repo=OWNER/REPO`
 
   GITLAB_URI: specify the url of the gitlab server if self hosted (eg: https://gitlab.example.com). Default is https://gitlab.com.
-  Can be set with `git config --url=gitlab.example.com`
+  Can be set with `glab config --url=gitlab.example.com`
   ```
 
 ## Contributions
