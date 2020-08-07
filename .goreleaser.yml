@@ -39,7 +39,7 @@ archives:
     builds: [macos, linux]
     <<: &archive_defaults
       name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}"
-    wrap_in_directory: true
+    wrap_in_directory: false
     replacements:
       darwin: macOS
       linux: Linux
@@ -72,7 +72,7 @@ brews:
   - name: glab
     ids:
       - nix
-    description: "An open source gitlab cli tool"
+    description: "An open source GitLab CLI tool"
     commit_author:
       name: Clement Sam
       email: clementsam75@gmail.com
@@ -86,8 +86,9 @@ brews:
     homepage: "https://github.com/profclems/glab"
     dependencies:
       - name: git
+    install: bin.install "bin/glab"
     test: |
-      system "#{bin}/glab --version"
+      system "#{bin}/glab version"
 nfpms:
   -
     id: foo
