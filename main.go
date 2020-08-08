@@ -1,7 +1,10 @@
 package glab
 
 import (
+	"bufio"
 	"fmt"
+	"log"
+	"os"
 	"strings"
 
 	"glab/cmd/glab/utils"
@@ -32,6 +35,26 @@ func Help(args map[string]string, arrCmd map[int]string) {
 	utils.PrintHelpHelp()
 }
 
+func readAndTrimString(defaultVal string) string  {
+	reader := bufio.NewReader(os.Stdin)
+	str, _ := reader.ReadString('\n')
+	str = strings.TrimSuffix(str, "\n")
+	if str == "" && defaultVal != "" {
+		return defaultVal
+	}
+	return str
+}
+
+func readAndSetEnv(env string) string  {
+	var envDefVal string
+	if env == "" {
+		envDefVal = commands.GetEnv(env)
+	}
+	envVal := readAndTrimString(envDefVal)
+	commands.SetEnv(env, envVal)
+	return envVal
+}
+
 func config(cmdArgs map[string]string, arrCmd map[int]string) {
 	cmdHelpList := map[string]string{
 		"uri":        "GITLAB_URI",
@@ -59,16 +82,25 @@ func config(cmdArgs map[string]string, arrCmd map[int]string) {
 	}
 	for i := 0; i < len(arrCmd); i++ {
 		if commands.CommandArgExists(cmdArgs, arrCmd[i]) && commands.CommandArgExists(cmdHelpList, arrCmd[i]) {
-			commands.SetEnv(cmdHelpList[arrCmd[i]], cmdArgs[arrCmd[i]])
+			if arrCmd[0] != "unset" {
+				commands.SetEnv(cmdHelpList[arrCmd[i]], "")
+			} else {
+				commands.SetEnv(cmdHelpList[arrCmd[i]], cmdArgs[arrCmd[i]])
+			}
 			isUpdated = true
-		} else if arrCmd[0] != "global" {
+		} else if arrCmd[0] != "global" && arrCmd[0] != "init" {
 			fmt.Println(aurora.Red(arrCmd[i] + ": invalid flag"))
 		}
 	}
-
-	if isUpdated {
-		fmt.Println(aurora.Green("Environment variable(s) updated"))
+	if !isUpdated {
+		fmt.Printf("Enter default Gitlab Host (Current Value: %s): ", commands.GetEnv("GITLAB_URI"))
+		readAndSetEnv("GITLAB_URI")
+		fmt.Print("Enter default Gitlab Token: ")
+		readAndSetEnv("GITLAB_TOKEN")
+		fmt.Printf("Enter Git remote url variable (Current Value: %s): ", commands.GetEnv("GIT_REMOTE_URL_VAR"))
+		readAndSetEnv("GIT_REMOTE_URL_VAR")
 	}
+	fmt.Println(aurora.Green("Environment variable(s) updated"))
 }
 
 // Exec is exported
@@ -98,13 +130,15 @@ func Exec(cmd string, cmdArgs map[string]string, arrCmd map[int]string) {
 					"mr":    utils.PrintHelpMr,
 					"repo":  utils.PrintHelpRepo,
 				}
-				cmdHelpList[cmd]()
+				if _, ok := cmdHelpList[cmd]; ok {
+					cmdHelpList[cmd]()
+				} else {
+					log.Fatal("Invalid command")
+				}
 			}
 		}
 		commandList[cmd](cmdArgs, arrCmd)
 	} else {
-		fmt.Println(cmd + ": command not found")
-		fmt.Println()
-		Help(cmdArgs, arrCmd)
+		log.Fatal(cmd + ": command not found")
 	}
 }

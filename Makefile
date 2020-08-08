@@ -16,23 +16,20 @@ ifndef CGO_LDFLAGS
     export CGO_LDFLAGS := $(LDFLAGS)
 endif
 
-GO_LDFLAGS := -X glab.version=$(GLAB_VERSION) $(GO_LDFLAGS)
-GO_LDFLAGS := -X glab.build=$(BUILD_DATE) $(GO_LDFLAGS)
+GO_LDFLAGS := -X commands.Version=$(GLAB_VERSION) $(GO_LDFLAGS)
+GO_LDFLAGS := -X commands.build=$(BUILD_DATE) $(GO_LDFLAGS)
 
 build:
 	go build -trimpath -ldflags "$(GO_LDFLAGS)" -o ./bin/glab ./cmd/glab
-
 run:
-	go run -trimpath -ldflags "$(GO_LDFLAGS)" cmd/glab/main.go $(var)
-
+	go run -trimpath -ldflags "$(GO_LDFLAGS)" ./cmd/glab $(var)
 test:
 	go test ./...
-
 rt: #Test release
 	goreleaser --snapshot --skip-publish --rm-dist
-
 rtdebug: #Test release
 	goreleaser --snapshot --skip-publish --rm-dist --debug
-
 release:
 	goreleaser $(var)
+docs:
+	go run ./cmd/gen-docs/docs.go
