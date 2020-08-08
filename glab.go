@@ -90,7 +90,7 @@ func Exec(cmd string, cmdArgs map[string]string, arrCmd map[int]string) {
 	}
 	if commands.CommandExists(commandList, cmd) {
 
-		if len(cmdArgs) > 0 {
+		if len(cmdArgs) == 1 {
 			if cmdArgs["help"] == "true" {
 				cmdHelpList := map[string]func(){
 					"help":  utils.PrintHelpHelp,
@@ -99,6 +99,7 @@ func Exec(cmd string, cmdArgs map[string]string, arrCmd map[int]string) {
 					"repo":  utils.PrintHelpRepo,
 				}
 				cmdHelpList[cmd]()
+				return
 			}
 		}
 		commandList[cmd](cmdArgs, arrCmd)

@@ -3,6 +3,7 @@ package commands
 import (
 	"bufio"
 	"fmt"
+	"glab/cmd/glab/utils"
 	"log"
 	"os"
 	"strings"
@@ -281,6 +282,21 @@ func ExecIssue(cmdArgs map[string]string, arrCmd map[int]string) {
 		"close":       changeIssueState,
 	}
 	if _, ok := commandList[arrCmd[0]]; ok {
+		if cmdArgs["help"] == "true" {
+			issueHelpList := map[string]func(){
+				"create":      utils.PrintHelpIssueCreate,
+				"list":        utils.PrintHelpIssueList,
+				"ls":          utils.PrintHelpIssueList,
+				"delete":      utils.PrintHelpIssueDelete,
+				"subscribe":   utils.PrintHelpIssueSubscribe,
+				"unsubscribe": utils.PrintHelpIssueUnsubscribe,
+				"open":        utils.PrintHelpIssueOpen,
+				"reopen":      utils.PrintHelpIssueReopen,
+				"close":       utils.PrintHelpIssueClose,
+			}
+			issueHelpList[arrCmd[0]]()
+			return
+		}
 		commandList[arrCmd[0]](cmdArgs, arrCmd)
 	} else {
 		fmt.Println(arrCmd[0]+":", "Invalid Command")
