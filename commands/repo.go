@@ -64,10 +64,9 @@ func archiveRepo(repository string, format string, name string) {
 	l.Format = gitlab.String(format)
 	ext := *l.Format
 	archiveName := strings.Replace(GetEnv("GITLAB_REPO"), "/", "-", -1)
-	if  len(strings.TrimSpace(name)) != 0{
+	if len(strings.TrimSpace(name)) != 0 {
 		archiveName = name + "." + ext
 	}
-	
 
 	bt, _, err := git.Repositories.Archive(GetEnv("GITLAB_PROJECT_ID"), l)
 	if err != nil {

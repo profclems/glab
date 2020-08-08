@@ -53,7 +53,7 @@ Built with ❤ by Clement Sam <https://clementsam.tech>`)
 //RepoHelp print help
 func RepoHelp(message string) {
 
-	fmt.Println(message,`
+	fmt.Println(message, `
 
 USAGE
   glab repo clone  <owner/repo> [<dir>] [<options>] [<flags>]

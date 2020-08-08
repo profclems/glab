@@ -78,7 +78,7 @@ func Exec(cmd string, cmdArgs map[string]string, arrCmd map[int]string) {
 		"mr":        commands.ExecMergeRequest,
 		"label":     commands.ExecLabel,
 		"pipeline":  commands.ExecPipeline,
-		"repo":  commands.ExecRepo,
+		"repo":      commands.ExecRepo,
 		"help":      Help,
 		"config":    config,
 		"version":   printVersion,
