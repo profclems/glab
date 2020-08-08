@@ -98,6 +98,7 @@ func Exec(cmd string, cmdArgs map[string]string, arrCmd map[int]string) {
 					"issue": utils.PrintHelpIssue,
 					"mr":    utils.PrintHelpMr,
 					"repo":  utils.PrintHelpRepo,
+					"pipeline": utils.PrintHelpPipeline,
 				}
 				cmdHelpList[cmd]()
 				return

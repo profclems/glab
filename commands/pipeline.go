@@ -2,6 +2,7 @@ package commands
 
 import (
 	"fmt"
+	"glab/cmd/glab/utils"
 	"log"
 	"os"
 	"strings"
@@ -87,6 +88,14 @@ func ExecPipeline(cmdArgs map[string]string, arrCmd map[int]string) {
 		"delete": deletePipeline,
 	}
 	if _, ok := commandList[arrCmd[0]]; ok {
+		if cmdArgs["help"] == "true" {
+			pipelineHelpList := map[string]func(){
+				"list":   utils.PrintHelpPipelineList,
+				"delete": utils.PrintHelpPipelineDelete,
+			}
+			pipelineHelpList[arrCmd[0]]()
+			return
+		}
 		commandList[arrCmd[0]](cmdArgs, arrCmd)
 	} else {
 		fmt.Println(arrCmd[0]+":", "Invalid Command")
