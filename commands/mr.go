@@ -3,6 +3,7 @@ package commands
 import (
 	"bufio"
 	"fmt"
+	"glab/cmd/glab/utils"
 	"log"
 	"net/url"
 	"os"
@@ -428,6 +429,26 @@ func ExecMergeRequest(cmdArgs map[string]string, arrCmd map[int]string) {
 		"update":      updateMergeRequest,
 	}
 	if _, ok := commandList[arrCmd[0]]; ok {
+		if cmdArgs["help"] == "true" {
+			mrHelpList := map[string]func(){
+				"create":      utils.PrintHelpMrCreate,
+				"list":        utils.PrintHelpMrList,
+				"ls":          utils.PrintHelpMrList,
+				"delete":      utils.PrintHelpMrDelete,
+				"subscribe":   utils.PrintHelpMrSubscribe,
+				"unsubscribe": utils.PrintHelpMrUnsubscribe,
+				"accept":      utils.PrintHelpMrAccept,
+				"merge":       utils.PrintHelpMrAccept,
+				"close":       utils.PrintHelpMrClose,
+				"reopen":      utils.PrintHelpMrReopen,
+				"issues":      utils.PrintHelpMrIssues,
+				"approve":     utils.PrintHelpMrApprove,
+				"revoke":      utils.PrintHelpMrRevoke,
+				"update":      utils.PrintHelpMrUpdate,
+			}
+			mrHelpList[arrCmd[0]]()
+			return
+		}
 		commandList[arrCmd[0]](cmdArgs, arrCmd)
 	} else {
 		fmt.Println(arrCmd[0]+":", "Invalid Command")
