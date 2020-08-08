@@ -21,7 +21,7 @@ ADDITIONAL COMMANDS
   help:       Help about any command
 
 FLAGS
-  --help      Show help for command
+  -h, --help  Show help for command
   --version   Show glab version
 
 EXAMPLES
