@@ -56,7 +56,7 @@ func RepoHelp(message string) {
 	fmt.Println(message,`
 
 USAGE
-  glab repo clone  <owner/repo> [<dir>] [<options>]
+  glab repo clone  <owner/repo> [<dir>] [<options>] [<flags>]
 
 OPTIONS
   format:      clone the repository as archive ,use values [zip,tar]
