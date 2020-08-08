@@ -54,7 +54,7 @@ func archiveRepo(repository string, format string, name string) {
 	extensions := []string{"tar.gz", "tar.bz2", "tbz", "tbz2", "tb2", "bz2", "tar", "zip"}
 	if b := contains(extensions, format); !b {
 
-		utils.RepoHelp("fatal: --format must be one of " + strings.Join(extensions[:], ","))
+		fmt.Println("fatal: --format must be one of " + strings.Join(extensions[:], ","))
 
 		return
 	}
@@ -101,7 +101,7 @@ func cloneRepo(cmdOptions map[string]string, cmdArgs map[int]string) {
 
 	if len(strings.TrimSpace(repo)) == 0 || !strings.Contains(repo, "/") {
 
-		utils.RepoHelp("fatal: You must specify a owner/repository to clone.")
+		fmt.Println("fatal: You must specify a owner/repository to clone.")
 
 		return
 	}
@@ -131,6 +131,13 @@ func ExecRepo(cmdArgs map[string]string, arrCmd map[int]string) {
 		"clone": cloneRepo,
 	}
 	if _, ok := commandList[arrCmd[0]]; ok {
+		if cmdArgs["help"] == "true" {
+			repoHelpList := map[string]func(){
+				"clone": utils.PrintHelpRepoClone,
+			}
+			repoHelpList[arrCmd[0]]()
+			return
+		}
 		commandList[arrCmd[0]](cmdArgs, arrCmd)
 	} else {
 		fmt.Println(arrCmd[0]+":", "Invalid Command")
