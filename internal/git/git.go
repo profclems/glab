@@ -30,6 +30,7 @@ func GetRepo() string {
 	return repo
 }
 
+// getRepoNameWithNamespace returns the the repo with its namespace (like profclems/glab). Respects group and subgroups names
 func getRepoNameWithNamespace(remoteURL string) (string, error)  {
 	parts := strings.Split(remoteURL, "//")
 
@@ -59,7 +60,11 @@ func InitGitlabClient() (*gitlab.Client, string) {
 	if err != nil {
 		log.Fatalf("Failed to create client: %v", err)
 	}
-	return git, strings.ReplaceAll(GetRepo(), "-", "%2D")
+	projectID := config.GetEnv("GITLAB_PROJECT_ID")
+	if projectID == "" {
+		projectID = GetRepo()
+	}
+	return git, projectID
 }
 
 // ErrNotOnAnyBranch indicates that the users is in detached HEAD state
@@ -338,4 +343,14 @@ func firstLine(output []byte) string {
 		return string(output)[0:i]
 	}
 	return string(output)
+}
+
+func RunCmd(args...string)  {
+	showRef := exec.Command("git", args...)
+	output, err := run.PrepareCmd(showRef).Output()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println(output)
 }

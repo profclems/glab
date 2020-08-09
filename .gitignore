@@ -13,11 +13,10 @@
 
 # Dependency directories (remove the comment below to include it)
 # vendor/
-cmd/glab/config/.env
 cmd/glab/bin
 cmd/glab/bin/*
 bin
-config
 dist
 cmd/glab/dist
+.idea
 .glab-cli

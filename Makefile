@@ -31,5 +31,5 @@ rtdebug: #Test release
 	goreleaser --snapshot --skip-publish --rm-dist --debug
 release:
 	goreleaser $(var)
-docs:
+gen-docs:
 	go run ./cmd/gen-docs/docs.go
