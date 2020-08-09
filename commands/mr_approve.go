@@ -12,12 +12,12 @@ import (
 )
 
 var mrApproveCmd = &cobra.Command{
-	Use:   "approve <id> [flags]",
-	Short: `Approve merge requests`,
-	Long:  ``,
+	Use:     "approve <id> [flags]",
+	Short:   `Approve merge requests`,
+	Long:    ``,
 	Aliases: []string{"ls"},
 	Args:    cobra.MaximumNArgs(1),
-	Run: approveMergeRequest,
+	Run:     approveMergeRequest,
 }
 
 func approveMergeRequest(cmd *cobra.Command, args []string) {

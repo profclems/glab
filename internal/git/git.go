@@ -31,7 +31,7 @@ func GetRepo() string {
 }
 
 // getRepoNameWithNamespace returns the the repo with its namespace (like profclems/glab). Respects group and subgroups names
-func getRepoNameWithNamespace(remoteURL string) (string, error)  {
+func getRepoNameWithNamespace(remoteURL string) (string, error) {
 	parts := strings.Split(remoteURL, "//")
 
 	if len(parts) == 1 {
@@ -43,11 +43,11 @@ func getRepoNameWithNamespace(remoteURL string) (string, error)  {
 		part := parts[1]
 		parts = strings.SplitN(part, "/", 2)
 	} else {
-		return "", errors.New("cannot parse remote: " + config.GetEnv("GIT_REMOTE_URL_VAR") + " url: "+ remoteURL)
+		return "", errors.New("cannot parse remote: " + config.GetEnv("GIT_REMOTE_URL_VAR") + " url: " + remoteURL)
 	}
 
 	if len(parts) != 2 {
-		return "", errors.New("cannot parse remote: " + config.GetEnv("GIT_REMOTE_URL_VAR") + " url: "+ remoteURL)
+		return "", errors.New("cannot parse remote: " + config.GetEnv("GIT_REMOTE_URL_VAR") + " url: " + remoteURL)
 	}
 	repo := parts[1]
 	repo = strings.TrimSuffix(repo, ".git")
@@ -345,7 +345,7 @@ func firstLine(output []byte) string {
 	return string(output)
 }
 
-func RunCmd(args...string)  {
+func RunCmd(args ...string) {
 	showRef := exec.Command("git", args...)
 	output, err := run.PrepareCmd(showRef).Output()
 	if err != nil {

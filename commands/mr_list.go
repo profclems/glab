@@ -7,21 +7,21 @@ import (
 )
 
 var mrListCmd = &cobra.Command{
-	Use:   "list [flags]",
-	Short: `List merge requests`,
-	Long:  ``,
+	Use:     "list [flags]",
+	Short:   `List merge requests`,
+	Long:    ``,
 	Aliases: []string{"ls"},
 	Args:    cobra.MaximumNArgs(3),
-	RunE: listMergeRequest,
+	RunE:    listMergeRequest,
 }
 
 func listMergeRequest(cmd *cobra.Command, args []string) error {
 	var state string
-	if lb, _ := cmd.Flags().GetBool("all"); lb  {
+	if lb, _ := cmd.Flags().GetBool("all"); lb {
 		state = "all"
-	} else if lb, _ := cmd.Flags().GetBool("closed"); lb  {
+	} else if lb, _ := cmd.Flags().GetBool("closed"); lb {
 		state = "closed"
-	} else if lb, _ := cmd.Flags().GetBool("merged"); lb  {
+	} else if lb, _ := cmd.Flags().GetBool("merged"); lb {
 		state = "merged"
 	} else {
 		state = "opened"
@@ -36,7 +36,7 @@ func listMergeRequest(cmd *cobra.Command, args []string) error {
 		}
 		l.Labels = &label
 	}
-	if lb, _ := cmd.Flags().GetString("milestone"); lb != ""  {
+	if lb, _ := cmd.Flags().GetString("milestone"); lb != "" {
 		l.Milestone = gitlab.String(lb)
 	}
 

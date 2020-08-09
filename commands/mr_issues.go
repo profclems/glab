@@ -10,13 +10,13 @@ import (
 )
 
 var mrIssuesCmd = &cobra.Command{
-	Use:   "issues <id>",
-	Short: `Get issues related to a particular merge request.`,
-	Long:  ``,
+	Use:     "issues <id>",
+	Short:   `Get issues related to a particular merge request.`,
+	Long:    ``,
 	Aliases: []string{"issue"},
 	Args:    cobra.MaximumNArgs(1),
 	Example: "$ glab mr issues 46",
-	Run: issuesRelatedMergeRequest,
+	Run:     issuesRelatedMergeRequest,
 }
 
 func issuesRelatedMergeRequest(cmd *cobra.Command, args []string) {

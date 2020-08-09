@@ -14,9 +14,10 @@ var pipelineListCmd = &cobra.Command{
 	$ glab pipeline list
 	$ glab pipeline list --state=failed
 	`),
-	Long:  ``,
-	Run: listPipelines,
+	Long: ``,
+	Run:  listPipelines,
 }
+
 func listPipelines(cmd *cobra.Command, args []string) {
 	gitlabClient, repo := git.InitGitlabClient()
 	l := &gitlab.ListProjectPipelinesOptions{}

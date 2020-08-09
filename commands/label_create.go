@@ -7,17 +7,16 @@ import (
 	"glab/internal/git"
 )
 
-
 var labelCreateCmd = &cobra.Command{
-	Use:   "create <id> [flags]",
-	Short: `Create labels for repository/project`,
-	Long:  ``,
+	Use:     "create <id> [flags]",
+	Short:   `Create labels for repository/project`,
+	Long:    ``,
 	Aliases: []string{"new"},
 	Args:    cobra.MaximumNArgs(1),
-	Run: createLabel,
+	Run:     createLabel,
 }
 
-func createLabel (cmd *cobra.Command, args []string) {
+func createLabel(cmd *cobra.Command, args []string) {
 
 	gitlabClient, repo := git.InitGitlabClient()
 	l := &gitlab.CreateLabelOptions{}

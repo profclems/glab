@@ -42,9 +42,9 @@ func displayMultiplePipelines(m []*gitlab.PipelineInfo) {
 
 // pipelineCmd is merge request command
 var pipelineCmd = &cobra.Command{
-	Use:   "pipeline <command> [flags]",
-	Short: `Manage pipelines`,
-	Long:  ``,
+	Use:     "pipeline <command> [flags]",
+	Short:   `Manage pipelines`,
+	Long:    ``,
 	Aliases: []string{"pipe"},
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 || len(args) > 2 {

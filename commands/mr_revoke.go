@@ -12,11 +12,11 @@ import (
 )
 
 var mrRevokeCmd = &cobra.Command{
-	Use:   "revoke <id>",
-	Short: `Revoke approval on a merge request <id>`,
-	Long:  ``,
+	Use:     "revoke <id>",
+	Short:   `Revoke approval on a merge request <id>`,
+	Long:    ``,
 	Aliases: []string{"unapprove"},
-	Run: revokeMergeRequest,
+	Run:     revokeMergeRequest,
 }
 
 func revokeMergeRequest(cmd *cobra.Command, args []string) {

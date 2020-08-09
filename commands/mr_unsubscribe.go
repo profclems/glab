@@ -12,11 +12,11 @@ import (
 )
 
 var mrUnsubscribeCmd = &cobra.Command{
-	Use:   "unsubscribe <id>",
-	Short: `Unsubscribe to merge requests`,
-	Long:  ``,
+	Use:     "unsubscribe <id>",
+	Short:   `Unsubscribe to merge requests`,
+	Long:    ``,
 	Aliases: []string{"unsub"},
-	Run: unsubscribeMergeRequest,
+	Run:     unsubscribeMergeRequest,
 }
 
 func unsubscribeMergeRequest(cmd *cobra.Command, args []string) {
