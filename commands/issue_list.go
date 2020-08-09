@@ -15,9 +15,9 @@ var issueListCmd = &cobra.Command{
 	Args:    cobra.MaximumNArgs(3),
 	Run: func(cmd *cobra.Command, args []string) {
 		var state string
-		if lb, _ := cmd.Flags().GetBool("all"); lb  {
+		if lb, _ := cmd.Flags().GetBool("all"); lb {
 			state = "all"
-		} else if lb, _ := cmd.Flags().GetBool("closed"); lb  {
+		} else if lb, _ := cmd.Flags().GetBool("closed"); lb {
 			state = "closed"
 		} else {
 			state = "opened"
@@ -26,16 +26,16 @@ var issueListCmd = &cobra.Command{
 		l := &gitlab.ListProjectIssuesOptions{
 			State: gitlab.String(state),
 		}
-		if lb, _ := cmd.Flags().GetString("label"); lb != ""  {
+		if lb, _ := cmd.Flags().GetString("label"); lb != "" {
 			label := gitlab.Labels{
 				lb,
 			}
 			l.Labels = label
 		}
-		if lb, _ := cmd.Flags().GetString("milestone"); lb != ""  {
+		if lb, _ := cmd.Flags().GetString("milestone"); lb != "" {
 			l.Milestone = gitlab.String(lb)
 		}
-		if lb, _ := cmd.Flags().GetBool("confidential"); lb  {
+		if lb, _ := cmd.Flags().GetBool("confidential"); lb {
 			l.Confidential = gitlab.Bool(lb)
 		}
 

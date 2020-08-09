@@ -11,12 +11,12 @@ import (
 )
 
 var mrReopenCmd = &cobra.Command{
-	Use:   "reopen <id>",
-	Short: `Reopen merge requests`,
-	Long:  ``,
+	Use:     "reopen <id>",
+	Short:   `Reopen merge requests`,
+	Long:    ``,
 	Aliases: []string{"open"},
 	Args:    cobra.MaximumNArgs(1),
-	Run: reopenMergeRequestState,
+	Run:     reopenMergeRequestState,
 }
 
 func reopenMergeRequestState(cmd *cobra.Command, args []string) {
@@ -35,7 +35,7 @@ func reopenMergeRequestState(cmd *cobra.Command, args []string) {
 			} else if resp.StatusCode == 404 {
 				er("MergeRequest does not exist")
 			} else {
-				er("Could not complete request: "+resp.Status)
+				er("Could not complete request: " + resp.Status)
 			}
 		}
 	} else {

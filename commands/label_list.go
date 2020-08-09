@@ -9,12 +9,12 @@ import (
 )
 
 var labelListCmd = &cobra.Command{
-	Use:   "list <id> [flags]",
-	Short: `List labels in repository`,
-	Long:  ``,
+	Use:     "list <id> [flags]",
+	Short:   `List labels in repository`,
+	Long:    ``,
 	Aliases: []string{"ls"},
 	Args:    cobra.MaximumNArgs(1),
-	Run: listLabels,
+	Run:     listLabels,
 }
 
 func listLabels(cmd *cobra.Command, args []string) {
@@ -27,7 +27,7 @@ func listLabels(cmd *cobra.Command, args []string) {
 	fmt.Printf("Showing label %d of %d on %s", len(labels), len(labels), repo)
 	fmt.Println()
 	for _, label := range labels {
-		color.HEX(strings.Trim(label.Color, "#")).Printf("#%d %s\n",label.ID, label.Name)
+		color.HEX(strings.Trim(label.Color, "#")).Printf("#%d %s\n", label.ID, label.Name)
 	}
 }
 

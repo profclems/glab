@@ -11,13 +11,13 @@ import (
 )
 
 var mrDeleteCmd = &cobra.Command{
-	Use:   "delete <id>",
-	Short: `Delete merge requests`,
-	Long:  ``,
+	Use:     "delete <id>",
+	Short:   `Delete merge requests`,
+	Long:    ``,
 	Aliases: []string{"del"},
 	Args:    cobra.MaximumNArgs(1),
 	Example: "$ glab delete 123",
-	RunE: deleteMergeRequest,
+	RunE:    deleteMergeRequest,
 }
 
 func deleteMergeRequest(cmd *cobra.Command, args []string) error {

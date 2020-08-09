@@ -11,9 +11,9 @@ import (
 )
 
 var mrCreateCmd = &cobra.Command{
-	Use:   "create",
-	Short: `Create new merge request`,
-	Long:  ``,
+	Use:     "create",
+	Short:   `Create new merge request`,
+	Long:    ``,
 	Aliases: []string{"new"},
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) > 0 {

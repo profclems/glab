@@ -32,7 +32,7 @@ var issueSubscribeCmd = &cobra.Command{
 				} else if resp.StatusCode == 404 {
 					er("Issue does not exist")
 				} else {
-					er("Could not complete request; "+ resp.Status)
+					er("Could not complete request; " + resp.Status)
 				}
 			}
 		} else {

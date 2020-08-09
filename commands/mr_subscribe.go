@@ -12,11 +12,11 @@ import (
 )
 
 var mrSubscribeCmd = &cobra.Command{
-	Use:   "subscribe <id>",
-	Short: `Subscribe to merge requests`,
-	Long:  ``,
+	Use:     "subscribe <id>",
+	Short:   `Subscribe to merge requests`,
+	Long:    ``,
 	Aliases: []string{"sub"},
-	Run: subscribeSubscribeRequest,
+	Run:     subscribeSubscribeRequest,
 }
 
 func subscribeSubscribeRequest(cmd *cobra.Command, args []string) {
@@ -36,7 +36,7 @@ func subscribeSubscribeRequest(cmd *cobra.Command, args []string) {
 			} else if resp.StatusCode == 404 {
 				er("Merge Request does not exist")
 			} else {
-				er("Could not complete request."+resp.Status)
+				er("Could not complete request." + resp.Status)
 			}
 		}
 	} else {

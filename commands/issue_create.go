@@ -11,9 +11,9 @@ import (
 )
 
 var issueCreateCmd = &cobra.Command{
-	Use:   "create [flags]",
-	Short: `Create an issue`,
-	Long:  ``,
+	Use:     "create [flags]",
+	Short:   `Create an issue`,
+	Long:    ``,
 	Aliases: []string{"new"},
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) > 0 {
@@ -28,7 +28,7 @@ var issueCreateCmd = &cobra.Command{
 		if title, _ := cmd.Flags().GetString("title"); title != "" {
 			issueTitle = strings.Trim(title, " ")
 		} else {
-			issueTitle = manip.AskQuestionWithInput("Title","", true)
+			issueTitle = manip.AskQuestionWithInput("Title", "", true)
 		}
 		if label, _ := cmd.Flags().GetString("label"); label != "" {
 			issueLabel = strings.Trim(label, "[] ")

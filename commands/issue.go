@@ -27,7 +27,7 @@ func displayAllIssues(m []*gitlab.Issue) {
 		for _, issue := range m {
 			var labels string
 			for _, l := range issue.Labels {
-				labels+=" "+l+","
+				labels += " " + l + ","
 			}
 			labels = strings.Trim(labels, ", ")
 			duration := manip.TimeAgo(*issue.CreatedAt)
@@ -58,7 +58,7 @@ var issueCmd = &cobra.Command{
 	Short: `Create, view and manage remote issues`,
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-		if len(args)==0 || len(args) > 2 {
+		if len(args) == 0 || len(args) > 2 {
 			cmd.Help()
 			return
 		}

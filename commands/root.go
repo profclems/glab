@@ -12,15 +12,16 @@ import (
 	"github.com/spf13/cobra"
 	"glab/internal/config"
 )
+
 // Version is set at build
 var Version string
 var build string
 var commit string
 
 var RootCmd = &cobra.Command{
-	Use:   "glab <command> <subcommand> [flags]",
-	Short: "A GitLab CLI Tool",
-	Long: `GLab is an open source Gitlab Cli tool bringing GitLab to your command line`,
+	Use:           "glab <command> <subcommand> [flags]",
+	Short:         "A GitLab CLI Tool",
+	Long:          `GLab is an open source Gitlab Cli tool bringing GitLab to your command line`,
 	SilenceErrors: true,
 	SilenceUsage:  true,
 	Example: heredoc.Doc(`
@@ -65,7 +66,6 @@ var RootCmd = &cobra.Command{
 	},
 }
 
-
 // Execute executes the root command.
 func Execute() error {
 	return RootCmd.Execute()
@@ -73,9 +73,9 @@ func Execute() error {
 
 // versionCmd represents the version command
 var versionCmd = &cobra.Command{
-	Use:   "version",
-	Short: "show glab version information",
-	Long:  ``,
+	Use:     "version",
+	Short:   "show glab version information",
+	Long:    ``,
 	Aliases: []string{"v"},
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Printf("glab version %s (%s)\n%s\n%s\n", Version, build, commit, changelogURL(Version))
@@ -85,11 +85,11 @@ var versionCmd = &cobra.Command{
 
 // versionCmd represents the version command
 var updateCmd = &cobra.Command{
-	Use:   "check-update",
-	Short: "Check for latest glab releases",
-	Long:  ``,
-	Aliases: []string{"update",""},
-	Run: checkForUpdate,
+	Use:     "check-update",
+	Short:   "Check for latest glab releases",
+	Long:    ``,
+	Aliases: []string{"update", ""},
+	Run:     checkForUpdate,
 }
 
 var configCmd = &cobra.Command{
@@ -97,7 +97,7 @@ var configCmd = &cobra.Command{
 	Short:   `Configuration`,
 	Long:    ``,
 	Aliases: []string{"conf"},
-	Args: cobra.MaximumNArgs(2),
+	Args:    cobra.MaximumNArgs(2),
 	Run:     config.Set,
 }
 
@@ -130,7 +130,7 @@ func initConfig() {
 	config.UseGlobalConfig = false
 }
 
-func initConfigCmd()  {
+func initConfigCmd() {
 	configCmd.Flags().BoolP("global", "g", false, "Set configuration globally")
 	configCmd.Flags().StringP("url", "u", "", "specify the url of the gitlab server if self hosted (eg: https://gitlab.example.com).")
 	configCmd.Flags().StringP("remote-var", "o", "", "delete merge request <id>")

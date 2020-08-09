@@ -13,11 +13,11 @@ import (
 )
 
 var mrMergeCmd = &cobra.Command{
-	Use:   "merge <id> [flags]",
-	Short: `Merge/Accept merge requests`,
-	Long:  ``,
+	Use:     "merge <id> [flags]",
+	Short:   `Merge/Accept merge requests`,
+	Long:    ``,
 	Aliases: []string{"accept"},
-	Run: acceptMergeRequest,
+	Run:     acceptMergeRequest,
 }
 
 func acceptMergeRequest(cmd *cobra.Command, args []string) {

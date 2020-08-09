@@ -34,7 +34,6 @@ func SetGlobalPathDir() string {
 	return globalPathDir
 }
 
-
 // GetEnv : returns env variable value
 func GetEnv(key string) string {
 	if key != "" {
@@ -99,7 +98,6 @@ func SetEnv(key, value string) {
 	}
 }
 
-
 func GetRepo() string {
 	gitRemoteVar, err := gitconfig.Entire("remote." + GetEnv("GIT_REMOTE_URL_VAR") + ".url")
 	if err != nil {
@@ -116,7 +114,7 @@ func GetRepo() string {
 	return strings.Trim(repo, "/")
 }
 
-func readAndSetEnv(question, env string) string  {
+func readAndSetEnv(question, env string) string {
 	envDefVal := GetEnv(env)
 	envVal := manip.AskQuestionWithInput(question, envDefVal, false)
 	SetEnv(env, envVal)
@@ -125,22 +123,22 @@ func readAndSetEnv(question, env string) string  {
 
 func Set(cmd *cobra.Command, args []string) {
 	var isUpdated bool
-	if b, _ := cmd.Flags().GetBool("global"); b  {
+	if b, _ := cmd.Flags().GetBool("global"); b {
 		UseGlobalConfig = true
 	}
-	if b, _ := cmd.Flags().GetString("token"); b != ""  {
+	if b, _ := cmd.Flags().GetString("token"); b != "" {
 		SetEnv("GITLAB_TOKEN", b)
 		isUpdated = true
 	}
-	if b, _ := cmd.Flags().GetString("url"); b != ""  {
+	if b, _ := cmd.Flags().GetString("url"); b != "" {
 		SetEnv("GITLAB_URI", b)
 		isUpdated = true
 	}
-	if b, _ := cmd.Flags().GetString("remote-var"); b != ""  {
+	if b, _ := cmd.Flags().GetString("remote-var"); b != "" {
 		SetEnv("GIT_REMOTE_URL_VAR", b)
 		isUpdated = true
 	}
-	if b, _ := cmd.Flags().GetString("pid"); b != ""  {
+	if b, _ := cmd.Flags().GetString("pid"); b != "" {
 		SetEnv("GITLAB_PROJECT_ID", b)
 		isUpdated = true
 	}

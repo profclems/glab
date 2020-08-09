@@ -18,9 +18,9 @@ import (
 func VariableExists(key string, global bool) string {
 	return GetKeyValueInFile(config.ConfigFile, key)
 }
- */
+*/
 
-func AskQuestionWithSelect(question, defaultVal string, isRequired bool)  {
+func AskQuestionWithSelect(question, defaultVal string, isRequired bool) {
 	color := ""
 	prompt := &survey.Select{
 		Message: "Choose a color:",
@@ -29,13 +29,13 @@ func AskQuestionWithSelect(question, defaultVal string, isRequired bool)  {
 	survey.AskOne(prompt, &color)
 }
 
-func AskQuestionWithInput(question, defaultVal string, isRequired bool) string  {
+func AskQuestionWithInput(question, defaultVal string, isRequired bool) string {
 	str := ""
 	prompt := &survey.Input{
 		Message: question,
 	}
 	if isRequired {
-			_ = survey.AskOne(prompt, &str, survey.WithValidator(survey.Required))
+		_ = survey.AskOne(prompt, &str, survey.WithValidator(survey.Required))
 	} else {
 		_ = survey.AskOne(prompt, &str)
 	}
@@ -46,7 +46,7 @@ func AskQuestionWithInput(question, defaultVal string, isRequired bool) string  
 	return str
 }
 
-func AskQuestionMultiline(question string, defaultVal string) string  {
+func AskQuestionMultiline(question string, defaultVal string) string {
 	str := ""
 	prompt := &survey.Multiline{
 		Message: question,
@@ -80,7 +80,7 @@ func ReplaceNonAlphaNumericChars(words, replaceWith string) string {
 	if err != nil {
 		log.Fatal(err)
 	}
-	newStr := reg.ReplaceAllString(strings.Trim(words," "), replaceWith)
+	newStr := reg.ReplaceAllString(strings.Trim(words, " "), replaceWith)
 	return newStr
 }
 
@@ -137,7 +137,7 @@ func TruncateStrings(s string, n int) string {
 	for !utf8.ValidString(s[:n]) {
 		n--
 	}
-	return s[:n]+"..."
+	return s[:n] + "..."
 }
 
 // TimeAgo is ...

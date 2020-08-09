@@ -17,8 +17,8 @@ var pipelineDeleteCmd = &cobra.Command{
 	$ glab pipeline delete 34
 	$ glab pipeline delete 12,34,2
 	`),
-	Long:  ``,
-	Run: deletePipeline,
+	Long: ``,
+	Run:  deletePipeline,
 }
 
 func deletePipeline(cmd *cobra.Command, args []string) {
@@ -34,7 +34,7 @@ func deletePipeline(cmd *cobra.Command, args []string) {
 			} else if pipeline.StatusCode == 404 {
 				er("Pipeline does not exist")
 			} else {
-				er("Could not complete request." +pipeline.Status)
+				er("Could not complete request." + pipeline.Status)
 			}
 		}
 		fmt.Println()
@@ -43,6 +43,6 @@ func deletePipeline(cmd *cobra.Command, args []string) {
 	}
 }
 
-func init()  {
+func init() {
 	pipelineCmd.AddCommand(pipelineDeleteCmd)
 }

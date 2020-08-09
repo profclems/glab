@@ -12,13 +12,13 @@ var mrUpdateCmd = &cobra.Command{
 	Use:   "update <id>",
 	Short: `Update merge requests`,
 	Long:  ``,
-	Run: updateMergeRequest,
+	Run:   updateMergeRequest,
 }
 
 func updateMergeRequest(cmd *cobra.Command, args []string) {
 	mergeID := strings.Trim(args[0], " ")
 	l := &gitlab.UpdateMergeRequestOptions{}
-	if m, _ := cmd.Flags().GetString("title"); m != ""{
+	if m, _ := cmd.Flags().GetString("title"); m != "" {
 		l.Title = gitlab.String(m)
 	}
 	if m, _ := cmd.Flags().GetBool("lock-discussion"); m {
@@ -35,7 +35,7 @@ func updateMergeRequest(cmd *cobra.Command, args []string) {
 	displayMergeRequest(mr)
 }
 
-func init()  {
+func init() {
 	mrUpdateCmd.Flags().StringP("title", "t", "", "Title of merge request")
 	mrUpdateCmd.Flags().BoolP("lock-discussion", "", false, "Lock discussion on merge request")
 	mrUpdateCmd.Flags().StringP("description", "d", "", "merge request description")
