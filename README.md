@@ -63,6 +63,9 @@ Updating:
 brew upgrade glab
 ```
 
+#### Arch Linux
+`glab` is available through the [gitlab-glab-bin](https://aur.archlinux.org/packages/gitlab-glab-bin/) package on the AUR.
+
 #### Manual Installation
 Download the tar ball, untar and install:
 
