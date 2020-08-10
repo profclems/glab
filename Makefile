@@ -33,3 +33,4 @@ release:
 	goreleaser $(var)
 gen-docs:
 	go run ./cmd/gen-docs/docs.go
+	mv ./docs/glab.md ./docs/index.md

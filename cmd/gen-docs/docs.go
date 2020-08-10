@@ -25,7 +25,7 @@ func main() {
 
 	linkHandler := func(name string) string {
 		base := strings.TrimSuffix(name, path.Ext(name))
-		return "/commands/" + strings.ToLower(base) + "/"
+		return "/" + strings.ToLower(base) + "/"
 	}
 
 	err := doc.GenMarkdownTreeCustom(commands.RootCmd, "./docs", filePrepender, linkHandler)
