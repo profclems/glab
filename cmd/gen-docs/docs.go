@@ -28,7 +28,7 @@ func main() {
 		return "/commands/" + strings.ToLower(base) + "/"
 	}
 
-	err := doc.GenMarkdownTreeCustom(commands.RootCmd, "./docs/gen-docs", filePrepender, linkHandler)
+	err := doc.GenMarkdownTreeCustom(commands.RootCmd, "./docs", filePrepender, linkHandler)
 	if err != nil {
 		log.Fatal(err)
 	}
