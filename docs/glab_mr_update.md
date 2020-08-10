@@ -1,7 +1,3 @@
----
-layout: page
-title: "glab mr update"
----
 ## glab mr update
 
 Update merge requests

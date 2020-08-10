@@ -1,7 +1,3 @@
----
-layout: page
-title: "glab mr reopen"
----
 ## glab mr reopen
 
 Reopen merge requests

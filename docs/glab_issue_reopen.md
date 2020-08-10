@@ -1,7 +1,3 @@
----
-layout: page
-title: "glab issue reopen"
----
 ## glab issue reopen
 
 Reopen a closed issue

@@ -1,7 +1,3 @@
----
-layout: page
-title: "glab issue create"
----
 ## glab issue create
 
 Create an issue

@@ -1,7 +1,3 @@
----
-layout: page
-title: "glab issue unsubscribe"
----
 ## glab issue unsubscribe
 
 Unsubscribe to an issue

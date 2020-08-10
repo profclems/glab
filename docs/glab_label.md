@@ -1,7 +1,3 @@
----
-layout: page
-title: "glab label"
----
 ## glab label
 
 Manage labels on remote

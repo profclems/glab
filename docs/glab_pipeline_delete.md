@@ -1,7 +1,3 @@
----
-layout: page
-title: "glab pipeline delete"
----
 ## glab pipeline delete
 
 Delete a pipeline

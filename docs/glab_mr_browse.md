@@ -1,7 +1,3 @@
----
-layout: page
-title: "glab mr browse"
----
 ## glab mr browse
 
 View merge request in a browser

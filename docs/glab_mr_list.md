@@ -1,7 +1,3 @@
----
-layout: page
-title: "glab mr list"
----
 ## glab mr list
 
 List merge requests

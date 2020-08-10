@@ -1,7 +1,3 @@
----
-layout: page
-title: "glab issue delete"
----
 ## glab issue delete
 
 Delete an issue

@@ -1,7 +1,3 @@
----
-layout: page
-title: "glab pipeline list"
----
 ## glab pipeline list
 
 Get the list of pipelines

@@ -1,7 +1,3 @@
----
-layout: page
-title: "glab pipeline"
----
 ## glab pipeline
 
 Manage pipelines

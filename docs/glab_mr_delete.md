@@ -1,7 +1,3 @@
----
-layout: page
-title: "glab mr delete"
----
 ## glab mr delete
 
 Delete merge requests

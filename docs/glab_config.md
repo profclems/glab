@@ -1,7 +1,3 @@
----
-layout: page
-title: "glab config"
----
 ## glab config
 
 Configuration

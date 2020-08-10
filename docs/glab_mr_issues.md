@@ -1,7 +1,3 @@
----
-layout: page
-title: "glab mr issues"
----
 ## glab mr issues
 
 Get issues related to a particular merge request.

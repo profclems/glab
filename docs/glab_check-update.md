@@ -1,7 +1,3 @@
----
-layout: page
-title: "glab check-update"
----
 ## glab check-update
 
 Check for latest glab releases

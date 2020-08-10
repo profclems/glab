@@ -1,7 +1,3 @@
----
-layout: page
-title: "glab mr unsubscribe"
----
 ## glab mr unsubscribe
 
 Unsubscribe to merge requests
