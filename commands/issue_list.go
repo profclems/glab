@@ -9,7 +9,7 @@ import (
 
 var issueListCmd = &cobra.Command{
 	Use:     "list [flags]",
-	Short:   `List merge requests`,
+	Short:   `List project issues`,
 	Long:    ``,
 	Aliases: []string{"ls"},
 	Args:    cobra.MaximumNArgs(3),
@@ -51,12 +51,11 @@ var issueListCmd = &cobra.Command{
 }
 
 func init() {
-	issueListCmd.Flags().StringP("label", "l", "", "Filter merge request by label <name>")
-	issueListCmd.Flags().StringP("milestone", "", "", "Filter merge request by milestone <id>")
-	issueListCmd.Flags().BoolP("all", "a", false, "Get all merge requests")
-	issueListCmd.Flags().BoolP("closed", "c", false, "Get only closed merge requests")
-	issueListCmd.Flags().BoolP("opened", "o", false, "Get only opened merge requests")
-	issueListCmd.Flags().BoolP("merged", "m", false, "Get only merged merge requests")
+	issueListCmd.Flags().StringP("label", "l", "", "Filter issue by label <name>")
+	issueListCmd.Flags().StringP("milestone", "", "", "Filter issue by milestone <id>")
+	issueListCmd.Flags().BoolP("all", "a", false, "Get all issues")
+	issueListCmd.Flags().BoolP("closed", "c", false, "Get only closed issues")
+	issueListCmd.Flags().BoolP("opened", "o", false, "Get only opened issues")
 	issueListCmd.Flags().BoolP("confidential", "", false, "Filter by confidential issues")
 	issueCmd.AddCommand(issueListCmd)
 }
