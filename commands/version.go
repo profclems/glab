@@ -23,7 +23,7 @@ var versionCmd = &cobra.Command{
 		if err := git.RunCmd([]string{"version"}); err != nil  {
 			fmt.Println(err)
 		}
-		fmt.Println("Made with ❤ by Clement Sam <clementsam75@gmail.com")
+		fmt.Println("Made with ❤ by Clement Sam <clementsam75@gmail.com> and contributors")
 	},
 }
 
