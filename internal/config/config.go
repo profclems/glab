@@ -39,7 +39,7 @@ func GetEnv(key string) string {
 	if key != "" {
 		env := os.Getenv(key) //first get user defined variable via export
 
-		if len(env) == 0 {
+		if env == "" {
 			env = manip.GetKeyValueInFile(configFile, key) //Find variable in local env
 			if env == "NOTFOUND" || env == "OK" {
 				env = manip.GetKeyValueInFile(globalConfigFile, key) //Find variable in global env
