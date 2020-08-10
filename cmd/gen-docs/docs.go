@@ -1,26 +1,29 @@
 package main
 
 import (
-	"fmt"
 	"github.com/spf13/cobra/doc"
 	"glab/commands"
 	"log"
 	"path"
-	"path/filepath"
 	"strings"
 )
 
+/*
 const fmTemplate = `---
 layout: page
 title: "%s"
 ---
 `
+ */
 
 func main() {
 	filePrepender := func(filename string) string {
+		/*
 		name := filepath.Base(filename)
 		base := strings.TrimSuffix(name, path.Ext(name))
 		return fmt.Sprintf(fmTemplate, strings.Replace(base, "_", " ", -1))
+		 */
+		return ""
 	}
 
 	linkHandler := func(name string) string {
