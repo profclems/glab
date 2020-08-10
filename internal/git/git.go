@@ -18,16 +18,25 @@ import (
 )
 
 func GetRepo() string {
-	gitRemoteVar, err := gitconfig.Local("remote." + config.GetEnv("GIT_REMOTE_URL_VAR") + ".url")
-	if err != nil {
-		log.Fatal("Could not find remote url for gitlab. Run git config init")
-	}
+	gitRemoteVar := GetRemoteURL()
 	repo, err := getRepoNameWithNamespace(gitRemoteVar)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
 	return repo
+}
+
+func GetRemoteURL() string {
+	gitRemoteURL, err := gitconfig.Local("remote." + config.GetEnv("GIT_REMOTE_URL_VAR") + ".url")
+	if err != nil {
+		log.Fatal("Could not find remote url for gitlab. Run git config")
+	}
+	return gitRemoteURL
+}
+
+func GetRemoteBaseURL() string {
+	return strings.TrimSuffix(strings.ReplaceAll(GetRemoteURL(), GetRepo(), ""),".git")
 }
 
 // getRepoNameWithNamespace returns the the repo with its namespace (like profclems/glab). Respects group and subgroups names
@@ -39,7 +48,7 @@ func getRepoNameWithNamespace(remoteURL string) (string, error) {
 		part := parts[0]
 		parts = strings.Split(part, ":")
 	} else if len(parts) == 2 {
-		// every other protocol syntax (e.g. ssh://, http://, git://)
+		// other protocols (e.g. ssh://, http://, git://)
 		part := parts[1]
 		parts = strings.SplitN(part, "/", 2)
 	} else {
@@ -279,11 +288,16 @@ func CheckoutBranch(branch string) error {
 }
 
 func parseCloneArgs(extraArgs []string) (args []string, target string) {
-	args = extraArgs
+	args, target = parseArgs(extraArgs)
+	return
+}
+
+func parseArgs(cmdWithArgs []string) (args []string, command string) {
+	args = cmdWithArgs
 
 	if len(args) > 0 {
 		if !strings.HasPrefix(args[0], "-") {
-			target, args = args[0], args[1:]
+			command, args = args[0], args[1:]
 		}
 	}
 	return
@@ -345,12 +359,12 @@ func firstLine(output []byte) string {
 	return string(output)
 }
 
-func RunCmd(args ...string) {
-	showRef := exec.Command("git", args...)
-	output, err := run.PrepareCmd(showRef).Output()
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	fmt.Println(output)
+func RunCmd(args []string) (err error) {
+	gitCmd := GitCommand(args...)
+	gitCmd.Stdin = os.Stdin
+	gitCmd.Stdout = os.Stdout
+	gitCmd.Stderr = os.Stderr
+
+	err = run.PrepareCmd(gitCmd).Run()
+	return
 }

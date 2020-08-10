@@ -19,6 +19,7 @@ var Version string
 var build string
 var commit string
 
+// RootCmd is the main root/parent command
 var RootCmd = &cobra.Command{
 	Use:           "glab <command> <subcommand> [flags]",
 	Short:         "A GitLab CLI Tool",
@@ -30,7 +31,6 @@ var RootCmd = &cobra.Command{
 	$ glab mr list --merged
 	$ glab pipeline list
 	`),
-	TraverseChildren: true,
 	Annotations: map[string]string{
 		"help:environment": heredoc.Doc(`
 			GITLAB_TOKEN: an authentication token for API requests. Setting this avoids being

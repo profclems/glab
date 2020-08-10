@@ -32,14 +32,14 @@ var repoCloneCmd = &cobra.Command{
 		}
 
 		repo := args[0]
-		if !git.IsValidURL(repo) {
+		fmt.Println(repo)
+		if git.IsValidURL(repo) == false {
 			repo = config.GetEnv("GITLAB_URI") + "/" + repo
 		}
-		fmt.Println(git.IsValidURL(repo))
 		if !strings.HasSuffix(repo, ".git") {
 			repo += ".git"
 		}
-		git.RunClone(args[0], args[1:])
+		git.RunClone(repo, args[1:])
 	},
 }
 

@@ -42,3 +42,19 @@ func ParseURL(rawURL string) (u *url.URL, err error) {
 
 	return
 }
+
+// IsValidUrl tests a string to determine if it is a well-structured url or not.
+func IsValidURL(toTest string) bool {
+	_, err := url.ParseRequestURI(toTest)
+	if err != nil {
+		if strings.HasPrefix(toTest, "git@") {
+			return true
+		}
+		if strings.HasPrefix(toTest, "ssh:") {
+			return true
+		}
+		return false
+	}
+
+	return true
+}
