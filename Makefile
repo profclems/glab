@@ -16,8 +16,8 @@ ifndef CGO_LDFLAGS
     export CGO_LDFLAGS := $(LDFLAGS)
 endif
 
-GO_LDFLAGS := -X commands.Version=$(GLAB_VERSION) $(GO_LDFLAGS)
-GO_LDFLAGS := -X commands.build=$(BUILD_DATE) $(GO_LDFLAGS)
+GO_LDFLAGS := -X main.version=$(GLAB_VERSION) $(GO_LDFLAGS)
+GO_LDFLAGS := -X main.build=$(BUILD_DATE) $(GO_LDFLAGS)
 
 build:
 	go build -trimpath -ldflags "$(GO_LDFLAGS)" -o ./bin/glab ./cmd/glab
