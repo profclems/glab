@@ -1,7 +1,3 @@
----
-layout: page
-title: "glab mr revoke"
----
 ## glab mr revoke
 
 Revoke approval on a merge request <id>

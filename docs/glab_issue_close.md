@@ -1,7 +1,3 @@
----
-layout: page
-title: "glab issue close"
----
 ## glab issue close
 
 Close an issue

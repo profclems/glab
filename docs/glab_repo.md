@@ -1,7 +1,3 @@
----
-layout: page
-title: "glab repo"
----
 ## glab repo
 
 Work with GitLab repositories

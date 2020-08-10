@@ -1,7 +1,3 @@
----
-layout: page
-title: "glab mr subscribe"
----
 ## glab mr subscribe
 
 Subscribe to merge requests

@@ -1,7 +1,3 @@
----
-layout: page
-title: "glab issue subscribe"
----
 ## glab issue subscribe
 
 Subscribe to an issue

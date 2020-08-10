@@ -1,7 +1,3 @@
----
-layout: page
-title: "glab mr"
----
 ## glab mr
 
 Create, view and manage merge requests

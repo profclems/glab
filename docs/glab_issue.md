@@ -1,7 +1,3 @@
----
-layout: page
-title: "glab issue"
----
 ## glab issue
 
 Create, view and manage remote issues

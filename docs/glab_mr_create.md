@@ -1,7 +1,3 @@
----
-layout: page
-title: "glab mr create"
----
 ## glab mr create
 
 Create new merge request

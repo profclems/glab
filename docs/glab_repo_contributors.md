@@ -1,7 +1,3 @@
----
-layout: page
-title: "glab repo contributors"
----
 ## glab repo contributors
 
 Get an archive of the repository.

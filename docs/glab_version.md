@@ -1,7 +1,3 @@
----
-layout: page
-title: "glab version"
----
 ## glab version
 
 show glab version information

@@ -1,7 +1,3 @@
----
-layout: page
-title: "glab"
----
 ## glab
 
 A GitLab CLI Tool

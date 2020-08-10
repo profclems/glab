@@ -1,7 +1,3 @@
----
-layout: page
-title: "glab mr close"
----
 ## glab mr close
 
 Close merge requests

@@ -1,7 +1,3 @@
----
-layout: page
-title: "glab mr merge"
----
 ## glab mr merge
 
 Merge/Accept merge requests

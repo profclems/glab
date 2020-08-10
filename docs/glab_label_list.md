@@ -1,7 +1,3 @@
----
-layout: page
-title: "glab label list"
----
 ## glab label list
 
 List labels in repository

@@ -1,7 +1,3 @@
----
-layout: page
-title: "glab repo clone"
----
 ## glab repo clone
 
 Clone or download a repository/project

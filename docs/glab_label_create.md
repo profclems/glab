@@ -1,7 +1,3 @@
----
-layout: page
-title: "glab label create"
----
 ## glab label create
 
 Create labels for repository/project

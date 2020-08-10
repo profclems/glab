@@ -1,7 +1,3 @@
----
-layout: page
-title: "glab repo archive"
----
 ## glab repo archive
 
 Get an archive of the repository.
