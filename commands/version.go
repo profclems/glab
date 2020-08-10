@@ -7,9 +7,10 @@ import (
 	"glab/internal/git"
 )
 
-// Version is set at build
+// Version is the version for glab
 var Version string
-var build string
+// Build holds the date bin was released
+var Build string
 
 // versionCmd represents the version command
 var versionCmd = &cobra.Command{
@@ -18,7 +19,7 @@ var versionCmd = &cobra.Command{
 	Long:    ``,
 	Aliases: []string{"v"},
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Printf("glab version %s (%s)\n", Version, build)
+		fmt.Printf("glab version %s (%s)\n", Version, Build)
 		if err := git.RunCmd([]string{"version"}); err != nil  {
 			fmt.Println(err)
 		}

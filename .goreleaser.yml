@@ -9,7 +9,7 @@ builds:
     env:
       - CGO_ENABLED=0
     ldflags:
-      - -s -w -X commands.Version={{.Version}} -X commands.build={{time "01/02/2006"}}
+      - -s -w -X main.version={{.Version}} -X main.build={{time "01/02/2006"}}
   - <<: &build_defaults
       binary: bin/glab
       main: ./cmd/glab
