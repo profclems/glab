@@ -2,6 +2,7 @@ package commands
 
 import (
 	"fmt"
+	"glab/internal/git"
 	"glab/internal/update"
 	"os"
 	"regexp"
@@ -78,7 +79,10 @@ var versionCmd = &cobra.Command{
 	Long:    ``,
 	Aliases: []string{"v"},
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Printf("glab version %s (%s)\n%s\n%s\n", Version, build, commit, changelogURL(Version))
+		fmt.Printf("glab version %s (%s) - %s\n", Version, build, commit)
+		if err := git.RunCmd([]string{"version"}); err != nil  {
+			fmt.Println(err)
+		}
 		fmt.Println("Made with ❤ by Clement Sam <clementsam75@gmail.com")
 	},
 }
