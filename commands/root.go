@@ -2,22 +2,13 @@ package commands
 
 import (
 	"fmt"
-	"glab/internal/git"
-	"glab/internal/update"
-	"os"
-	"regexp"
-	"strings"
-
 	"github.com/MakeNowJust/heredoc"
 	"github.com/gookit/color"
 	"github.com/spf13/cobra"
 	"glab/internal/config"
+	"glab/internal/update"
+	"os"
 )
-
-// Version is set at build
-var Version string
-var build string
-var commit string
 
 // RootCmd is the main root/parent command
 var RootCmd = &cobra.Command{
@@ -50,16 +41,11 @@ var RootCmd = &cobra.Command{
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) > 0 {
-			if ok, err := cmd.Flags().GetBool("version"); err == nil && ok {
-				versionCmd.Run(cmd, args)
-				return
-			}
-			if ok, err := cmd.Flags().GetBool("check-update"); err == nil && ok {
-				updateCmd.Run(cmd, args)
-				return
-			}
 			fmt.Printf("Unknown command: %s\n", args[0])
 			cmd.Usage()
+			return
+		} else if ok, _ := cmd.Flags().GetBool("version"); ok {
+			versionCmd.Run(cmd, args)
 			return
 		}
 
@@ -69,22 +55,8 @@ var RootCmd = &cobra.Command{
 
 // Execute executes the root command.
 func Execute() error {
+	RootCmd.Flags().BoolP("version", "v", false, "show glab version information")
 	return RootCmd.Execute()
-}
-
-// versionCmd represents the version command
-var versionCmd = &cobra.Command{
-	Use:     "version",
-	Short:   "show glab version information",
-	Long:    ``,
-	Aliases: []string{"v"},
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Printf("glab version %s (%s) - %s\n", Version, build, commit)
-		if err := git.RunCmd([]string{"version"}); err != nil  {
-			fmt.Println(err)
-		}
-		fmt.Println("Made with ❤ by Clement Sam <clementsam75@gmail.com")
-	},
 }
 
 // versionCmd represents the version command
@@ -107,7 +79,6 @@ var configCmd = &cobra.Command{
 
 func init() {
 	cobra.OnInitialize(initConfig)
-	RootCmd.AddCommand(versionCmd)
 	RootCmd.AddCommand(updateCmd)
 	initConfigCmd()
 	RootCmd.AddCommand(configCmd)
@@ -139,16 +110,6 @@ func initConfigCmd() {
 	configCmd.Flags().StringP("url", "u", "", "specify the url of the gitlab server if self hosted (eg: https://gitlab.example.com).")
 	configCmd.Flags().StringP("remote-var", "o", "", "delete merge request <id>")
 	configCmd.Flags().StringP("token", "t", "", "an authentication token for API requests.")
-}
-
-func changelogURL(version string) string {
-	path := "https://github.com/profclems/glab"
-	r := regexp.MustCompile(`^v?\d+\.\d+\.\d+(-[\w.]+)?$`)
-	if !r.MatchString(version) {
-		return fmt.Sprintf("%s/releases/latest", path)
-	}
-	url := fmt.Sprintf("%s/releases/tag/v%s", path, strings.TrimPrefix(version, "v"))
-	return url
 }
 
 func isSuccessful(code int) bool {
