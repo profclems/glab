@@ -22,7 +22,7 @@ glab issue <command> [flags]
 * [glab issue close](glab_issue_close.md)	 - Close an issue
 * [glab issue create](glab_issue_create.md)	 - Create an issue
 * [glab issue delete](glab_issue_delete.md)	 - Delete an issue
-* [glab issue list](glab_issue_list.md)	 - List merge requests
+* [glab issue list](glab_issue_list.md)	 - List project issues
 * [glab issue reopen](glab_issue_reopen.md)	 - Reopen a closed issue
 * [glab issue subscribe](glab_issue_subscribe.md)	 - Subscribe to an issue
 * [glab issue unsubscribe](glab_issue_unsubscribe.md)	 - Unsubscribe to an issue

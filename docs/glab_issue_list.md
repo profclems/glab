@@ -1,10 +1,10 @@
 ## glab issue list
 
-List merge requests
+List project issues
 
 ### Synopsis
 
-List merge requests
+List project issues
 
 ```
 glab issue list [flags]
@@ -13,14 +13,13 @@ glab issue list [flags]
 ### Options
 
 ```
-  -a, --all                Get all merge requests
-  -c, --closed             Get only closed merge requests
+  -a, --all                Get all issues
+  -c, --closed             Get only closed issues
       --confidential       Filter by confidential issues
   -h, --help               help for list
-  -l, --label string       Filter merge request by label <name>
-  -m, --merged             Get only merged merge requests
-      --milestone string   Filter merge request by milestone <id>
-  -o, --opened             Get only opened merge requests
+  -l, --label string       Filter issue by label <name>
+      --milestone string   Filter issue by milestone <id>
+  -o, --opened             Get only opened issues
 ```
 
 ### SEE ALSO
