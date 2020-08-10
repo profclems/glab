@@ -8,6 +8,7 @@ import (
 
 // Version is set at build
 var version string
+
 // build is set at build
 var build string
 
