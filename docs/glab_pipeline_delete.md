@@ -21,7 +21,8 @@ $ glab pipeline delete 12,34,2
 ### Options
 
 ```
-  -h, --help   help for delete
+  -h, --help            help for delete
+  -s, --status string   delete pipelines by status: {running|pending|success|failed|canceled|skipped|created|manual}
 ```
 
 ### SEE ALSO
