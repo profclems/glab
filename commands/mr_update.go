@@ -34,7 +34,7 @@ func updateMergeRequest(cmd *cobra.Command, args []string) {
 			er(err)
 		}
 		displayMergeRequest(mr)
-	}  else {
+	} else {
 		cmdErr(cmd, args)
 	}
 }
