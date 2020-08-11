@@ -36,7 +36,7 @@ func GetRemoteURL() string {
 }
 
 func GetRemoteBaseURL() string {
-	return strings.TrimSuffix(strings.ReplaceAll(GetRemoteURL(), GetRepo(), ""),".git")
+	return strings.TrimSuffix(strings.ReplaceAll(GetRemoteURL(), GetRepo(), ""), ".git")
 }
 
 // getRepoNameWithNamespace returns the the repo with its namespace (like profclems/glab). Respects group and subgroups names
@@ -65,6 +65,7 @@ func getRepoNameWithNamespace(remoteURL string) (string, error) {
 
 // HasHub is true if hub binary is installed
 var HasHub bool
+
 // HasGH is true is GitHub Cli is installed
 var HasGH bool
 
