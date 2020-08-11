@@ -34,7 +34,7 @@ func displayAllIssues(m []*gitlab.Issue) {
 			if issue.State == "opened" {
 				_, _ = fmt.Fprintln(w, color.Sprintf("<green>#%d</>\t%s\t<cyan>(%s)</>\t<gray>%s</>", issue.IID, issue.Title, labels, duration))
 			} else {
-				_, _ = fmt.Fprintln(w, color.Sprintf("<green>#%d</>\t%s\t<cyan>(%s)</>\t<gray>%s</>", issue.IID, issue.Title, labels, duration))
+				_, _ = fmt.Fprintln(w, color.Sprintf("<red>#%d</>\t%s\t<cyan>(%s)</>\t<gray>%s</>", issue.IID, issue.Title, labels, duration))
 			}
 		}
 	} else {
