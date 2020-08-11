@@ -3,7 +3,7 @@ module glab
 go 1.14
 
 require (
-	github.com/AlecAivazis/survey/v2 v2.1.0
+	github.com/AlecAivazis/survey/v2 v2.1.1
 	github.com/MakeNowJust/heredoc v1.0.0
 	github.com/dustin/go-humanize v1.0.0
 	github.com/fsnotify/fsnotify v1.4.9 // indirect
