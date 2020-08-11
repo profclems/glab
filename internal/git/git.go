@@ -63,6 +63,22 @@ func getRepoNameWithNamespace(remoteURL string) (string, error) {
 	return repo, nil
 }
 
+// HasHub is true if hub binary is installed
+var HasHub bool
+// HasGH is true is GitHub Cli is installed
+var HasGH bool
+
+func init() {
+	_, err := exec.LookPath("hub")
+	if err == nil {
+		HasHub = true
+	}
+	_, err = exec.LookPath("gh")
+	if err == nil {
+		HasHub = true
+	}
+}
+
 // InitGitlabClient : creates client
 func InitGitlabClient() (*gitlab.Client, string) {
 	git, err := gitlab.NewClient(config.GetEnv("GITLAB_TOKEN"), gitlab.WithBaseURL(strings.TrimRight(config.GetEnv("GITLAB_URI"), "/")+"/api/v4"))
