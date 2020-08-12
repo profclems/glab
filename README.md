@@ -132,7 +132,7 @@ If a supported binary for your OS is not found at the [releases page](https://gi
    $ sudo mv ./bin/glab /usr/bin/
    ```
 
-4. Run `glab version` to check if it worked and `glab config` to set up
+4. Run `glab version` to check if it worked and `glab config -g` to set up
 
 
 ## Configuration
