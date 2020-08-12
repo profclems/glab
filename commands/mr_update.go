@@ -12,6 +12,7 @@ var mrUpdateCmd = &cobra.Command{
 	Use:   "update <id>",
 	Short: `Update merge requests`,
 	Long:  ``,
+	Args:    cobra.ExactArgs(1),
 	Run:   updateMergeRequest,
 }
 
@@ -29,6 +30,9 @@ func updateMergeRequest(cmd *cobra.Command, args []string) {
 			l.Description = gitlab.String(m)
 		}
 		gitlabClient, repo := git.InitGitlabClient()
+		if r, _ := cmd.Flags().GetString("repo"); r != "" {
+			repo = r
+		}
 		mr, _, err := gitlabClient.MergeRequests.UpdateMergeRequest(repo, manip.StringToInt(mergeID), l)
 		if err != nil {
 			er(err)

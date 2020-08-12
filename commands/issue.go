@@ -52,7 +52,7 @@ func displayIssue(hm *gitlab.Issue) {
 
 // mrCmd is merge request command
 var issueCmd = &cobra.Command{
-	Use:   "issue <command> [flags]",
+	Use:   "issue [command] [flags]",
 	Short: `Create, view and manage remote issues`,
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -64,5 +64,6 @@ var issueCmd = &cobra.Command{
 }
 
 func init() {
+	issueCmd.PersistentFlags().StringP("repo", "R","", "Select another repository using the OWNER/REPO format or the project ID. Supports group namespaces")
 	RootCmd.AddCommand(issueCmd)
 }

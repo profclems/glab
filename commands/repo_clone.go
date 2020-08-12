@@ -25,6 +25,7 @@ var repoCloneCmd = &cobra.Command{
 	- namespace/group/repo
 	- url/namespace/group/repo
 	`),
+	Args: cobra.MaximumNArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 {
 			cmdErr(cmd, args)

@@ -9,10 +9,11 @@ import (
 )
 
 var issueUnsubscribeCmd = &cobra.Command{
-	Use:     "unsubscribe",
+	Use:     "unsubscribe <id>",
 	Short:   `Unsubscribe to an issue`,
 	Long:    ``,
 	Aliases: []string{"unsub"},
+	Args:    cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) > 1 {
 			cmdErr(cmd, args)
@@ -21,6 +22,9 @@ var issueUnsubscribeCmd = &cobra.Command{
 		if len(args) > 0 {
 			mergeID := strings.TrimSpace(args[0])
 			gitlabClient, repo := git.InitGitlabClient()
+			if r, _ := cmd.Flags().GetString("repo"); r != "" {
+				repo = r
+			}
 			arrIds := strings.Split(strings.Trim(mergeID, "[] "), ",")
 			for _, i2 := range arrIds {
 				fmt.Println("Unsubscribing to Issue #" + i2)

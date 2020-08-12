@@ -9,16 +9,19 @@ import (
 )
 
 var labelListCmd = &cobra.Command{
-	Use:     "list <id> [flags]",
+	Use:     "list [flags]",
 	Short:   `List labels in repository`,
 	Long:    ``,
 	Aliases: []string{"ls"},
-	Args:    cobra.MaximumNArgs(1),
+	Args:    cobra.ExactArgs(0),
 	Run:     listLabels,
 }
 
 func listLabels(cmd *cobra.Command, args []string) {
 	gitlabClient, repo := git.InitGitlabClient()
+	if r, _ := cmd.Flags().GetString("repo"); r != "" {
+		repo = r
+	}
 	// List all labels
 	labels, _, err := gitlabClient.Labels.ListLabels(repo, nil)
 	if err != nil {

@@ -11,10 +11,11 @@ import (
 )
 
 var issueCloseCmd = &cobra.Command{
-	Use:     "close",
+	Use:     "close <id>",
 	Short:   `Close an issue`,
 	Long:    ``,
 	Aliases: []string{"unsub"},
+	Args:      cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) > 1 {
 			cmdErr(cmd, args)
@@ -23,6 +24,9 @@ var issueCloseCmd = &cobra.Command{
 		if len(args) > 0 {
 			issueID := strings.TrimSpace(args[0])
 			gitlabClient, repo := git.InitGitlabClient()
+			if r, _ := cmd.Flags().GetString("repo"); r != "" {
+				repo = r
+			}
 			l := &gitlab.UpdateIssueOptions{}
 			l.StateEvent = gitlab.String("close")
 			arrIds := strings.Split(strings.Trim(issueID, "[] "), ",")

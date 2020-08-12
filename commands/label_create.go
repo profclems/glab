@@ -8,17 +8,20 @@ import (
 )
 
 var labelCreateCmd = &cobra.Command{
-	Use:     "create <id> [flags]",
+	Use:     "create [flags]",
 	Short:   `Create labels for repository/project`,
 	Long:    ``,
 	Aliases: []string{"new"},
-	Args:    cobra.MaximumNArgs(1),
+	Args:    cobra.ExactArgs(0),
 	Run:     createLabel,
 }
 
 func createLabel(cmd *cobra.Command, args []string) {
 
 	gitlabClient, repo := git.InitGitlabClient()
+	if r, _ := cmd.Flags().GetString("repo"); r != "" {
+		repo = r
+	}
 	l := &gitlab.CreateLabelOptions{}
 
 	if s, _ := cmd.Flags().GetString("name"); s != "" {

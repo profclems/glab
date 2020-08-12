@@ -17,11 +17,11 @@ import (
 )
 
 var issueViewCmd = &cobra.Command{
-	Use:     "view <id> [flags]",
+	Use:     "view <id>",
 	Short:   `Display the title, body, and other information about an issue.`,
 	Long:    ``,
 	Aliases: []string{"show"},
-	Args:    cobra.MaximumNArgs(3),
+	Args:      cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 || len(args) >1 {
 			cmdErr(cmd, args)

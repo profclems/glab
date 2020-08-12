@@ -11,7 +11,7 @@ var mrListCmd = &cobra.Command{
 	Short:   `List merge requests`,
 	Long:    ``,
 	Aliases: []string{"ls"},
-	Args:    cobra.MaximumNArgs(3),
+	Args:    cobra.ExactArgs(0),
 	RunE:    listMergeRequest,
 }
 
@@ -41,6 +41,9 @@ func listMergeRequest(cmd *cobra.Command, args []string) error {
 	}
 
 	gitlabClient, repo := git.InitGitlabClient()
+	if r, _ := cmd.Flags().GetString("repo"); r != "" {
+		repo = r
+	}
 	mergeRequests, _, err := gitlabClient.MergeRequests.ListProjectMergeRequests(repo, l)
 	if err != nil {
 		return err

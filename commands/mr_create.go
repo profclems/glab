@@ -15,6 +15,7 @@ var mrCreateCmd = &cobra.Command{
 	Short:   `Create new merge request`,
 	Long:    ``,
 	Aliases: []string{"new"},
+	Args:    cobra.ExactArgs(0),
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) > 0 {
 			cmdErr(cmd, args)
@@ -84,6 +85,9 @@ var mrCreateCmd = &cobra.Command{
 		}
 
 		gitlabClient, repo := git.InitGitlabClient()
+		if r, _ := cmd.Flags().GetString("repo"); r != "" {
+			repo = r
+		}
 		if c, _ := cmd.Flags().GetBool("create-source-branch"); c {
 			lb := &gitlab.CreateBranchOptions{
 				Branch: gitlab.String(sourceBranch),

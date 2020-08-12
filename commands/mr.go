@@ -55,5 +55,6 @@ var mrCmd = &cobra.Command{
 }
 
 func init() {
+	mrCmd.PersistentFlags().StringP("repo", "R","", "Select another repository using the OWNER/REPO format or the project ID. Supports group namespaces")
 	RootCmd.AddCommand(mrCmd)
 }
