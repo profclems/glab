@@ -11,11 +11,11 @@ import (
 )
 
 var mrCloseCmd = &cobra.Command{
-	Use:     "close <id>",
-	Short:   `Close merge requests`,
-	Long:    ``,
-	Args:    cobra.ExactArgs(1),
-	Run:     closeMergeRequestState,
+	Use:   "close <id>",
+	Short: `Close merge requests`,
+	Long:  ``,
+	Args:  cobra.ExactArgs(1),
+	Run:   closeMergeRequestState,
 }
 
 func closeMergeRequestState(cmd *cobra.Command, args []string) {

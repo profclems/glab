@@ -33,7 +33,7 @@ func displayAllMergeRequests(m []*gitlab.MergeRequest) {
 			} else {
 				mrID = color.Sprintf("<red>#%d</>", mr.IID)
 			}
-			table.AddRow(mrID, mr.Title, color.Sprintf("<cyan>(%s) ← (%s)</>",mr.TargetBranch, mr.SourceBranch))
+			table.AddRow(mrID, mr.Title, color.Sprintf("<cyan>(%s) ← (%s)</>", mr.TargetBranch, mr.SourceBranch))
 		}
 		fmt.Println(table)
 	} else {
@@ -55,6 +55,6 @@ var mrCmd = &cobra.Command{
 }
 
 func init() {
-	mrCmd.PersistentFlags().StringP("repo", "R","", "Select another repository using the OWNER/REPO format or the project ID. Supports group namespaces")
+	mrCmd.PersistentFlags().StringP("repo", "R", "", "Select another repository using the OWNER/REPO format or the project ID. Supports group namespaces")
 	RootCmd.AddCommand(mrCmd)
 }

@@ -21,9 +21,9 @@ var issueViewCmd = &cobra.Command{
 	Short:   `Display the title, body, and other information about an issue.`,
 	Long:    ``,
 	Aliases: []string{"show"},
-	Args:      cobra.ExactArgs(1),
+	Args:    cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) == 0 || len(args) >1 {
+		if len(args) == 0 || len(args) > 1 {
 			cmdErr(cmd, args)
 			return
 		}
@@ -44,7 +44,7 @@ var issueViewCmd = &cobra.Command{
 			if err != nil {
 				er(err)
 			}
-			if err:= a.Run(); err != nil {
+			if err := a.Run(); err != nil {
 				er(err)
 			}
 			return
@@ -62,7 +62,7 @@ var issueViewCmd = &cobra.Command{
 			issue.Author.Username,
 			issue.Author.Name,
 			utils.PrettyTimeAgo(ago),
-			)
+		)
 		if issue.Description != "" {
 			issue.Description, _ = utils.RenderMarkdown(issue.Description)
 			fmt.Println(issue.Description)
@@ -141,7 +141,7 @@ var issueViewCmd = &cobra.Command{
 	},
 }
 
-func prettifyNilEmptyValues(value interface{}, defVal string) interface{}  {
+func prettifyNilEmptyValues(value interface{}, defVal string) interface{} {
 	if value == nil || value == "" {
 		return defVal
 	}

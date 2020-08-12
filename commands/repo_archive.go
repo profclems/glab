@@ -30,7 +30,7 @@ var repoArchiveCmd = &cobra.Command{
 	- namespace/group/repo
 	`),
 	Args: cobra.MaximumNArgs(2),
-	Run: func (cmd *cobra.Command, args []string) {
+	Run: func(cmd *cobra.Command, args []string) {
 		repo := config.GetRepo()
 		var name string
 		if len(args) != 0 {
