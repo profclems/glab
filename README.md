@@ -132,17 +132,25 @@ If a supported binary for your OS is not found at the [releases page](https://gi
    $ sudo mv ./bin/glab /usr/bin/
    ```
 
-4. Run `glab help` to check if it worked.
+4. Run `glab version` to check if it worked and `glab config` to set up
 
 
-## Setting Up
+## Configuration
 **To set configuration for current directory (must be a git repository)**
 ```sh
-glab config --token=<YOUR-GITLAB-ACCESS-TOKEN> --url=https://gitlab.com
+glab config  // Will be prompted for details
+
+or
+
+glab config --token=<YOUR-GITLAB-ACCESS-TOKEN> --url=https://gitlab.com --remote-var=origin
 ```
 **To set configuration globally**
 ```sh
-glab config global --token=<YOUR-GITLAB-ACCESS-TOKEN> --url=https://gitlab.com
+glab config --global // Will be prompted for details
+
+or
+
+glab config --global --token=<YOUR-GITLAB-ACCESS-TOKEN> --url=https://gitlab.com  --remote-var=origin
 ```
 **For initial releases up to v1.6.1**
 ```sh
