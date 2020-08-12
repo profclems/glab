@@ -8,6 +8,7 @@ import (
 	"github.com/xanzy/go-gitlab"
 	"glab/internal/git"
 	"glab/internal/manip"
+	"glab/internal/utils"
 	"io"
 	"io/ioutil"
 	"log"
@@ -21,6 +22,7 @@ var pipelineViewCmd = &cobra.Command{
 	$ glab pipeline view 177883
 	`),
 	Long: ``,
+	Args: cobra.ExactArgs(1),
 	Run:  viewPipelines,
 }
 
@@ -274,7 +276,7 @@ func updatePipelineLog(v *gocui.View, jid int)  {
 	if b, err := ioutil.ReadAll(getPipelineJobLog(jid)); err == nil {
 		str = string(b)
 	}
-	str, _ = manip.RenderMarkdown(str)
+	str, _ = utils.RenderMarkdown(str)
 	fmt.Fprintln(v, str)
 	//updatePipelineLog(v, jid)
 }

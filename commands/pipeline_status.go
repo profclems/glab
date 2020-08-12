@@ -14,16 +14,16 @@ import (
 )
 
 var pipelineStatusCmd = &cobra.Command{
-	Use:   "status <command> [flags]",
-	Short: `Check the status of a single pipeline`,
+	Use:   "status [flags]",
+	Short: `View a running pipeline on `,
 	Aliases: []string{"stats"},
 	Example: heredoc.Doc(`
-	$ glab pipeline status 177883
 	$ glab pipeline status --live
 	$ glab pipeline status --branch=master   // Get pipeline for master branch
 	$ glab pipe status   // Get pipeline for current branch
 	`),
 	Long: ``,
+	Args: cobra.ExactArgs(0),
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) != 0 {
 			cmdErr(cmd, args)
