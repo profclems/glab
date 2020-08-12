@@ -7,11 +7,12 @@ import (
 	"strings"
 
 	"github.com/google/shlex"
+	"glab/internal/config"
 )
 
 // Command produces an exec.Cmd respecting runtime.GOOS and $BROWSER environment variable
 func Command(url string) (*exec.Cmd, error) {
-	launcher := os.Getenv("BROWSER")
+	launcher := config.GetEnv("BROWSER")
 	if launcher != "" {
 		return FromLauncher(launcher, url)
 	}

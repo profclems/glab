@@ -1,7 +1,8 @@
-package manip
+package utils
 
 import (
 	"fmt"
+	"glab/internal/config"
 	"net/url"
 	"strings"
 	"time"
@@ -26,9 +27,10 @@ func RenderMarkdown(text string) (string, error) {
 	// we need to ensure that no such characters are present in the output.
 	text = strings.ReplaceAll(text, "\r\n", "\n")
 
-	renderStyle := glamour.WithStandardStyle("notty")
-
-	renderStyle = glamour.WithEnvironmentConfig()
+	renderStyle := glamour.WithStandardStyle("dark")
+	if config.GetEnv("GLAMOUR_STYLE") != "" {
+		renderStyle = glamour.WithEnvironmentConfig()
+	}
 
 	tr, err := glamour.NewTermRenderer(
 		renderStyle,
@@ -69,6 +71,12 @@ func PrettyTimeAgo(ago time.Duration) string {
 	}
 
 	return fmtDuration(int(ago.Hours()/24/365), "year")
+}
+
+func TimeToPrettyTimeAgo(d time.Time) string {
+	now := time.Now()
+	ago := now.Sub(d)
+	return PrettyTimeAgo(ago)
 }
 
 func Humanize(s string) string {

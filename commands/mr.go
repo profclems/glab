@@ -3,13 +3,11 @@ package commands
 import (
 	"fmt"
 	"github.com/gookit/color"
+	"github.com/gosuri/uitable"
 	"github.com/spf13/cobra"
+	"github.com/xanzy/go-gitlab"
 	"glab/internal/git"
 	"glab/internal/manip"
-	"os"
-	"text/tabwriter"
-
-	"github.com/xanzy/go-gitlab"
 )
 
 func displayMergeRequest(hm *gitlab.MergeRequest) {
@@ -23,24 +21,21 @@ func displayMergeRequest(hm *gitlab.MergeRequest) {
 }
 
 func displayAllMergeRequests(m []*gitlab.MergeRequest) {
-	// initialize tabwriter
-	w := new(tabwriter.Writer)
-
-	// minwidth, tabwidth, padding, padchar, flags
-	w.Init(os.Stdout, 8, 8, 0, '\t', 0)
-
-	defer w.Flush()
 	if len(m) > 0 {
+		table := uitable.New()
+		table.MaxColWidth = 70
 		fmt.Println()
-		fmt.Printf("Showing mergeRequests %d of %d on %s\n", len(m), len(m), git.GetRepo())
+		fmt.Printf("Showing mergeRequests %d of %d on %s\n\n", len(m), len(m), git.GetRepo())
 		for _, mr := range m {
+			var mrID string
 			if mr.State == "opened" {
-				_, _ = fmt.Fprintln(w, color.Sprintf("<green>#%d</>\t%s\t\t<cyan>(%s) ← (%s)</>", mr.IID, mr.Title, mr.TargetBranch, mr.SourceBranch))
+				mrID = color.Sprintf("<green>#%d</>", mr.IID)
 			} else {
-				_, _ = fmt.Fprintln(w, color.Sprintf("<green>#%d</>\t%s\t\t<cyan>(%s) ← (%s)</>", mr.IID, mr.Title, mr.TargetBranch, mr.SourceBranch))
+				mrID = color.Sprintf("<red>#%d</>", mr.IID)
 			}
+			table.AddRow(mrID, mr.Title, color.Sprintf("<cyan>(%s) ← (%s)</>",mr.TargetBranch, mr.SourceBranch))
 		}
-		fmt.Println()
+		fmt.Println(table)
 	} else {
 		fmt.Println("No Merge Requests available on " + git.GetRepo())
 	}
