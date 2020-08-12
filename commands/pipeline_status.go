@@ -15,7 +15,7 @@ import (
 
 var pipelineStatusCmd = &cobra.Command{
 	Use:   "status [flags]",
-	Short: `View a running pipeline on `,
+	Short: `View a running pipeline on current or other branch specified`,
 	Aliases: []string{"stats"},
 	Example: heredoc.Doc(`
 	$ glab pipeline status --live
@@ -39,9 +39,9 @@ var pipelineStatusCmd = &cobra.Command{
 			}
 		}
 		l := &gitlab.ListProjectPipelinesOptions{
-			Ref: gitlab.String(branch),
+			Ref:     gitlab.String(branch),
 			OrderBy: gitlab.String("updated_at"),
-			Sort: gitlab.String("desc"),
+			Sort:    gitlab.String("desc"),
 		}
 		l.Page = 1
 		l.PerPage = 1
@@ -63,7 +63,7 @@ var pipelineStatusCmd = &cobra.Command{
 				for _, job := range jobs {
 					duration := fmtDuration(job.Duration)
 					var status string
-					switch s:=job.Status; s {
+					switch s := job.Status; s {
 					case "failed":
 						status = color.Red.Sprint(s)
 					case "success":
@@ -117,7 +117,7 @@ func retryPipelineJob(pid int) *gitlab.Pipeline {
 
 func fmtDuration(duration float64) string {
 	s := math.Mod(duration, 60)
-	m := (duration-s)/60
+	m := (duration - s) / 60
 	s = math.Round(s)
 	return fmt.Sprintf("%02vm %02vs", m, s)
 }

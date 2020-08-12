@@ -30,7 +30,7 @@ var pipelineDetails *gitlab.Pipeline
 var pipelineJobDetails []*gitlab.Job
 var mainView *gocui.View
 
-func getPipelineJobs(pid int) []*gitlab.Job  {
+func getPipelineJobs(pid int) []*gitlab.Job {
 	gitlabClient, repo := git.InitGitlabClient()
 	l := &gitlab.ListJobsOptions{}
 	pipeJobs, _, err := gitlabClient.Jobs.ListPipelineJobs(repo, pid, l)
@@ -173,10 +173,10 @@ func keybindings(g *gocui.Gui) error {
 		return err
 	}
 	/*
-	if err := g.SetKeybinding("side", gocui.KeyEnter, gocui.ModNone, getLine); err != nil {
-		return err
-	}
-	 */
+		if err := g.SetKeybinding("side", gocui.KeyEnter, gocui.ModNone, getLine); err != nil {
+			return err
+		}
+	*/
 	if err := g.SetKeybinding("side", gocui.KeyEnter, gocui.ModNone, showLoading); err != nil {
 		return err
 	}
@@ -271,7 +271,7 @@ func displayPipelineJobLog(g *gocui.Gui, jid int, maxX, maxY int) error {
 	return nil
 }
 
-func updatePipelineLog(v *gocui.View, jid int)  {
+func updatePipelineLog(v *gocui.View, jid int) {
 	var str string
 	if b, err := ioutil.ReadAll(getPipelineJobLog(jid)); err == nil {
 		str = string(b)
