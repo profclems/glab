@@ -116,6 +116,6 @@ var pipelineCmd = &cobra.Command{
 }
 
 func init() {
-	pipelineCmd.PersistentFlags().StringP("repo", "R","", "Select another repository using the OWNER/REPO format or the project ID. Supports group namespaces")
+	pipelineCmd.PersistentFlags().StringP("repo", "R", "", "Select another repository using the OWNER/REPO format or the project ID. Supports group namespaces")
 	RootCmd.AddCommand(pipelineCmd)
 }
