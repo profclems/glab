@@ -30,25 +30,6 @@ var pipelineDetails *gitlab.Pipeline
 var pipelineJobDetails []*gitlab.Job
 var mainView *gocui.View
 
-func getPipelineJobs(pid int) []*gitlab.Job {
-	gitlabClient, repo := git.InitGitlabClient()
-	l := &gitlab.ListJobsOptions{}
-	pipeJobs, _, err := gitlabClient.Jobs.ListPipelineJobs(repo, pid, l)
-	if err != nil {
-		er(err)
-	}
-	return pipeJobs
-}
-
-func getPipelineJobLog(jobID int) io.Reader {
-	gitlabClient, repo := git.InitGitlabClient()
-	pipeJobs, _, err := gitlabClient.Jobs.GetTraceFile(repo, jobID)
-	if err != nil {
-		er(err)
-	}
-	return pipeJobs
-}
-
 func viewPipelines(cmd *cobra.Command, args []string) {
 	if len(args) > 1 || len(args) == 0 {
 		cmdErr(cmd, args)

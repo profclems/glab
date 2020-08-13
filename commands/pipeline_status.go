@@ -10,6 +10,7 @@ import (
 	"github.com/xanzy/go-gitlab"
 	"glab/internal/git"
 	"math"
+	"strconv"
 	"time"
 )
 
@@ -50,10 +51,10 @@ var pipelineStatusCmd = &cobra.Command{
 		if err != nil {
 			er(err)
 		}
-		runningPipeline := pipes[0]
 		if len(pipes) == 1 {
+			runningPipeline := pipes[0]
 			isRunning := true
-			retry := false
+			retry := "Exit"
 			writer := uilive.New()
 
 			// start listening for updates and render
@@ -71,6 +72,7 @@ var pipelineStatusCmd = &cobra.Command{
 					default:
 						status = color.Gray.Sprint(s)
 					}
+					//fmt.Println(job.Tag)
 					fmt.Fprintf(writer, "(%s) • %s\t\t%s\t\t%s\n", status, duration, job.Stage, job.Name)
 				}
 
@@ -85,59 +87,37 @@ var pipelineStatusCmd = &cobra.Command{
 					runningPipeline = pipes[0]
 				} else {
 					if runningPipeline.Status == "failed" || runningPipeline.Status == "canceled" {
-						prompt := &survey.Confirm{
-							Message: "Do you want to retry?",
+						prompt := &survey.Select{
+							Message: "Choose an action:",
+							Options: []string{"View Logs", "Retry", "Exit"},
+							Default: "Exit",
 						}
 						survey.AskOne(prompt, &retry)
 					}
-					if retry {
-						retryPipelineJob(runningPipeline.ID)
-						pipes, err = getPipelines(l)
-						runningPipeline = pipes[0]
+					if retry != "" && retry != "Exit" {
+						if retry == "View Logs" {
+							isRunning = false
+						} else {
+							retryPipelineJob(runningPipeline.ID)
+							pipes, err = getPipelines(l)
+							runningPipeline = pipes[0]
+							isRunning = true
+						}
 					} else {
 						isRunning = false
 					}
 				}
 				time.Sleep(time.Millisecond * 0)
+				if retry == "View Logs" {
+					args = []string{strconv.FormatInt(int64(runningPipeline.ID), 10)}
+					viewPipelines(cmd, args)
+					fmt.Println("logs")
+				}
 			}
 		} else {
-			er("No pipelines running on " + branch + " branch")
+			er("No pipelines running or available on " + branch + " branch")
 		}
 	},
-}
-
-func retryPipelineJob(pid int) *gitlab.Pipeline {
-	gitlabClient, repo := git.InitGitlabClient()
-	pipe, _, err := gitlabClient.Pipelines.RetryPipelineBuild(repo, pid)
-	if err != nil {
-		er(err)
-	}
-	return pipe
-}
-
-func fmtDuration(duration float64) string {
-	s := math.Mod(duration, 60)
-	m := (duration - s) / 60
-	s = math.Round(s)
-	return fmt.Sprintf("%02vm %02vs", m, s)
-}
-
-func getPipelines(l *gitlab.ListProjectPipelinesOptions) ([]*gitlab.PipelineInfo, error) {
-	gitlabClient, repo := git.InitGitlabClient()
-	pipes, _, err := gitlabClient.Pipelines.ListProjectPipelines(repo, l)
-	if err != nil {
-		return nil, err
-	}
-	return pipes, nil
-}
-
-func getSinglePipeline(pid int) (*gitlab.Pipeline, error) {
-	gitlabClient, repo := git.InitGitlabClient()
-	pipes, _, err := gitlabClient.Pipelines.GetPipeline(repo, pid)
-	if err != nil {
-		return nil, err
-	}
-	return pipes, nil
 }
 
 func init() {
