@@ -18,7 +18,6 @@ import (
 	//"strings"
 	"sync"
 	"time"
-
 	//"github.com/pkg/errors"
 )
 
@@ -78,7 +77,7 @@ var pipelineCITraceCmd = &cobra.Command{
 			_ = survey.AskOne(prompt, &selectedJob)
 			if selectedJob != "" {
 				re := regexp.MustCompile(`(?s)\((.*)\)`)
-				m := re.FindAllStringSubmatch(selectedJob,-1)
+				m := re.FindAllStringSubmatch(selectedJob, -1)
 				jobID = manip.StringToInt(m[0][1])
 			}
 

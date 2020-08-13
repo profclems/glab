@@ -19,7 +19,6 @@ var pipelineCICmd = &cobra.Command{
 	},
 }
 
-
 func init() {
 	pipelineCmd.AddCommand(pipelineCICmd)
 }
