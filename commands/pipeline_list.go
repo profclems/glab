@@ -15,7 +15,7 @@ var pipelineListCmd = &cobra.Command{
 	$ glab pipeline list --state=failed
 	`),
 	Long: ``,
-	Args:    cobra.ExactArgs(0),
+	Args: cobra.ExactArgs(0),
 	Run:  listPipelines,
 }
 

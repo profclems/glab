@@ -22,7 +22,7 @@ func displayAllIssues(m []*gitlab.Issue) {
 				labels += " " + l + ","
 			}
 			labels = strings.Trim(labels, ", ")
-			if labels != ""{
+			if labels != "" {
 				labels = "(" + labels + ")"
 			}
 			var issueID string
@@ -64,6 +64,6 @@ var issueCmd = &cobra.Command{
 }
 
 func init() {
-	issueCmd.PersistentFlags().StringP("repo", "R","", "Select another repository using the OWNER/REPO format or the project ID. Supports group namespaces")
+	issueCmd.PersistentFlags().StringP("repo", "R", "", "Select another repository using the OWNER/REPO format or the project ID. Supports group namespaces")
 	RootCmd.AddCommand(issueCmd)
 }

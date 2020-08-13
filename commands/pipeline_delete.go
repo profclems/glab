@@ -21,7 +21,7 @@ var pipelineDeleteCmd = &cobra.Command{
 	$ glab pipeline delete 12,34,2
 	`),
 	Long: ``,
-	Args:  cobra.ExactArgs(1),
+	Args: cobra.ExactArgs(1),
 	Run:  deletePipeline,
 }
 

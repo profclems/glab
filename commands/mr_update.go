@@ -12,7 +12,7 @@ var mrUpdateCmd = &cobra.Command{
 	Use:   "update <id>",
 	Short: `Update merge requests`,
 	Long:  ``,
-	Args:    cobra.ExactArgs(1),
+	Args:  cobra.ExactArgs(1),
 	Run:   updateMergeRequest,
 }
 

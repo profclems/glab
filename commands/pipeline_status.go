@@ -15,8 +15,8 @@ import (
 )
 
 var pipelineStatusCmd = &cobra.Command{
-	Use:   "status [flags]",
-	Short: `View a running pipeline on current or other branch specified`,
+	Use:     "status [flags]",
+	Short:   `View a running pipeline on current or other branch specified`,
 	Aliases: []string{"stats"},
 	Example: heredoc.Doc(`
 	$ glab pipeline status --live

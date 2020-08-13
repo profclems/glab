@@ -22,9 +22,9 @@ var repoContributorsCmd = &cobra.Command{
 	- namespace/repo
 	- namespace/group/repo
 	`),
-	Args: cobra.ExactArgs(0),
+	Args:    cobra.ExactArgs(0),
 	Aliases: []string{"users"},
-	Run: func (cmd *cobra.Command, args []string) {
+	Run: func(cmd *cobra.Command, args []string) {
 		gitlabClient, repo := git.InitGitlabClient()
 		l := &gitlab.ListContributorsOptions{}
 		users, _, err := gitlabClient.Repositories.Contributors(repo, l)

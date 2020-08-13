@@ -21,6 +21,7 @@ func ReadAndAppend(file, text string) {
 		log.Fatal(err)
 	}
 }
+
 // GetKeyValueInFile : returns env variable value
 func GetKeyValueInFile(filePath, key string) string {
 	data, _ := ioutil.ReadFile(filePath)
