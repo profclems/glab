@@ -9,7 +9,6 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/xanzy/go-gitlab"
 	"glab/internal/git"
-	"math"
 	"strconv"
 	"time"
 )
@@ -73,12 +72,12 @@ var pipelineStatusCmd = &cobra.Command{
 						status = color.Gray.Sprint(s)
 					}
 					//fmt.Println(job.Tag)
-					fmt.Fprintf(writer, "(%s) • %s\t\t%s\t\t%s\n", status, duration, job.Stage, job.Name)
+					_, _ = fmt.Fprintf(writer, "(%s) • %s\t\t%s\t\t%s\n", status, duration, job.Stage, job.Name)
 				}
 
-				fmt.Fprintf(writer.Newline(), "\n%s\n", runningPipeline.WebURL)
-				fmt.Fprintf(writer.Newline(), "SHA: %s\n", runningPipeline.SHA)
-				fmt.Fprintf(writer.Newline(), "Pipeline State: %s\n", runningPipeline.Status)
+				_, _ = fmt.Fprintf(writer.Newline(), "\n%s\n", runningPipeline.WebURL)
+				_, _ = fmt.Fprintf(writer.Newline(), "SHA: %s\n", runningPipeline.SHA)
+				_, _ = fmt.Fprintf(writer.Newline(), "Pipeline State: %s\n", runningPipeline.Status)
 				if runningPipeline.Status == "running" && live {
 					pipes, err = getPipelines(l)
 					if err != nil {
@@ -92,7 +91,7 @@ var pipelineStatusCmd = &cobra.Command{
 							Options: []string{"View Logs", "Retry", "Exit"},
 							Default: "Exit",
 						}
-						survey.AskOne(prompt, &retry)
+						_ = survey.AskOne(prompt, &retry)
 					}
 					if retry != "" && retry != "Exit" {
 						if retry == "View Logs" {

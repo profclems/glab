@@ -75,7 +75,7 @@ var pipelineCITraceCmd = &cobra.Command{
 				Message: "Select pipeline job to trace:",
 				Options: jobOptions,
 			}
-			survey.AskOne(prompt, &selectedJob)
+			_ = survey.AskOne(prompt, &selectedJob)
 			if selectedJob != "" {
 				re := regexp.MustCompile(`(?s)\((.*)\)`)
 				m := re.FindAllStringSubmatch(selectedJob,-1)
