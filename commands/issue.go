@@ -57,7 +57,7 @@ var issueCmd = &cobra.Command{
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 || len(args) > 2 {
-			cmd.Help()
+			_ = cmd.Help()
 			return
 		}
 	},

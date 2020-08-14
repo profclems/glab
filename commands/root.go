@@ -8,6 +8,7 @@ import (
 	"glab/internal/config"
 	"glab/internal/update"
 	"os"
+	"strings"
 )
 
 // RootCmd is the main root/parent command
@@ -42,14 +43,14 @@ var RootCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) > 0 {
 			fmt.Printf("Unknown command: %s\n", args[0])
-			cmd.Usage()
+			_ = cmd.Usage()
 			return
 		} else if ok, _ := cmd.Flags().GetBool("version"); ok {
 			versionCmd.Run(cmd, args)
 			return
 		}
 
-		cmd.Help()
+		_ = cmd.Help()
 	},
 }
 
@@ -90,7 +91,7 @@ func er(msg interface{}) {
 }
 func cmdErr(cmd *cobra.Command, args []string) {
 	color.Error.Println("Error: Unknown command:")
-	cmd.Usage()
+	_ = cmd.Usage()
 }
 
 func initConfig() {
@@ -122,11 +123,13 @@ func isSuccessful(code int) bool {
 func checkForUpdate(*cobra.Command, []string) {
 
 	releaseInfo, err := update.CheckForUpdate()
-	latestVersion := Version
+	var latestVersion string
 	if err != nil {
 		er("Could not check for update! Make sure you have a stable internet connection")
+		return
 	}
-	latestVersion = releaseInfo.Name
+	latestVersion = strings.TrimSpace(releaseInfo.Name)
+	Version = strings.TrimSpace(Version)
 	if latestVersion == Version {
 		color.Green.Println("You are already using the latest version of glab")
 	} else {
