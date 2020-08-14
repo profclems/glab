@@ -3,6 +3,7 @@ package commands
 import (
 	"errors"
 	"fmt"
+	"glab/internal/utils"
 	"io"
 	"math"
 	"os"
@@ -12,7 +13,6 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/xanzy/go-gitlab"
 	"glab/internal/git"
-	"glab/internal/manip"
 )
 
 func displayMultiplePipelines(m []*gitlab.PipelineInfo) {
@@ -26,7 +26,7 @@ func displayMultiplePipelines(m []*gitlab.PipelineInfo) {
 	if len(m) > 0 {
 		fmt.Printf("Showing pipelines %d of %d on %s\n\n", len(m), len(m), git.GetRepo())
 		for _, pipeline := range m {
-			duration := manip.TimeAgo(*pipeline.CreatedAt)
+			duration := utils.TimeToPrettyTimeAgo(*pipeline.CreatedAt)
 			var pipeState string
 			if pipeline.Status == "success" {
 				pipeState = color.Sprintf("<green>(%s) • #%d</>", pipeline.Status, pipeline.ID)

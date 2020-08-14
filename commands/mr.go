@@ -7,11 +7,11 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/xanzy/go-gitlab"
 	"glab/internal/git"
-	"glab/internal/manip"
+	"glab/internal/utils"
 )
 
 func displayMergeRequest(hm *gitlab.MergeRequest) {
-	duration := manip.TimeAgo(*hm.CreatedAt)
+	duration := utils.TimeToPrettyTimeAgo(*hm.CreatedAt)
 	if hm.State == "opened" {
 		color.Printf("<green>#%d</> %s <magenta>(%s)</> %s\n", hm.IID, hm.Title, hm.SourceBranch, duration)
 	} else {

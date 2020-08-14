@@ -2,13 +2,14 @@ package commands
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/gookit/color"
 	"github.com/gosuri/uitable"
 	"github.com/spf13/cobra"
 	"github.com/xanzy/go-gitlab"
 	"glab/internal/git"
-	"glab/internal/manip"
-	"strings"
+	"glab/internal/utils"
 )
 
 func displayAllIssues(m []*gitlab.Issue) {
@@ -26,7 +27,7 @@ func displayAllIssues(m []*gitlab.Issue) {
 				labels = "(" + labels + ")"
 			}
 			var issueID string
-			duration := manip.TimeAgo(*issue.CreatedAt)
+			duration := utils.TimeToPrettyTimeAgo(*issue.CreatedAt)
 			if issue.State == "opened" {
 				issueID = color.Sprintf("<green>#%d</>", issue.IID)
 			} else {
@@ -41,7 +42,7 @@ func displayAllIssues(m []*gitlab.Issue) {
 }
 
 func displayIssue(hm *gitlab.Issue) {
-	duration := manip.TimeAgo(*hm.CreatedAt)
+	duration := utils.TimeToPrettyTimeAgo(*hm.CreatedAt)
 	if hm.State == "opened" {
 		color.Printf("<green>#%d</> %s <magenta>(%s)</>\n", hm.IID, hm.Title, duration)
 	} else {
