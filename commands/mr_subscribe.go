@@ -16,6 +16,7 @@ var mrSubscribeCmd = &cobra.Command{
 	Short:   `Subscribe to merge requests`,
 	Long:    ``,
 	Aliases: []string{"sub"},
+	Args:    cobra.ExactArgs(1),
 	Run:     subscribeSubscribeRequest,
 }
 
@@ -23,6 +24,9 @@ func subscribeSubscribeRequest(cmd *cobra.Command, args []string) {
 	if len(args) > 0 {
 		mergeID := strings.Trim(args[0], " ")
 		gitlabClient, repo := git.InitGitlabClient()
+		if r, _ := cmd.Flags().GetString("repo"); r != "" {
+			repo = r
+		}
 		arrIds := strings.Split(strings.Trim(mergeID, "[] "), ",")
 		for _, i2 := range arrIds {
 			fmt.Println("Subscribing to merge Request #" + i2)

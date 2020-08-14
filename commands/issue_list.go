@@ -12,7 +12,7 @@ var issueListCmd = &cobra.Command{
 	Short:   `List project issues`,
 	Long:    ``,
 	Aliases: []string{"ls"},
-	Args:    cobra.MaximumNArgs(3),
+	Args:    cobra.ExactArgs(0),
 	Run: func(cmd *cobra.Command, args []string) {
 		var state string
 		if lb, _ := cmd.Flags().GetBool("all"); lb {
@@ -40,7 +40,9 @@ var issueListCmd = &cobra.Command{
 		}
 
 		gitlabClient, repo := git.InitGitlabClient()
-
+		if r, _ := cmd.Flags().GetString("repo"); r != "" {
+			repo = r
+		}
 		issues, _, err := gitlabClient.Issues.ListProjectIssues(repo, l)
 		if err != nil {
 			log.Fatal(err)

@@ -16,6 +16,7 @@ var mrRevokeCmd = &cobra.Command{
 	Short:   `Revoke approval on a merge request <id>`,
 	Long:    ``,
 	Aliases: []string{"unapprove"},
+	Args:    cobra.ExactArgs(1),
 	Run:     revokeMergeRequest,
 }
 
@@ -25,6 +26,9 @@ func revokeMergeRequest(cmd *cobra.Command, args []string) {
 
 		fmt.Println(aurora.Yellow("Revoking approval for Merge Request #" + mergeID + "..."))
 		gitlabClient, repo := git.InitGitlabClient()
+		if r, _ := cmd.Flags().GetString("repo"); r != "" {
+			repo = r
+		}
 		resp, _ := gitlabClient.MergeRequestApprovals.UnapproveMergeRequest(repo, manip.StringToInt(mergeID))
 		if resp != nil {
 			if resp.StatusCode == 201 {

@@ -15,6 +15,7 @@ var issueCreateCmd = &cobra.Command{
 	Short:   `Create an issue`,
 	Long:    ``,
 	Aliases: []string{"new"},
+	Args:    cobra.ExactArgs(0),
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) > 0 {
 			cmdErr(cmd, args)
@@ -69,6 +70,9 @@ var issueCreateCmd = &cobra.Command{
 			l.AssigneeIDs = t2
 		}
 		gitlabClient, repo := git.InitGitlabClient()
+		if r, _ := cmd.Flags().GetString("repo"); r != "" {
+			repo = r
+		}
 		issue, _, err := gitlabClient.Issues.CreateIssue(repo, l)
 		if err != nil {
 			log.Fatal(err)

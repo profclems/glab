@@ -29,7 +29,8 @@ var repoArchiveCmd = &cobra.Command{
 	- namespace/repo
 	- namespace/group/repo
 	`),
-	Run: func (cmd *cobra.Command, args []string) {
+	Args: cobra.MaximumNArgs(2),
+	Run: func(cmd *cobra.Command, args []string) {
 		repo := config.GetRepo()
 		var name string
 		if len(args) != 0 {
@@ -45,7 +46,7 @@ var repoArchiveCmd = &cobra.Command{
 		extensions := []string{"tar.gz", "tar.bz2", "tbz", "tbz2", "tb2", "bz2", "tar", "zip"}
 		if b := contains(extensions, format); !b {
 
-			fmt.Println("fatal: --format must be one of " + strings.Join(extensions[:], ","))
+			fmt.Println("fatal: --format must be one of " + strings.Join(extensions, ","))
 
 			return
 		}
@@ -58,7 +59,7 @@ var repoArchiveCmd = &cobra.Command{
 		}
 		ext := *l.Format
 		archiveName := strings.Replace(repo, "/", "-", -1) + ext
-		if len(strings.TrimSpace(name)) != 0 {
+		if strings.TrimSpace(name) != "" {
 			archiveName = name + "." + ext
 		}
 

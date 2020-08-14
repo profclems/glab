@@ -11,18 +11,20 @@ import (
 )
 
 var mrCloseCmd = &cobra.Command{
-	Use:     "close <id>",
-	Short:   `Close merge requests`,
-	Long:    ``,
-	Aliases: []string{"ls"},
-	Args:    cobra.MaximumNArgs(1),
-	Run:     closeMergeRequestState,
+	Use:   "close <id>",
+	Short: `Close merge requests`,
+	Long:  ``,
+	Args:  cobra.ExactArgs(1),
+	Run:   closeMergeRequestState,
 }
 
 func closeMergeRequestState(cmd *cobra.Command, args []string) {
 	if len(args) > 0 {
 		mergeID := strings.Trim(args[0], " ")
 		gitlabClient, repo := git.InitGitlabClient()
+		if r, _ := cmd.Flags().GetString("repo"); r != "" {
+			repo = r
+		}
 		l := &gitlab.UpdateMergeRequestOptions{}
 		l.StateEvent = gitlab.String("close")
 		arrIds := strings.Split(strings.Trim(mergeID, "[] "), ",")

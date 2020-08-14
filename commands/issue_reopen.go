@@ -11,10 +11,11 @@ import (
 )
 
 var issueReopenCmd = &cobra.Command{
-	Use:     "reopen",
+	Use:     "reopen <id>",
 	Short:   `Reopen a closed issue`,
 	Long:    ``,
 	Aliases: []string{"open"},
+	Args:    cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) > 1 {
 			cmdErr(cmd, args)
@@ -23,6 +24,9 @@ var issueReopenCmd = &cobra.Command{
 		if len(args) > 0 {
 			issueID := strings.TrimSpace(args[0])
 			gitlabClient, repo := git.InitGitlabClient()
+			if r, _ := cmd.Flags().GetString("repo"); r != "" {
+				repo = r
+			}
 			l := &gitlab.UpdateIssueOptions{}
 			l.StateEvent = gitlab.String("reopen")
 			arrIds := strings.Split(strings.Trim(issueID, "[] "), ",")

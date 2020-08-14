@@ -40,9 +40,9 @@ func GetEnv(key string) string {
 		env := os.Getenv(key) //first get user defined variable via export
 
 		if env == "" {
-			env = manip.GetKeyValueInFile(configFile, key) //Find variable in local env
+			env = GetKeyValueInFile(configFile, key) //Find variable in local env
 			if env == "NOTFOUND" || env == "OK" {
-				env = manip.GetKeyValueInFile(globalConfigFile, key) //Find variable in global env
+				env = GetKeyValueInFile(globalConfigFile, key) //Find variable in global env
 				if env == "NOTFOUND" || env == "OK" {
 					//log.Fatal("Configuration not set for ", key)
 					return ""
@@ -93,8 +93,8 @@ func SetEnv(key, value string) {
 	w := bufio.NewWriter(f)
 	_, _ = w.WriteString(strings.Trim(newData, "\n"))
 	_ = w.Flush()
-	if manip.GetKeyValueInFile(".gitignore", configFileFileParentDir) == "NOTFOUND" {
-		manip.ReadAndAppend(".gitignore", configFileFileParentDir)
+	if GetKeyValueInFile(".gitignore", configFileFileParentDir) == "NOTFOUND" {
+		ReadAndAppend(".gitignore", configFileFileParentDir)
 	}
 }
 

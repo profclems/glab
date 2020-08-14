@@ -21,11 +21,15 @@ var pipelineDeleteCmd = &cobra.Command{
 	$ glab pipeline delete 12,34,2
 	`),
 	Long: ``,
+	Args: cobra.ExactArgs(1),
 	Run:  deletePipeline,
 }
 
 func deletePipeline(cmd *cobra.Command, args []string) {
 	gitlabClient, repo := git.InitGitlabClient()
+	if r, _ := cmd.Flags().GetString("repo"); r != "" {
+		repo = r
+	}
 	if m, _ := cmd.Flags().GetString("status"); m != "" {
 		l := &gitlab.ListProjectPipelinesOptions{}
 		l.Status = gitlab.BuildState(gitlab.BuildStateValue(m))

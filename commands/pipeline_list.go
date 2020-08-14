@@ -15,11 +15,15 @@ var pipelineListCmd = &cobra.Command{
 	$ glab pipeline list --state=failed
 	`),
 	Long: ``,
+	Args: cobra.ExactArgs(0),
 	Run:  listPipelines,
 }
 
 func listPipelines(cmd *cobra.Command, args []string) {
 	gitlabClient, repo := git.InitGitlabClient()
+	if r, _ := cmd.Flags().GetString("repo"); r != "" {
+		repo = r
+	}
 	l := &gitlab.ListProjectPipelinesOptions{}
 	if m, _ := cmd.Flags().GetString("status"); m != "" {
 		l.Status = gitlab.BuildState(gitlab.BuildStateValue(m))
