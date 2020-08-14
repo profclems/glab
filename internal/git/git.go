@@ -17,6 +17,7 @@ import (
 	"strings"
 )
 
+// GetRepo returns the repo name of the git directory with the namespace like profclems/glab
 func GetRepo() string {
 	gitRemoteVar := GetRemoteURL()
 	repo, err := getRepoNameWithNamespace(gitRemoteVar)
@@ -28,9 +29,13 @@ func GetRepo() string {
 }
 
 func GetRemoteURL() string {
+	remoteNickname := strings.TrimSpace(config.GetEnv("GIT_REMOTE_URL_VAR"))
+	if remoteNickname == "" {
+		remoteNickname = "origin"
+	}
 	gitRemoteURL, err := gitconfig.Local("remote." + config.GetEnv("GIT_REMOTE_URL_VAR") + ".url")
 	if err != nil {
-		log.Fatal("Could not find remote url for gitlab. Run git config")
+		log.Fatal("Could not find remote url for gitlab. Run glab config -g")
 	}
 	return gitRemoteURL
 }
@@ -63,25 +68,22 @@ func getRepoNameWithNamespace(remoteURL string) (string, error) {
 	return repo, nil
 }
 
-// HasHub is true if hub binary is installed
-var HasHub bool
-
-// HasGH is true is GitHub Cli is installed
-var HasGH bool
+// HasHub is true if git binary is installed
+var HasGit bool
 
 func init() {
-	_, err := exec.LookPath("hub")
+	_, err := exec.LookPath("git")
 	if err == nil {
-		HasHub = true
-	}
-	_, err = exec.LookPath("gh")
-	if err == nil {
-		HasHub = true
+		HasGit = true
 	}
 }
 
 // InitGitlabClient : creates client
 func InitGitlabClient() (*gitlab.Client, string) {
+	baseUrl := strings.TrimRight(config.GetEnv("GITLAB_URI"), "/")
+	if baseUrl == "" {
+		baseUrl = "https://gitlab.com"
+	}
 	git, err := gitlab.NewClient(config.GetEnv("GITLAB_TOKEN"), gitlab.WithBaseURL(strings.TrimRight(config.GetEnv("GITLAB_URI"), "/")+"/api/v4"))
 	if err != nil {
 		log.Fatalf("Failed to create client: %v", err)
