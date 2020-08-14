@@ -125,7 +125,7 @@ func inputCapture(a *tview.Application, root *tview.Pages, navi navigator, input
 			a.Stop()
 			return nil
 		case tcell.KeyCtrlC:
-			if curJob.Status == "pending" || curJob.Status=="running" {
+			if curJob.Status == "pending" || curJob.Status == "running" {
 				modalVisible = true
 				modal := tview.NewModal().
 					SetText(fmt.Sprintf("Are you sure you want to Cancel %s", curJob.Name)).
