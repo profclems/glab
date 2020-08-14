@@ -112,6 +112,10 @@ var pipelineStatusCmd = &cobra.Command{
 								er(err)
 							}
 							pipes, err = getPipelines(l, repo)
+							if err != nil {
+								er(err)
+								return
+							}
 							runningPipeline = pipes[0]
 							isRunning = true
 						}

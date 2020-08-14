@@ -145,7 +145,7 @@ func runTrace(ctx context.Context, w io.Writer, pid interface{}, sha, name strin
 			}
 			fmt.Fprintf(w, "Showing logs for %s job #%d\n", job.Name, job.ID)
 		})
-		_, err = io.CopyN(ioutil.Discard, trace, offset)
+		_, _ = io.CopyN(ioutil.Discard, trace, offset)
 		lenT, err := io.Copy(w, trace)
 		if err != nil {
 			return err

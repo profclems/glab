@@ -246,6 +246,9 @@ func getPipelineFromBranch(ref, repo string) ([]*gitlab.Job, error) {
 	}
 	pipeline := pipes[0]
 	jobs, err := getPipelineJobs(pipeline.ID, repo)
+	if err != nil {
+		return  nil, err
+	}
 	return jobs, nil
 }
 
