@@ -2,6 +2,8 @@ package commands
 
 import (
 	"fmt"
+	"time"
+
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/MakeNowJust/heredoc"
 	"github.com/gookit/color"
@@ -9,8 +11,6 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/xanzy/go-gitlab"
 	"glab/internal/git"
-	"strconv"
-	"time"
 )
 
 var pipelineStatusCmd = &cobra.Command{
@@ -30,6 +30,11 @@ var pipelineStatusCmd = &cobra.Command{
 			return
 		}
 		branch, _ := cmd.Flags().GetString("branch")
+		var repo string
+		rep, _ := cmd.Flags().GetString("repo")
+		if rep != "" {
+			repo = rep
+		}
 		live, _ := cmd.Flags().GetBool("live")
 		var err error
 		if branch == "" {
@@ -46,7 +51,7 @@ var pipelineStatusCmd = &cobra.Command{
 		l.Page = 1
 		l.PerPage = 1
 		//pid := manip.StringToInt(args[0])
-		pipes, err := getPipelines(l)
+		pipes, err := getPipelines(l, repo)
 		if err != nil {
 			er(err)
 		}
@@ -59,7 +64,11 @@ var pipelineStatusCmd = &cobra.Command{
 			// start listening for updates and render
 			writer.Start()
 			for isRunning {
-				jobs := getPipelineJobs(runningPipeline.ID)
+				jobs, err := getPipelineJobs(runningPipeline.ID, repo)
+				if err != nil {
+					er(err)
+					return
+				}
 				for _, job := range jobs {
 					duration := fmtDuration(job.Duration)
 					var status string
@@ -79,9 +88,10 @@ var pipelineStatusCmd = &cobra.Command{
 				_, _ = fmt.Fprintf(writer.Newline(), "SHA: %s\n", runningPipeline.SHA)
 				_, _ = fmt.Fprintf(writer.Newline(), "Pipeline State: %s\n", runningPipeline.Status)
 				if runningPipeline.Status == "running" && live {
-					pipes, err = getPipelines(l)
+					pipes, err = getPipelines(l, repo)
 					if err != nil {
 						er(err)
+						return
 					}
 					runningPipeline = pipes[0]
 				} else {
@@ -97,8 +107,11 @@ var pipelineStatusCmd = &cobra.Command{
 						if retry == "View Logs" {
 							isRunning = false
 						} else {
-							retryPipelineJob(runningPipeline.ID)
-							pipes, err = getPipelines(l)
+							_, err = retryPipeline(runningPipeline.ID, repo)
+							if err != nil {
+								er(err)
+							}
+							pipes, err = getPipelines(l, repo)
 							runningPipeline = pipes[0]
 							isRunning = true
 						}
@@ -108,8 +121,8 @@ var pipelineStatusCmd = &cobra.Command{
 				}
 				time.Sleep(time.Millisecond * 0)
 				if retry == "View Logs" {
-					args = []string{strconv.FormatInt(int64(runningPipeline.ID), 10)}
-					viewPipelines(cmd, args)
+					//args = []string{strconv.FormatInt(int64(runningPipeline.ID), 10)}
+					pipelineCITrace(cmd, args)
 					fmt.Println("logs")
 				}
 			}

@@ -1,7 +1,13 @@
 package commands
 
+/*
 import (
 	"fmt"
+	"io"
+	"io/ioutil"
+	"log"
+	"strings"
+
 	"github.com/MakeNowJust/heredoc"
 	"github.com/jroimartin/gocui"
 	"github.com/spf13/cobra"
@@ -9,10 +15,6 @@ import (
 	"glab/internal/git"
 	"glab/internal/manip"
 	"glab/internal/utils"
-	"io"
-	"io/ioutil"
-	"log"
-	"strings"
 )
 
 var pipelineViewCmd = &cobra.Command{
@@ -153,11 +155,6 @@ func keybindings(g *gocui.Gui) error {
 	if err := g.SetKeybinding("", gocui.KeyCtrlQ, gocui.ModNone, quit); err != nil {
 		return err
 	}
-	/*
-		if err := g.SetKeybinding("side", gocui.KeyEnter, gocui.ModNone, getLine); err != nil {
-			return err
-		}
-	*/
 	if err := g.SetKeybinding("side", gocui.KeyEnter, gocui.ModNone, showLoading); err != nil {
 		return err
 	}
@@ -265,3 +262,4 @@ func updatePipelineLog(v *gocui.View, jid int) {
 func init() {
 	pipelineCmd.AddCommand(pipelineViewCmd)
 }
+*/
