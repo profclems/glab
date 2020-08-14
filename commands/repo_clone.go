@@ -34,7 +34,7 @@ var repoCloneCmd = &cobra.Command{
 
 		repo := args[0]
 		fmt.Println(repo)
-		if git.IsValidURL(repo) == false {
+		if !git.IsValidURL(repo) {
 			repo = config.GetEnv("GITLAB_URI") + "/" + repo
 		}
 		if !strings.HasSuffix(repo, ".git") {
