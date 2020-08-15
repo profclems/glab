@@ -37,7 +37,7 @@ func acceptRebaseRequest(cmd *cobra.Command, args []string) {
 	opts.IncludeRebaseInProgress = gitlab.Bool(true)
 	fmt.Println("Checking rebase status...")
 	i := 0
-	for  {
+	for {
 		mr, _, err := gitlabClient.MergeRequests.GetMergeRequest(repo, manip.StringToInt(mergeID), opts)
 		if err != nil {
 			log.Fatal(err)
