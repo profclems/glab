@@ -33,13 +33,13 @@ var issueCreateCmd = &cobra.Command{
 		if description, _ := cmd.Flags().GetString("description"); description != "" {
 			issueDescription = strings.Trim(description, " ")
 		} else {
-			if  editor, _ := cmd.Flags().GetBool("no-editor"); editor {
+			if editor, _ := cmd.Flags().GetBool("no-editor"); editor {
 				issueDescription = manip.AskQuestionMultiline("Description:", "")
 			} else {
 				issueDescription = manip.Editor(manip.EditorOptions{
-					Label: "Description:",
-					Help : "Enter the issue description. ",
-					FileName : "*_ISSUE_EDITMSG.md",
+					Label:    "Description:",
+					Help:     "Enter the issue description. ",
+					FileName: "*_ISSUE_EDITMSG.md",
 				})
 			}
 		}
@@ -94,8 +94,8 @@ func init() {
 	issueCreateCmd.Flags().StringP("assignee", "a", "", "Assign issue to people by their ID. Multiple values should be comma separated ")
 	issueCreateCmd.Flags().IntP("milestone", "m", -1, "The global ID of a milestone to assign issue")
 	issueCreateCmd.Flags().BoolP("confidential", "c", false, "Set an issue to be confidential. Default is false")
-	issueCreateCmd.Flags().IntP("linked-mr", "",-1, "The IID of a merge request in which to resolve all issues")
-	issueCreateCmd.Flags().IntP("weight", "w",-1, "The weight of the issue. Valid values are greater than or equal to 0.")
+	issueCreateCmd.Flags().IntP("linked-mr", "", -1, "The IID of a merge request in which to resolve all issues")
+	issueCreateCmd.Flags().IntP("weight", "w", -1, "The weight of the issue. Valid values are greater than or equal to 0.")
 	issueCreateCmd.Flags().BoolP("no-editor", "", false, "Don't open editor to enter description. If set to true, uses prompt. Default is false")
 	issueCmd.AddCommand(issueCreateCmd)
 }

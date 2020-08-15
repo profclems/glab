@@ -1,25 +1,19 @@
-## glab mr delete
+## glab mr rebase
 
-Delete merge requests
+Automatically rebase the source_branch of the merge request against its target_branch.
 
 ### Synopsis
 
-Delete merge requests
+If you don’t have permissions to push to the merge request’s source branch - you’ll get a 403 Forbidden response.
 
 ```
-glab mr delete <id> [flags]
-```
-
-### Examples
-
-```
-$ glab delete 123
+glab mr rebase <id> [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help   help for delete
+  -h, --help   help for rebase
 ```
 
 ### Options inherited from parent commands

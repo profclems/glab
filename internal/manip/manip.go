@@ -68,12 +68,12 @@ func AskQuestionMultiline(question string, defaultVal string) string {
 }
 
 type EditorOptions struct {
-	FileName  	string
-	Label 	  	string
-	Help 	  	string
-	Default	    string
+	FileName      string
+	Label         string
+	Help          string
+	Default       string
 	AppendDefault bool
-	HideDefault bool
+	HideDefault   bool
 }
 
 func Editor(opts EditorOptions) string {

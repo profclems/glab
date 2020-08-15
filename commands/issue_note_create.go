@@ -32,22 +32,22 @@ var issueNoteCreateCmd = &cobra.Command{
 		}
 		if body == "" {
 			body = manip.Editor(manip.EditorOptions{
-				Label: "Note Message:",
-				Help : "Enter the note message. ",
-				FileName : "ISSUE_NOTE_EDITMSG",
+				Label:    "Note Message:",
+				Help:     "Enter the note message. ",
+				FileName: "ISSUE_NOTE_EDITMSG",
 			})
 		}
 		if body == "" {
 			return errors.New("aborted... Note is empty")
 		}
 
-		noteInfo,_, err := gitlabClient.Notes.CreateIssueNote(repo, manip.StringToInt(mID), &gitlab.CreateIssueNoteOptions{
+		noteInfo, _, err := gitlabClient.Notes.CreateIssueNote(repo, manip.StringToInt(mID), &gitlab.CreateIssueNoteOptions{
 			Body: &body,
 		})
 		if err != nil {
 			return err
 		}
-		fmt.Printf("%s#note_%d\n",mr.WebURL, noteInfo.ID)
+		fmt.Printf("%s#note_%d\n", mr.WebURL, noteInfo.ID)
 		return nil
 	},
 }
