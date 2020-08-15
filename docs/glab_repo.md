@@ -1,10 +1,10 @@
 ## glab repo
 
-Work with GitLab repositories
+Work with GitLab repositories and projects
 
 ### Synopsis
 
-Work with GitLab repositories
+Work with GitLab repositories and projects
 
 ```
 glab repo <command> [flags]

@@ -17,15 +17,19 @@ glab mr create [flags]
   -a, --assignee string        Assign merge request to people by their IDs. Multiple values should be comma separated 
       --create-source-branch   Create source branch if it does not exist
   -d, --description string     Supply a description for merge request
+      --draft                  Mark merge request as a draft
+  -f, --fill                   Do not prompt for title/description and just use commit info
   -h, --help                   help for create
   -l, --label string           Add label by name. Multiple labels should be comma separated
   -m, --milestone int          add milestone by <id> for merge request (default -1)
       --no-editor              Don't open editor to enter description. If set to true, uses prompt. Default is false
+      --push                   Push commit changes after creating merge request. Make sure you have committed changes
       --remove-source-branch   Remove Source Branch on merge
-  -s, --source-branch string   Source Branch for merge request
-  -g, --target-branch string   Target Branch for merge request
+  -s, --source-branch string   The Branch you are creating the merge request. Default is the current branch.
+  -b, --target-branch string   The target or base branch into which you want your code merged
       --target-project int     Add target project by id (default -1)
   -t, --title string           Supply a title for merge request
+      --wip                    Mark merge request as a work in progress. Alternative to --draft
 ```
 
 ### Options inherited from parent commands

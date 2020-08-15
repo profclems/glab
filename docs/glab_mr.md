@@ -21,6 +21,7 @@ glab mr <command> [flags]
 
 * [glab](glab.md)	 - A GitLab CLI Tool
 * [glab mr approve](glab_mr_approve.md)	 - Approve merge requests
+* [glab mr checkout](glab_mr_checkout.md)	 - Checkout to an open merge request
 * [glab mr close](glab_mr_close.md)	 - Close merge requests
 * [glab mr create](glab_mr_create.md)	 - Create new merge request
 * [glab mr delete](glab_mr_delete.md)	 - Delete merge requests
