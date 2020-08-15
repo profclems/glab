@@ -1,19 +1,20 @@
-## glab issue delete
+## glab issue note
 
-Delete an issue
+Add a comment or note to an issue on Gitlab
 
 ### Synopsis
 
-Delete an issue
+Add a comment or note to an issue on Gitlab
 
 ```
-glab issue delete <id> [flags]
+glab issue note <issue-id> [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help   help for delete
+  -h, --help             help for note
+  -m, --message string   Comment/Note message
 ```
 
 ### Options inherited from parent commands

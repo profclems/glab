@@ -1,25 +1,20 @@
-## glab mr delete
+## glab mr note
 
-Delete merge requests
+Add a comment or note to merge request
 
 ### Synopsis
 
-Delete merge requests
+Add a comment or note to merge request
 
 ```
-glab mr delete <id> [flags]
-```
-
-### Examples
-
-```
-$ glab delete 123
+glab mr note <merge-request-id> [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help   help for delete
+  -h, --help             help for note
+  -m, --message string   Comment/Note message
 ```
 
 ### Options inherited from parent commands
