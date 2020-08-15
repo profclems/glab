@@ -11,7 +11,6 @@ import (
 	"glab/internal/git"
 	"glab/internal/manip"
 	"glab/internal/utils"
-	"log"
 	"strings"
 	"time"
 )
@@ -22,10 +21,10 @@ var issueViewCmd = &cobra.Command{
 	Long:    ``,
 	Aliases: []string{"show"},
 	Args:    cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		if len(args) == 0 || len(args) > 1 {
 			cmdErr(cmd, args)
-			return
+			return nil
 		}
 		pid := manip.StringToInt(args[0])
 
@@ -37,17 +36,17 @@ var issueViewCmd = &cobra.Command{
 
 		issue, _, err := gitlabClient.Issues.GetIssue(repo, pid)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 		if lb, _ := cmd.Flags().GetBool("web"); lb { //open in browser if --web flag is specified
 			a, err := browser.Command(issue.WebURL)
 			if err != nil {
-				er(err)
+				return err
 			}
 			if err := a.Run(); err != nil {
-				er(err)
+				return err
 			}
-			return
+			return nil
 		}
 		var issueState string
 		if issue.State == "opened" {
@@ -108,7 +107,7 @@ var issueViewCmd = &cobra.Command{
 			l := &gitlab.ListIssueNotesOptions{}
 			notes, _, err := gitlabClient.Notes.ListIssueNotes(repo, pid, l)
 			if err != nil {
-				er(err)
+				return err
 			}
 
 			table := uitable.New()
@@ -138,6 +137,7 @@ var issueViewCmd = &cobra.Command{
 				fmt.Println("There are no comments on this issue")
 			}
 		}
+		return nil
 	},
 }
 

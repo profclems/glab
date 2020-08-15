@@ -1,7 +1,6 @@
 package commands
 
 import (
-	"log"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -16,10 +15,10 @@ var issueCreateCmd = &cobra.Command{
 	Long:    ``,
 	Aliases: []string{"new"},
 	Args:    cobra.ExactArgs(0),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		if len(args) > 0 {
 			cmdErr(cmd, args)
-			return
+			return nil
 		}
 
 		l := &gitlab.CreateIssueOptions{}
@@ -30,11 +29,6 @@ var issueCreateCmd = &cobra.Command{
 			issueTitle = strings.Trim(title, " ")
 		} else {
 			issueTitle = manip.AskQuestionWithInput("Title", "", true)
-		}
-		if label, _ := cmd.Flags().GetString("label"); label != "" {
-			issueLabel = strings.Trim(label, "[] ")
-		} else {
-			issueLabel = manip.AskQuestionWithInput("Label(s) [Comma Separated]", "", false)
 		}
 		if description, _ := cmd.Flags().GetString("description"); description != "" {
 			issueDescription = strings.Trim(description, " ")
@@ -48,6 +42,11 @@ var issueCreateCmd = &cobra.Command{
 					FileName : "*_ISSUE_EDITMSG.md",
 				})
 			}
+		}
+		if label, _ := cmd.Flags().GetString("label"); label != "" {
+			issueLabel = strings.Trim(label, "[] ")
+		} else {
+			issueLabel = manip.AskQuestionWithInput("Label(s) [Comma Separated]", "", false)
 		}
 		l.Title = gitlab.String(issueTitle)
 		l.Labels = &gitlab.Labels{issueLabel}
@@ -81,9 +80,10 @@ var issueCreateCmd = &cobra.Command{
 		}
 		issue, _, err := gitlabClient.Issues.CreateIssue(repo, l)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 		displayIssue(issue)
+		return nil
 	},
 }
 

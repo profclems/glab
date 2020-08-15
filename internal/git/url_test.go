@@ -15,7 +15,7 @@ func TestIsValidURL(t *testing.T) {
 		{"Group namespace", args{"group/namespace/repo"}, false},
 		{"HTTPS Protocol", args{"https://gitlab.com/profclems/glab.git"}, true},
 		{"With SSH", args{"git@gitlab.com:profclems/glab.git"}, true},
-		{"SSH Protocol", args{"ssh:user@example.com:my-project"}, true},
+		{"SSH Protocol", args{"ssh://user@example.com:my-project"}, true},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

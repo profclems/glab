@@ -16,7 +16,7 @@ var mrCreateNoteCmd = &cobra.Command{
 	Short:   "Add a comment or note to merge request",
 	Long:    ``,
 	Args:    cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 
 		gitlabClient, repo := git.InitGitlabClient()
 		mID := args[0]
@@ -25,13 +25,11 @@ var mrCreateNoteCmd = &cobra.Command{
 			repo = r
 		}
 		if err != nil {
-			er(err)
-			return
+			return err
 		}
 		mr, _, err := gitlabClient.MergeRequests.GetMergeRequest(repo, manip.StringToInt(mID), &gitlab.GetMergeRequestsOptions{})
 		if err != nil {
-			er(err)
-			return
+			return err
 		}
 		if body == "" {
 			body = manip.Editor(manip.EditorOptions{
@@ -48,9 +46,10 @@ var mrCreateNoteCmd = &cobra.Command{
 			Body: &body,
 		})
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 		fmt.Printf("%s#note_%d\n",mr.WebURL, noteInfo.ID)
+		return nil
 	},
 }
 

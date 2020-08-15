@@ -1,13 +1,12 @@
 package commands
 
 import (
+	"errors"
 	"fmt"
-	"glab/internal/git"
-	"glab/internal/manip"
-	"log"
-
 	"github.com/spf13/cobra"
 	gitlab "github.com/xanzy/go-gitlab"
+	"glab/internal/git"
+	"glab/internal/manip"
 )
 
 var issueNoteCreateCmd = &cobra.Command{
@@ -16,7 +15,7 @@ var issueNoteCreateCmd = &cobra.Command{
 	Short:   "Add a comment or note to an issue on Gitlab",
 	Long:    ``,
 	Args:    cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 
 		gitlabClient, repo := git.InitGitlabClient()
 		mID := args[0]
@@ -25,13 +24,11 @@ var issueNoteCreateCmd = &cobra.Command{
 			repo = r
 		}
 		if err != nil {
-			er(err)
-			return
+			return err
 		}
 		mr, _, err := gitlabClient.Issues.GetIssue(repo, manip.StringToInt(mID))
 		if err != nil {
-			er(err)
-			return
+			return err
 		}
 		if body == "" {
 			body = manip.Editor(manip.EditorOptions{
@@ -41,16 +38,17 @@ var issueNoteCreateCmd = &cobra.Command{
 			})
 		}
 		if body == "" {
-			log.Fatal("Aborted... Note is empty")
+			return errors.New("aborted... Note is empty")
 		}
 
 		noteInfo,_, err := gitlabClient.Notes.CreateIssueNote(repo, manip.StringToInt(mID), &gitlab.CreateIssueNoteOptions{
 			Body: &body,
 		})
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 		fmt.Printf("%s#note_%d\n",mr.WebURL, noteInfo.ID)
+		return nil
 	},
 }
 

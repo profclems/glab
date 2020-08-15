@@ -14,10 +14,10 @@ var issueDeleteCmd = &cobra.Command{
 	Long:    ``,
 	Aliases: []string{"del"},
 	Args:    cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		if len(args) > 1 {
 			cmdErr(cmd, args)
-			return
+			return nil
 		}
 		if len(args) > 0 {
 			issueID := strings.TrimSpace(args[0])
@@ -40,6 +40,7 @@ var issueDeleteCmd = &cobra.Command{
 		} else {
 			cmdErr(cmd, args)
 		}
+		return nil
 	},
 }
 

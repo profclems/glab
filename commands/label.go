@@ -7,11 +7,15 @@ var labelCmd = &cobra.Command{
 	Use:   "label <command> [flags]",
 	Short: `Manage labels on remote`,
 	Long:  ``,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		if len(args) == 0 || len(args) > 2 {
-			cmd.Help()
-			return
+			err := cmd.Help()
+			if err != nil {
+				return err
+			}
+			return nil
 		}
+		return nil
 	},
 }
 

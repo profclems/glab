@@ -293,7 +293,7 @@ func pipelineJobTraceWithSha(pid interface{}, sha, name string) (io.Reader, *git
 	return r, job, err
 }
 
-// CIJobs returns a list of jobs in a pipeline for a given sha. The jobs are
+// pipelineJobsWithSha returns a list of jobs in a pipeline for a given sha. The jobs are
 // returned sorted by their CreatedAt time
 func pipelineJobsWithSha(pid interface{}, sha string) ([]*gitlab.Job, error) {
 	gitlabClient, _ := git.InitGitlabClient()

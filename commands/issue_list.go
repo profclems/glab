@@ -4,7 +4,6 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/xanzy/go-gitlab"
 	"glab/internal/git"
-	"log"
 )
 
 var issueListCmd = &cobra.Command{
@@ -13,7 +12,7 @@ var issueListCmd = &cobra.Command{
 	Long:    ``,
 	Aliases: []string{"ls"},
 	Args:    cobra.ExactArgs(0),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		var state string
 		if lb, _ := cmd.Flags().GetBool("all"); lb {
 			state = "all"
@@ -45,9 +44,10 @@ var issueListCmd = &cobra.Command{
 		}
 		issues, _, err := gitlabClient.Issues.ListProjectIssues(repo, l)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 		displayAllIssues(issues)
+		return nil
 
 	},
 }

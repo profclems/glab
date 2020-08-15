@@ -55,9 +55,9 @@ var RootCmd = &cobra.Command{
 }
 
 // Execute executes the root command.
-func Execute() error {
+func Execute() (*cobra.Command, error) {
 	RootCmd.Flags().BoolP("version", "v", false, "show glab version information")
-	return RootCmd.Execute()
+	return RootCmd.ExecuteC()
 }
 
 // versionCmd represents the version command
@@ -79,7 +79,6 @@ var configCmd = &cobra.Command{
 }
 
 func init() {
-	cobra.OnInitialize(initConfig)
 	RootCmd.AddCommand(updateCmd)
 	initConfigCmd()
 	RootCmd.AddCommand(configCmd)
@@ -92,18 +91,6 @@ func er(msg interface{}) {
 func cmdErr(cmd *cobra.Command, args []string) {
 	color.Error.Println("Error: Unknown command:")
 	_ = cmd.Usage()
-}
-
-func initConfig() {
-	config.SetGlobalPathDir()
-	config.UseGlobalConfig = true
-	if config.GetEnv("GITLAB_URI") == "NOTFOUND" || config.GetEnv("GITLAB_URI") == "OK" {
-		config.SetEnv("GITLAB_URI", "https://gitlab.com")
-	}
-	if config.GetEnv("GIT_REMOTE_URL_VAR") == "NOTFOUND" || config.GetEnv("GIT_REMOTE_URL_VAR") == "OK" {
-		config.SetEnv("GIT_REMOTE_URL_VAR", "origin")
-	}
-	config.UseGlobalConfig = false
 }
 
 func initConfigCmd() {

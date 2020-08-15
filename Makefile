@@ -20,9 +20,9 @@ GO_LDFLAGS := -X main.version=$(GLAB_VERSION) $(GO_LDFLAGS)
 GO_LDFLAGS := -X main.build=$(BUILD_DATE) $(GO_LDFLAGS)
 
 build:
-	go build -trimpath -ldflags "$(GO_LDFLAGS)" -o ./bin/glab ./cmd/glab
+	go build -trimpath -ldflags "$(GO_LDFLAGS) -X  main.usageMode=prod" -o ./bin/glab ./cmd/glab
 run:
-	go run -trimpath -ldflags "$(GO_LDFLAGS)" ./cmd/glab $(var)
+	go run -trimpath -ldflags "$(GO_LDFLAGS) -X main.usageMode=dev" ./cmd/glab $(var)
 test:
 	go test ./...
 rt: #Test release

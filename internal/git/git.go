@@ -4,10 +4,6 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"github.com/tcnksm/go-gitconfig"
-	"github.com/xanzy/go-gitlab"
-	"glab/internal/config"
-	"glab/internal/run"
 	"log"
 	"net/url"
 	"os"
@@ -15,6 +11,11 @@ import (
 	"path"
 	"regexp"
 	"strings"
+
+	"github.com/tcnksm/go-gitconfig"
+	"github.com/xanzy/go-gitlab"
+	"glab/internal/config"
+	"glab/internal/run"
 )
 
 // GetRepo returns the repo name of the git directory with the namespace like profclems/glab
@@ -376,6 +377,107 @@ func firstLine(output []byte) string {
 		return string(output)[0:i]
 	}
 	return string(output)
+}
+
+var remoteRE = regexp.MustCompile(`(.+)\s+(.+)\s+\((push|fetch)\)`)
+
+// RemoteSet is a slice of git remotes
+type RemoteSet []*Remote
+
+func NewRemote(name string, u string) *Remote {
+	pu, _ := url.Parse(u)
+	return &Remote{
+		Name:     name,
+		FetchURL: pu,
+		PushURL:  pu,
+	}
+}
+
+// Remote is a parsed git remote
+type Remote struct {
+	Name     string
+	FetchURL *url.URL
+	PushURL  *url.URL
+}
+
+func (r *Remote) String() string {
+	return r.Name
+}
+
+// Remotes gets the git remotes set for the current repo
+func Remotes() (RemoteSet, error) {
+	list, err := listRemotes()
+	if err != nil {
+		return nil, err
+	}
+	return parseRemotes(list), nil
+}
+
+func parseRemotes(gitRemotes []string) (remotes RemoteSet) {
+	for _, r := range gitRemotes {
+		match := remoteRE.FindStringSubmatch(r)
+		if match == nil {
+			continue
+		}
+		name := strings.TrimSpace(match[1])
+		urlStr := strings.TrimSpace(match[2])
+		urlType := strings.TrimSpace(match[3])
+
+		var rem *Remote
+		if len(remotes) > 0 {
+			rem = remotes[len(remotes)-1]
+			if name != rem.Name {
+				rem = nil
+			}
+		}
+		if rem == nil {
+			rem = &Remote{Name: name}
+			remotes = append(remotes, rem)
+		}
+
+		u, err := ParseURL(urlStr)
+		if err != nil {
+			continue
+		}
+
+		switch urlType {
+		case "fetch":
+			rem.FetchURL = u
+		case "push":
+			rem.PushURL = u
+		}
+	}
+	return
+}
+
+// AddRemote adds a new git remote and auto-fetches objects from it
+func AddRemote(name, u string) (*Remote, error) {
+	addCmd := exec.Command("git", "remote", "add", "-f", name, u)
+	err := run.PrepareCmd(addCmd).Run()
+	if err != nil {
+		return nil, err
+	}
+
+	var urlParsed *url.URL
+	if strings.HasPrefix(u, "https") {
+		urlParsed, err = url.Parse(u)
+		if err != nil {
+			return nil, err
+		}
+
+	} else {
+		urlParsed, err = ParseURL(u)
+		if err != nil {
+			return nil, err
+		}
+
+	}
+
+	return &Remote{
+		Name:     name,
+		FetchURL: urlParsed,
+		PushURL:  urlParsed,
+	}, nil
 }
 
 func RunCmd(args []string) (err error) {

@@ -14,10 +14,10 @@ var issueSubscribeCmd = &cobra.Command{
 	Long:    ``,
 	Aliases: []string{"sub"},
 	Args:    cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		if len(args) > 1 {
 			cmdErr(cmd, args)
-			return
+			return nil
 		}
 		if len(args) > 0 {
 			mergeID := strings.TrimSpace(args[0])
@@ -42,6 +42,7 @@ var issueSubscribeCmd = &cobra.Command{
 		} else {
 			cmdErr(cmd, args)
 		}
+		return nil
 	},
 }
 
