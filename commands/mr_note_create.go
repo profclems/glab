@@ -35,22 +35,22 @@ var mrCreateNoteCmd = &cobra.Command{
 		}
 		if body == "" {
 			body = manip.Editor(manip.EditorOptions{
-				Label: "Note Message:",
-				Help : "Enter the note message for the merge request. ",
-				FileName : "*_MR_NOTE_EDITMSG.md",
+				Label:    "Note Message:",
+				Help:     "Enter the note message for the merge request. ",
+				FileName: "*_MR_NOTE_EDITMSG.md",
 			})
 		}
 		if body == "" {
 			log.Fatal("Aborted... Note has an empty message")
 		}
 
-		noteInfo,_, err := gitlabClient.Notes.CreateMergeRequestNote(repo, manip.StringToInt(mID), &gitlab.CreateMergeRequestNoteOptions{
+		noteInfo, _, err := gitlabClient.Notes.CreateMergeRequestNote(repo, manip.StringToInt(mID), &gitlab.CreateMergeRequestNoteOptions{
 			Body: &body,
 		})
 		if err != nil {
 			log.Fatal(err)
 		}
-		fmt.Printf("%s#note_%d\n",mr.WebURL, noteInfo.ID)
+		fmt.Printf("%s#note_%d\n", mr.WebURL, noteInfo.ID)
 	},
 }
 

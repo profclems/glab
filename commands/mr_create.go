@@ -40,13 +40,13 @@ var mrCreateCmd = &cobra.Command{
 		if desc, _ := cmd.Flags().GetString("description"); desc != "" {
 			mergeDescription = strings.Trim(desc, " ")
 		} else {
-			if  editor, _ := cmd.Flags().GetBool("no-editor"); editor {
+			if editor, _ := cmd.Flags().GetBool("no-editor"); editor {
 				mergeDescription = manip.AskQuestionMultiline("Description:", "")
 			} else {
 				mergeDescription = manip.Editor(manip.EditorOptions{
-					Label: "Description:",
-					Help : "Enter the MR description. ",
-					FileName : "*_MERGE_REQUEST_EDITMSG.md",
+					Label:    "Description:",
+					Help:     "Enter the MR description. ",
+					FileName: "*_MERGE_REQUEST_EDITMSG.md",
 				})
 			}
 		}
