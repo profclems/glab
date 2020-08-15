@@ -203,6 +203,24 @@ type Commit struct {
 	Title string
 }
 
+func LatestCommit(ref string) (*Commit, error) {
+	logCmd := GitCommand("show", "-s", "--format='%h %s'", ref)
+	output, err := run.PrepareCmd(logCmd).Output()
+	if err != nil {
+		return &Commit{}, err
+	}
+	commit := &Commit{}
+	split := strings.SplitN(string(output), " ", 2)
+	if len(split) != 2 {
+		return commit, fmt.Errorf("could not find commit for %s", ref)
+	}
+	commit = &Commit{
+		Sha:   split[0],
+		Title: split[1],
+	}
+	return commit, nil
+}
+
 func Commits(baseRef, headRef string) ([]*Commit, error) {
 	logCmd := GitCommand(
 		"-c", "log.ShowSignature=false",

@@ -86,7 +86,7 @@ var mrViewCmd = &cobra.Command{
 		}
 		assignees = strings.Trim(assignees, ", ")
 		table := uitable.New()
-		table.MaxColWidth = 50
+		table.MaxColWidth = 70
 		table.Wrap = true
 		table.AddRow("Project ID:", mr.ProjectID)
 		table.AddRow("Labels:", prettifyNilEmptyValues(labels, "None"))

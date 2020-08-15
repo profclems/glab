@@ -18,7 +18,8 @@ func TestCommits(t *testing.T) {
 	}{
 		{
 			name: "Commit",
-			args: args{"trunk","HEAD"},
+			args: args{"trunk","origin/trunk"},
+			wantErr: true,
 		},
 	}
 	for _, tt := range tests {
