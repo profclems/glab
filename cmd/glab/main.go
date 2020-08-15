@@ -17,8 +17,10 @@ import (
 
 // Version is set at build
 var version string
+
 // build is set at build
 var build string
+
 // usage mode is set at build to either "dev" or "prod" depending how binary is created
 var usageMode string
 var debug bool

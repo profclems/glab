@@ -33,7 +33,7 @@ var mrCreateCmd = &cobra.Command{
 		if source, _ := cmd.Flags().GetString("source-branch"); source != "" {
 			sourceBranch = strings.Trim(source, "[] ")
 		} else {
-			if c, _ := cmd.Flags().GetBool("create-source-branch"); c && sourceBranch=="" {
+			if c, _ := cmd.Flags().GetBool("create-source-branch"); c && sourceBranch == "" {
 				sourceBranch = manip.ReplaceNonAlphaNumericChars(mergeTitle, "-")
 			} else {
 				b, err := git.CurrentBranch()
@@ -79,13 +79,13 @@ var mrCreateCmd = &cobra.Command{
 		if t, _ := cmd.Flags().GetString("target-branch"); t != "" {
 			targetBranch = strings.Trim(t, "[] ")
 		} else {
-			targetBranch = manip.AskQuestionWithInput("Target Branch (Default is " + targetBranch + "):", targetBranch, false)
+			targetBranch = manip.AskQuestionWithInput("Target Branch (Default is "+targetBranch+"):", targetBranch, false)
 		}
 		isDraft, _ := cmd.Flags().GetBool("draft")
 		isWIP, _ := cmd.Flags().GetBool("wip")
 		if isDraft || isWIP {
 			if isDraft {
-				mergeTitle = "Draft: "+mergeTitle
+				mergeTitle = "Draft: " + mergeTitle
 			} else {
 				mergeTitle = "WIP: " + mergeTitle
 			}
