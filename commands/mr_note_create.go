@@ -1,9 +1,7 @@
 package commands
 
-
 import (
 	"fmt"
-	"github.com/AlecAivazis/survey/v2"
 	"glab/internal/git"
 	"glab/internal/manip"
 	"log"
@@ -15,7 +13,7 @@ import (
 var mrCreateNoteCmd = &cobra.Command{
 	Use:     "note <merge-request-id>",
 	Aliases: []string{"comment"},
-	Short:   "Add a comment to merge request",
+	Short:   "Add a comment or note to merge request",
 	Long:    ``,
 	Args:    cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
@@ -36,18 +34,11 @@ var mrCreateNoteCmd = &cobra.Command{
 			return
 		}
 		if body == "" {
-			prompt := &survey.Editor{
-				Renderer:      survey.Renderer{},
-				Message:       "Note Message: ",
-				Help:          "Enter the note message for the merge request. Uses the editor defined by the $VISUAL or $EDITOR environment variables). If neither of those are present, notepad (on Windows) or vim (Linux or Mac) is used",
-				FileName:      "*.md",
-			}
-			err = survey.AskOne(prompt, &body)
-		}
-
-		if err != nil {
-			er(err)
-			return
+			body = manip.Editor(manip.EditorOptions{
+				Label: "Note Message:",
+				Help : "Enter the note message for the merge request. ",
+				FileName : "*_MR_NOTE_EDITMSG.md",
+			})
 		}
 		if body == "" {
 			log.Fatal("Aborted... Note has an empty message")
@@ -64,6 +55,6 @@ var mrCreateNoteCmd = &cobra.Command{
 }
 
 func init() {
-	mrCreateNoteCmd.Flags().StringP("message", "m", "", "Use the given <msg>; multiple -m are concatenated as separate paragraphs")
+	mrCreateNoteCmd.Flags().StringP("message", "m", "", "Comment/Note message")
 	mrCmd.AddCommand(mrCreateNoteCmd)
 }

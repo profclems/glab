@@ -24,7 +24,10 @@ func AskQuestionWithSelect(question, defaultVal string, isRequired bool) {
 		Message: "Choose a color:",
 		Options: []string{"red", "blue", "green"},
 	}
-	survey.AskOne(prompt, &color)
+	err := survey.AskOne(prompt, &color)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func AskQuestionWithInput(question, defaultVal string, isRequired bool) string {
@@ -32,10 +35,14 @@ func AskQuestionWithInput(question, defaultVal string, isRequired bool) string {
 	prompt := &survey.Input{
 		Message: question,
 	}
+	var err error
 	if isRequired {
-		_ = survey.AskOne(prompt, &str, survey.WithValidator(survey.Required))
+		err = survey.AskOne(prompt, &str, survey.WithValidator(survey.Required))
 	} else {
-		_ = survey.AskOne(prompt, &str)
+		err = survey.AskOne(prompt, &str)
+	}
+	if err != nil {
+		log.Fatal(err)
 	}
 	str = strings.TrimSuffix(str, "\n")
 	if str == "" && defaultVal != "" {
@@ -49,12 +56,42 @@ func AskQuestionMultiline(question string, defaultVal string) string {
 	prompt := &survey.Multiline{
 		Message: question,
 	}
-	_ = survey.AskOne(prompt, &str)
+	err := survey.AskOne(prompt, &str)
+	if err != nil {
+		log.Fatal(err)
+	}
 	str = strings.TrimSuffix(str, "\n")
 	if str == "" && defaultVal != "" {
 		return defaultVal
 	}
 	return str
+}
+
+type EditorOptions struct {
+	FileName  	string
+	Label 	  	string
+	Help 	  	string
+	Default	    string
+	AppendDefault bool
+	HideDefault bool
+}
+
+func Editor(opts EditorOptions) string {
+	var container string
+	prompt := &survey.Editor{
+		Renderer:      survey.Renderer{},
+		Message:       opts.Label,
+		Default:       opts.Default,
+		Help:          opts.Help + "Uses the editor defined by the $VISUAL or $EDITOR environment variables). If neither of those are present, notepad (on Windows) or vim (Linux or Mac) is used",
+		HideDefault:   opts.HideDefault,
+		AppendDefault: opts.AppendDefault,
+		FileName:      opts.FileName,
+	}
+	err := survey.AskOne(prompt, &container)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return container
 }
 
 // ReplaceNonAlphaNumericChars : Replaces non alpha-numeric values with provided char/string

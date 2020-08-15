@@ -40,18 +40,31 @@ var mrCreateCmd = &cobra.Command{
 		if desc, _ := cmd.Flags().GetString("description"); desc != "" {
 			mergeDescription = strings.Trim(desc, " ")
 		} else {
-			mergeDescription = manip.AskQuestionMultiline("Description:", "")
+			if  editor, _ := cmd.Flags().GetBool("no-editor"); editor {
+				mergeDescription = manip.AskQuestionMultiline("Description:", "")
+			} else {
+				mergeDescription = manip.Editor(manip.EditorOptions{
+					Label: "Description:",
+					Help : "Enter the MR description. ",
+					FileName : "*_MERGE_REQUEST_EDITMSG.md",
+				})
+			}
 		}
-		if source, _ := cmd.Flags().GetString("source"); source != "" {
+		if source, _ := cmd.Flags().GetString("source-branch"); source != "" {
 			sourceBranch = strings.Trim(source, "[] ")
 		} else {
 			if c, _ := cmd.Flags().GetBool("create-source-branch"); c {
 				sourceBranch = manip.ReplaceNonAlphaNumericChars(mergeTitle, "-")
 			} else {
-				sourceBranch = manip.AskQuestionWithInput("Source Branch:", "", true)
+				b, err := git.CurrentBranch()
+				if err != nil {
+					er(err)
+					return
+				}
+				sourceBranch = manip.AskQuestionWithInput("Source Branch (Defaults to current branch):", b, false)
 			}
 		}
-		if t, _ := cmd.Flags().GetString("target"); t != "" {
+		if t, _ := cmd.Flags().GetString("target-branch"); t != "" {
 			targetBranch = strings.Trim(t, "[] ")
 		} else {
 			targetBranch = manip.AskQuestionWithInput("Target Branch:", "", true)
@@ -73,7 +86,7 @@ var mrCreateCmd = &cobra.Command{
 		if targetProject, _ := cmd.Flags().GetInt("target-project"); targetProject != -1 {
 			l.TargetProjectID = gitlab.Int(targetProject)
 		}
-		if a, _ := cmd.Flags().GetString("assigns"); a != "" {
+		if a, _ := cmd.Flags().GetString("assignee"); a != "" {
 			arrIds := strings.Split(strings.Trim(a, "[] "), ",")
 			var t2 []int
 
@@ -122,5 +135,6 @@ func init() {
 	mrCreateCmd.Flags().IntP("milestone", "m", -1, "add milestone by <id> for merge request")
 	mrCreateCmd.Flags().BoolP("allow-collaboration", "", false, "Allow commits from other members")
 	mrCreateCmd.Flags().BoolP("remove-source-branch", "", false, "Remove Source Branch on merge")
+	mrCreateCmd.Flags().BoolP("no-editor", "", false, "Don't open editor to enter description. If set to true, uses prompt. Default is false")
 	mrCmd.AddCommand(mrCreateCmd)
 }
