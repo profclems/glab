@@ -1,36 +1,31 @@
 package git
 
-import (
-	"reflect"
-	"testing"
-)
+import "testing"
 
-func TestCommits(t *testing.T) {
+func Test_isFilesystemPath(t *testing.T) {
 	type args struct {
-		baseRef string
-		headRef string
+		p string
 	}
 	tests := []struct {
-		name    string
-		args    args
-		want    []*Commit
-		wantErr bool
+		name string
+		args args
+		want bool
 	}{
 		{
-			name: "Commit",
-			args: args{"trunk","origin/trunk"},
-			wantErr: true,
+			name: "Filesystem",
+			args: args{"./.git"},
+			want: true,
+		},
+		{
+			name: "Filesystem",
+			args: args{".git"},
+			want: false,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := Commits(tt.args.baseRef, tt.args.headRef)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("Commits() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("Commits() got = %v, want %v", got, tt.want)
+			if got := isFilesystemPath(tt.args.p); got != tt.want {
+				t.Errorf("isFilesystemPath() = %v, want %v", got, tt.want)
 			}
 		})
 	}
