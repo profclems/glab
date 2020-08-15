@@ -19,7 +19,7 @@ import (
 // and calls the main function
 func TestGlab(t *testing.T) {
 	rand.Seed(time.Now().UnixNano())
-	flag.Set("test", "../coverage-" + strconv.Itoa(int(rand.Uint64())) + ".out")
+	flag.Set("test", "../coverage-"+strconv.Itoa(int(rand.Uint64()))+".out")
 	main()
 }
 
@@ -49,12 +49,12 @@ func Test_printError(t *testing.T) {
 			name: "DNS error",
 			args: args{
 				err: fmt.Errorf("DNS oopsie: %w", &net.DNSError{
-					Name: config.GetEnv("GITLAB_URI")+"/api/v4",
+					Name: config.GetEnv("GITLAB_URI") + "/api/v4",
 				}),
 				cmd:   nil,
 				debug: false,
 			},
-			wantOut: `error connecting to `+config.GetEnv("GITLAB_URI")+`/api/v4
+			wantOut: `error connecting to ` + config.GetEnv("GITLAB_URI") + `/api/v4
 check your internet connection or status.gitlab.com or 'Run sudo gitlab-ctl status' on your server if self-hosted
 `,
 		},

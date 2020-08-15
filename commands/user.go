@@ -33,7 +33,7 @@ func getUsername(uid int) string {
 	return u.Username
 }
 
-func getUserActivities() ([]*gitlab.UserActivity, error)  {
+func getUserActivities() ([]*gitlab.UserActivity, error) {
 	gLab, _ := git.InitGitlabClient()
 	l := &gitlab.GetUserActivitiesOptions{}
 	ua, _, err := gLab.Users.GetUserActivities(l)

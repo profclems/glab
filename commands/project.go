@@ -5,7 +5,7 @@ import (
 	"glab/internal/git"
 )
 
-func getProject(projectID interface{}) (*gitlab.Project, error)  {
+func getProject(projectID interface{}) (*gitlab.Project, error) {
 	gitlabClient, _ := git.InitGitlabClient()
 	opts := &gitlab.GetProjectOptions{
 		Statistics:           gitlab.Bool(true),
@@ -19,7 +19,7 @@ func getProject(projectID interface{}) (*gitlab.Project, error)  {
 	return project, nil
 }
 
-func createProject(opts *gitlab.CreateProjectOptions) (*gitlab.Project, error)  {
+func createProject(opts *gitlab.CreateProjectOptions) (*gitlab.Project, error) {
 	gitlabClient, _ := git.InitGitlabClient()
 	project, _, err := gitlabClient.Projects.CreateProject(opts)
 	if err != nil {
