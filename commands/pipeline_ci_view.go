@@ -31,15 +31,24 @@ var (
 
 // ciViewCmd represents the ci command
 var pipelineCIView = &cobra.Command{
-	Use:   "view [remote [branch/tag]]",
-	Short: "View, run, trace, and cancel CI jobs current pipeline",
-	Long: heredoc.Doc(`Supports viewing, running, tracing, and canceling jobs
-		'CtrlR', 'p' to run/retry/play a job -- Tab navigates modal and Enter to confirm
-		'Enter' to toggle trace/logs (runs in background, so you can jump in and out)
-		'CtrlSpace' to toggle trace/logs by suspending application (similar to lab ci trace)
-		'CtrlQ' to cancel job
+	Use:   "view [branch/tag]",
+	Short: "View, run, trace/logs, and cancel CI jobs current pipeline",
+	Long: heredoc.Doc(`Supports viewing, running, tracing, and canceling jobs.
+		Use arrow keys to navigate jobs and logs.
+		'Enter' to toggle a job's logs or trace.
+		'Ctrl+R', 'Ctrl+P' to run/retry/play a job -- Use Tab / Arrow keys to navigate modal and Enter to confirm.
+		'Ctrl+C' to cancel job -- (Quits CI view if selected job isn't running or pending).
+		'Ctrl+Q' to Quit CI View.
+		'Ctrl+Space' suspend application and view logs (similar to glab pipeline ci trace)
 		Supports vi style (hjkl,Gg) bindings and arrow keys for navigating jobs and logs.
 	`),
+	Example: heredoc.Doc(`
+	$ glab pipeline ci view   # Uses current branch
+	$ glab pipeline ci view master  # Get latest pipeline on master branch
+	$ glab pipeline ci view -b master  # just like the second example
+	$ glab pipeline ci view -b master -R profclems/glab  # Get latest pipeline on master branch of profclems/glab repo
+	`),
+	Args: cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		a := tview.NewApplication()
 		defer recoverPanic(a)
@@ -54,9 +63,13 @@ var pipelineCIView = &cobra.Command{
 
 		refName, _ = cmd.Flags().GetString("branch")
 		if refName == "" {
-			refName, err = git.CurrentBranch()
-			if err != nil {
-				er(err)
+			if len(args) == 1 {
+				refName = args[0]
+			} else {
+				refName, err = git.CurrentBranch()
+				if err != nil {
+					er(err)
+				}
 			}
 		}
 
@@ -539,7 +552,7 @@ func linkJobs(screen tcell.Screen, jobs []*gitlab.Job, boxes map[string]*tview.T
 		}
 	}
 	var padding int
-	// find the abount of space between two jobs is adjacent stages
+	// find the amount of space between two jobs is adjacent stages
 	for i, k := 0, 1; k < len(jobs); i, k = i+1, k+1 {
 		if jobs[i].Stage == jobs[k].Stage {
 			continue
