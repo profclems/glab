@@ -73,7 +73,7 @@ var mrCreateCmd = &cobra.Command{
 			if err != nil {
 				return err
 			}
-			mergeTitle = commit.Title
+			mergeTitle = strings.Trim(commit.Title, "'")
 			//fmt.Println(git.CommitBody(branchRef[0].))
 		}
 		if t, _ := cmd.Flags().GetString("target-branch"); t != "" {
