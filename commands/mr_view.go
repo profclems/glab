@@ -107,6 +107,12 @@ var mrViewCmd = &cobra.Command{
 
 		if c, _ := cmd.Flags().GetBool("comments"); c {
 			l := &gitlab.ListMergeRequestNotesOptions{}
+			if p, _ := cmd.Flags().GetInt("page"); p != 0 {
+				l.Page = p
+			}
+			if p, _ := cmd.Flags().GetInt("per-page"); p != 0 {
+				l.PerPage = p
+			}
 			notes, _, err := gitlabClient.Notes.ListMergeRequestNotes(repo, pid, l)
 			if err != nil {
 				er(err)
@@ -147,5 +153,7 @@ func init() {
 	mrViewCmd.Flags().BoolP("comments", "c", false, "Show mr comments and activities")
 	mrViewCmd.Flags().BoolP("system-logs", "s", false, "Show system activities / logs")
 	mrViewCmd.Flags().BoolP("web", "w", false, "Open mr in a browser. Uses default browser or browser specified in BROWSER variable")
+	mrViewCmd.Flags().IntP("page", "p", 1, "Page number")
+	mrViewCmd.Flags().IntP("per-page", "P", 20, "Number of items to list per page")
 	mrCmd.AddCommand(mrViewCmd)
 }

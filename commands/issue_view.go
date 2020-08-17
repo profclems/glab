@@ -105,6 +105,12 @@ var issueViewCmd = &cobra.Command{
 
 		if c, _ := cmd.Flags().GetBool("comments"); c { //open in browser if --web flag is specified
 			l := &gitlab.ListIssueNotesOptions{}
+			if p, _ := cmd.Flags().GetInt("page"); p != 0 {
+				l.Page = p
+			}
+			if p, _ := cmd.Flags().GetInt("per-page"); p != 0 {
+				l.PerPage = p
+			}
 			notes, _, err := gitlabClient.Notes.ListIssueNotes(repo, pid, l)
 			if err != nil {
 				return err
@@ -155,5 +161,7 @@ func init() {
 	issueViewCmd.Flags().StringP("repo", "r", "", "Select another repository using the OWNER/REPO format. Supports group namespaces")
 	issueViewCmd.Flags().BoolP("comments", "c", false, "Show issue comments and activities")
 	issueViewCmd.Flags().BoolP("web", "w", false, "Open issue in a browser. Uses default browser or browser specified in BROWSER variable")
+	issueViewCmd.Flags().IntP("page", "p", 1, "Page number")
+	issueViewCmd.Flags().IntP("per-page", "P", 20, "Number of items to list per page")
 	issueCmd.AddCommand(issueViewCmd)
 }
