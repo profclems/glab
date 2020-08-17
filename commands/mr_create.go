@@ -43,7 +43,7 @@ var mrCreateCmd = &cobra.Command{
 				sourceBranch = b
 			}
 		}
-		if title, _ := cmd.Flags().GetString("title"); title != "" {
+		if fill, _ := cmd.Flags().GetBool("fill"); !fill {
 			if title, _ := cmd.Flags().GetString("title"); title != "" {
 				mergeTitle = strings.Trim(title, " ")
 			} else {
