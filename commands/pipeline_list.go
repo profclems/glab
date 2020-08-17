@@ -34,6 +34,13 @@ func listPipelines(cmd *cobra.Command, args []string) {
 	if m, _ := cmd.Flags().GetString("sort"); m != "" {
 		l.Sort = gitlab.String(m)
 	}
+	if p, _ := cmd.Flags().GetInt("page"); p != 0 {
+		l.Page = p
+	}
+	if p, _ := cmd.Flags().GetInt("per-page"); p != 0 {
+		l.PerPage = p
+	}
+
 	pipes, _, err := gitlabClient.Pipelines.ListProjectPipelines(repo, l)
 	if err != nil {
 		er(err)
@@ -46,5 +53,7 @@ func init() {
 	pipelineListCmd.Flags().StringP("status", "s", "", "Get pipeline with status: {running|pending|success|failed|canceled|skipped|created|manual}")
 	pipelineListCmd.Flags().StringP("orderBy", "o", "", "Order pipeline by <string>")
 	pipelineListCmd.Flags().StringP("sort", "", "desc", "Sort pipeline by {asc|desc}. (Defaults to desc)")
+	pipelineListCmd.Flags().IntP("page", "p", 1, "Page number")
+	pipelineListCmd.Flags().IntP("per-page", "P", 20, "Number of items to list per page")
 	pipelineCmd.AddCommand(pipelineListCmd)
 }

@@ -37,7 +37,12 @@ var issueListCmd = &cobra.Command{
 		if lb, _ := cmd.Flags().GetBool("confidential"); lb {
 			l.Confidential = gitlab.Bool(lb)
 		}
-
+		if p, _ := cmd.Flags().GetInt("page"); p != 0 {
+			l.Page = p
+		}
+		if p, _ := cmd.Flags().GetInt("per-page"); p != 0 {
+			l.PerPage = p
+		}
 		gitlabClient, repo := git.InitGitlabClient()
 		if r, _ := cmd.Flags().GetString("repo"); r != "" {
 			repo = r
@@ -59,5 +64,7 @@ func init() {
 	issueListCmd.Flags().BoolP("closed", "c", false, "Get only closed issues")
 	issueListCmd.Flags().BoolP("opened", "o", false, "Get only opened issues")
 	issueListCmd.Flags().BoolP("confidential", "", false, "Filter by confidential issues")
+	issueListCmd.Flags().IntP("page", "p", 1, "Page number")
+	issueListCmd.Flags().IntP("per-page", "P", 20, "Number of items to list per page")
 	issueCmd.AddCommand(issueListCmd)
 }
