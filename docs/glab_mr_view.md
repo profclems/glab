@@ -13,10 +13,12 @@ glab mr view <id> [flags]
 ### Options
 
 ```
-  -c, --comments      Show mr comments and activities
-  -h, --help          help for view
-  -s, --system-logs   Show system activities / logs
-  -w, --web           Open mr in a browser. Uses default browser or browser specified in BROWSER variable
+  -c, --comments       Show mr comments and activities
+  -h, --help           help for view
+  -p, --page int       Page number (default 1)
+  -P, --per-page int   Number of items to list per page (default 20)
+  -s, --system-logs    Show system activities / logs
+  -w, --web            Open mr in a browser. Uses default browser or browser specified in BROWSER variable
 ```
 
 ### Options inherited from parent commands

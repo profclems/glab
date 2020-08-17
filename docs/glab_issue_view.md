@@ -13,9 +13,11 @@ glab issue view <id> [flags]
 ### Options
 
 ```
-  -c, --comments   Show issue comments and activities
-  -h, --help       help for view
-  -w, --web        Open issue in a browser. Uses default browser or browser specified in BROWSER variable
+  -c, --comments       Show issue comments and activities
+  -h, --help           help for view
+  -p, --page int       Page number (default 1)
+  -P, --per-page int   Number of items to list per page (default 20)
+  -w, --web            Open issue in a browser. Uses default browser or browser specified in BROWSER variable
 ```
 
 ### Options inherited from parent commands

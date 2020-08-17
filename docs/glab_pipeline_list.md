@@ -23,6 +23,8 @@ $ glab pipeline list --state=failed
 ```
   -h, --help             help for list
   -o, --orderBy string   Order pipeline by <string>
+  -p, --page int         Page number (default 1)
+  -P, --per-page int     Number of items to list per page (default 20)
       --sort string      Sort pipeline by {asc|desc}. (Defaults to desc) (default "desc")
   -s, --status string    Get pipeline with status: {running|pending|success|failed|canceled|skipped|created|manual}
 ```

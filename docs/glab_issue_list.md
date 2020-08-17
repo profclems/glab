@@ -20,6 +20,8 @@ glab issue list [flags]
   -l, --label string       Filter issue by label <name>
       --milestone string   Filter issue by milestone <id>
   -o, --opened             Get only opened issues
+  -p, --page int           Page number (default 1)
+  -P, --per-page int       Number of items to list per page (default 20)
 ```
 
 ### Options inherited from parent commands

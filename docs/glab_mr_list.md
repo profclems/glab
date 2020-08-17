@@ -20,6 +20,8 @@ glab mr list [flags]
   -m, --merged             Get only merged merge requests
       --milestone string   Filter merge request by milestone <id>
   -o, --opened             Get only opened merge requests
+  -p, --page int           Page number (default 1)
+  -P, --per-page int       Number of items to list per page (default 20)
 ```
 
 ### Options inherited from parent commands

@@ -13,7 +13,9 @@ glab label list [flags]
 ### Options
 
 ```
-  -h, --help   help for list
+  -h, --help           help for list
+  -p, --page int       Page number (default 1)
+  -P, --per-page int   Number of items to list per page (default 20)
 ```
 
 ### Options inherited from parent commands
