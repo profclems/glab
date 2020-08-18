@@ -15,7 +15,7 @@ var mrReopenCmd = &cobra.Command{
 	Short:   `Reopen merge requests`,
 	Long:    ``,
 	Aliases: []string{"open"},
-	Args:    cobra.MaximumNArgs(1),
+	Args:    cobra.ExactArgs(1),
 	Run:     reopenMergeRequestState,
 }
 
@@ -23,6 +23,9 @@ func reopenMergeRequestState(cmd *cobra.Command, args []string) {
 	if len(args) > 0 {
 		mergeID := strings.Trim(args[0], " ")
 		gitlabClient, repo := git.InitGitlabClient()
+		if r, _ := cmd.Flags().GetString("repo"); r != "" {
+			repo = r
+		}
 		l := &gitlab.UpdateMergeRequestOptions{}
 		l.StateEvent = gitlab.String("reopen")
 		arrIds := strings.Split(strings.Trim(mergeID, "[] "), ",")

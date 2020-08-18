@@ -3,10 +3,8 @@ package manip
 import (
 	"fmt"
 	"github.com/AlecAivazis/survey/v2"
-	"io/ioutil"
 	"log"
 	"math"
-	"os"
 	"regexp"
 	"strconv"
 	"strings"
@@ -26,7 +24,10 @@ func AskQuestionWithSelect(question, defaultVal string, isRequired bool) {
 		Message: "Choose a color:",
 		Options: []string{"red", "blue", "green"},
 	}
-	survey.AskOne(prompt, &color)
+	err := survey.AskOne(prompt, &color)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func AskQuestionWithInput(question, defaultVal string, isRequired bool) string {
@@ -34,10 +35,14 @@ func AskQuestionWithInput(question, defaultVal string, isRequired bool) string {
 	prompt := &survey.Input{
 		Message: question,
 	}
+	var err error
 	if isRequired {
-		_ = survey.AskOne(prompt, &str, survey.WithValidator(survey.Required))
+		err = survey.AskOne(prompt, &str, survey.WithValidator(survey.Required))
 	} else {
-		_ = survey.AskOne(prompt, &str)
+		err = survey.AskOne(prompt, &str)
+	}
+	if err != nil {
+		log.Fatal(err)
 	}
 	str = strings.TrimSuffix(str, "\n")
 	if str == "" && defaultVal != "" {
@@ -51,7 +56,10 @@ func AskQuestionMultiline(question string, defaultVal string) string {
 	prompt := &survey.Multiline{
 		Message: question,
 	}
-	_ = survey.AskOne(prompt, &str)
+	err := survey.AskOne(prompt, &str)
+	if err != nil {
+		log.Fatal(err)
+	}
 	str = strings.TrimSuffix(str, "\n")
 	if str == "" && defaultVal != "" {
 		return defaultVal
@@ -59,19 +67,31 @@ func AskQuestionMultiline(question string, defaultVal string) string {
 	return str
 }
 
-// ReadAndAppend : appends string to file
-func ReadAndAppend(file, text string) {
-	// If the file doesn't exist, create it, or append to the file
-	f, err := os.OpenFile(file, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+type EditorOptions struct {
+	FileName      string
+	Label         string
+	Help          string
+	Default       string
+	AppendDefault bool
+	HideDefault   bool
+}
+
+func Editor(opts EditorOptions) string {
+	var container string
+	prompt := &survey.Editor{
+		Renderer:      survey.Renderer{},
+		Message:       opts.Label,
+		Default:       opts.Default,
+		Help:          opts.Help + "Uses the editor defined by the $VISUAL or $EDITOR environment variables). If neither of those are present, notepad (on Windows) or vim (Linux or Mac) is used",
+		HideDefault:   opts.HideDefault,
+		AppendDefault: opts.AppendDefault,
+		FileName:      opts.FileName,
+	}
+	err := survey.AskOne(prompt, &container)
 	if err != nil {
 		log.Fatal(err)
 	}
-	if _, err := f.Write([]byte("\n" + text)); err != nil {
-		log.Fatal(err)
-	}
-	if err := f.Close(); err != nil {
-		log.Fatal(err)
-	}
+	return container
 }
 
 // ReplaceNonAlphaNumericChars : Replaces non alpha-numeric values with provided char/string
@@ -82,27 +102,6 @@ func ReplaceNonAlphaNumericChars(words, replaceWith string) string {
 	}
 	newStr := reg.ReplaceAllString(strings.Trim(words, " "), replaceWith)
 	return newStr
-}
-
-// GetKeyValueInFile : returns env variable value
-func GetKeyValueInFile(filePath, key string) string {
-	data, _ := ioutil.ReadFile(filePath)
-
-	file := string(data)
-	line := 0
-	temp := strings.Split(file, "\n")
-	for _, item := range temp {
-		//fmt.Println("[",line,"]",item)
-		env := strings.Split(item, "=")
-		if env[0] == key {
-			if len(env) > 1 {
-				return env[1]
-			}
-			return "OK"
-		}
-		line++
-	}
-	return "NOTFOUND"
 }
 
 // CommandExists : checks if string is available in the defined commands

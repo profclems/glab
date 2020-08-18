@@ -3,17 +3,15 @@ package commands
 import (
 	"fmt"
 	"github.com/gookit/color"
+	"github.com/gosuri/uitable"
 	"github.com/spf13/cobra"
-	"glab/internal/git"
-	"glab/internal/manip"
-	"os"
-	"text/tabwriter"
-
 	"github.com/xanzy/go-gitlab"
+	"glab/internal/git"
+	"glab/internal/utils"
 )
 
 func displayMergeRequest(hm *gitlab.MergeRequest) {
-	duration := manip.TimeAgo(*hm.CreatedAt)
+	duration := utils.TimeToPrettyTimeAgo(*hm.CreatedAt)
 	if hm.State == "opened" {
 		color.Printf("<green>#%d</> %s <magenta>(%s)</> %s\n", hm.IID, hm.Title, hm.SourceBranch, duration)
 	} else {
@@ -23,24 +21,21 @@ func displayMergeRequest(hm *gitlab.MergeRequest) {
 }
 
 func displayAllMergeRequests(m []*gitlab.MergeRequest) {
-	// initialize tabwriter
-	w := new(tabwriter.Writer)
-
-	// minwidth, tabwidth, padding, padchar, flags
-	w.Init(os.Stdout, 8, 8, 0, '\t', 0)
-
-	defer w.Flush()
 	if len(m) > 0 {
+		table := uitable.New()
+		table.MaxColWidth = 70
 		fmt.Println()
-		fmt.Printf("Showing mergeRequests %d of %d on %s\n", len(m), len(m), git.GetRepo())
+		fmt.Printf("Showing mergeRequests %d of %d on %s\n\n", len(m), len(m), git.GetRepo())
 		for _, mr := range m {
+			var mrID string
 			if mr.State == "opened" {
-				_, _ = fmt.Fprintln(w, color.Sprintf("<green>#%d</>\t%s\t\t<cyan>(%s) ← (%s)</>", mr.IID, mr.Title, mr.TargetBranch, mr.SourceBranch))
+				mrID = color.Sprintf("<green>#%d</>", mr.IID)
 			} else {
-				_, _ = fmt.Fprintln(w, color.Sprintf("<green>#%d</>\t%s\t\t<cyan>(%s) ← (%s)</>", mr.IID, mr.Title, mr.TargetBranch, mr.SourceBranch))
+				mrID = color.Sprintf("<red>#%d</>", mr.IID)
 			}
+			table.AddRow(mrID, mr.Title, color.Sprintf("<cyan>(%s) ← (%s)</>", mr.TargetBranch, mr.SourceBranch))
 		}
-		fmt.Println()
+		fmt.Println(table)
 	} else {
 		fmt.Println("No Merge Requests available on " + git.GetRepo())
 	}
@@ -53,12 +48,13 @@ var mrCmd = &cobra.Command{
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 || len(args) > 2 {
-			cmd.Help()
+			_ = cmd.Help()
 			return
 		}
 	},
 }
 
 func init() {
+	mrCmd.PersistentFlags().StringP("repo", "R", "", "Select another repository using the OWNER/REPO format or the project ID. Supports group namespaces")
 	RootCmd.AddCommand(mrCmd)
 }

@@ -15,7 +15,7 @@ var mrDeleteCmd = &cobra.Command{
 	Short:   `Delete merge requests`,
 	Long:    ``,
 	Aliases: []string{"del"},
-	Args:    cobra.MaximumNArgs(1),
+	Args:    cobra.ExactArgs(1),
 	Example: "$ glab delete 123",
 	RunE:    deleteMergeRequest,
 }
@@ -25,7 +25,9 @@ func deleteMergeRequest(cmd *cobra.Command, args []string) error {
 	if len(args) > 0 {
 		mergeID := strings.Trim(args[0], " ")
 		gitlabClient, repo := git.InitGitlabClient()
-
+		if r, _ := cmd.Flags().GetString("repo"); r != "" {
+			repo = r
+		}
 		arrIds := strings.Split(strings.Trim(mergeID, "[] "), ",")
 		for _, i2 := range arrIds {
 			fmt.Println("Deleting Merge Request #" + i2)

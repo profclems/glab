@@ -9,19 +9,22 @@ import (
 )
 
 var issueDeleteCmd = &cobra.Command{
-	Use:     "delete",
+	Use:     "delete <id>",
 	Short:   `Delete an issue`,
 	Long:    ``,
 	Aliases: []string{"del"},
-	Run: func(cmd *cobra.Command, args []string) {
+	Args:    cobra.ExactArgs(1),
+	RunE: func(cmd *cobra.Command, args []string) error {
 		if len(args) > 1 {
 			cmdErr(cmd, args)
-			return
+			return nil
 		}
 		if len(args) > 0 {
 			issueID := strings.TrimSpace(args[0])
 			gitlabClient, repo := git.InitGitlabClient()
-
+			if r, _ := cmd.Flags().GetString("repo"); r != "" {
+				repo = r
+			}
 			arrIds := strings.Split(strings.Trim(issueID, "[] "), ",")
 			for _, i2 := range arrIds {
 				fmt.Println("Deleting Issue #" + i2)
@@ -37,6 +40,7 @@ var issueDeleteCmd = &cobra.Command{
 		} else {
 			cmdErr(cmd, args)
 		}
+		return nil
 	},
 }
 

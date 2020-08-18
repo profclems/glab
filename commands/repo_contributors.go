@@ -10,13 +10,11 @@ import (
 )
 
 var repoContributorsCmd = &cobra.Command{
-	Use:   "contributors <command> [flags]",
-	Short: `Get an archive of the repository.`,
+	Use:   "contributors [flags]",
+	Short: `Get contributors of the repository.`,
 	Example: heredoc.Doc(`
-	$ glab repo archive profclems/glab
+	$ glab repo contributors
 	$ glab repo archive  // Downloads zip file of current repository
-	$ glab repo clone profclems/glab mydirectory  // Clones repo into mydirectory
-	$ glab repo clone profclems/glab --format=zip   // Finds repo for current user and download in zip format
 	`),
 	Long: heredoc.Doc(`
 	Clone supports these shorthands
@@ -24,8 +22,9 @@ var repoContributorsCmd = &cobra.Command{
 	- namespace/repo
 	- namespace/group/repo
 	`),
+	Args:    cobra.ExactArgs(0),
 	Aliases: []string{"users"},
-	Run: func (cmd *cobra.Command, args []string) {
+	Run: func(cmd *cobra.Command, args []string) {
 		gitlabClient, repo := git.InitGitlabClient()
 		l := &gitlab.ListContributorsOptions{}
 		users, _, err := gitlabClient.Repositories.Contributors(repo, l)

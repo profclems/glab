@@ -17,6 +17,7 @@ var mrMergeCmd = &cobra.Command{
 	Short:   `Merge/Accept merge requests`,
 	Long:    ``,
 	Aliases: []string{"accept"},
+	Args:    cobra.ExactArgs(1),
 	Run:     acceptMergeRequest,
 }
 
@@ -42,6 +43,9 @@ func acceptMergeRequest(cmd *cobra.Command, args []string) {
 		l.SHA = gitlab.String(m)
 	}
 	gitlabClient, repo := git.InitGitlabClient()
+	if r, _ := cmd.Flags().GetString("repo"); r != "" {
+		repo = r
+	}
 	mr, resp, _ := gitlabClient.MergeRequests.AcceptMergeRequest(repo, manip.StringToInt(mergeID), l)
 
 	fmt.Println(aurora.Yellow("Accepting Merge Request #" + mergeID + "..."))

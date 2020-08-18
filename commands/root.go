@@ -8,6 +8,7 @@ import (
 	"glab/internal/config"
 	"glab/internal/update"
 	"os"
+	"strings"
 )
 
 // RootCmd is the main root/parent command
@@ -42,21 +43,21 @@ var RootCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) > 0 {
 			fmt.Printf("Unknown command: %s\n", args[0])
-			cmd.Usage()
+			_ = cmd.Usage()
 			return
 		} else if ok, _ := cmd.Flags().GetBool("version"); ok {
 			versionCmd.Run(cmd, args)
 			return
 		}
 
-		cmd.Help()
+		_ = cmd.Help()
 	},
 }
 
 // Execute executes the root command.
-func Execute() error {
+func Execute() (*cobra.Command, error) {
 	RootCmd.Flags().BoolP("version", "v", false, "show glab version information")
-	return RootCmd.Execute()
+	return RootCmd.ExecuteC()
 }
 
 // versionCmd represents the version command
@@ -78,7 +79,6 @@ var configCmd = &cobra.Command{
 }
 
 func init() {
-	cobra.OnInitialize(initConfig)
 	RootCmd.AddCommand(updateCmd)
 	initConfigCmd()
 	RootCmd.AddCommand(configCmd)
@@ -90,19 +90,7 @@ func er(msg interface{}) {
 }
 func cmdErr(cmd *cobra.Command, args []string) {
 	color.Error.Println("Error: Unknown command:")
-	cmd.Usage()
-}
-
-func initConfig() {
-	config.SetGlobalPathDir()
-	config.UseGlobalConfig = true
-	if config.GetEnv("GITLAB_URI") == "NOTFOUND" || config.GetEnv("GITLAB_URI") == "OK" {
-		config.SetEnv("GITLAB_URI", "https://gitlab.com")
-	}
-	if config.GetEnv("GIT_REMOTE_URL_VAR") == "NOTFOUND" || config.GetEnv("GIT_REMOTE_URL_VAR") == "OK" {
-		config.SetEnv("GIT_REMOTE_URL_VAR", "origin")
-	}
-	config.UseGlobalConfig = false
+	_ = cmd.Usage()
 }
 
 func initConfigCmd() {
@@ -122,11 +110,13 @@ func isSuccessful(code int) bool {
 func checkForUpdate(*cobra.Command, []string) {
 
 	releaseInfo, err := update.CheckForUpdate()
-	latestVersion := Version
+	var latestVersion string
 	if err != nil {
 		er("Could not check for update! Make sure you have a stable internet connection")
+		return
 	}
-	latestVersion = releaseInfo.Name
+	latestVersion = strings.TrimSpace(releaseInfo.Name)
+	Version = strings.TrimSpace(Version)
 	if latestVersion == Version {
 		color.Green.Println("You are already using the latest version of glab")
 	} else {

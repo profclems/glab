@@ -25,6 +25,7 @@ var repoCloneCmd = &cobra.Command{
 	- namespace/group/repo
 	- url/namespace/group/repo
 	`),
+	Args: cobra.MaximumNArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 {
 			cmdErr(cmd, args)
@@ -33,7 +34,7 @@ var repoCloneCmd = &cobra.Command{
 
 		repo := args[0]
 		fmt.Println(repo)
-		if git.IsValidURL(repo) == false {
+		if !git.IsValidURL(repo) {
 			repo = config.GetEnv("GITLAB_URI") + "/" + repo
 		}
 		if !strings.HasSuffix(repo, ".git") {

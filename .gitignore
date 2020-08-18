@@ -20,3 +20,5 @@ dist
 cmd/glab/dist
 .idea
 .glab-cli
+
+/.vscode/

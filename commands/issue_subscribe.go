@@ -9,18 +9,22 @@ import (
 )
 
 var issueSubscribeCmd = &cobra.Command{
-	Use:     "subscribe",
+	Use:     "subscribe <id>",
 	Short:   `Subscribe to an issue`,
 	Long:    ``,
 	Aliases: []string{"sub"},
-	Run: func(cmd *cobra.Command, args []string) {
+	Args:    cobra.ExactArgs(1),
+	RunE: func(cmd *cobra.Command, args []string) error {
 		if len(args) > 1 {
 			cmdErr(cmd, args)
-			return
+			return nil
 		}
 		if len(args) > 0 {
 			mergeID := strings.TrimSpace(args[0])
 			gitlabClient, repo := git.InitGitlabClient()
+			if r, _ := cmd.Flags().GetString("repo"); r != "" {
+				repo = r
+			}
 			arrIds := strings.Split(strings.Trim(mergeID, "[] "), ",")
 			for _, i2 := range arrIds {
 				fmt.Println("Subscribing to Issue #" + i2)
@@ -38,6 +42,7 @@ var issueSubscribeCmd = &cobra.Command{
 		} else {
 			cmdErr(cmd, args)
 		}
+		return nil
 	},
 }
 

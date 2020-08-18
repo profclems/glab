@@ -16,7 +16,7 @@ var mrApproveCmd = &cobra.Command{
 	Short:   `Approve merge requests`,
 	Long:    ``,
 	Aliases: []string{"ls"},
-	Args:    cobra.MaximumNArgs(1),
+	Args:    cobra.ExactArgs(1),
 	Run:     approveMergeRequest,
 }
 
@@ -33,6 +33,9 @@ func approveMergeRequest(cmd *cobra.Command, args []string) {
 
 		fmt.Println(aurora.Yellow("Approving Merge Request #" + mergeID + "..."))
 		gitlabClient, repo := git.InitGitlabClient()
+		if r, _ := cmd.Flags().GetString("repo"); r != "" {
+			repo = r
+		}
 		_, resp, _ := gitlabClient.MergeRequestApprovals.ApproveMergeRequest(repo, manip.StringToInt(mergeID), l)
 		if resp != nil {
 			if resp.StatusCode == 201 {

@@ -11,7 +11,7 @@ var mrListCmd = &cobra.Command{
 	Short:   `List merge requests`,
 	Long:    ``,
 	Aliases: []string{"ls"},
-	Args:    cobra.MaximumNArgs(3),
+	Args:    cobra.ExactArgs(0),
 	RunE:    listMergeRequest,
 }
 
@@ -39,8 +39,17 @@ func listMergeRequest(cmd *cobra.Command, args []string) error {
 	if lb, _ := cmd.Flags().GetString("milestone"); lb != "" {
 		l.Milestone = gitlab.String(lb)
 	}
+	if p, _ := cmd.Flags().GetInt("page"); p != 0 {
+		l.Page = p
+	}
+	if p, _ := cmd.Flags().GetInt("per-page"); p != 0 {
+		l.PerPage = p
+	}
 
 	gitlabClient, repo := git.InitGitlabClient()
+	if r, _ := cmd.Flags().GetString("repo"); r != "" {
+		repo = r
+	}
 	mergeRequests, _, err := gitlabClient.MergeRequests.ListProjectMergeRequests(repo, l)
 	if err != nil {
 		return err
@@ -56,5 +65,7 @@ func init() {
 	mrListCmd.Flags().BoolP("closed", "c", false, "Get only closed merge requests")
 	mrListCmd.Flags().BoolP("opened", "o", false, "Get only opened merge requests")
 	mrListCmd.Flags().BoolP("merged", "m", false, "Get only merged merge requests")
+	mrListCmd.Flags().IntP("page", "p", 1, "Page number")
+	mrListCmd.Flags().IntP("per-page", "P", 20, "Number of items to list per page")
 	mrCmd.AddCommand(mrListCmd)
 }

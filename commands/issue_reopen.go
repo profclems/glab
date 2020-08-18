@@ -6,23 +6,26 @@ import (
 	"github.com/xanzy/go-gitlab"
 	"glab/internal/git"
 	"glab/internal/manip"
-	"log"
 	"strings"
 )
 
 var issueReopenCmd = &cobra.Command{
-	Use:     "reopen",
+	Use:     "reopen <id>",
 	Short:   `Reopen a closed issue`,
 	Long:    ``,
 	Aliases: []string{"open"},
-	Run: func(cmd *cobra.Command, args []string) {
+	Args:    cobra.ExactArgs(1),
+	RunE: func(cmd *cobra.Command, args []string) error {
 		if len(args) > 1 {
 			cmdErr(cmd, args)
-			return
+			return nil
 		}
 		if len(args) > 0 {
 			issueID := strings.TrimSpace(args[0])
 			gitlabClient, repo := git.InitGitlabClient()
+			if r, _ := cmd.Flags().GetString("repo"); r != "" {
+				repo = r
+			}
 			l := &gitlab.UpdateIssueOptions{}
 			l.StateEvent = gitlab.String("reopen")
 			arrIds := strings.Split(strings.Trim(issueID, "[] "), ",")
@@ -30,7 +33,7 @@ var issueReopenCmd = &cobra.Command{
 				fmt.Println("Reopening Issue...")
 				issue, resp, err := gitlabClient.Issues.UpdateIssue(repo, manip.StringToInt(i2), l)
 				if err != nil {
-					log.Fatal(err)
+					return err
 				}
 				if isSuccessful(resp.StatusCode) {
 					fmt.Println("Issue #" + i2 + " eopened")
@@ -44,6 +47,7 @@ var issueReopenCmd = &cobra.Command{
 		} else {
 			cmdErr(cmd, args)
 		}
+		return nil
 	},
 }
 

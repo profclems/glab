@@ -1,7 +1,6 @@
 package commands
 
 import (
-	"log"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -15,10 +14,11 @@ var issueCreateCmd = &cobra.Command{
 	Short:   `Create an issue`,
 	Long:    ``,
 	Aliases: []string{"new"},
-	Run: func(cmd *cobra.Command, args []string) {
+	Args:    cobra.ExactArgs(0),
+	RunE: func(cmd *cobra.Command, args []string) error {
 		if len(args) > 0 {
 			cmdErr(cmd, args)
-			return
+			return nil
 		}
 
 		l := &gitlab.CreateIssueOptions{}
@@ -30,31 +30,37 @@ var issueCreateCmd = &cobra.Command{
 		} else {
 			issueTitle = manip.AskQuestionWithInput("Title", "", true)
 		}
+		if description, _ := cmd.Flags().GetString("description"); description != "" {
+			issueDescription = strings.Trim(description, " ")
+		} else {
+			if editor, _ := cmd.Flags().GetBool("no-editor"); editor {
+				issueDescription = manip.AskQuestionMultiline("Description:", "")
+			} else {
+				issueDescription = manip.Editor(manip.EditorOptions{
+					Label:    "Description:",
+					Help:     "Enter the issue description. ",
+					FileName: "*_ISSUE_EDITMSG.md",
+				})
+			}
+		}
 		if label, _ := cmd.Flags().GetString("label"); label != "" {
 			issueLabel = strings.Trim(label, "[] ")
 		} else {
 			issueLabel = manip.AskQuestionWithInput("Label(s) [Comma Separated]", "", false)
 		}
-		if description, _ := cmd.Flags().GetString("description"); description != "" {
-			issueDescription = strings.Trim(description, " ")
-		} else {
-			issueDescription = manip.AskQuestionMultiline("Description", "")
-		}
-		//issueDate := manip.AskQuestionWithInput("Due Date (Format: YYYY-MM-DD):", "", false)
 		l.Title = gitlab.String(issueTitle)
 		l.Labels = &gitlab.Labels{issueLabel}
 		l.Description = &issueDescription
-		//l.DueDate = &gitlab.ISOTime{issueDate}
 		if confidential, _ := cmd.Flags().GetBool("confidential"); confidential {
 			l.Confidential = gitlab.Bool(confidential)
 		}
-		if weight, _ := cmd.Flags().GetInt("weight"); weight != 0 {
+		if weight, _ := cmd.Flags().GetInt("weight"); weight != -1 {
 			l.Weight = gitlab.Int(weight)
 		}
-		if a, _ := cmd.Flags().GetInt("linked-merge-request"); a != 0 {
+		if a, _ := cmd.Flags().GetInt("linked-mr"); a != -1 {
 			l.MergeRequestToResolveDiscussionsOf = gitlab.Int(a)
 		}
-		if a, _ := cmd.Flags().GetInt("milestone"); a != 0 {
+		if a, _ := cmd.Flags().GetInt("milestone"); a != -1 {
 			l.MilestoneID = gitlab.Int(a)
 		}
 		if a, _ := cmd.Flags().GetString("assignee"); a != "" {
@@ -69,11 +75,15 @@ var issueCreateCmd = &cobra.Command{
 			l.AssigneeIDs = t2
 		}
 		gitlabClient, repo := git.InitGitlabClient()
+		if r, _ := cmd.Flags().GetString("repo"); r != "" {
+			repo = r
+		}
 		issue, _, err := gitlabClient.Issues.CreateIssue(repo, l)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 		displayIssue(issue)
+		return nil
 	},
 }
 
@@ -82,8 +92,10 @@ func init() {
 	issueCreateCmd.Flags().StringP("description", "d", "", "Supply a description for issue")
 	issueCreateCmd.Flags().StringP("label", "l", "", "Add label by name. Multiple labels should be comma separated")
 	issueCreateCmd.Flags().StringP("assignee", "a", "", "Assign issue to people by their ID. Multiple values should be comma separated ")
-	issueCreateCmd.Flags().StringP("milestone", "m", "", "add milestone by <id> for issue")
-	issueCreateCmd.Flags().BoolP("allow-collaboration", "", false, "Allow collaboration")
-	issueCreateCmd.Flags().BoolP("remove-source-branch", "", false, "Remove Source Branch after merge")
+	issueCreateCmd.Flags().IntP("milestone", "m", -1, "The global ID of a milestone to assign issue")
+	issueCreateCmd.Flags().BoolP("confidential", "c", false, "Set an issue to be confidential. Default is false")
+	issueCreateCmd.Flags().IntP("linked-mr", "", -1, "The IID of a merge request in which to resolve all issues")
+	issueCreateCmd.Flags().IntP("weight", "w", -1, "The weight of the issue. Valid values are greater than or equal to 0.")
+	issueCreateCmd.Flags().BoolP("no-editor", "", false, "Don't open editor to enter description. If set to true, uses prompt. Default is false")
 	issueCmd.AddCommand(issueCreateCmd)
 }
