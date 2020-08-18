@@ -43,7 +43,7 @@ func GetRemoteURL() string {
 	}else {
 		gitRemoteURL, err := gitconfig.Local("remote." + remoteVar + ".url")
 		if err != nil {
-			log.Fatal("Could not find remote url for gitlab. Run g config -g")
+			log.Fatal("Could not find remote url for gitlab. Run glab config -g")
 		}
 		return gitRemoteURL
 	}
