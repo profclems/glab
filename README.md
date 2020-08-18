@@ -1,8 +1,8 @@
+# GLab
 [![Go Report Card](https://goreportcard.com/badge/github.com/profclems/glab)](https://goreportcard.com/report/github.com/profclems/glab)
 [![Gitter](https://badges.gitter.im/glabcli/community.svg)](https://gitter.im/glabcli/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
-# GLab
-GLab is an open source Gitlab Cli tool written in Go (golang) to help work seamlessly with Gitlab from the command line.
+GLab is an open source Gitlab Cli tool written in Go (golang) to help work seamlessly with Gitlab from the command line. Work with issues, merge requests, **watch running pipelines directly from your CLI** among other features.
 
 ![image](https://user-images.githubusercontent.com/41906128/88968573-0b556400-d29f-11ea-8504-8ecd9c292263.png)
 
@@ -15,7 +15,7 @@ GLab is an open source Gitlab Cli tool written in Go (golang) to help work seaml
 
 - `glab mr [list, create, close, reopen, delete]`
 - `glab issue [list, create, close, reopen, delete]`
-- `glab pipline [list, delete]`
+- `glab pipeline [list, delete, ci status, ci view]`
 - `glab config`
 - `glab help`
 
@@ -24,6 +24,8 @@ GLab is an open source Gitlab Cli tool written in Go (golang) to help work seaml
   ```bash
   $ glab issue create --title="This is an issue title" --description="This is a really long description"
   $ glab issue list --closed
+  $ glab pipeline ci view -b master    # to watch the latest pipeline on master
+  $ glab pipeline status    # classic ci view
   ```
   
 ## Learn More
@@ -62,6 +64,9 @@ Updating:
 ```sh
 brew upgrade glab
 ```
+
+#### Arch Linux
+`glab` is available through the [gitlab-glab-bin](https://aur.archlinux.org/packages/gitlab-glab-bin/) package on the AUR.
 
 #### Manual Installation
 Download the tar ball, untar and install:
@@ -129,17 +134,25 @@ If a supported binary for your OS is not found at the [releases page](https://gi
    $ sudo mv ./bin/glab /usr/bin/
    ```
 
-4. Run `glab help` to check if it worked.
+4. Run `glab version` to check if it worked and `glab config -g` to set up
 
 
-## Setting Up
+## Configuration
 **To set configuration for current directory (must be a git repository)**
 ```sh
-glab config --token=<YOUR-GITLAB-ACCESS-TOKEN> --url=https://gitlab.com
+glab config  // Will be prompted for details
+
+or
+
+glab config --token=<YOUR-GITLAB-ACCESS-TOKEN> --url=https://gitlab.com --remote-var=origin
 ```
 **To set configuration globally**
 ```sh
-glab config global --token=<YOUR-GITLAB-ACCESS-TOKEN> --url=https://gitlab.com
+glab config --global // Will be prompted for details
+
+or
+
+glab config --global --token=<YOUR-GITLAB-ACCESS-TOKEN> --url=https://gitlab.com  --remote-var=origin
 ```
 **For initial releases up to v1.6.1**
 ```sh
@@ -151,21 +164,24 @@ glab config --token=sometoken --url=https://gitlab.com --pid=someprojectid --rep
 ```
 **NB**: Change gitlab.com to company or group's gitlab url if self-hosted
 
-## Envronment Variables
+## Environment Variables
   ```sh
   GITLAB_TOKEN: an authentication token for API requests. Setting this avoids being
   prompted to authenticate and overrides any previously stored credentials.
+  Can be set with `glab config --token=<YOUR-GITLAB-ACCESS-TOKEN>`
 
   GITLAB_REPO: specify the Gitlab repository in "OWNER/REPO" format for commands that
   otherwise operate on a local repository. (Depreciated in v1.6.2) 
+  Can be set with `glab config --repo=OWNER/REPO`
 
-  GITLAB_URI: specify the url of the gitlab server if self hosted (eg: https://gitlab.example.com). Default is https://github.com
+  GITLAB_URI: specify the url of the gitlab server if self hosted (eg: https://gitlab.example.com). Default is https://gitlab.com.
+  Can be set with `glab config --url=gitlab.example.com`
   ```
 
 ## Contributions
 Thanks for considering contributing to this project!
 
-Please read the [contibutions guide](.github/contributions.md) and [Code of conduct](.github/CODE_OF_CONDUCT.md). 
+Please read the [contributions guide](.github/CONTRIBUTING.md) and [Code of conduct](.github/CODE_OF_CONDUCT.md). 
 
 Feel free to open an issue or submit a pull request!
 

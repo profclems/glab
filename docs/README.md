@@ -1,3 +1,5 @@
-#GLab Documentation
+# DO NOT EDIT!
 
-### This folder is used for the documentation related to using GLab.
+The docs for all commands including new commands are automatically generated. Do not change any file in this folder.
+
+Just add the commands and the docs will be generated

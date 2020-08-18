@@ -9,7 +9,7 @@ builds:
     env:
       - CGO_ENABLED=0
     ldflags:
-      - -s -w -X glab.version={{.Version}} -X glab.commit={{.Commit}} -X glab.build={{time "01/02/2006"}}
+      - -s -w -X main.version={{.Version}} -X main.build={{time "01/02/2006"}}
   - <<: &build_defaults
       binary: bin/glab
       main: ./cmd/glab
@@ -39,7 +39,7 @@ archives:
     builds: [macos, linux]
     <<: &archive_defaults
       name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}"
-    wrap_in_directory: true
+    wrap_in_directory: false
     replacements:
       darwin: macOS
       linux: Linux
@@ -72,7 +72,7 @@ brews:
   - name: glab
     ids:
       - nix
-    description: "An open source gitlab cli tool"
+    description: "An open source GitLab CLI tool"
     commit_author:
       name: Clement Sam
       email: clementsam75@gmail.com
@@ -86,8 +86,9 @@ brews:
     homepage: "https://github.com/profclems/glab"
     dependencies:
       - name: git
+    install: bin.install "bin/glab"
     test: |
-      system "#{bin}/glab --version"
+      system "#{bin}/glab version"
 nfpms:
   -
     id: foo
@@ -125,3 +126,5 @@ changelog:
     exclude:
       - '^docs:'
       - '^test:'
+      - '^Merge pull request'
+      - '^chore'
