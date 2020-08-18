@@ -3,15 +3,16 @@ package config
 import (
 	"bufio"
 	"fmt"
-	"github.com/logrusorgru/aurora"
-	"github.com/spf13/cobra"
-	"github.com/tcnksm/go-gitconfig"
 	"glab/internal/manip"
 	"io/ioutil"
 	"log"
 	"os"
 	"os/user"
 	"strings"
+
+	"github.com/logrusorgru/aurora"
+	"github.com/spf13/cobra"
+	"github.com/tcnksm/go-gitconfig"
 )
 
 var (
@@ -22,6 +23,7 @@ var (
 	configFileFileDir       = configFileFileParentDir + "/config"
 	configFile              = configFileFileDir + "/.env"
 	globalConfigFile        = configFile
+	aliasFile               = configFileFileDir + "/aliases.txt"
 )
 
 func SetGlobalPathDir() string {
@@ -32,6 +34,99 @@ func SetGlobalPathDir() string {
 	globalPathDir = usr.HomeDir
 	globalConfigFile = globalPathDir + "/" + globalConfigFile
 	return globalPathDir
+}
+
+// SetAlias sets an alias for a command
+func SetAlias(name string, command string) {
+	if !CheckFileExists(aliasFile) {
+		_, err := os.Stat(configFileFileDir)
+		if os.IsNotExist(err) {
+			errDir := os.MkdirAll(configFileFileDir, 0755)
+			if errDir != nil {
+				log.Fatalln(err)
+			}
+		}
+		f, err := os.Create(aliasFile)
+		if err != nil {
+			log.Fatalln(err)
+		}
+		f.Close()
+	}
+
+	contents, err := ioutil.ReadFile(aliasFile)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	lines := strings.Split(string(contents), "\n")
+	if len(lines) == 1 && lines[0] == "" {
+		lines = []string{}
+	}
+	set := false
+
+	for i, line := range lines {
+		aliasSplit := strings.SplitN(line, ":", 2)
+		if aliasSplit[0] == name {
+			lines[i] = name + ":" + command
+			set = true
+			break
+		}
+	}
+
+	if !set {
+		lines = append(lines, name+":"+command)
+	}
+
+	output := strings.Join(lines, "\n")
+	err = ioutil.WriteFile(aliasFile, []byte(output), 0644)
+	if err != nil {
+		log.Fatalln(err)
+	}
+}
+
+// GetAllAliases retrieves all of the aliases.
+func GetAllAliases() map[string]string {
+	if !CheckFileExists(aliasFile) {
+		return nil
+	}
+
+	contents, err := ioutil.ReadFile(aliasFile)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	lines := strings.Split(string(contents), "\n")
+	aliasMap := make(map[string]string)
+
+	for _, line := range lines {
+		aliasSplit := strings.SplitN(line, ":", 2)
+		aliasMap[aliasSplit[0]] = aliasSplit[1]
+	}
+
+	return aliasMap
+}
+
+// GetAlias retrieves the command for an alias
+func GetAlias(name string) string {
+	if !CheckFileExists(aliasFile) {
+		return ""
+	}
+
+	contents, err := ioutil.ReadFile(aliasFile)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	lines := strings.Split(string(contents), "\n")
+
+	for _, line := range lines {
+		aliasSplit := strings.SplitN(line, ":", 2)
+		if aliasSplit[0] == name {
+			return aliasSplit[1]
+		}
+	}
+
+	return ""
 }
 
 // GetEnv : returns env variable value
