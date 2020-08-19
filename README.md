@@ -1,6 +1,6 @@
 ![GLab](https://user-images.githubusercontent.com/9063085/90530075-d7a58580-e14a-11ea-9727-4f592f7dcf2e.png)
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-8-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-9-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/profclems/glab)](https://goreportcard.com/report/github.com/profclems/glab)
@@ -231,6 +231,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
   </tr>
   <tr>
     <td align="center"><a href="http://patrickmcmichael.org"><img src="https://avatars0.githubusercontent.com/u/3779458?v=4" width="100px;" alt=""/><br /><sub><b>Patrick McMichael</b></sub></a><br /><a href="https://github.com/profclems/glab/commits?author=Saturn" title="Documentation">📖</a></td>
+    <td align="center"><a href="https://github.com/wolffc"><img src="https://avatars3.githubusercontent.com/u/1393783?v=4" width="100px;" alt=""/><br /><sub><b>Christian Wolff</b></sub></a><br /><a href="https://github.com/profclems/glab/commits?author=wolffc" title="Documentation">📖</a></td>
   </tr>
 </table>
 
