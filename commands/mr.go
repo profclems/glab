@@ -2,12 +2,11 @@ package commands
 
 import (
 	"fmt"
+	"glab/internal/utils"
+
 	"github.com/gookit/color"
-	"github.com/gosuri/uitable"
 	"github.com/spf13/cobra"
 	"github.com/xanzy/go-gitlab"
-	"glab/internal/git"
-	"glab/internal/utils"
 )
 
 func displayMergeRequest(hm *gitlab.MergeRequest) {
@@ -21,24 +20,28 @@ func displayMergeRequest(hm *gitlab.MergeRequest) {
 }
 
 func displayAllMergeRequests(m []*gitlab.MergeRequest) {
-	if len(m) > 0 {
-		table := uitable.New()
-		table.MaxColWidth = 70
-		fmt.Println()
-		fmt.Printf("Showing mergeRequests %d of %d on %s\n\n", len(m), len(m), git.GetRepo())
-		for _, mr := range m {
-			var mrID string
-			if mr.State == "opened" {
-				mrID = color.Sprintf("<green>#%d</>", mr.IID)
-			} else {
-				mrID = color.Sprintf("<red>#%d</>", mr.IID)
+	DisplayList(ListInfo{
+		Name:    "Merge Requests",
+		Columns: []string{"ID", "Title", "Branch"},
+		Total:   len(m),
+		GetCellValue: func(ri int, ci int) interface{} {
+			mr := m[ri]
+			switch ci {
+			case 0:
+				if mr.State == "opened" {
+					return color.Sprintf("<green>#%d</>", mr.IID)
+				} else {
+					return color.Sprintf("<red>#%d</>", mr.IID)
+				}
+			case 1:
+				return mr.Title
+			case 2:
+				return color.Sprintf("<cyan>(%s) ← (%s)</>", mr.TargetBranch, mr.SourceBranch)
+			default:
+				return ""
 			}
-			table.AddRow(mrID, mr.Title, color.Sprintf("<cyan>(%s) ← (%s)</>", mr.TargetBranch, mr.SourceBranch))
-		}
-		fmt.Println(table)
-	} else {
-		fmt.Println("No Merge Requests available on " + git.GetRepo())
-	}
+		},
+	})
 }
 
 // mrCmd is merge request command

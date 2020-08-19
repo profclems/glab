@@ -2,13 +2,11 @@ package commands
 
 import (
 	"fmt"
-	"glab/internal/git"
 	"glab/internal/utils"
 
 	"github.com/gookit/color"
 	"github.com/spf13/cobra"
 
-	"github.com/gosuri/uitable"
 	"github.com/xanzy/go-gitlab"
 )
 
@@ -18,21 +16,28 @@ func displayRelease(r *gitlab.Release) {
 }
 
 func displayAllReleases(rs []*gitlab.Release) {
-	if len(rs) > 0 {
-
-		table := uitable.New()
-		table.MaxColWidth = 70
-		fmt.Println()
-		fmt.Printf("Showing releases %d of %d on %s\n\n", len(rs), len(rs), git.GetRepo())
-		for _, r := range rs {
-			duration := utils.TimeToPrettyTimeAgo(*r.CreatedAt)
-			author := fmt.Sprintf("%s (%s)", r.Author.Name, r.Author.Username)
-			table.AddRow(r.Name, r.TagName, author, r.Description, duration)
-		}
-		fmt.Println(table)
-	} else {
-		fmt.Println("No releases available on " + git.GetRepo())
-	}
+	DisplayList(ListInfo{
+		Name:    "releases",
+		Columns: []string{"Name", "TagName", "Author", "Description", "CreatedAt"},
+		Total:   len(rs),
+		GetCellValue: func(ri int, ci int) interface{} {
+			row := rs[ri]
+			switch ci {
+			case 0:
+				return row.Name
+			case 1:
+				return row.TagName
+			case 2:
+				return fmt.Sprintf("%s (%s)", row.Author.Name, row.Author.Username)
+			case 3:
+				return row.Description
+			case 4:
+				return utils.TimeToPrettyTimeAgo(*row.CreatedAt)
+			default:
+				return ""
+			}
+		},
+	})
 }
 
 // releaseCmd is release command
