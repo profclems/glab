@@ -1,8 +1,10 @@
 ![GLab](https://user-images.githubusercontent.com/9063085/90530075-d7a58580-e14a-11ea-9727-4f592f7dcf2e.png)
 
-# GLab
-[![Go Report Card](https://goreportcard.com/badge/github.com/profclems/glab)](https://goreportcard.com/report/github.com/profclems/glab)
-[![Gitter](https://badges.gitter.im/glabcli/community.svg)](https://gitter.im/glabcli/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
+<p style="text-align: center">
+<a href="https://goreportcard.com/report/github.com/profclems/glab"><img alt="Go Report Card" src="https://goreportcard.com/badge/github.com/profclems/glab"></a>
+<a href="https://gitter.im/glabcli/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge"><img alt="Gitter" src="https://badges.gitter.im/glabcli/community.svg"></a>
+<a href="https://www.buymeacoffee.com/profclems" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Me A Coffee" style="height: 10px !important;width: 50px !important;" ></a>
+</p>
 
 GLab is an open source Gitlab Cli tool written in Go (golang) to help work seamlessly with Gitlab from the command line. Work with issues, merge requests, **watch running pipelines directly from your CLI** among other features.
 
