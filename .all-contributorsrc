@@ -51,6 +51,16 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "BreD1810",
+      "name": "Bradley Garrod",
+      "avatar_url": "https://avatars3.githubusercontent.com/u/32489229?v=4",
+      "profile": "https://bredley.co.uk",
+      "contributions": [
+        "code",
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,
