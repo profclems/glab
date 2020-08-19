@@ -23,6 +23,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "matheuslugon",
+      "name": "Matheus Lugon",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/9063085?v=4",
+      "profile": "https://twitter.com/tetheusmeuneto",
+      "contributions": [
+        "design"
+      ]
     }
   ],
   "contributorsPerLine": 7,
