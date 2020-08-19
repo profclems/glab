@@ -2,107 +2,94 @@ package commands
 
 import (
 	"fmt"
+	"strings"
+
+	"github.com/MakeNowJust/heredoc"
 	"github.com/spf13/cobra"
 	"github.com/xanzy/go-gitlab"
 	"glab/internal/git"
 	"glab/internal/manip"
-	"strings"
 )
 
 var mrForCmd = &cobra.Command{
-	Use:     "for <issue_id>",
-	Short:   `Create new merge request for existing issue`,
+	Use:     "for",
+	Short:   `Create new merge request for an issue`,
 	Long:    ``,
-	Aliases: []string{"new"},
-	Args:    cobra.ExactArgs(1),
+	Aliases: []string{"new-for", "create-for", "for-issue"},
+	Example: heredoc.Doc(`
+	$ glab mr for 34   # Create mr for issue 34
+	$ glab mr for 34 --wip   # Create mr and mark as work in progress
+	$ glab mr new-for 34
+	$ glab mr create-for 34
+	`),
+	Args: cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		if len(args) > 1 {
+		if len(args) == 0 || len(args) > 1 {
 			cmdErr(cmd, args)
 			return nil
 		}
-		pid := manip.StringToInt(args[0])
 
 		gitlabClient, repo := git.InitGitlabClient()
 		if r, _ := cmd.Flags().GetString("repo"); r != "" {
 			repo = r
 		}
 
-		issue, _, err := gitlabClient.Issues.GetIssue(repo, pid)
+		issueID := manip.StringToInt(args[0])
+		issue, _, err := gitlabClient.Issues.GetIssue(repo, issueID)
 		if err != nil {
 			return err
 		}
 
-		var mergeTitle string
-		var mergeDescription string
-		var targetBranch string
+		sourceBranch := fmt.Sprintf("%d-%s", issue.IID, manip.ReplaceNonAlphaNumericChars(strings.ToLower(issue.Title), "-"))
 
+		lb := &gitlab.CreateBranchOptions{
+			Branch: gitlab.String(sourceBranch),
+			Ref:    gitlab.String("master"),
+		}
+
+		_, _, err = gitlabClient.Branches.CreateBranch(repo, lb)
+		if err != nil {
+			for branchErr, branchCount := err, 1; branchErr != nil; branchCount++ {
+
+				numberedBranch := fmt.Sprintf("%d-%s-%d", issue.IID, strings.ReplaceAll(strings.ToLower(issue.Title), " ", "-"), branchCount)
+				lb = &gitlab.CreateBranchOptions{
+					Branch: gitlab.String(numberedBranch),
+					Ref:    gitlab.String("master"),
+				}
+				sourceBranch = numberedBranch
+				_, _, branchErr = gitlabClient.Branches.CreateBranch(repo, lb)
+				fmt.Println(branchErr)
+			}
+
+		}
+
+		var targetBranch string
 		if t, _ := cmd.Flags().GetString("target-branch"); t != "" {
-			targetBranch = strings.Trim(t, "[] ")
+			targetBranch = strings.TrimSpace(t)
 		} else {
 			targetBranch = "master"
 		}
-		if fill, _ := cmd.Flags().GetBool("fill"); !fill {
-			if title, _ := cmd.Flags().GetString("title"); title != "" {
-				mergeTitle = strings.Trim(title, " ")
-			} else {
-				mergeTitle = fmt.Sprintf("Resolve: %s (#%d)", issue.Description, issue.IID)
-			}
-			mergeDescription, _ = cmd.Flags().GetString("description")
-		} else {
-			branch, _ := git.CurrentBranch()
-			commit, _ := git.LatestCommit(branch)
-			_, err := getCommit(repo, targetBranch)
-			if err != nil {
-				return fmt.Errorf("target branch %s does not exist on remote. Specify target branch with --target-branch flag", targetBranch)
-			}
-			mergeDescription, err = git.CommitBody(branch)
-			if err != nil {
-				return err
-			}
-			mergeTitle = strings.Trim(commit.Title, "'")
-		}
-		if closesIssue, _ := cmd.Flags().GetBool("closes-issue"); closesIssue {
-			mergeDescription = fmt.Sprintf("Closes #%d\n%s", issue.IID, mergeDescription)
-		}
 
-		newBranch := fmt.Sprintf("%d-%s", issue.IID, manip.ReplaceNonAlphaNumericChars(strings.ToLower(issue.Description), "-"))
-
-		cbo := &gitlab.CreateBranchOptions{}
-		cbo.Branch = gitlab.String(newBranch)
-		cbo.Ref = gitlab.String(targetBranch)
-
-		fmt.Println("Creating related branch...")
-		branch, _, err := gitlabClient.Branches.CreateBranch(repo, cbo)
-		if err == nil {
-			fmt.Println("Branch created: ", branch.WebURL)
-		} else {
-			for counter, branchErr := 1, err; branchErr == nil; counter++ {
-				newBranch = fmt.Sprintf("%d-%s-%d", issue.IID, manip.ReplaceNonAlphaNumericChars(strings.ToLower(issue.Description), "-"), counter)
-				cbo.Branch = gitlab.String(newBranch)
-				branch, _, branchErr = gitlabClient.Branches.CreateBranch(repo, cbo)
-				if branchErr == nil {
-					fmt.Println("Branch created: ", branch.WebURL)
-				}
-			}
-		}
-
-		l := &gitlab.CreateMergeRequestOptions{}
+		var mergeTitle string
+		mergeTitle = fmt.Sprintf("Resolve \"%s\"", issue.Title)
 
 		isDraft, _ := cmd.Flags().GetBool("draft")
 		isWIP, _ := cmd.Flags().GetBool("wip")
 		if isDraft || isWIP {
-			if isDraft {
-				mergeTitle = "Draft: " + mergeTitle
-			} else {
+			if isWIP {
 				mergeTitle = "WIP: " + mergeTitle
+			} else {
+				mergeTitle = "Draft: " + mergeTitle
 			}
 		}
 
 		mergeLabel, _ := cmd.Flags().GetString("label")
+
+		l := &gitlab.CreateMergeRequestOptions{}
 		l.Title = gitlab.String(mergeTitle)
-		l.Description = gitlab.String(mergeDescription)
+		l.Description = gitlab.String(fmt.Sprintf("Closes #%d", issue.IID))
 		l.Labels = &gitlab.Labels{mergeLabel}
-		l.SourceBranch = cbo.Branch
+		l.SourceBranch = gitlab.String(sourceBranch)
 		l.TargetBranch = gitlab.String(targetBranch)
 		if milestone, _ := cmd.Flags().GetInt("milestone"); milestone != -1 {
 			l.MilestoneID = gitlab.Int(milestone)
@@ -113,9 +100,7 @@ var mrForCmd = &cobra.Command{
 		if removeSource, _ := cmd.Flags().GetBool("remove-source-branch"); removeSource {
 			l.RemoveSourceBranch = gitlab.Bool(true)
 		}
-		if targetProject, _ := cmd.Flags().GetInt("target-project"); targetProject != -1 {
-			l.TargetProjectID = gitlab.Int(targetProject)
-		}
+
 		if a, _ := cmd.Flags().GetString("assignee"); a != "" {
 			arrIds := strings.Split(strings.Trim(a, "[] "), ",")
 			var t2 []int
@@ -132,23 +117,20 @@ var mrForCmd = &cobra.Command{
 			return err
 		}
 		displayMergeRequest(mr)
+
 		return nil
 	},
 }
 
 func init() {
-	mrForCmd.Flags().BoolP("closes-issue", "", true, "This merge request closes the issue when it is merged or closed")
-	mrForCmd.Flags().BoolP("fill", "f", false, "Do not prompt for title/description and just use commit info")
-	mrForCmd.Flags().BoolP("draft", "", true, "Mark merge request as a draft")
-	mrForCmd.Flags().BoolP("wip", "", false, "Mark merge request as a work in progress. Alternative to --draft")
-	mrForCmd.Flags().StringP("title", "t", "", "Supply a title for merge request")
+
+	mrForCmd.Flags().BoolP("draft", "", true, "Mark merge request as a draft. Default is true")
+	mrForCmd.Flags().BoolP("wip", "", false, "Mark merge request as a work in progress. Overrides --draft")
 	mrForCmd.Flags().StringP("label", "l", "", "Add label by name. Multiple labels should be comma separated")
 	mrForCmd.Flags().StringP("assignee", "a", "", "Assign merge request to people by their IDs. Multiple values should be comma separated ")
-	mrForCmd.Flags().StringP("target-branch", "b", "", "The target or base branch into which you want your code merged (default master)")
-	mrForCmd.Flags().IntP("target-project", "", -1, "Add target project by id")
-	mrForCmd.Flags().IntP("milestone", "m", -1, "add milestone by <id> for merge request")
 	mrForCmd.Flags().BoolP("allow-collaboration", "", false, "Allow commits from other members")
 	mrForCmd.Flags().BoolP("remove-source-branch", "", false, "Remove Source Branch on merge")
-	mrForCmd.Flags().BoolP("no-editor", "", false, "Don't open editor to enter description. If set to true, uses prompt. Default is false")
+	mrForCmd.Flags().IntP("milestone", "m", -1, "add milestone by <id> for merge request")
+	mrForCmd.Flags().StringP("target-branch", "b", "", "The target or base branch into which you want your code merged")
 	mrCmd.AddCommand(mrForCmd)
 }
