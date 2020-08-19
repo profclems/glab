@@ -10,7 +10,7 @@ import (
 
 var mrToDoCmd = &cobra.Command{
 	Use:     "todo <merge-request-id>",
-	Aliases: []string{"comment"},
+	Aliases: []string{"add-todo"},
 	Short:   "Add a ToDo to merge request",
 	Long:    ``,
 	Args:    cobra.ExactArgs(1),
