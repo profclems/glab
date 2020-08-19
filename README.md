@@ -1,6 +1,6 @@
 ![GLab](https://user-images.githubusercontent.com/9063085/90530075-d7a58580-e14a-11ea-9727-4f592f7dcf2e.png)
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-2-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/profclems/glab)](https://goreportcard.com/report/github.com/profclems/glab)
@@ -222,6 +222,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
 <table>
   <tr>
     <td align="center"><a href="https://bredley.co.uk"><img src="https://avatars3.githubusercontent.com/u/32489229?v=4" width="100px;" alt=""/><br /><sub><b>Bradley Garrod</b></sub></a><br /><a href="https://github.com/profclems/glab/commits?author=BreD1810" title="Code">💻</a> <a href="#platform-BreD1810" title="Packaging/porting to new platform">📦</a> <a href="https://github.com/profclems/glab/commits?author=BreD1810" title="Documentation">📖</a></td>
+    <td align="center"><a href="https://twitter.com/tetheusmeuneto"><img src="https://avatars2.githubusercontent.com/u/9063085?v=4" width="100px;" alt=""/><br /><sub><b>Matheus Lugon</b></sub></a><br /><a href="#design-matheuslugon" title="Design">🎨</a></td>
   </tr>
 </table>
 
