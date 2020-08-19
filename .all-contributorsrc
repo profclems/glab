@@ -1,0 +1,35 @@
+{
+  "files": [
+    "README.md"
+  ],
+  "imageSize": 100,
+  "commit": false,
+  "contributors": [
+    {
+      "login": "princeselasi",
+      "name": "Opoku-Dapaah ",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/59126177?v=4",
+      "profile": "https://github.com/princeselasi",
+      "contributions": [
+        "doc",
+        "design"
+      ]
+    },
+    {
+      "login": "sirlatrom",
+      "name": "Sune Keller",
+      "avatar_url": "https://avatars3.githubusercontent.com/u/425633?v=4",
+      "profile": "https://github.com/sirlatrom",
+      "contributions": [
+        "code",
+        "financial"
+      ]
+    }
+  ],
+  "contributorsPerLine": 7,
+  "projectName": "glab",
+  "projectOwner": "profclems",
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "skipCi": true
+}
