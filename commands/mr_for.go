@@ -10,7 +10,7 @@ import (
 )
 
 var mrForCmd = &cobra.Command{
-	Use:     "for",
+	Use:     "for <issue_id>",
 	Short:   `Create new merge request for existing issue`,
 	Long:    ``,
 	Aliases: []string{"new"},
