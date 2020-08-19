@@ -1,6 +1,6 @@
 ![GLab](https://user-images.githubusercontent.com/9063085/90530075-d7a58580-e14a-11ea-9727-4f592f7dcf2e.png)
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-2-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-3-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/profclems/glab)](https://goreportcard.com/report/github.com/profclems/glab)
@@ -222,6 +222,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
   <tr>
     <td align="center"><a href="https://github.com/princeselasi"><img src="https://avatars2.githubusercontent.com/u/59126177?v=4" width="100px;" alt=""/><br /><sub><b>Opoku-Dapaah </b></sub></a><br /><a href="https://github.com/profclems/glab/commits?author=princeselasi" title="Documentation">📖</a> <a href="#design-princeselasi" title="Design">🎨</a></td>
     <td align="center"><a href="https://github.com/sirlatrom"><img src="https://avatars3.githubusercontent.com/u/425633?v=4" width="100px;" alt=""/><br /><sub><b>Sune Keller</b></sub></a><br /><a href="https://github.com/profclems/glab/commits?author=sirlatrom" title="Code">💻</a></td>
+    <td align="center"><a href="https://www.linkedin.com/in/lwpamihiranga/"><img src="https://avatars3.githubusercontent.com/u/39789194?v=4" width="100px;" alt=""/><br /><sub><b>Amith Mihiranga</b></sub></a><br /><a href="https://github.com/profclems/glab/commits?author=lwpamihiranga" title="Documentation">📖</a></td>
   </tr>
 </table>
 
