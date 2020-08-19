@@ -108,6 +108,15 @@
         "code",
         "maintenance"
       ]
+    },
+    {
+      "login": "j-mcavoy",
+      "name": "John McAvoy",
+      "avatar_url": "https://avatars1.githubusercontent.com/u/17990820?v=4",
+      "profile": "https://github.com/j-mcavoy",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
