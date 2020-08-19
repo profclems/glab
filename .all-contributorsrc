@@ -53,6 +53,15 @@
         "financial",
         "code"
       ]
+    },
+    {
+      "login": "sattellite",
+      "name": "sattellite",
+      "avatar_url": "https://avatars1.githubusercontent.com/u/322910?v=4",
+      "profile": "https://sattellite.me",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
