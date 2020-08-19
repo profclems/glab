@@ -58,7 +58,6 @@ var mrForCmd = &cobra.Command{
 				}
 				sourceBranch = numberedBranch
 				_, _, branchErr = gitlabClient.Branches.CreateBranch(repo, lb)
-				fmt.Println(branchErr)
 			}
 
 		}
