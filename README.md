@@ -222,6 +222,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
   <tr>
     <td align="center"><a href="https://github.com/princeselasi"><img src="https://avatars2.githubusercontent.com/u/59126177?v=4" width="100px;" alt=""/><br /><sub><b>Opoku-Dapaah </b></sub></a><br /><a href="https://github.com/profclems/glab/commits?author=princeselasi" title="Documentation">📖</a> <a href="#design-princeselasi" title="Design">🎨</a></td>
     <td align="center"><a href="https://github.com/sirlatrom"><img src="https://avatars3.githubusercontent.com/u/425633?v=4" width="100px;" alt=""/><br /><sub><b>Sune Keller</b></sub></a><br /><a href="https://github.com/profclems/glab/commits?author=sirlatrom" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/pgollangi"><img src="https://avatars3.githubusercontent.com/u/6123002?v=4" width="100px;" alt=""/><br /><sub><b>Prasanna Kumar Gollangi</b></sub></a><br /><a href="https://github.com/profclems/glab/commits?author=pgollangi" title="Code">💻</a></td>
     <td align="center"><a href="https://twitter.com/tetheusmeuneto"><img src="https://avatars2.githubusercontent.com/u/9063085?v=4" width="100px;" alt=""/><br /><sub><b>Matheus Lugon</b></sub></a><br /><a href="#design-matheuslugon" title="Design">🎨</a></td>
   </tr>
 </table>
