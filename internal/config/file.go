@@ -7,6 +7,9 @@ import (
 	"strings"
 )
 
+// glab environment cache: <file: <key: value>>
+var envCache map[string]map[string]string
+
 // ReadAndAppend : appends string to file
 func ReadAndAppend(file, text string) {
 	// If the file doesn't exist, create it, or append to the file
@@ -22,23 +25,37 @@ func ReadAndAppend(file, text string) {
 	}
 }
 
-// GetKeyValueInFile : returns env variable value
-func GetKeyValueInFile(filePath, key string) string {
+func readConfig(filePath string) map[string]string {
+	var config = make(map[string]string)
 	data, _ := ioutil.ReadFile(filePath)
-
 	file := string(data)
-	line := 0
 	temp := strings.Split(file, "\n")
 	for _, item := range temp {
 		//fmt.Println("[",line,"]",item)
 		env := strings.Split(item, "=")
-		if env[0] == key {
-			if len(env) > 1 {
-				return env[1]
-			}
-			return "OK"
+		if len(env) > 1 {
+			config[env[0]] = env[1]
 		}
-		line++
+	}
+	return config
+}
+
+// GetKeyValueInFile : returns env variable value
+func GetKeyValueInFile(filePath, key string) string {
+	configCache, okConfig := envCache[filePath]
+	if !okConfig {
+		configCache = readConfig(filePath)
+		if envCache == nil {
+			envCache = make(map[string]map[string]string)
+		}
+		envCache[filePath] = configCache
+	}
+
+	if cachedEnv, okEnv := configCache[key]; okEnv {
+		if cachedEnv == "" {
+			cachedEnv = "OK"
+		}
+		return cachedEnv
 	}
 	return "NOTFOUND"
 }
