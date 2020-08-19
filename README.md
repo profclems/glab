@@ -1,3 +1,5 @@
+![GLab](https://user-images.githubusercontent.com/9063085/90530075-d7a58580-e14a-11ea-9727-4f592f7dcf2e.png)
+
 # GLab
 [![Go Report Card](https://goreportcard.com/badge/github.com/profclems/glab)](https://goreportcard.com/report/github.com/profclems/glab)
 [![Gitter](https://badges.gitter.im/glabcli/community.svg)](https://gitter.im/glabcli/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
@@ -174,8 +176,17 @@ glab config --token=sometoken --url=https://gitlab.com --pid=someprojectid --rep
   otherwise operate on a local repository. (Depreciated in v1.6.2) 
   Can be set with `glab config --repo=OWNER/REPO`
 
-  GITLAB_URI: specify the url of the gitlab server if self hosted (eg: https://gitlab.example.com). Default is https://gitlab.com.
+  GITLAB_URI: specify the url of the gitlab server if self hosted (eg: https://gitlab.example.com). 
+  Default is https://gitlab.com.
   Can be set with `glab config --url=gitlab.example.com`
+  
+  VISUAL, EDITOR (in order of precedence): the editor tool to use for authoring text.
+
+  BROWSER: the web browser to use for opening links.
+  
+  GLAMOUR_STYLE: environment variable to set your desired markdown renderer style
+  Available options are (dark|light|notty) or set a custom style
+  https://github.com/charmbracelet/glamour#styles
   ```
 
 ## Contributions
