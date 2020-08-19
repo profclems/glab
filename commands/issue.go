@@ -29,7 +29,7 @@ func displayAllIssues(m []*gitlab.Issue) {
 				return issue.Title
 			case 2:
 				if len(issue.Labels) > 0 {
-					return fmt.Sprintf("(%s)", strings.Trim(strings.Join(issue.Labels, ", "), ","))
+					return color.Cyan.Sprintf("(%s)", strings.Trim(strings.Join(issue.Labels, ", "), ","))
 				}
 				return ""
 			case 3:
