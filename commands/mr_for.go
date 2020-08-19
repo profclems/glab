@@ -12,6 +12,7 @@ import (
 var mrForCmd = &cobra.Command{
 	Use:     "for <issue_id>",
 	Short:   `Create new merge request for existing issue`,
+
 	Long:    ``,
 	Aliases: []string{"new"},
 	Args:    cobra.ExactArgs(1),
@@ -22,15 +23,19 @@ var mrForCmd = &cobra.Command{
 		}
 		pid := manip.StringToInt(args[0])
 
+
 		gitlabClient, repo := git.InitGitlabClient()
 		if r, _ := cmd.Flags().GetString("repo"); r != "" {
 			repo = r
 		}
 
+
 		issue, _, err := gitlabClient.Issues.GetIssue(repo, pid)
+
 		if err != nil {
 			return err
 		}
+
 
 		var mergeTitle string
 		var mergeDescription string
@@ -97,11 +102,13 @@ var mrForCmd = &cobra.Command{
 				mergeTitle = "WIP: " + mergeTitle
 			}
 		}
+
 		mergeLabel, _ := cmd.Flags().GetString("label")
 		l.Title = gitlab.String(mergeTitle)
 		l.Description = gitlab.String(mergeDescription)
 		l.Labels = &gitlab.Labels{mergeLabel}
 		l.SourceBranch = cbo.Branch
+
 		l.TargetBranch = gitlab.String(targetBranch)
 		if milestone, _ := cmd.Flags().GetInt("milestone"); milestone != -1 {
 			l.MilestoneID = gitlab.Int(milestone)

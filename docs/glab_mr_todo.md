@@ -1,19 +1,19 @@
-## glab mr subscribe
+## glab mr todo
 
-Subscribe to merge requests
+Add a ToDo to merge request
 
 ### Synopsis
 
-Subscribe to merge requests
+Add a ToDo to merge request
 
 ```
-glab mr subscribe <id> [flags]
+glab mr todo <merge-request-id> [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help   help for subscribe
+  -h, --help   help for todo
 ```
 
 ### Options inherited from parent commands
