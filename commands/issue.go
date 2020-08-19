@@ -4,41 +4,41 @@ import (
 	"fmt"
 	"strings"
 
+	"glab/internal/utils"
+
 	"github.com/gookit/color"
-	"github.com/gosuri/uitable"
 	"github.com/spf13/cobra"
 	"github.com/xanzy/go-gitlab"
-	"glab/internal/git"
-	"glab/internal/utils"
 )
 
 func displayAllIssues(m []*gitlab.Issue) {
-	if len(m) > 0 {
-		fmt.Printf("\nShowing issues %d of %d on %s\n\n", len(m), len(m), git.GetRepo())
-		table := uitable.New()
-		table.MaxColWidth = 70
-		for _, issue := range m {
-			var labels string
-			for _, l := range issue.Labels {
-				labels += " " + l + ","
+	DisplayList(ListInfo{
+		Name:    "issues",
+		Columns: []string{"IssueID", "Title", "Labels", "CreatedAt"},
+		Total:   len(m),
+		GetCellValue: func(ri int, ci int) interface{} {
+			issue := m[ri]
+			switch ci {
+			case 0:
+				if issue.State == "opened" {
+					return color.Sprintf("<green>#%d</>", issue.IID)
+				} else {
+					return color.Sprintf("<red>#%d</>", issue.IID)
+				}
+			case 1:
+				return issue.Title
+			case 2:
+				if len(issue.Labels) > 0 {
+					return fmt.Sprintf("(%s)", strings.Trim(strings.Join(issue.Labels, ", "), ","))
+				}
+				return ""
+			case 3:
+				return color.Gray.Sprintf(utils.TimeToPrettyTimeAgo(*issue.CreatedAt))
+			default:
+				return ""
 			}
-			labels = strings.Trim(labels, ", ")
-			if labels != "" {
-				labels = "(" + labels + ")"
-			}
-			var issueID string
-			duration := utils.TimeToPrettyTimeAgo(*issue.CreatedAt)
-			if issue.State == "opened" {
-				issueID = color.Sprintf("<green>#%d</>", issue.IID)
-			} else {
-				issueID = color.Sprintf("<red>#%d</>", issue.IID)
-			}
-			table.AddRow(issueID, issue.Title, color.Cyan.Sprintf(labels), color.Gray.Sprintf(duration))
-		}
-		fmt.Println(table)
-	} else {
-		fmt.Println("No Issues available on " + git.GetRepo())
-	}
+		},
+	})
 }
 
 func displayIssue(hm *gitlab.Issue) {
