@@ -34,6 +34,7 @@ glab mr <command> [flags]
 * [glab mr reopen](glab_mr_reopen.md)	 - Reopen merge requests
 * [glab mr revoke](glab_mr_revoke.md)	 - Revoke approval on a merge request <id>
 * [glab mr subscribe](glab_mr_subscribe.md)	 - Subscribe to merge requests
+* [glab mr todo](glab_mr_todo.md)	 - Add a ToDo to merge request
 * [glab mr unsubscribe](glab_mr_unsubscribe.md)	 - Unsubscribe to merge requests
 * [glab mr update](glab_mr_update.md)	 - Update merge requests
 * [glab mr view](glab_mr_view.md)	 - Display the title, body, and other information about a merge request.
