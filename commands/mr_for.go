@@ -21,7 +21,7 @@ var mrForCmd = &cobra.Command{
 	$ glab mr new-for 34
 	$ glab mr create-for 34
 	`),
-	Args:    cobra.ExactArgs(1),
+	Args: cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if len(args) == 0 || len(args) > 1 {
 			cmdErr(cmd, args)
@@ -32,7 +32,7 @@ var mrForCmd = &cobra.Command{
 		if r, _ := cmd.Flags().GetString("repo"); r != "" {
 			repo = r
 		}
-		
+
 		issueID := manip.StringToInt(args[0])
 		issue, _, err := gitlabClient.Issues.GetIssue(repo, issueID)
 		if err != nil {
@@ -45,7 +45,7 @@ var mrForCmd = &cobra.Command{
 			Branch: gitlab.String(sourceBranch),
 			Ref:    gitlab.String("master"),
 		}
-	
+
 		_, _, err = gitlabClient.Branches.CreateBranch(repo, lb)
 		if err != nil {
 			for branchErr, branchCount := err, 1; branchErr != nil; branchCount++ {
@@ -71,7 +71,7 @@ var mrForCmd = &cobra.Command{
 
 		var mergeTitle string
 		mergeTitle = fmt.Sprintf("Resolve \"%s\"", issue.Title)
-		
+
 		isDraft, _ := cmd.Flags().GetBool("draft")
 		isWIP, _ := cmd.Flags().GetBool("wip")
 		if isDraft || isWIP {
