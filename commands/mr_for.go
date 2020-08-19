@@ -2,12 +2,13 @@ package commands
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/MakeNowJust/heredoc"
 	"github.com/spf13/cobra"
 	"github.com/xanzy/go-gitlab"
 	"glab/internal/git"
 	"glab/internal/manip"
-	"strings"
 )
 
 var mrForCmd = &cobra.Command{
@@ -122,6 +123,7 @@ var mrForCmd = &cobra.Command{
 }
 
 func init() {
+
 	mrForCmd.Flags().BoolP("draft", "", true, "Mark merge request as a draft. Default is true")
 	mrForCmd.Flags().BoolP("wip", "", false, "Mark merge request as a work in progress. Overrides --draft")
 	mrForCmd.Flags().StringP("label", "l", "", "Add label by name. Multiple labels should be comma separated")

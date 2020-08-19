@@ -1,8 +1,13 @@
 ![GLab](https://user-images.githubusercontent.com/9063085/90530075-d7a58580-e14a-11ea-9727-4f592f7dcf2e.png)
+<!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
+[![All Contributors](https://img.shields.io/badge/all_contributors-11-orange.svg?style=flat-square)](#contributors-)
+<!-- ALL-CONTRIBUTORS-BADGE:END -->
 
-# GLab
 [![Go Report Card](https://goreportcard.com/badge/github.com/profclems/glab)](https://goreportcard.com/report/github.com/profclems/glab)
 [![Gitter](https://badges.gitter.im/glabcli/community.svg)](https://gitter.im/glabcli/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
+[![License](https://img.shields.io/github/license/profclems/glab)](LICENSE)
+[![Twitter](https://img.shields.io/twitter/url?style=social&url=https%3A%2F%2Fgithub.com%2Fprofclems%2Fglab)](https://twitter.com/intent/tweet?text=Take%20Gitlab%20to%20the%20command%20line%20with%20%23glab,%20an%20open-source%20GitLab%20CLI%20tool:&url=https%3A%2F%2Fgithub.com%2Fprofclems%2Fglab)
+
 
 GLab is an open source Gitlab Cli tool written in Go (golang) to help work seamlessly with Gitlab from the command line. Work with issues, merge requests, **watch running pipelines directly from your CLI** among other features.
 
@@ -198,10 +203,42 @@ Feel free to open an issue or submit a pull request!
 
 
 ## License
-[MIT](LICENSE)
+Copyright © [Clement Sam](https://clementsam.tech)
 
+`glab` is open-sourced software licensed under the [MIT](LICENSE) license.
 
 ## Author
 Built with ❤ by [Clement Sam](https://clementsam.tech)
 
 [![image](https://cdn.buymeacoffee.com/buttons/default-green.png)](https://www.buymeacoffee.com/profclems)
+
+## Contributors ✨
+
+Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
+
+<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
+<!-- prettier-ignore-start -->
+<!-- markdownlint-disable -->
+<table>
+  <tr>
+    <td align="center"><a href="https://bredley.co.uk"><img src="https://avatars3.githubusercontent.com/u/32489229?v=4" width="100px;" alt=""/><br /><sub><b>Bradley Garrod</b></sub></a><br /><a href="https://github.com/profclems/glab/commits?author=BreD1810" title="Code">💻</a> <a href="#platform-BreD1810" title="Packaging/porting to new platform">📦</a> <a href="https://github.com/profclems/glab/commits?author=BreD1810" title="Documentation">📖</a></td>
+    <td align="center"><a href="https://twitter.com/tetheusmeuneto"><img src="https://avatars2.githubusercontent.com/u/9063085?v=4" width="100px;" alt=""/><br /><sub><b>Matheus Lugon</b></sub></a><br /><a href="#design-matheuslugon" title="Design">🎨</a></td>
+    <td align="center"><a href="https://github.com/princeselasi"><img src="https://avatars2.githubusercontent.com/u/59126177?v=4" width="100px;" alt=""/><br /><sub><b>Opoku-Dapaah </b></sub></a><br /><a href="https://github.com/profclems/glab/commits?author=princeselasi" title="Documentation">📖</a> <a href="#design-princeselasi" title="Design">🎨</a></td>
+    <td align="center"><a href="https://github.com/pgollangi"><img src="https://avatars3.githubusercontent.com/u/6123002?v=4" width="100px;" alt=""/><br /><sub><b>Prasanna Kumar Gollangi</b></sub></a><br /><a href="https://github.com/profclems/glab/commits?author=pgollangi" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/sirlatrom"><img src="https://avatars3.githubusercontent.com/u/425633?v=4" width="100px;" alt=""/><br /><sub><b>Sune Keller</b></sub></a><br /><a href="#financial-sirlatrom" title="Financial">💵</a> <a href="https://github.com/profclems/glab/commits?author=sirlatrom" title="Code">💻</a></td>
+    <td align="center"><a href="https://sattellite.me"><img src="https://avatars1.githubusercontent.com/u/322910?v=4" width="100px;" alt=""/><br /><sub><b>sattellite</b></sub></a><br /><a href="https://github.com/profclems/glab/commits?author=sattellite" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/abakermi"><img src="https://avatars1.githubusercontent.com/u/60294727?v=4" width="100px;" alt=""/><br /><sub><b>Abdelhak Akermi</b></sub></a><br /><a href="https://github.com/profclems/glab/commits?author=abakermi" title="Code">💻</a></td>
+  </tr>
+  <tr>
+    <td align="center"><a href="http://patrickmcmichael.org"><img src="https://avatars0.githubusercontent.com/u/3779458?v=4" width="100px;" alt=""/><br /><sub><b>Patrick McMichael</b></sub></a><br /><a href="https://github.com/profclems/glab/commits?author=Saturn" title="Documentation">📖</a></td>
+    <td align="center"><a href="https://github.com/wolffc"><img src="https://avatars3.githubusercontent.com/u/1393783?v=4" width="100px;" alt=""/><br /><sub><b>Christian Wolff</b></sub></a><br /><a href="https://github.com/profclems/glab/commits?author=wolffc" title="Documentation">📖</a></td>
+    <td align="center"><a href="https://www.linkedin.com/in/lwpamihiranga/"><img src="https://avatars3.githubusercontent.com/u/39789194?v=4" width="100px;" alt=""/><br /><sub><b>Amith Mihiranga</b></sub></a><br /><a href="https://github.com/profclems/glab/commits?author=lwpamihiranga" title="Documentation">📖</a></td>
+    <td align="center"><a href="https://clementsam.tech"><img src="https://avatars0.githubusercontent.com/u/41906128?v=4" width="100px;" alt=""/><br /><sub><b>Clement Sam</b></sub></a><br /><a href="https://github.com/profclems/glab/commits?author=profclems" title="Code">💻</a> <a href="#maintenance-profclems" title="Maintenance">🚧</a></td>
+  </tr>
+</table>
+
+<!-- markdownlint-enable -->
+<!-- prettier-ignore-end -->
+<!-- ALL-CONTRIBUTORS-LIST:END -->
+
+This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
