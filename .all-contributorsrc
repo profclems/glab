@@ -23,6 +23,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "Saturn",
+      "name": "Patrick McMichael",
+      "avatar_url": "https://avatars0.githubusercontent.com/u/3779458?v=4",
+      "profile": "http://patrickmcmichael.org",
+      "contributions": [
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,
