@@ -98,6 +98,16 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "profclems",
+      "name": "Clement Sam",
+      "avatar_url": "https://avatars0.githubusercontent.com/u/41906128?v=4",
+      "profile": "https://clementsam.tech",
+      "contributions": [
+        "code",
+        "maintenance"
+      ]
     }
   ],
   "contributorsPerLine": 7,
