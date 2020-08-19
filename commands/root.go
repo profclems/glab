@@ -2,13 +2,16 @@ package commands
 
 import (
 	"fmt"
-	"github.com/MakeNowJust/heredoc"
-	"github.com/gookit/color"
-	"github.com/spf13/cobra"
 	"glab/internal/config"
+	"glab/internal/git"
 	"glab/internal/update"
 	"os"
 	"strings"
+
+	"github.com/MakeNowJust/heredoc"
+	"github.com/gookit/color"
+	"github.com/gosuri/uitable"
+	"github.com/spf13/cobra"
 )
 
 // RootCmd is the main root/parent command
@@ -123,4 +126,57 @@ func checkForUpdate(*cobra.Command, []string) {
 		color.Printf("<yellow>A new version of glab has been released:</> <red>%s</> → <green>%s</>\n", Version, latestVersion)
 		fmt.Println(releaseInfo.HTMLUrl)
 	}
+}
+
+// ListInfo represents the parameters required to display a list result.
+type ListInfo struct {
+	// Name of the List to be used in constructing Description and EmptyMessage if not provided.
+	Name string
+	// List of columns to display
+	Columns []string
+	// Total number of record. Ideally size of the List.
+	Total int
+	// Function to pick a cell value from cell index
+	GetCellValue func(int, int) interface{}
+	// Optional. Description of the List. If not provided, default one constructed from list Name.
+	Description string
+	// Optional. EmptyMessage to display when List is empty. If not provided, default one constructed from list Name.
+	EmptyMessage string
+}
+
+// Prints the list data on console
+func DisplayList(lInfo ListInfo) {
+	table := uitable.New()
+	table.MaxColWidth = 70
+	fmt.Println()
+
+	if lInfo.Total > 0 {
+		description := lInfo.Description
+		if description == "" {
+			description = fmt.Sprintf("Showing %s %d of %d on %s\n\n", lInfo.Name, lInfo.Total, lInfo.Total, git.GetRepo())
+		}
+		fmt.Println(description)
+		header := make([]interface{}, len(lInfo.Columns))
+		for ci, c := range lInfo.Columns {
+			header[ci] = c
+		}
+		table.AddRow(header...)
+
+		for ri := 0; ri < lInfo.Total; ri++ {
+			row := make([]interface{}, len(lInfo.Columns))
+			for ci := range lInfo.Columns {
+				row[ci] = lInfo.GetCellValue(ri, ci)
+			}
+			table.AddRow(row...)
+		}
+
+		fmt.Println(table)
+	} else {
+		emptyMessage := lInfo.EmptyMessage
+		if emptyMessage == "" {
+			emptyMessage = fmt.Sprintf("No %s available on %s", lInfo.Name, git.GetRepo())
+		}
+		fmt.Println(emptyMessage)
+	}
+
 }
