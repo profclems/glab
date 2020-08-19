@@ -25,7 +25,7 @@ var mrForCmd = &cobra.Command{
 		if r, _ := cmd.Flags().GetString("repo"); r != "" {
 			repo = r
 		}
-		
+
 		issueID := manip.StringToInt(args[0])
 		issue, _, err := gitlabClient.Issues.GetIssue(repo, issueID)
 		if err != nil {
@@ -38,7 +38,7 @@ var mrForCmd = &cobra.Command{
 			Branch: gitlab.String(sourceBranch),
 			Ref:    gitlab.String("master"),
 		}
-	
+
 		_, _, err = gitlabClient.Branches.CreateBranch(repo, lb)
 		if err != nil {
 			for branchErr, branchCount := err, 1; branchErr != nil; branchCount++ {
@@ -64,7 +64,7 @@ var mrForCmd = &cobra.Command{
 
 		var mergeTitle string
 		mergeTitle = fmt.Sprintf("%s (#%d)", issue.Title, issue.IID)
-		
+
 		isDraft, _ := cmd.Flags().GetBool("draft")
 		isWIP, _ := cmd.Flags().GetBool("wip")
 		if isDraft || isWIP {
