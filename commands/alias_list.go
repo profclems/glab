@@ -14,7 +14,7 @@ var aliasListCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		aliasMap := config.GetAllAliases()
 
-		if aliasMap == nil || len(aliasMap) == 0 {
+		if len(aliasMap) == 0 {
 			fmt.Println("There are currently no aliases")
 			fmt.Println("See 'glab alias set --help' for more info")
 			return

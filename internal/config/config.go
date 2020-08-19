@@ -106,7 +106,7 @@ func SetAlias(name string, command string) {
 	if !CheckFileExists(aliasFile) {
 		_, err := os.Stat(configFileFileDir)
 		if os.IsNotExist(err) {
-			errDir := os.MkdirAll(configFileFileDir, 0755)
+			errDir := os.MkdirAll(configFileFileDir, 0700)
 			if errDir != nil {
 				log.Fatalln(err)
 			}
@@ -115,7 +115,11 @@ func SetAlias(name string, command string) {
 		if err != nil {
 			log.Fatalln(err)
 		}
-		f.Close()
+
+		err = f.Close()
+		if err != nil {
+			log.Println(err)
+		}
 	}
 
 	contents, err := ioutil.ReadFile(aliasFile)
