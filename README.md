@@ -200,100 +200,11 @@ Feel free to open an issue or submit a pull request!
 
 
 ## License
-[MIT](LICENSE)
+Copyright © [Clement Sam](https://clementsam.tech)
 
+`glab` is open-sourced software licensed under the [MIT](LICENSE) license.
 
 ## Author
-Built with b$ by [Clement Sam](https://clementsam.tech)
+Built with ❤ by [Clement Sam](https://clementsam.tech)
 
 [![image](https://cdn.buymeacoffee.com/buttons/default-green.png)](https://www.buymeacoffee.com/profclems)
-## Contributors :sparkles:
-<table>
-<tr>
-                <td align="center">
-                    <a href="https://github.com/profclems">
-                        <img src="https://avatars0.githubusercontent.com/u/41906128?v=4" width="100;" alt="profclems"/>
-                        <br />
-                        <sub><b>Clement Sam</b></sub>
-                    </a>
-                </td>
-                <td align="center">
-                    <a href="https://github.com/abakermi">
-                        <img src="https://avatars1.githubusercontent.com/u/60294727?v=4" width="100;" alt="abakermi"/>
-                        <br />
-                        <sub><b>Abdelhak Akermi</b></sub>
-                    </a>
-                </td>
-                <td align="center">
-                    <a href="https://github.com/BreD1810">
-                        <img src="https://avatars3.githubusercontent.com/u/32489229?v=4" width="100;" alt="BreD1810"/>
-                        <br />
-                        <sub><b>Bradley Garrod</b></sub>
-                    </a>
-                </td>
-                <td align="center">
-                    <a href="https://github.com/lwpamihiranga">
-                        <img src="https://avatars3.githubusercontent.com/u/39789194?v=4" width="100;" alt="lwpamihiranga"/>
-                        <br />
-                        <sub><b>Amith Mihiranga</b></sub>
-                    </a>
-                </td>
-                <td align="center">
-                    <a href="https://github.com/sattellite">
-                        <img src="https://avatars1.githubusercontent.com/u/322910?v=4" width="100;" alt="sattellite"/>
-                        <br />
-                        <sub><b>Sattellite</b></sub>
-                    </a>
-                </td>
-                <td align="center">
-                    <a href="https://github.com/wolffc">
-                        <img src="https://avatars3.githubusercontent.com/u/1393783?v=4" width="100;" alt="wolffc"/>
-                        <br />
-                        <sub><b>Christian Wolff</b></sub>
-                    </a>
-                </td></tr>
-<tr>
-                <td align="center">
-                    <a href="https://github.com/deepsourcebot">
-                        <img src="https://avatars2.githubusercontent.com/u/60907429?v=4" width="100;" alt="deepsourcebot"/>
-                        <br />
-                        <sub><b>DeepSource Bot</b></sub>
-                    </a>
-                </td>
-                <td align="center">
-                    <a href="https://github.com/matheuslugon">
-                        <img src="https://avatars2.githubusercontent.com/u/9063085?v=4" width="100;" alt="matheuslugon"/>
-                        <br />
-                        <sub><b>Matheus Lugon</b></sub>
-                    </a>
-                </td>
-                <td align="center">
-                    <a href="https://github.com/princeselasi">
-                        <img src="https://avatars2.githubusercontent.com/u/59126177?v=4" width="100;" alt="princeselasi"/>
-                        <br />
-                        <sub><b>Opoku-Dapaah </b></sub>
-                    </a>
-                </td>
-                <td align="center">
-                    <a href="https://github.com/Saturn">
-                        <img src="https://avatars0.githubusercontent.com/u/3779458?v=4" width="100;" alt="Saturn"/>
-                        <br />
-                        <sub><b>Patrick McMichael</b></sub>
-                    </a>
-                </td>
-                <td align="center">
-                    <a href="https://github.com/pgollangi">
-                        <img src="https://avatars3.githubusercontent.com/u/6123002?v=4" width="100;" alt="pgollangi"/>
-                        <br />
-                        <sub><b>Prasanna Kumar Gollangi</b></sub>
-                    </a>
-                </td>
-                <td align="center">
-                    <a href="https://github.com/sirlatrom">
-                        <img src="https://avatars3.githubusercontent.com/u/425633?v=4" width="100;" alt="sirlatrom"/>
-                        <br />
-                        <sub><b>Sune Keller</b></sub>
-                    </a>
-                </td></tr>
-</table>
-
