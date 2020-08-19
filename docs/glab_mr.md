@@ -26,6 +26,7 @@ glab mr <command> [flags]
 * [glab mr close](glab_mr_close.md)	 - Close merge requests
 * [glab mr create](glab_mr_create.md)	 - Create new merge request
 * [glab mr delete](glab_mr_delete.md)	 - Delete merge requests
+* [glab mr for](glab_mr_for.md)	 - Create new merge request for an issue
 * [glab mr issues](glab_mr_issues.md)	 - Get issues related to a particular merge request.
 * [glab mr list](glab_mr_list.md)	 - List merge requests
 * [glab mr merge](glab_mr_merge.md)	 - Merge/Accept merge requests
