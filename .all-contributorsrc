@@ -14,6 +14,15 @@
         "doc",
         "design"
       ]
+    },
+    {
+      "login": "sirlatrom",
+      "name": "Sune Keller",
+      "avatar_url": "https://avatars3.githubusercontent.com/u/425633?v=4",
+      "profile": "https://github.com/sirlatrom",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
