@@ -35,11 +35,11 @@ func GetRemoteURL() string {
 		remoteNickname = "origin"
 	}
 
-	if remoteNickname != "origin"{
+	if remoteNickname != "origin" {
 		gitlabURL := strings.TrimSpace(config.GetEnv("GITLAB_URI"))
-		gitRemoteURL := gitlabURL + "/"+ remoteNickname +".git"
+		gitRemoteURL := gitlabURL + "/" + remoteNickname + ".git"
 		return gitRemoteURL
-	}else {
+	} else {
 		gitRemoteURL, err := gitconfig.Local("remote." + remoteNickname + ".url")
 		if err != nil {
 			log.Fatal("Could not find remote url for gitlab. Run glab config -g")
