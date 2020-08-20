@@ -15,7 +15,7 @@ glab config [flags]
 ```
   -g, --global              Set configuration globally
   -h, --help                help for config
-  -o, --remote-var string   delete merge request <id>
+  -o, --remote-var origin   Shorthand name for the remote repository. An example of a remote shorthand name is origin
   -t, --token string        an authentication token for API requests.
   -u, --url string          specify the url of the gitlab server if self hosted (eg: https://gitlab.example.com).
 ```
