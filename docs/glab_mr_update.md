@@ -10,13 +10,24 @@ Update merge requests
 glab mr update <id> [flags]
 ```
 
+### Examples
+
+```
+$ glab mr update 23 --ready
+$ glab mr update 23 --draft
+
+```
+
 ### Options
 
 ```
   -d, --description string   merge request description
+      --draft                Mark merge request as a draft
   -h, --help                 help for update
       --lock-discussion      Lock discussion on merge request
+  -r, --ready                Mark merge request as ready to be reviewed and merged
   -t, --title string         Title of merge request
+      --wip                  Mark merge request as a work in progress. Alternative to --draft
 ```
 
 ### Options inherited from parent commands
