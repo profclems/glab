@@ -99,7 +99,7 @@ func cmdErr(cmd *cobra.Command, args []string) {
 func initConfigCmd() {
 	configCmd.Flags().BoolP("global", "g", false, "Set configuration globally")
 	configCmd.Flags().StringP("url", "u", "", "specify the url of the gitlab server if self hosted (eg: https://gitlab.example.com).")
-	configCmd.Flags().StringP("remote-var", "o", "", "delete merge request <id>")
+	configCmd.Flags().StringP("remote-var", "o", "", "Shorthand name for the remote repository. An example of a remote shorthand name is `origin`")
 	configCmd.Flags().StringP("token", "t", "", "an authentication token for API requests.")
 }
 

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"github.com/MakeNowJust/heredoc"
 	"log"
 	"net/url"
 	"os"
@@ -35,17 +36,26 @@ func GetRemoteURL() string {
 		remoteNickname = "origin"
 	}
 
-	if remoteNickname != "origin" {
-		gitlabURL := strings.TrimSpace(config.GetEnv("GITLAB_URI"))
-		gitRemoteURL := gitlabURL + "/" + remoteNickname + ".git"
-		return gitRemoteURL
-	} else {
-		gitRemoteURL, err := gitconfig.Local("remote." + remoteNickname + ".url")
-		if err != nil {
-			log.Fatal("Could not find remote url for gitlab. Run glab config -g")
+	gitRemoteURL, err := gitconfig.Local("remote." + remoteNickname + ".url")
+	if err != nil {
+		fmt.Println(heredoc.Doc(`
+
+		Could not find remote url for gitlab in remote.` + remoteNickname + `.url
+		Possible errors:
+		- This directory may not be a git repository`))
+		if remoteNickname != "origin" {
+			fmt.Printf("- `%s` does not exist or is an invalid shorthand name for the remote repository. An example of a remote shorthand name is `origin`\n", remoteNickname)
 		}
-		return gitRemoteURL
+		fmt.Println(heredoc.Doc(`
+
+		Possible Fix:
+		- Make sure the directory is a git repository
+		- Run glab config -g --remote-var=<name>
+		NB: change <name> to the shorthand name.
+		`))
+		os.Exit(0)
 	}
+	return gitRemoteURL
 }
 
 func GetRemoteBaseURL() string {
