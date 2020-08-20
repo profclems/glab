@@ -59,7 +59,6 @@ var RootCmd = &cobra.Command{
 
 // Execute executes the root command.
 func Execute() (*cobra.Command, error) {
-	RootCmd.Flags().BoolP("version", "v", false, "show glab version information")
 	return RootCmd.ExecuteC()
 }
 
@@ -82,6 +81,7 @@ var configCmd = &cobra.Command{
 }
 
 func init() {
+	RootCmd.Flags().BoolP("version", "v", false, "show glab version information")
 	RootCmd.AddCommand(updateCmd)
 	initConfigCmd()
 	RootCmd.AddCommand(configCmd)
