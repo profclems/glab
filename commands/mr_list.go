@@ -34,7 +34,7 @@ func listMergeRequest(cmd *cobra.Command, args []string) error {
 		label := gitlab.Labels{
 			lb,
 		}
-		l.Labels = &label
+		l.Labels = label
 	}
 	if lb, _ := cmd.Flags().GetString("milestone"); lb != "" {
 		l.Milestone = gitlab.String(lb)
