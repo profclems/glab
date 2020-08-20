@@ -22,7 +22,8 @@ $ glab pipeline list
 ### Options
 
 ```
-  -h, --help   help for glab
+  -h, --help      help for glab
+  -v, --version   show glab version information
 ```
 
 ### SEE ALSO
