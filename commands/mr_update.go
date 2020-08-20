@@ -17,8 +17,8 @@ var mrUpdateCmd = &cobra.Command{
 	$ glab mr update 23 --ready
 	$ glab mr update 23 --draft
 	`),
-	Args:  cobra.ExactArgs(1),
-	RunE:   updateMergeRequest,
+	Args: cobra.ExactArgs(1),
+	RunE: updateMergeRequest,
 }
 
 func updateMergeRequest(cmd *cobra.Command, args []string) error {
