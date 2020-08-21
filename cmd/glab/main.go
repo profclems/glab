@@ -10,9 +10,10 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/spf13/cobra"
 	"glab/commands"
 	"glab/internal/config"
+
+	"github.com/spf13/cobra"
 )
 
 // Version is set at build

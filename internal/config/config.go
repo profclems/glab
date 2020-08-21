@@ -24,7 +24,7 @@ var (
 	configFileFileDir       = configFileFileParentDir + "/config"
 	configFile              = configFileFileDir + "/.env"
 	globalConfigFile        = configFile
-	aliasFile               = configFileFileDir + "/aliases.txt"
+	aliasFile               = configFileFileParentDir + "/config/aliases.format"
 )
 
 func SetGlobalPathDir() string {
@@ -34,6 +34,7 @@ func SetGlobalPathDir() string {
 	}
 	globalPathDir = usr.HomeDir
 	globalConfigFile = globalPathDir + "/" + globalConfigFile
+	aliasFile = globalPathDir + "/" + configFileFileParentDir + "/config/aliases.format"
 	return globalPathDir
 }
 
@@ -90,8 +91,8 @@ func SetEnv(key, value string) {
 	if !keyExists {
 		newData += newConfig
 	}
-	_ = os.Mkdir(cFileFileParentDir, 0700)
-	_ = os.Mkdir(cFileDir, 0700)
+	_ = os.Mkdir(cFileFileParentDir, 0755)
+	_ = os.Mkdir(cFileDir, 0755)
 	f, _ := os.Create(cFile) // Create a writer
 	w := bufio.NewWriter(f)
 	_, _ = w.WriteString(strings.Trim(newData, "\n"))
@@ -104,9 +105,10 @@ func SetEnv(key, value string) {
 // SetAlias sets an alias for a command
 func SetAlias(name string, command string) {
 	if !CheckFileExists(aliasFile) {
-		_, err := os.Stat(configFileFileDir)
+		aliasDir := globalPathDir + "/" + configFileFileDir
+		_, err := os.Stat(aliasDir)
 		if os.IsNotExist(err) {
-			errDir := os.MkdirAll(configFileFileDir, 0700)
+			errDir := os.MkdirAll(aliasDir, 0700)
 			if errDir != nil {
 				log.Fatalln(err)
 			}
