@@ -13,12 +13,15 @@ glab project create [path] [flags]
 ### Options
 
 ```
-  -d, --description string   Description of the new project
-  -h, --help                 help for create
-      --internal             Make project internal: visible to any authenticated user (default)
-  -n, --name string          name of the new project
-  -p, --private              Make project private: visible only to project members
-  -P, --public               Make project public: visible without any authentication
+      --defaultBranch master   Default branch of the project. If not provided, master by default.
+  -d, --description string     Description of the new project
+  -h, --help                   help for create
+      --internal               Make project internal: visible to any authenticated user (default)
+  -n, --name string            Name of the new project
+  -p, --private                Make project private: visible only to project members
+  -P, --public                 Make project public: visible without any authentication
+      --readme                 Initialize project with README.md
+  -t, --tag stringArray        The list of tags for the project.
 ```
 
 ### SEE ALSO
