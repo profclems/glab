@@ -1,52 +1,76 @@
 package commands
 
 import (
-	"glab/internal/git"
+	"fmt"
 
 	"github.com/spf13/cobra"
 	"github.com/xanzy/go-gitlab"
 )
 
-func createProject(opts *gitlab.CreateProjectOptions) (*gitlab.Project, error) {
-	gitlabClient, _ := git.InitGitlabClient()
-	project, _, err := gitlabClient.Projects.CreateProject(opts)
-	if err != nil {
-		return nil, err
-	}
-	return project, nil
-}
-
 var projectCreateCmd = &cobra.Command{
-	Use:   "create [flags]",
+	Use:   "create [path] [flags]",
 	Short: `Create Gitlab project`,
 	Long:  ``,
-	Run:   runCreateProject,
+	RunE:  runCreateProject,
 }
 
-func runCreateProject(cmd *cobra.Command, args []string) {
+func runCreateProject(cmd *cobra.Command, args []string) error {
 	if len(args) > 1 {
 		_ = cmd.Help()
-		return
+		return nil
 	}
 
-	// var path string
-	// if len(args) > 0 {
-	// 	path
-	// }
+	var (
+		path      string
+		visiblity gitlab.VisibilityValue
+	)
+	if len(args) == 1 {
+		path = args[0]
+	}
 
 	name, _ := cmd.Flags().GetString("name")
-	opts := &gitlab.CreateProjectOptions{
-		Name: gitlab.String(name),
+
+	if path == "" && name == "" {
+		fmt.Println("ERROR: Path or Name required to create project.")
+		_ = cmd.Usage()
+		return nil
 	}
-	createProject(opts)
+
+	description, _ := cmd.Flags().GetString("description")
+
+	if internal, _ := cmd.Flags().GetBool("internal"); internal {
+		visiblity = gitlab.InternalVisibility
+	} else if private, _ := cmd.Flags().GetBool("private"); private {
+		visiblity = gitlab.PrivateVisibility
+	} else if public, _ := cmd.Flags().GetBool("public"); public {
+		visiblity = gitlab.PublicVisibility
+	}
+
+	opts := &gitlab.CreateProjectOptions{
+		Name:        gitlab.String(name),
+		Path:        gitlab.String(path),
+		Description: gitlab.String(description),
+	}
+
+	if visiblity != "" {
+		opts.Visibility = &visiblity
+	}
+
+	project, err := createProject(opts)
+
+	if err == nil {
+		fmt.Println("Project created: ", project.WebURL)
+	} else {
+		fmt.Println("Error creating project: ", err)
+	}
+	return err
 }
 
 func init() {
+	projectCreateCmd.Flags().StringP("name", "n", "", "name of the new project")
 	projectCreateCmd.Flags().StringP("description", "d", "", "Description of the new project")
 	projectCreateCmd.Flags().Bool("internal", false, "Make project internal: visible to any authenticated user (default)")
-	projectCreateCmd.Flags().StringP("name", "n", "", "name of the new project")
 	projectCreateCmd.Flags().BoolP("private", "p", false, "Make project private: visible only to project members")
 	projectCreateCmd.Flags().BoolP("public", "P", false, "Make project public: visible without any authentication")
-	projectCreateCmd.Flags().BoolP("create-source-branch", "", false, "Create source branch if it does not exist")
 	projectCmd.AddCommand(projectCreateCmd)
 }
