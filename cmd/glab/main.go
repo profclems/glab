@@ -10,9 +10,11 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/spf13/cobra"
 	"glab/commands"
 	"glab/internal/config"
+
+	"github.com/google/shlex"
+	"github.com/spf13/cobra"
 )
 
 // Version is set at build
@@ -33,10 +35,68 @@ func main() {
 	if usageMode == "dev" {
 		debug = true
 	}
-	if cmd, err := commands.Execute(); err != nil {
+
+	expandedArgs := []string{}
+	if len(os.Args) > 0 {
+		expandedArgs = os.Args[1:]
+	}
+
+	cmd, _, err := commands.RootCmd.Traverse(expandedArgs)
+	if err != nil || cmd == commands.RootCmd {
+		originalArgs := expandedArgs
+		expandedArgs, err = expandAlias(os.Args)
+		if err != nil {
+			fmt.Printf("Failed to process alias: %s\n", err)
+		}
+
+		if debug {
+			fmt.Printf("%v -> %v\n", originalArgs, expandedArgs)
+		}
+	}
+
+	commands.RootCmd.SetArgs(expandedArgs)
+
+	if cmd, err := commands.RootCmd.ExecuteC(); err != nil {
 		printError(os.Stderr, err, cmd, debug)
 		os.Exit(1)
 	}
+}
+
+func expandAlias(args []string) (expanded []string, err error) {
+	if len(args) < 2 {
+		// No subcommand
+		return
+	}
+	expanded = args[1:]
+
+	expansion := config.GetAlias(args[1])
+	if expansion == "" {
+		return
+	}
+
+	extraArgs := []string{}
+	for i, a := range args[2:] {
+		if !strings.Contains(expansion, "$") {
+			extraArgs = append(extraArgs, a)
+		} else {
+			expansion = strings.ReplaceAll(expansion, fmt.Sprintf("$%d", i+1), a)
+		}
+	}
+
+	leftoverChecker := regexp.MustCompile(`\$\d`)
+	if leftoverChecker.MatchString(expansion) {
+		err = fmt.Errorf("Not enough arguments for alias: %s", expansion)
+		return
+	}
+
+	var newArgs []string
+	newArgs, err = shlex.Split(expansion)
+	if err != nil {
+		return
+	}
+
+	expanded = append(newArgs, extraArgs...)
+	return
 }
 
 func initConfig() {

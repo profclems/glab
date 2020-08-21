@@ -10,6 +10,15 @@ import (
 // glab environment cache: <file: <key: value>>
 var envCache map[string]map[string]string
 
+// CheckFileExists : checks if a file exists and is not a directory.
+func CheckFileExists(filename string) bool {
+	info, err := os.Stat(filename)
+	if os.IsNotExist(err) {
+		return false
+	}
+	return !info.IsDir()
+}
+
 // ReadAndAppend : appends string to file
 func ReadAndAppend(file, text string) {
 	// If the file doesn't exist, create it, or append to the file

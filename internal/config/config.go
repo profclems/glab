@@ -2,16 +2,18 @@ package config
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
-	"github.com/logrusorgru/aurora"
-	"github.com/spf13/cobra"
-	"github.com/tcnksm/go-gitconfig"
 	"glab/internal/manip"
 	"io/ioutil"
 	"log"
 	"os"
 	"os/user"
 	"strings"
+
+	"github.com/logrusorgru/aurora"
+	"github.com/spf13/cobra"
+	"github.com/tcnksm/go-gitconfig"
 )
 
 var (
@@ -22,6 +24,7 @@ var (
 	configFileFileDir       = configFileFileParentDir + "/config"
 	configFile              = configFileFileDir + "/.env"
 	globalConfigFile        = configFile
+	aliasFile               = configFileFileParentDir + "/config/aliases.format"
 )
 
 func SetGlobalPathDir() string {
@@ -31,6 +34,7 @@ func SetGlobalPathDir() string {
 	}
 	globalPathDir = usr.HomeDir
 	globalConfigFile = globalPathDir + "/" + globalConfigFile
+	aliasFile = globalPathDir + "/" + configFileFileParentDir + "/config/aliases.format"
 	return globalPathDir
 }
 
@@ -87,8 +91,8 @@ func SetEnv(key, value string) {
 	if !keyExists {
 		newData += newConfig
 	}
-	_ = os.Mkdir(cFileFileParentDir, 0700)
-	_ = os.Mkdir(cFileDir, 0700)
+	_ = os.Mkdir(cFileFileParentDir, 0755)
+	_ = os.Mkdir(cFileDir, 0755)
 	f, _ := os.Create(cFile) // Create a writer
 	w := bufio.NewWriter(f)
 	_, _ = w.WriteString(strings.Trim(newData, "\n"))
@@ -96,6 +100,151 @@ func SetEnv(key, value string) {
 	if GetKeyValueInFile(".gitignore", configFileFileParentDir) == "NOTFOUND" {
 		ReadAndAppend(".gitignore", configFileFileParentDir)
 	}
+}
+
+// SetAlias sets an alias for a command
+func SetAlias(name string, command string) {
+	if !CheckFileExists(aliasFile) {
+		aliasDir := globalPathDir + "/" + configFileFileDir
+		_, err := os.Stat(aliasDir)
+		if os.IsNotExist(err) {
+			errDir := os.MkdirAll(aliasDir, 0700)
+			if errDir != nil {
+				log.Fatalln(err)
+			}
+		}
+		f, err := os.Create(aliasFile)
+		if err != nil {
+			log.Fatalln(err)
+		}
+
+		err = f.Close()
+		if err != nil {
+			log.Println(err)
+		}
+	}
+
+	contents, err := ioutil.ReadFile(aliasFile)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	lines := strings.Split(string(contents), "\n")
+	if len(lines) == 1 && lines[0] == "" {
+		lines = []string{}
+	}
+	set := false
+
+	for i, line := range lines {
+		aliasSplit := strings.SplitN(line, ":", 2)
+		if aliasSplit[0] == name {
+			lines[i] = name + ":" + command
+			set = true
+			break
+		}
+	}
+
+	if !set {
+		lines = append(lines, name+":"+command)
+	}
+
+	output := strings.Join(lines, "\n")
+	err = ioutil.WriteFile(aliasFile, []byte(output), 0644)
+	if err != nil {
+		log.Fatalln(err)
+	}
+}
+
+// GetAllAliases retrieves all of the aliases.
+func GetAllAliases() map[string]string {
+	if !CheckFileExists(aliasFile) {
+		return nil
+	}
+
+	contents, err := ioutil.ReadFile(aliasFile)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	lines := strings.Split(string(contents), "\n")
+	if len(lines) == 0 {
+		return nil
+	}
+
+	aliasMap := make(map[string]string)
+
+	for _, line := range lines {
+		if line != "" {
+			aliasSplit := strings.SplitN(line, ":", 2)
+			aliasMap[aliasSplit[0]] = aliasSplit[1]
+		}
+	}
+
+	return aliasMap
+}
+
+// GetAlias retrieves the command for an alias
+func GetAlias(name string) string {
+	if !CheckFileExists(aliasFile) {
+		return ""
+	}
+
+	contents, err := ioutil.ReadFile(aliasFile)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	lines := strings.Split(string(contents), "\n")
+
+	for _, line := range lines {
+		aliasSplit := strings.SplitN(line, ":", 2)
+		if aliasSplit[0] == name {
+			return aliasSplit[1]
+		}
+	}
+
+	return ""
+}
+
+// DeleteAlias deletes an alias
+func DeleteAlias(name string) error {
+	if !CheckFileExists(aliasFile) {
+		return errors.New("No aliases are currently set")
+	}
+
+	contents, err := ioutil.ReadFile(aliasFile)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	lines := strings.Split(string(contents), "\n")
+	if len(lines) == 1 && lines[0] == "" {
+		lines = []string{}
+	}
+	deleted := false
+
+	for i, line := range lines {
+		aliasSplit := strings.SplitN(line, ":", 2)
+		if aliasSplit[0] == name {
+			copy(lines[i:], lines[i+1:])
+			lines[len(lines)-1] = ""
+			lines = lines[:len(lines)-1]
+			deleted = true
+			break
+		}
+	}
+
+	if !deleted {
+		return errors.New("That alias does not exist")
+	}
+
+	output := strings.Join(lines, "\n")
+	err = ioutil.WriteFile(aliasFile, []byte(output), 0644)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	return nil
 }
 
 func GetRepo() string {
