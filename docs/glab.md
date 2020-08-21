@@ -28,6 +28,7 @@ $ glab pipeline list
 
 ### SEE ALSO
 
+* [glab alias](glab_alias.md)	 - Create, list and delete aliases
 * [glab check-update](glab_check-update.md)	 - Check for latest glab releases
 * [glab config](glab_config.md)	 - Configuration
 * [glab issue](glab_issue.md)	 - Create, view and manage remote issues
