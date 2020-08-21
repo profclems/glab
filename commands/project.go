@@ -1,8 +1,10 @@
 package commands
 
 import (
-	"github.com/xanzy/go-gitlab"
 	"glab/internal/git"
+
+	"github.com/spf13/cobra"
+	"github.com/xanzy/go-gitlab"
 )
 
 func getProject(projectID interface{}) (*gitlab.Project, error) {
@@ -26,4 +28,20 @@ func createProject(opts *gitlab.CreateProjectOptions) (*gitlab.Project, error) {
 		return nil, err
 	}
 	return project, nil
+}
+
+var projectCmd = &cobra.Command{
+	Use:   "project <command> [flags]",
+	Short: `Work with GitLab projects`,
+	Long:  ``,
+	Run: func(cmd *cobra.Command, args []string) {
+		if len(args) == 0 || len(args) > 2 {
+			_ = cmd.Help()
+			return
+		}
+	},
+}
+
+func init() {
+	RootCmd.AddCommand(projectCmd)
 }
