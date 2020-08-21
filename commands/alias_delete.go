@@ -1,8 +1,9 @@
 package commands
 
 import (
+	"fmt"
 	"glab/internal/config"
-	"log"
+	"os"
 
 	"github.com/spf13/cobra"
 )
@@ -15,7 +16,8 @@ var aliasDeleteCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		err := config.DeleteAlias(args[0])
 		if err != nil {
-			log.Fatal(err)
+			fmt.Println(err)
+			os.Exit(1)
 		}
 	},
 }
