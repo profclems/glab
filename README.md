@@ -45,7 +45,11 @@ Download a binary suitable for your OS at the [releases page](https://github.com
 
 ### Quick Install (Bash)
 You can install or update `glab` with:
-```sh
+```bash
+curl -sL https://j.mp/glab-i | sudo bash
+```
+or
+```bash
 curl -s https://raw.githubusercontent.com/profclems/glab/trunk/scripts/quick_install.sh | sudo bash
 ```
 *Installs into `usr/local/bin`*
