@@ -3,7 +3,6 @@ package commands
 import (
 	"glab/internal/git"
 
-	"github.com/spf13/cobra"
 	"github.com/xanzy/go-gitlab"
 )
 
@@ -30,18 +29,5 @@ func createProject(opts *gitlab.CreateProjectOptions) (*gitlab.Project, error) {
 	return project, nil
 }
 
-var projectCmd = &cobra.Command{
-	Use:   "project <command> [flags]",
-	Short: `Work with GitLab projects`,
-	Long:  ``,
-	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) == 0 || len(args) > 2 {
-			_ = cmd.Help()
-			return
-		}
-	},
-}
-
-func init() {
-	RootCmd.AddCommand(projectCmd)
-}
+// projectCmd is the same as the repoCmd since repo has project as an alias
+var projectCmd = repoCmd
