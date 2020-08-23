@@ -10,12 +10,11 @@ import (
 	"strings"
 )
 
-
 var projectSearchCmd = &cobra.Command{
 	Use:     "search [flags]",
 	Short:   `Search for GitLab repositories and projects by name`,
 	Long:    ``,
-	Aliases: []string{"find","lookup"},
+	Aliases: []string{"find", "lookup"},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if len(args) > 0 {
 			_ = cmd.Help()
@@ -29,7 +28,7 @@ var projectSearchCmd = &cobra.Command{
 		perPage, _ := cmd.Flags().GetInt("per-page")
 
 		projects, _, err := gitlabClient.Search.Projects(search, &gitlab.SearchOptions{
-			Page: page,
+			Page:    page,
 			PerPage: perPage,
 		})
 
@@ -38,12 +37,12 @@ var projectSearchCmd = &cobra.Command{
 		}
 
 		DisplayList(ListInfo{
-			Name:    "Projects",
-			Columns: []string{"", "", "", ""},
-			Total:   len(projects),
-			Description: fmt.Sprintf("Showing results for \"%s\"", search),
+			Name:         "Projects",
+			Columns:      []string{"", "", "", ""},
+			Total:        len(projects),
+			Description:  fmt.Sprintf("Showing results for \"%s\"", search),
 			EmptyMessage: fmt.Sprintf("No results found for \"%s\"", search),
-			TableWrap: true,
+			TableWrap:    true,
 			GetCellValue: func(ri int, ci int) interface{} {
 				p := projects[ri]
 				switch ci {
@@ -60,7 +59,7 @@ var projectSearchCmd = &cobra.Command{
 				case 2:
 					return fmt.Sprintf("%d stars %d forks %d issues", p.StarCount, p.ForksCount, p.OpenIssuesCount)
 				case 3:
-					return "updated " +utils.TimeToPrettyTimeAgo(*p.LastActivityAt)
+					return "updated " + utils.TimeToPrettyTimeAgo(*p.LastActivityAt)
 				default:
 					return ""
 				}
