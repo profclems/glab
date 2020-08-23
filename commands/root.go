@@ -142,12 +142,15 @@ type ListInfo struct {
 	Description string
 	// Optional. EmptyMessage to display when List is empty. If not provided, default one constructed from list Name.
 	EmptyMessage string
+	// TableWrap wraps the contents when the column length exceeds the maximum width
+	TableWrap bool
 }
 
 // Prints the list data on console
 func DisplayList(lInfo ListInfo) {
 	table := uitable.New()
 	table.MaxColWidth = 70
+	table.Wrap = lInfo.TableWrap
 	fmt.Println()
 
 	if lInfo.Total > 0 {
