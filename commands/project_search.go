@@ -13,7 +13,7 @@ import (
 
 var projectSearchCmd = &cobra.Command{
 	Use:     "search [flags]",
-	Short:   `Work with GitLab repositories and projects`,
+	Short:   `Search for GitLab repositories and projects by name`,
 	Long:    ``,
 	Aliases: []string{"find","lookup"},
 	RunE: func(cmd *cobra.Command, args []string) error {
@@ -74,5 +74,6 @@ func init() {
 	projectSearchCmd.Flags().IntP("page", "p", 1, "Page number")
 	projectSearchCmd.Flags().IntP("per-page", "P", 20, "Number of items to list per page")
 	projectSearchCmd.Flags().StringP("search", "s", "", "A string contained in the project name")
+	_ = projectSearchCmd.MarkFlagRequired("search")
 	projectCmd.AddCommand(projectSearchCmd)
 }
