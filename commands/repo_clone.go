@@ -37,7 +37,7 @@ var repoCloneCmd = &cobra.Command{
 
 		var (
 			project *gitlab.Project = nil
-			err error
+			err     error
 		)
 
 		repo := args[0]
@@ -45,7 +45,7 @@ var repoCloneCmd = &cobra.Command{
 		u, _ := currentUser()
 		if !git.IsValidURL(repo) {
 			// Assuming that repo is a project ID if it is an integer
-			if _, err := strconv.ParseInt(repo,10,64); err != nil {
+			if _, err := strconv.ParseInt(repo, 10, 64); err != nil {
 				// Assuming that "/" in the project name means its owned by an organisation
 				if !strings.Contains(repo, "/") {
 					repo = fmt.Sprintf("%s/%s", u, repo)
@@ -73,7 +73,7 @@ var repoCloneCmd = &cobra.Command{
 				if len(args) > 1 {
 					dir = args[1]
 				} else {
-					dir = "./"+project.Path
+					dir = "./" + project.Path
 				}
 				fProject, err := getProject(project.ForkedFromProject.PathWithNamespace)
 				if err != nil {
