@@ -14,6 +14,7 @@ require (
 	github.com/gookit/color v1.2.7
 	github.com/gosuri/uilive v0.0.4
 	github.com/gosuri/uitable v0.0.4
+	github.com/hashicorp/go-version v1.2.1
 	github.com/logrusorgru/aurora v2.0.3+incompatible
 	github.com/lunixbochs/vtclean v1.0.0
 	github.com/mattn/go-colorable v0.1.7 // indirect

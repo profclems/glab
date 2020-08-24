@@ -2,6 +2,7 @@ package commands
 
 import (
 	"fmt"
+	"github.com/hashicorp/go-version"
 	"glab/internal/config"
 	"glab/internal/git"
 	"glab/internal/update"
@@ -113,19 +114,26 @@ func isSuccessful(code int) bool {
 func checkForUpdate(*cobra.Command, []string) {
 
 	releaseInfo, err := update.CheckForUpdate()
-	var latestVersion string
 	if err != nil {
 		er("Could not check for update! Make sure you have a stable internet connection")
 		return
 	}
-	latestVersion = strings.TrimSpace(releaseInfo.Name)
+	latestVersion := strings.TrimSpace(releaseInfo.Name)
 	Version = strings.TrimSpace(Version)
-	if latestVersion == Version {
+	if isLatestVersion(latestVersion, Version) {
 		color.Green.Println("You are already using the latest version of glab")
 	} else {
-		color.Printf("<yellow>A new version of glab has been released:</> <red>%s</> → <green>%s</>\n", Version, latestVersion)
-		fmt.Println(releaseInfo.HTMLUrl)
+		color.Printf("<yellow>A new version of glab has been released:</> <red>%s</> → <green>%s</>\n%s\n",
+			Version, latestVersion, releaseInfo.HTMLUrl)
 	}
+}
+
+func isLatestVersion(latestVersion, appVersion string)  bool {
+	latestVersion = strings.TrimSpace(latestVersion)
+	appVersion = strings.TrimSpace(appVersion)
+	vo, v1e := version.NewVersion(appVersion)
+	vn, v2e := version.NewVersion(latestVersion)
+	return v1e == nil && v2e == nil && vo.LessThan(vn)
 }
 
 // ListInfo represents the parameters required to display a list result.
