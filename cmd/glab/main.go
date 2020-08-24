@@ -128,15 +128,17 @@ func printError(out io.Writer, err error, cmd *cobra.Command, debug bool) {
 		return
 	}
 
-	re := regexp.MustCompile(`(?s){(.*)}`)
-	m := re.FindAllStringSubmatch(err.Error(), -1)
-	if len(m) != 0 {
-		if len(m[0]) >= 1 {
-			_, _ = fmt.Fprintln(out, m[0][1])
+	if !debug {
+		re := regexp.MustCompile(`(?s){(.*)}`)
+		m := re.FindAllStringSubmatch(err.Error(), -1)
+		if len(m) != 0 {
+			if len(m[0]) >= 1 {
+				_, _ = fmt.Fprintln(out, m[0][1])
+				return
+			}
 		}
-	} else {
-		_, _ = fmt.Fprintln(out, err)
 	}
+	_, _ = fmt.Fprintln(out, err)
 
 	var flagError *utils.FlagError
 	if errors.As(err, &flagError) || strings.HasPrefix(err.Error(), "unknown command ") {

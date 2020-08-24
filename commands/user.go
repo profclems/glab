@@ -7,7 +7,7 @@ import (
 	"glab/internal/git"
 )
 
-func currentUser(token string) (string, error) {
+func currentUser() (string, error) {
 	gLab, _ := git.InitGitlabClient()
 	u, _, err := gLab.Users.CurrentUser()
 	if err != nil {
