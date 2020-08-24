@@ -115,11 +115,15 @@ func inputCapture(a *tview.Application, root *tview.Pages, navi navigator, input
 			case modalVisible:
 				modalVisible = !modalVisible
 				root.HidePage("yesno")
-				inputCh <- struct{}{}
+				if inputCh == nil {
+					inputCh <- struct{}{}
+				}
 			case logsVisible:
 				logsVisible = !logsVisible
 				root.HidePage("logs-" + curJob.Name)
-				inputCh <- struct{}{}
+				if inputCh == nil {
+					inputCh <- struct{}{}
+				}
 				a.ForceDraw()
 			default:
 				a.Stop()
@@ -240,7 +244,9 @@ func inputCapture(a *tview.Application, root *tview.Pages, navi navigator, input
 			}
 			return nil
 		}
-		inputCh <- struct{}{}
+		if inputCh == nil {
+			inputCh <- struct{}{}
+		}
 		return event
 	}
 }
