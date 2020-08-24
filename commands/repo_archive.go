@@ -19,9 +19,9 @@ var repoArchiveCmd = &cobra.Command{
 	Short: `Get an archive of the repository.`,
 	Example: heredoc.Doc(`
 	$ glab repo archive profclems/glab
-	$ glab repo archive  // Downloads zip file of current repository
-	$ glab repo clone profclems/glab mydirectory  // Clones repo into mydirectory
-	$ glab repo clone profclems/glab --format=zip   // Finds repo for current user and download in zip format
+	$ glab repo archive  # Downloads zip file of current repository
+	$ glab repo archive profclems/glab mydirectory  # Downloads repo zip file into mydirectory
+	$ glab repo archive profclems/glab --format=zip   # Finds repo for current user and download in zip format
 	`),
 	Long: heredoc.Doc(`
 	Clone supports these shorthands
