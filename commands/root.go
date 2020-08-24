@@ -128,7 +128,7 @@ func checkForUpdate(*cobra.Command, []string) {
 	}
 }
 
-func isLatestVersion(latestVersion, appVersion string)  bool {
+func isLatestVersion(latestVersion, appVersion string) bool {
 	latestVersion = strings.TrimSpace(latestVersion)
 	appVersion = strings.TrimSpace(appVersion)
 	vo, v1e := version.NewVersion(appVersion)

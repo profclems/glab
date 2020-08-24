@@ -4,7 +4,7 @@ import "testing"
 
 func Test_isLatestVersion(t *testing.T) {
 	type args struct {
-		latestVersion string
+		latestVersion  string
 		currentVersion string
 	}
 	tests := []struct {
@@ -34,7 +34,7 @@ func Test_isLatestVersion(t *testing.T) {
 		},
 		{
 			name: "latest is older (against prerelease)",
-			args: args{ "v1.9.0", "v1.10.0-pre.1"},
+			args: args{"v1.9.0", "v1.10.0-pre.1"},
 			want: false,
 		},
 	}
