@@ -4,15 +4,16 @@ import (
 	"bytes"
 	"flag"
 	"fmt"
-	"github.com/pkg/errors"
-	"github.com/spf13/cobra"
-	"glab/internal/config"
-	"glab/internal/utils"
 	"math/rand"
 	"net"
 	"strconv"
 	"testing"
 	"time"
+
+	"github.com/pkg/errors"
+	"github.com/spf13/cobra"
+	"glab/internal/config"
+	"glab/internal/utils"
 )
 
 // Test started when the test binary is started

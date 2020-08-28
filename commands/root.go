@@ -58,11 +58,6 @@ var RootCmd = &cobra.Command{
 	},
 }
 
-// Execute executes the root command.
-func Execute() (*cobra.Command, error) {
-	return RootCmd.ExecuteC()
-}
-
 // versionCmd represents the version command
 var updateCmd = &cobra.Command{
 	Use:     "check-update",
