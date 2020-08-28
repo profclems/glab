@@ -199,24 +199,17 @@ glab config --token=sometoken --url=https://gitlab.com --pid=someprojectid --rep
   Available options are (dark|light|notty) or set a custom style
   https://github.com/charmbracelet/glamour#styles
   ```
+## ToDo
+Aside adding more features, the biggest thing this tool still needs is tests 😞
 
+## Issues
+If you have an issue: report it on the [issue tracker](https://github.com/profclems/glab/issues)
 ## Contributions
 Thanks for considering contributing to this project!
 
-Please read the [contributions guide](.github/CONTRIBUTING.md) and [Code of conduct](.github/CODE_OF_CONDUCT.md). 
+Please read the [contributions guide](https://github.com/profclems/glab/blob/trunk/.github/CONTRIBUTING.md) and [Code of conduct](https://github.com/profclems/glab/blob/trunk/.github/CODE_OF_CONDUCT.md). 
 
 Feel free to open an issue or submit a pull request!
-
-
-## License
-Copyright © [Clement Sam](https://clementsam.tech)
-
-`glab` is open-sourced software licensed under the [MIT](LICENSE) license.
-
-## Author
-Built with ❤ by [Clement Sam](https://clementsam.tech)
-
-[![image](https://cdn.buymeacoffee.com/buttons/default-green.png)](https://www.buymeacoffee.com/profclems)
 
 ## Contributors ✨
 
@@ -250,3 +243,13 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
 <!-- ALL-CONTRIBUTORS-LIST:END -->
 
 This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
+
+## License
+Copyright © [Clement Sam](https://clementsam.tech)
+
+`glab` is open-sourced software licensed under the [MIT](LICENSE) license.
+
+## Author
+Built with ❤ by [Clement Sam](https://clementsam.tech)
+
+[![image](https://cdn.buymeacoffee.com/buttons/default-green.png)](https://www.buymeacoffee.com/profclems)
