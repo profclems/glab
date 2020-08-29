@@ -11,22 +11,22 @@ func Test_issueClose(t *testing.T) {
 	t.Parallel()
 	repo := copyTestRepo(t)
 
-	testCases := []struct{
-		Name		string
-		Issue		string
-		ExpectedMsg	[]string
-		wantErr		bool
-	} {
+	testCases := []struct {
+		Name        string
+		Issue       string
+		ExpectedMsg []string
+		wantErr     bool
+	}{
 		{
-			Name: "Issue Exists",
-			Issue: "1",
+			Name:        "Issue Exists",
+			Issue:       "1",
 			ExpectedMsg: []string{"Closing Issue...", "Issue #1 closed"},
 		},
 		{
-			Name: "Issue Does Not Exist",
-			Issue: "0",
+			Name:        "Issue Does Not Exist",
+			Issue:       "0",
 			ExpectedMsg: []string{"Closing Issue", "404 Not found"},
-			wantErr: true,
+			wantErr:     true,
 		},
 	}
 

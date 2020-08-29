@@ -113,7 +113,6 @@ func TestMain(m *testing.M) {
 	os.Exit(code)
 }
 
-
 func TestRootVersion(t *testing.T) {
 	old := os.Stdout // keep backup of the real stdout
 	r, w, _ := os.Pipe()
@@ -163,7 +162,6 @@ func copyTestRepo(log fatalLogger) string {
 	}
 	return dest
 }
-
 
 func TestRootNoArg(t *testing.T) {
 	cmd := exec.Command(glabBinaryPath)
