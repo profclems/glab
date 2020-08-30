@@ -5,6 +5,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/xanzy/go-gitlab"
+	"glab/internal/config"
 	"glab/internal/git"
 	"glab/internal/manip"
 )
@@ -46,7 +47,13 @@ var issueCreateCmd = &cobra.Command{
 		if label, _ := cmd.Flags().GetString("label"); label != "" {
 			issueLabel = strings.Trim(label, "[] ")
 		} else {
-			issueLabel = manip.AskQuestionWithInput("Label(s) [Comma Separated]", "", false)
+			labelsEntry := config.GetEnv("PROJECT_LABELS")
+			if labelsEntry != "" {
+				labels := strings.Split(labelsEntry, ",")
+				issueLabel = strings.Join(manip.AskQuestionWithMultiSelect("Label(s)", labels), ",")
+			} else {
+				issueLabel = manip.AskQuestionWithInput("Label(s) [Comma Separated]", "", false)
+			}
 		}
 		l.Title = gitlab.String(issueTitle)
 		l.Labels = &gitlab.Labels{issueLabel}
