@@ -126,6 +126,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "bgraf",
+      "name": "Benjamin Graf",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/2063428?v=4",
+      "profile": "https://github.com/bgraf",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
