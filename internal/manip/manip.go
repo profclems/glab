@@ -51,6 +51,19 @@ func AskQuestionWithInput(question, defaultVal string, isRequired bool) string {
 	return str
 }
 
+func AskQuestionWithMultiSelect(question string, options []string) []string {
+	labels := []string{}
+	prompt := &survey.MultiSelect{
+		Message: question,
+		Options: options,
+	}
+	err := survey.AskOne(prompt, &labels)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return labels
+}
+
 func AskQuestionMultiline(question string, defaultVal string) string {
 	str := ""
 	prompt := &survey.Multiline{

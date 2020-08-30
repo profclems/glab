@@ -5,6 +5,7 @@ import (
 	"github.com/gookit/color"
 	"github.com/spf13/cobra"
 	"github.com/xanzy/go-gitlab"
+	"glab/internal/config"
 	"glab/internal/git"
 	"strings"
 )
@@ -41,6 +42,17 @@ func listLabels(cmd *cobra.Command, args []string) {
 	for _, label := range labels {
 		color.HEX(strings.Trim(label.Color, "#")).Printf("#%d %s\n", label.ID, label.Name)
 	}
+
+	// Cache labels if local configuration is used
+	if !config.UseGlobalConfig {
+		labelNames := make([]string, 0, len(labels))
+		for _, label := range labels {
+			labelNames = append(labelNames, label.Name)
+		}
+		labelsEntry := strings.Join(labelNames, ",")
+		config.SetEnv("PROJECT_LABELS", labelsEntry)
+	}
+
 }
 
 func init() {
