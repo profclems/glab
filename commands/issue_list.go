@@ -50,7 +50,7 @@ var issueListCmd = &cobra.Command{
 		if r, _ := cmd.Flags().GetString("repo"); r != "" {
 			repo = r
 		}
-		if lb, _ := cmd.Flags().GetBool("mine"); lb  {
+		if lb, _ := cmd.Flags().GetBool("mine"); lb {
 			u, _, _ := gitlabClient.Users.CurrentUser()
 			l.AssigneeUsername = gitlab.String(u.Username)
 		}
