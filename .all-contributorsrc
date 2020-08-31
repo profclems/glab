@@ -41,7 +41,8 @@
       "avatar_url": "https://avatars3.githubusercontent.com/u/6123002?v=4",
       "profile": "https://github.com/pgollangi",
       "contributions": [
-        "code"
+        "code",
+        "maintenance"
       ]
     },
     {
@@ -60,7 +61,8 @@
       "avatar_url": "https://avatars1.githubusercontent.com/u/322910?v=4",
       "profile": "https://sattellite.me",
       "contributions": [
-        "code"
+        "code",
+        "bug"
       ]
     },
     {
@@ -106,7 +108,8 @@
       "profile": "https://clementsam.tech",
       "contributions": [
         "code",
-        "maintenance"
+        "maintenance",
+        "platform"
       ]
     },
     {
@@ -123,6 +126,15 @@
       "name": "wiwi",
       "avatar_url": "https://avatars1.githubusercontent.com/u/8638857?v=4",
       "profile": "http://docs.vue2.net",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "bgraf",
+      "name": "Benjamin Graf",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/2063428?v=4",
+      "profile": "https://github.com/bgraf",
       "contributions": [
         "code"
       ]
