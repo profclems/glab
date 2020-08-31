@@ -25,6 +25,9 @@ var issueListCmd = &cobra.Command{
 		l := &gitlab.ListProjectIssuesOptions{
 			State: gitlab.String(state),
 		}
+		if lb, _ := cmd.Flags().GetString("assignee"); lb != "" {
+			l.AssigneeUsername = gitlab.String(lb)
+		}
 		if lb, _ := cmd.Flags().GetString("label"); lb != "" {
 			label := gitlab.Labels{
 				lb,
@@ -47,6 +50,10 @@ var issueListCmd = &cobra.Command{
 		if r, _ := cmd.Flags().GetString("repo"); r != "" {
 			repo = r
 		}
+		if lb, _ := cmd.Flags().GetBool("mine"); lb  {
+			u, _, _ := gitlabClient.Users.CurrentUser()
+			l.AssigneeUsername = gitlab.String(u.Username)
+		}
 		issues, _, err := gitlabClient.Issues.ListProjectIssues(repo, l)
 		if err != nil {
 			return err
@@ -58,8 +65,10 @@ var issueListCmd = &cobra.Command{
 }
 
 func init() {
+	issueListCmd.Flags().StringP("assignee", "", "", "Filter issue by assignee <username>")
 	issueListCmd.Flags().StringP("label", "l", "", "Filter issue by label <name>")
 	issueListCmd.Flags().StringP("milestone", "", "", "Filter issue by milestone <id>")
+	issueListCmd.Flags().BoolP("mine", "", false, "Filter only issues issues assigned to me")
 	issueListCmd.Flags().BoolP("all", "a", false, "Get all issues")
 	issueListCmd.Flags().BoolP("closed", "c", false, "Get only closed issues")
 	issueListCmd.Flags().BoolP("opened", "o", false, "Get only opened issues")
