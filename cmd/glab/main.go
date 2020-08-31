@@ -3,15 +3,14 @@ package main
 import (
 	"errors"
 	"fmt"
+	"glab/commands"
+	"glab/internal/config"
 	"glab/internal/utils"
 	"io"
 	"net"
 	"os"
 	"regexp"
 	"strings"
-
-	"glab/commands"
-	"glab/internal/config"
 
 	"github.com/google/shlex"
 	"github.com/spf13/cobra"
@@ -103,10 +102,10 @@ func initConfig() {
 	config.SetGlobalPathDir()
 	config.UseGlobalConfig = true
 
-	if config.GetEnv("GITLAB_URI") == "NOTFOUND" || config.GetEnv("GITLAB_URI") == "OK" {
+	if config.GetEnv("GITLAB_URI") == "" {
 		config.SetEnv("GITLAB_URI", "https://gitlab.com")
 	}
-	if config.GetEnv("GIT_REMOTE_URL_VAR") == "NOTFOUND" || config.GetEnv("GIT_REMOTE_URL_VAR") == "OK" {
+	if config.GetEnv("GIT_REMOTE_URL_VAR") == "" {
 		config.SetEnv("GIT_REMOTE_URL_VAR", "origin")
 	}
 
