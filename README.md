@@ -189,7 +189,7 @@ glab config --token=sometoken --url=https://gitlab.com --pid=someprojectid --rep
 
   GITLAB_URI: specify the url of the gitlab server if self hosted (eg: https://gitlab.example.com). 
   Default is https://gitlab.com.
-  Can be set with `glab config --url=gitlab.example.com`
+  Can be set with `glab config --url=https://gitlab.example.com`
   
   VISUAL, EDITOR (in order of precedence): the editor tool to use for authoring text.
 
