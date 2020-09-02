@@ -52,10 +52,19 @@ jobs:
 
       - name: Build
         run: go build -v ./cmd/glab
+        
+      - name: Add GOPATH/bin to PATH
+        run: echo "::add-path::$(go env GOPATH)/bin"
     
       - name: Run tests
         env: 
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+          GOPATH: $(go env GOPATH) 
         run: | 
           sudo make tests
-          bash <(curl -s https://codecov.io/bash)
+      - name: Upload Unit Test Coverage
+        uses: codecov/codecov-action@v1
+        with:
+          file: ./coverage.txt
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: true
