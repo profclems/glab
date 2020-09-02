@@ -4,11 +4,12 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/logrusorgru/aurora"
+	"github.com/profclems/glab/internal/git"
+	"github.com/profclems/glab/internal/manip"
+
+	"github.com/gookit/color"
 	"github.com/spf13/cobra"
 	"github.com/xanzy/go-gitlab"
-	"glab/internal/git"
-	"glab/internal/manip"
 )
 
 var mrApproveCmd = &cobra.Command{
@@ -31,7 +32,7 @@ func approveMergeRequest(cmd *cobra.Command, args []string) {
 		// ToDo:
 		//}
 
-		fmt.Println(aurora.Yellow("Approving Merge Request #" + mergeID + "..."))
+		fmt.Println(color.Yellow.Sprint("Approving Merge Request #" + mergeID + "..."))
 		gitlabClient, repo := git.InitGitlabClient()
 		if r, _ := cmd.Flags().GetString("repo"); r != "" {
 			repo = r
@@ -39,7 +40,7 @@ func approveMergeRequest(cmd *cobra.Command, args []string) {
 		_, resp, _ := gitlabClient.MergeRequestApprovals.ApproveMergeRequest(repo, manip.StringToInt(mergeID), l)
 		if resp != nil {
 			if resp.StatusCode == 201 {
-				fmt.Println(aurora.Green("Merge Request approved successfully"))
+				fmt.Println(color.Green.Sprint("Merge Request approved successfully"))
 			} else if resp.StatusCode == 405 {
 				fmt.Println("Merge request cannot be approved")
 			} else if resp.StatusCode == 401 {

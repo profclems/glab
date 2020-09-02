@@ -2,12 +2,14 @@ package commands
 
 import (
 	"fmt"
+	"strings"
+
+	"github.com/profclems/glab/internal/config"
+	"github.com/profclems/glab/internal/git"
+
 	"github.com/gookit/color"
 	"github.com/spf13/cobra"
 	"github.com/xanzy/go-gitlab"
-	"glab/internal/config"
-	"glab/internal/git"
-	"strings"
 )
 
 var labelListCmd = &cobra.Command{

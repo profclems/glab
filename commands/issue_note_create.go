@@ -3,10 +3,12 @@ package commands
 import (
 	"errors"
 	"fmt"
+
+	"github.com/profclems/glab/internal/git"
+	"github.com/profclems/glab/internal/manip"
+
 	"github.com/spf13/cobra"
 	gitlab "github.com/xanzy/go-gitlab"
-	"glab/internal/git"
-	"glab/internal/manip"
 )
 
 var issueNoteCreateCmd = &cobra.Command{

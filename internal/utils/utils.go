@@ -2,15 +2,16 @@ package utils
 
 import (
 	"fmt"
-	"glab/internal/config"
 	"net/url"
 	"strings"
 	"time"
 
+	"github.com/profclems/glab/internal/config"
+
 	"github.com/charmbracelet/glamour"
 	"github.com/gookit/color"
-	"glab/internal/browser"
-	"glab/internal/run"
+	"github.com/profclems/glab/internal/browser"
+	"github.com/profclems/glab/internal/run"
 )
 
 // OpenInBrowser opens the url in a web browser based on OS and $BROWSER environment variable

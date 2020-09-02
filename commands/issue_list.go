@@ -1,9 +1,10 @@
 package commands
 
 import (
+	"github.com/profclems/glab/internal/git"
+
 	"github.com/spf13/cobra"
 	"github.com/xanzy/go-gitlab"
-	"glab/internal/git"
 )
 
 var issueListCmd = &cobra.Command{

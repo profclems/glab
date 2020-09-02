@@ -3,8 +3,9 @@ package main
 import (
 	"log"
 
+	"github.com/profclems/glab/commands"
+
 	"github.com/spf13/cobra/doc"
-	"glab/commands"
 )
 
 func main() {

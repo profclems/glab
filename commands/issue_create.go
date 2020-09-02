@@ -3,11 +3,12 @@ package commands
 import (
 	"strings"
 
+	"github.com/profclems/glab/internal/config"
+	"github.com/profclems/glab/internal/git"
+	"github.com/profclems/glab/internal/manip"
+
 	"github.com/spf13/cobra"
 	"github.com/xanzy/go-gitlab"
-	"glab/internal/config"
-	"glab/internal/git"
-	"glab/internal/manip"
 )
 
 var issueCreateCmd = &cobra.Command{

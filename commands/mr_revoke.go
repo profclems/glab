@@ -2,13 +2,14 @@ package commands
 
 import (
 	"fmt"
-	"github.com/spf13/cobra"
+	"github.com/gookit/color"
+	"github.com/logrusorgru/aurora"
 	"strings"
 
-	"github.com/logrusorgru/aurora"
+	"github.com/profclems/glab/internal/git"
+	"github.com/profclems/glab/internal/manip"
 
-	"glab/internal/git"
-	"glab/internal/manip"
+	"github.com/spf13/cobra"
 )
 
 var mrRevokeCmd = &cobra.Command{
@@ -24,7 +25,7 @@ func revokeMergeRequest(cmd *cobra.Command, args []string) {
 	if len(args) > 0 {
 		mergeID := strings.Trim(args[0], " ")
 
-		fmt.Println(aurora.Yellow("Revoking approval for Merge Request #" + mergeID + "..."))
+		fmt.Println(color.Yellow.Sprint("Revoking approval for Merge Request #" + mergeID + "..."))
 		gitlabClient, repo := git.InitGitlabClient()
 		if r, _ := cmd.Flags().GetString("repo"); r != "" {
 			repo = r
@@ -32,7 +33,7 @@ func revokeMergeRequest(cmd *cobra.Command, args []string) {
 		resp, _ := gitlabClient.MergeRequestApprovals.UnapproveMergeRequest(repo, manip.StringToInt(mergeID))
 		if resp != nil {
 			if resp.StatusCode == 201 {
-				fmt.Println(aurora.Green("Merge Request approval revoked successfully"))
+				fmt.Println(color.Green.Sprint("Merge Request approval revoked successfully"))
 			} else if resp.StatusCode == 405 {
 				er("Merge request cannot be unapproved")
 			} else if resp.StatusCode == 401 {

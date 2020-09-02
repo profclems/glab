@@ -4,13 +4,14 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/profclems/glab/internal/git"
+
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/MakeNowJust/heredoc"
 	"github.com/gookit/color"
 	"github.com/gosuri/uilive"
 	"github.com/spf13/cobra"
 	"github.com/xanzy/go-gitlab"
-	"glab/internal/git"
 )
 
 var pipelineStatusCmd = &cobra.Command{

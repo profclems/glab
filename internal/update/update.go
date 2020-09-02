@@ -2,8 +2,9 @@ package update
 
 import (
 	"encoding/json"
-	"glab/internal/request"
 	"time"
+
+	"github.com/profclems/glab/internal/request"
 )
 
 type ReleaseInfo struct {

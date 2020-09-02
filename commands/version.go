@@ -3,8 +3,9 @@ package commands
 import (
 	"fmt"
 
+	"github.com/profclems/glab/internal/git"
+
 	"github.com/spf13/cobra"
-	"glab/internal/git"
 )
 
 // Version is the version for glab

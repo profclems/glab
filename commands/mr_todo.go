@@ -2,8 +2,9 @@ package commands
 
 import (
 	"fmt"
-	"glab/internal/git"
-	"glab/internal/manip"
+
+	"github.com/profclems/glab/internal/git"
+	"github.com/profclems/glab/internal/manip"
 
 	"github.com/spf13/cobra"
 )

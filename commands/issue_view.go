@@ -2,17 +2,19 @@ package commands
 
 import (
 	"fmt"
+	"strings"
+	"time"
+
+	"github.com/profclems/glab/internal/browser"
+	"github.com/profclems/glab/internal/git"
+	"github.com/profclems/glab/internal/manip"
+	"github.com/profclems/glab/internal/utils"
+
 	"github.com/MakeNowJust/heredoc"
 	"github.com/gookit/color"
 	"github.com/gosuri/uitable"
 	"github.com/spf13/cobra"
 	"github.com/xanzy/go-gitlab"
-	"glab/internal/browser"
-	"glab/internal/git"
-	"glab/internal/manip"
-	"glab/internal/utils"
-	"strings"
-	"time"
 )
 
 var issueViewCmd = &cobra.Command{

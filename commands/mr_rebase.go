@@ -5,10 +5,11 @@ import (
 	"log"
 	"strings"
 
+	"github.com/profclems/glab/internal/git"
+	"github.com/profclems/glab/internal/manip"
+
 	"github.com/spf13/cobra"
 	"github.com/xanzy/go-gitlab"
-	"glab/internal/git"
-	"glab/internal/manip"
 )
 
 var mrRebaseCmd = &cobra.Command{

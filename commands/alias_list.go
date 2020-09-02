@@ -2,7 +2,8 @@ package commands
 
 import (
 	"fmt"
-	"glab/internal/config"
+
+	"github.com/profclems/glab/internal/config"
 
 	"github.com/spf13/cobra"
 )

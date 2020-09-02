@@ -2,10 +2,11 @@ package commands
 
 import (
 	"fmt"
-	"glab/internal/git"
-	"glab/internal/manip"
 	"strconv"
 	"strings"
+
+	"github.com/profclems/glab/internal/git"
+	"github.com/profclems/glab/internal/manip"
 
 	"github.com/MakeNowJust/heredoc"
 	"github.com/gookit/color"

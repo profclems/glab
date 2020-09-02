@@ -3,14 +3,15 @@ package main
 import (
 	"errors"
 	"fmt"
-	"glab/commands"
-	"glab/internal/config"
-	"glab/internal/utils"
 	"io"
 	"net"
 	"os"
 	"regexp"
 	"strings"
+
+	"github.com/profclems/glab/commands"
+	"github.com/profclems/glab/internal/config"
+	"github.com/profclems/glab/internal/utils"
 
 	"github.com/google/shlex"
 	"github.com/spf13/cobra"

@@ -2,7 +2,6 @@ package manip
 
 import (
 	"fmt"
-	"github.com/AlecAivazis/survey/v2"
 	"log"
 	"math"
 	"regexp"
@@ -10,6 +9,8 @@ import (
 	"strings"
 	"time"
 	"unicode/utf8"
+
+	"github.com/AlecAivazis/survey/v2"
 )
 
 /*

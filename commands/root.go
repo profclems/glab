@@ -2,16 +2,17 @@ package commands
 
 import (
 	"fmt"
-	"github.com/hashicorp/go-version"
-	"glab/internal/config"
-	"glab/internal/git"
-	"glab/internal/update"
 	"os"
 	"strings"
+
+	"github.com/profclems/glab/internal/config"
+	"github.com/profclems/glab/internal/git"
+	"github.com/profclems/glab/internal/update"
 
 	"github.com/MakeNowJust/heredoc"
 	"github.com/gookit/color"
 	"github.com/gosuri/uitable"
+	"github.com/hashicorp/go-version"
 	"github.com/spf13/cobra"
 )
 

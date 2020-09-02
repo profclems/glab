@@ -11,13 +11,14 @@ import (
 	"sync"
 	"time"
 
+	"github.com/profclems/glab/internal/git"
+	"github.com/profclems/glab/internal/manip"
+
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/MakeNowJust/heredoc"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/xanzy/go-gitlab"
-	"glab/internal/git"
-	"glab/internal/manip"
 )
 
 var (

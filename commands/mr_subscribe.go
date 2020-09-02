@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/logrusorgru/aurora"
-	"github.com/spf13/cobra"
+	"github.com/profclems/glab/internal/git"
+	"github.com/profclems/glab/internal/manip"
 
-	"glab/internal/git"
-	"glab/internal/manip"
+	"github.com/gookit/color"
+	"github.com/spf13/cobra"
 )
 
 var mrSubscribeCmd = &cobra.Command{
@@ -35,7 +35,7 @@ func subscribeSubscribeRequest(cmd *cobra.Command, args []string) {
 			if resp.StatusCode == 204 {
 				bodyString := resp.Body
 				fmt.Println(bodyString)
-				fmt.Println(aurora.Green("You have successfully subscribed to merge request #" + i2))
+				fmt.Println(color.Green.Sprint("You have successfully subscribed to merge request #" + i2))
 				displayMergeRequest(issue)
 			} else if resp.StatusCode == 404 {
 				er("Merge Request does not exist")

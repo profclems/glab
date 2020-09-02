@@ -3,16 +3,17 @@ package commands
 import (
 	"errors"
 	"fmt"
-	"glab/internal/utils"
 	"io"
 	"math"
 	"os"
 	"text/tabwriter"
 
+	"github.com/profclems/glab/internal/git"
+	"github.com/profclems/glab/internal/utils"
+
 	"github.com/gookit/color"
 	"github.com/spf13/cobra"
 	"github.com/xanzy/go-gitlab"
-	"glab/internal/git"
 )
 
 func displayMultiplePipelines(m []*gitlab.PipelineInfo) {

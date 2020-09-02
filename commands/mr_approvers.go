@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	"glab/internal/git"
-	"glab/internal/manip"
+	"github.com/profclems/glab/internal/git"
+	"github.com/profclems/glab/internal/manip"
 
 	"github.com/gookit/color"
 	"github.com/gosuri/uitable"

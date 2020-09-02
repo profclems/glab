@@ -4,9 +4,10 @@ import (
 	"github.com/spf13/cobra"
 	"strings"
 
+	"github.com/profclems/glab/internal/git"
+	"github.com/profclems/glab/internal/manip"
+
 	"github.com/xanzy/go-gitlab"
-	"glab/internal/git"
-	"glab/internal/manip"
 )
 
 var mrIssuesCmd = &cobra.Command{

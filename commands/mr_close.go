@@ -2,12 +2,14 @@ package commands
 
 import (
 	"fmt"
-	"github.com/logrusorgru/aurora"
+	"strings"
+
+	"github.com/profclems/glab/internal/git"
+	"github.com/profclems/glab/internal/manip"
+
+	"github.com/gookit/color"
 	"github.com/spf13/cobra"
 	"github.com/xanzy/go-gitlab"
-	"glab/internal/git"
-	"glab/internal/manip"
-	"strings"
 )
 
 var mrCloseCmd = &cobra.Command{
@@ -32,10 +34,10 @@ func closeMergeRequestState(cmd *cobra.Command, args []string) {
 			fmt.Println("Closing Merge request...")
 			mr, resp, _ := gitlabClient.MergeRequests.UpdateMergeRequest(repo, manip.StringToInt(i2), l)
 			if resp.StatusCode == 200 {
-				fmt.Println(aurora.Green("You have closed merge request #" + i2))
+				fmt.Println(color.Green.Sprint("You have closed merge request #" + i2))
 				displayMergeRequest(mr)
 			} else if resp.StatusCode == 404 {
-				fmt.Println(aurora.Red("MergeRequest does not exist"))
+				fmt.Println(color.Red.Sprint("MergeRequest does not exist"))
 			} else {
 				fmt.Println("Could not complete request: ", resp.Status)
 			}
