@@ -1,9 +1,6 @@
-# Binaries for programs and plugins
-*.exe
-*.exe~
-*.dll
-*.so
-*.dylib
+# Binaries for glab
+cmd/glab/bin
+bin
 
 # Test binary, built with `go test -c`
 *.test
@@ -11,19 +8,29 @@
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
 
-# Dependency directories (remove the comment below to include it)
-# vendor/
-cmd/glab/bin
-cmd/glab/bin/*
-bin
-dist
-cmd/glab/dist
+# IntelliJ
 .idea
+
+# vim
+*.sw*
+*.vim
+
+# test
+_test
+
+coverage*
+vendor
+log.txt
+
+# VsCode
+.vscode/
+
+# Dist binaries created at build with make rt
+dist
+
+# GLab local config dir
 .glab-cli
 
-/.vscode/
-
-.glab-cli
-.glab-cli
-.glab-cli
-.glab-cli
+# The testdata-* copies created by the unit tests must be ignored or the tests
+# will encounter write errors as Git attempts to add the dirs to its index.
+test/testdata-*

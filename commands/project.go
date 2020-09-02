@@ -29,5 +29,14 @@ func createProject(opts *gitlab.CreateProjectOptions) (*gitlab.Project, error) {
 	return project, nil
 }
 
+func listProjectTree(projectID interface{}, opts *gitlab.ListTreeOptions) ([]*gitlab.TreeNode, error) {
+	gitlabClient, _ := git.InitGitlabClient()
+	projectTree, _, err := gitlabClient.Repositories.ListTree(projectID, opts)
+	if err != nil {
+		return nil, err
+	}
+	return projectTree, nil
+}
+
 // projectCmd is the same as the repoCmd since repo has project as an alias
 var projectCmd = repoCmd

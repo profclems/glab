@@ -1,0 +1,6 @@
+# pack-refs with: peeled fully-peeled sorted 
+79204f14c8e64b4d6775c0078180175a02354e2c refs/remotes/origin/Testing
+79204f14c8e64b4d6775c0078180175a02354e2c refs/remotes/origin/master
+3d195f9442bbaf68f88aea107c2ae9d9b02b28d1 refs/remotes/origin/newbranch
+6da602e6771636999f2475bf4a5aa2e48469bcac refs/remotes/origin/test
+dba49a3f16cb34b13476e704bc095c15474f57e3 refs/remotes/origin/test-cli
