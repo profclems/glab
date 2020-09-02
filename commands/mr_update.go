@@ -9,7 +9,6 @@ import (
 	"github.com/MakeNowJust/heredoc"
 	"github.com/spf13/cobra"
 	"github.com/xanzy/go-gitlab"
-
 )
 
 var mrUpdateCmd = &cobra.Command{
