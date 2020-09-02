@@ -57,10 +57,8 @@ jobs:
         run: echo "::add-path::$(go env GOPATH)/bin"
     
       - name: Run tests
-        env: 
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-          GOPATH: $(go env GOPATH) 
         run: | 
+          export GOPATH=$(go env GOPATH)
           sudo make tests
       - name: Upload Unit Test Coverage
         uses: codecov/codecov-action@v1
