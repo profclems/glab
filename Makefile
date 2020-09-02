@@ -18,7 +18,7 @@ endif
 
 GO_LDFLAGS := -X main.build=$(BUILD_DATE) $(GO_LDFLAGS)
 GO_LDFLAGS := $(GO_LDFLAGS) -X main.version=$(GLAB_VERSION)
-GOURL ?= glab
+GOURL ?= github.com/profclems/glab
 BUILDLOC ?= ./bin/glab
 
 build:
@@ -35,7 +35,7 @@ tests:
 
 internal-test:
 	rm coverage-* 2>&1 > /dev/null || true
-	GO111MODULE=on go test -coverprofile=coverage-main.out -covermode=count -coverpkg ./... -run=$(run)$(GOURL)/cmd/glab $(GOURL)/commands $(GOURL)/internal/...
+	GO111MODULE=on go test -coverprofile=coverage-main.out -covermode=count -coverpkg ./... -run=$(run) $(GOURL)/cmd/glab $(GOURL)/commands $(GOURL)/internal/...
 	go get -u github.com/wadey/gocovmerge
 	gocovmerge coverage-*.out > coverage.txt && rm coverage-*.out
 
