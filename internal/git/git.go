@@ -13,10 +13,10 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/tcnksm/go-gitconfig"
-	"github.com/xanzy/go-gitlab"
 	"github.com/profclems/glab/internal/config"
 	"github.com/profclems/glab/internal/run"
+	"github.com/tcnksm/go-gitconfig"
+	"github.com/xanzy/go-gitlab"
 )
 
 // GetRepo returns the repo name of the git directory with the namespace like profclems/glab

@@ -11,9 +11,9 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
-	"github.com/spf13/cobra"
 	"github.com/profclems/glab/internal/config"
 	"github.com/profclems/glab/internal/utils"
+	"github.com/spf13/cobra"
 )
 
 // Test started when the test binary is started
