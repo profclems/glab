@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func Test_clone(t *testing.T) {
+func Test_repoClone(t *testing.T) {
 	t.Parallel()
 	repo := copyTestRepo(t)
 	// profclems/test is a forked repo from glab-cli/test

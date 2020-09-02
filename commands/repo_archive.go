@@ -2,9 +2,9 @@ package commands
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
-	"log"
 	"os"
 	"strings"
 
@@ -32,7 +32,7 @@ var repoArchiveCmd = &cobra.Command{
 	- namespace/group/repo
 	`),
 	Args: cobra.MaximumNArgs(2),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		repo := config.GetRepo()
 		var name string
 		if len(args) != 0 {
@@ -47,10 +47,7 @@ var repoArchiveCmd = &cobra.Command{
 		// tar.gz, tar.bz2, tbz, tbz2, tb2, bz2, tar, and zip
 		extensions := []string{"tar.gz", "tar.bz2", "tbz", "tbz2", "tb2", "bz2", "tar", "zip"}
 		if b := contains(extensions, format); !b {
-
-			fmt.Println("fatal: --format must be one of " + strings.Join(extensions, ","))
-
-			return
+			return errors.New("format must be one of " + strings.Join(extensions, ","))
 		}
 
 		gitlabClient, _ := git.InitGitlabClient()
@@ -60,35 +57,35 @@ var repoArchiveCmd = &cobra.Command{
 			l.SHA = gitlab.String(sha)
 		}
 		ext := *l.Format
-		archiveName := strings.Replace(repo, "/", "-", -1) + ext
+		archiveName := strings.Replace(repo, "/", "-", -1) + "." + ext
 		if strings.TrimSpace(name) != "" {
 			archiveName = name + "." + ext
 		}
 
 		bt, _, err := gitlabClient.Repositories.Archive(repo, l)
 		if err != nil {
-			log.Fatalf("Failed to clone repos: %v", err)
+			return err
 		}
 
 		r := bytes.NewReader(bt)
 		out, err := os.Create(archiveName + ".tmp")
 		if err != nil {
-
-			log.Fatalf("Failed to create archive repos: %v", err)
+			return fmt.Errorf("failed to create repo archive: %v", err)
 		}
 
 		counter := &CloneWriter{}
 		if _, err = io.Copy(out, io.TeeReader(r, counter)); err != nil {
-			out.Close()
-			log.Fatalf("Failed to write repos: %v", err)
+			_ = out.Close()
+			return fmt.Errorf("failed to write repos: %v", err)
 		}
 
 		fmt.Print("\n")
-		out.Close()
+		_ = out.Close()
 		if err = os.Rename(archiveName+".tmp", archiveName); err != nil {
-			log.Fatalf("Failed to rename tmp repos: %v", err)
+			return fmt.Errorf("failed to rename tmp repos: %v", err)
 		}
-		fmt.Println("finish ", archiveName)
+		fmt.Println("Complete...", archiveName)
+		return nil
 	},
 }
 

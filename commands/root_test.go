@@ -76,7 +76,7 @@ func TestMain(m *testing.M) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	testCmd := []string{"test", "-c", "-o", glabBinaryPath, "glab/cmd/glab"}
+	testCmd := []string{"test", "-c", "-o", glabBinaryPath, "github.com/profclems/glab/cmd/glab"}
 	if coverMode := testing.CoverMode(); coverMode != "" {
 		testCmd = append(testCmd, "-covermode", coverMode, "-coverpkg", "./...")
 	}
