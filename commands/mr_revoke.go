@@ -3,7 +3,6 @@ package commands
 import (
 	"fmt"
 	"github.com/gookit/color"
-	"github.com/logrusorgru/aurora"
 	"strings"
 
 	"github.com/profclems/glab/internal/git"
