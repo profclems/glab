@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func Test_Release(t *testing.T)  {
+func Test_Release(t *testing.T) {
 	t.Parallel()
 	repo := copyTestRepo(t)
 

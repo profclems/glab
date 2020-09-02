@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func Test_Alias(t *testing.T)  {
+func Test_Alias(t *testing.T) {
 	t.Parallel()
 	repo := copyTestRepo(t)
 

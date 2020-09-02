@@ -12,32 +12,32 @@ func Test_repoArchive(t *testing.T) {
 	repo := copyTestRepo(t)
 
 	type argFlags struct {
-		format 	string
-		sha		string
-		repo 	string
-		dest	string
+		format string
+		sha    string
+		repo   string
+		dest   string
 	}
 
 	tests := []struct {
-		name 	string
-		args 	argFlags
+		name    string
+		args    argFlags
 		wantMsg []string
 		wantErr bool
 	}{
 		{
-			name: "Has invalid format",
-			args: argFlags{"asp", "master", "glab-cli/test", "test"},
+			name:    "Has invalid format",
+			args:    argFlags{"asp", "master", "glab-cli/test", "test"},
 			wantMsg: []string{"format must be one of"},
 			wantErr: true,
 		},
 		{
-			name: "Has valid format",
-			args: argFlags{"zip","master", "glab-cli/test", "test"},
+			name:    "Has valid format",
+			args:    argFlags{"zip", "master", "glab-cli/test", "test"},
 			wantMsg: []string{"Cloning...", "Complete... test.zip"},
 		},
 		{
-			name: "Repo is invalid",
-			args: argFlags{"zip","master", "glab-cli/testzz", "test"},
+			name:    "Repo is invalid",
+			args:    argFlags{"zip", "master", "glab-cli/testzz", "test"},
 			wantMsg: []string{"404 Project Not Found"},
 			wantErr: true,
 		},
