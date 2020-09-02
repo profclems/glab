@@ -2,12 +2,12 @@ package commands
 
 import (
 	"fmt"
-	"github.com/MakeNowJust/heredoc"
-	"github.com/gookit/color"
 	"io/ioutil"
 	"log"
 	"os"
 
+	"github.com/MakeNowJust/heredoc"
+	"github.com/gookit/color"
 	"github.com/spf13/cobra"
 )
 

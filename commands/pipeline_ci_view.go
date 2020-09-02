@@ -4,9 +4,6 @@ import (
 	"bufio"
 	"context"
 	"fmt"
-	"github.com/MakeNowJust/heredoc"
-	"glab/internal/git"
-	"glab/internal/utils"
 	"io"
 	"log"
 	"os"
@@ -14,6 +11,10 @@ import (
 	"strings"
 	"time"
 
+	"github.com/profclems/glab/internal/git"
+	"github.com/profclems/glab/internal/utils"
+
+	"github.com/MakeNowJust/heredoc"
 	"github.com/gdamore/tcell"
 	"github.com/pkg/errors"
 	"github.com/rivo/tview"

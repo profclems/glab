@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"glab/internal/utils"
+	"github.com/profclems/glab/internal/utils"
 
 	"github.com/gookit/color"
 	"github.com/spf13/cobra"

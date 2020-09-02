@@ -2,11 +2,13 @@ package commands
 
 import (
 	"fmt"
+
+	"github.com/profclems/glab/internal/git"
+
 	"github.com/MakeNowJust/heredoc"
 	"github.com/gookit/color"
 	"github.com/spf13/cobra"
 	"github.com/xanzy/go-gitlab"
-	"glab/internal/git"
 )
 
 var repoContributorsCmd = &cobra.Command{

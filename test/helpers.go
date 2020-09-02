@@ -7,7 +7,7 @@ import (
 	"regexp"
 
 	"github.com/pkg/errors"
-	"glab/internal/run"
+	"github.com/profclems/glab/internal/run"
 )
 
 // TODO copypasta from command package

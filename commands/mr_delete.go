@@ -4,10 +4,11 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/logrusorgru/aurora"
+	"github.com/profclems/glab/internal/git"
+	"github.com/profclems/glab/internal/manip"
+
+	"github.com/gookit/color"
 	"github.com/spf13/cobra"
-	"glab/internal/git"
-	"glab/internal/manip"
 )
 
 var mrDeleteCmd = &cobra.Command{
@@ -35,13 +36,13 @@ func deleteMergeRequest(cmd *cobra.Command, args []string) error {
 
 			if issue != nil {
 				if issue.StatusCode == 204 {
-					fmt.Println(aurora.Green("Merge Request Deleted Successfully"))
+					fmt.Println(color.Green.Sprint("Merge Request Deleted Successfully"))
 				} else if issue.StatusCode == 404 {
-					fmt.Println(aurora.Red("Merge Request does not exist"))
+					fmt.Println(color.Red.Sprint("Merge Request does not exist"))
 				} else if issue.StatusCode == 401 {
-					fmt.Println(aurora.Red("You are not authorized to perform this action"))
+					fmt.Println(color.Red.Sprint("You are not authorized to perform this action"))
 				} else {
-					fmt.Println(aurora.Red("Could not complete request."))
+					fmt.Println(color.Red.Sprint("Could not complete request."))
 				}
 			} else if err != nil {
 				return err

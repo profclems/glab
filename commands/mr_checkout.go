@@ -4,12 +4,13 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/profclems/glab/internal/config"
+	"github.com/profclems/glab/internal/git"
+	"github.com/profclems/glab/internal/manip"
+
 	"github.com/spf13/cobra"
 	"github.com/tcnksm/go-gitconfig"
 	"github.com/xanzy/go-gitlab"
-	"glab/internal/config"
-	"glab/internal/git"
-	"glab/internal/manip"
 )
 
 type mrCheckoutConfig struct {

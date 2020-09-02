@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/google/shlex"
-	"glab/internal/config"
+	"github.com/profclems/glab/internal/config"
 )
 
 // Command produces an exec.Cmd respecting runtime.GOOS and $BROWSER environment variable

@@ -4,12 +4,13 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
-	"glab/internal/manip"
 	"io/ioutil"
 	"log"
 	"os"
 	"os/user"
 	"strings"
+
+	"github.com/profclems/glab/internal/manip"
 
 	"github.com/logrusorgru/aurora"
 	"github.com/spf13/cobra"

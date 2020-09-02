@@ -6,8 +6,8 @@ import (
 	"reflect"
 	"testing"
 
-	"glab/internal/run"
-	"glab/test"
+	"github.com/profclems/glab/internal/run"
+	"github.com/profclems/glab/test"
 )
 
 func Test_isFilesystemPath(t *testing.T) {

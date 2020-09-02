@@ -1,7 +1,7 @@
 package commands
 
 import (
-	"glab/internal/git"
+	"github.com/profclems/glab/internal/git"
 
 	"github.com/spf13/cobra"
 	"github.com/xanzy/go-gitlab"

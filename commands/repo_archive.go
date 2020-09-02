@@ -3,15 +3,17 @@ package commands
 import (
 	"bytes"
 	"fmt"
-	"github.com/MakeNowJust/heredoc"
-	"github.com/spf13/cobra"
-	"github.com/xanzy/go-gitlab"
-	"glab/internal/config"
-	"glab/internal/git"
 	"io"
 	"log"
 	"os"
 	"strings"
+
+	"github.com/profclems/glab/internal/config"
+	"github.com/profclems/glab/internal/git"
+
+	"github.com/MakeNowJust/heredoc"
+	"github.com/spf13/cobra"
+	"github.com/xanzy/go-gitlab"
 )
 
 var repoArchiveCmd = &cobra.Command{

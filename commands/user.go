@@ -3,8 +3,9 @@ package commands
 import (
 	"log"
 
+	"github.com/profclems/glab/internal/git"
+
 	"github.com/xanzy/go-gitlab"
-	"glab/internal/git"
 )
 
 func currentUser() (string, error) {

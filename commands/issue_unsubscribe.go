@@ -2,10 +2,12 @@ package commands
 
 import (
 	"fmt"
-	"github.com/spf13/cobra"
-	"glab/internal/git"
-	"glab/internal/manip"
 	"strings"
+
+	"github.com/profclems/glab/internal/git"
+	"github.com/profclems/glab/internal/manip"
+
+	"github.com/spf13/cobra"
 )
 
 var issueUnsubscribeCmd = &cobra.Command{
