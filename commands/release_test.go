@@ -1,17 +1,16 @@
 package commands
 
 import (
+	"github.com/stretchr/testify/assert"
 	"os/exec"
 	"testing"
-
-	"github.com/stretchr/testify/assert"
 )
 
-func TestMrCmd(t *testing.T) {
+func Test_Release(t *testing.T)  {
 	t.Parallel()
 	repo := copyTestRepo(t)
 
-	cmd := exec.Command(glabBinaryPath, "mr")
+	cmd := exec.Command(glabBinaryPath, "release")
 	cmd.Dir = repo
 
 	b, err := cmd.CombinedOutput()
@@ -22,5 +21,5 @@ func TestMrCmd(t *testing.T) {
 	out := string(b)
 	t.Log(out)
 
-	assert.Contains(t, out, "Use \"glab mr [command] --help\" for more information about a command.")
+	assert.Contains(t, out, "Use \"glab release [command] --help\" for more information about a command.")
 }

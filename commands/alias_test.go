@@ -7,11 +7,11 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestMrCmd(t *testing.T) {
+func Test_Alias(t *testing.T)  {
 	t.Parallel()
 	repo := copyTestRepo(t)
 
-	cmd := exec.Command(glabBinaryPath, "mr")
+	cmd := exec.Command(glabBinaryPath, "alias")
 	cmd.Dir = repo
 
 	b, err := cmd.CombinedOutput()
@@ -22,5 +22,5 @@ func TestMrCmd(t *testing.T) {
 	out := string(b)
 	t.Log(out)
 
-	assert.Contains(t, out, "Use \"glab mr [command] --help\" for more information about a command.")
+	assert.Contains(t, out, "Use \"glab alias [command] --help\" for more information about a command.")
 }
