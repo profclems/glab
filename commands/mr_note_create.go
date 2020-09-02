@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"github.com/profclems/glab/internal/git"
 	"github.com/profclems/glab/internal/manip"
-	"log"
-
 	"github.com/spf13/cobra"
 	gitlab "github.com/xanzy/go-gitlab"
 )
@@ -39,7 +37,7 @@ var mrCreateNoteCmd = &cobra.Command{
 			})
 		}
 		if body == "" {
-			log.Fatal("Aborted... Note has an empty message")
+			return fmt.Errorf("aborted... Note has an empty message")
 		}
 
 		noteInfo, _, err := gitlabClient.Notes.CreateMergeRequestNote(repo, manip.StringToInt(mID), &gitlab.CreateMergeRequestNoteOptions{
