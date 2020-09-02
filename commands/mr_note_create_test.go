@@ -12,9 +12,9 @@ func Test_mrNoteCreate(t *testing.T) {
 	var cmd *exec.Cmd
 
 	tests := []struct {
-		name string
-		args []string
-		want bool
+		name          string
+		args          []string
+		want          bool
 		assertionFunc func(t *testing.T, out string)
 	}{
 		{
