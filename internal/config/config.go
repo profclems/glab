@@ -128,6 +128,9 @@ func SetEnv(key, value string) {
 	if UseGlobalConfig {
 		cFile = globalConfigFile
 	}
+
+	defer InvalidateEnvCacheForFile(cFile)
+
 	data, _ := ioutil.ReadFile(cFile)
 
 	file := string(data)
