@@ -2,8 +2,8 @@ package commands
 
 import (
 	"fmt"
-	"github.com/profclems/glab/internal/utils"
 
+	"github.com/profclems/glab/internal/utils"
 	"github.com/profclems/glab/internal/config"
 
 	"github.com/MakeNowJust/heredoc"
