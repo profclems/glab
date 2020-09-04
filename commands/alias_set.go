@@ -1,6 +1,9 @@
 package commands
 
 import (
+	"fmt"
+	"github.com/profclems/glab/internal/utils"
+
 	"github.com/profclems/glab/internal/config"
 
 	"github.com/MakeNowJust/heredoc"
@@ -12,10 +15,22 @@ var aliasSetCmd = &cobra.Command{
 	Short: `Set an alias.`,
 	Long:  ``,
 	Args:  cobra.ExactArgs(2),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		aliasName := args[0]
 		aliasedCommand := args[1]
-		config.SetAlias(aliasName, aliasedCommand)
+		// Check if provided alias name is already a glab command
+		// err should be <nil> if alias name already exists as a command
+		fmt.Printf("- Adding alias for %s: %s\n", aliasName, aliasedCommand)
+		_, _, err := RootCmd.Find(append([]string{""}, aliasName))
+		if err == nil {
+			return fmt.Errorf("could not create alias: \"%s\" is already a glab command", aliasName)
+		}
+		err = config.SetAlias(aliasName, aliasedCommand)
+		if err != nil {
+			return err
+		}
+		fmt.Println(utils.GreenCheck(), "Alias added")
+		return nil
 	},
 	Example: heredoc.Doc(`
 	$ glab alias set createissue 'glab create issue --title "$1"'
