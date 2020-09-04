@@ -138,6 +138,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "andhe",
+      "name": "andhe",
+      "avatar_url": "https://avatars1.githubusercontent.com/u/3367571?v=4",
+      "profile": "https://qa.debian.org/developer.php?login=ah&comaint=yes",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
