@@ -156,7 +156,7 @@ func SetEnv(key, value string) {
 	w := bufio.NewWriter(f)
 	_, _ = w.WriteString(strings.Trim(newData, "\n"))
 	_ = w.Flush()
-	if !CheckFileHasLine(".gitignore", configFileFileParentDir) {
+	if !UseGlobalConfig && !CheckFileHasLine(".gitignore", configFileFileParentDir) {
 		ReadAndAppend(".gitignore", configFileFileParentDir)
 	}
 }
