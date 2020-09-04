@@ -162,29 +162,29 @@ func SetEnv(key, value string) {
 }
 
 // SetAlias sets an alias for a command
-func SetAlias(name string, command string) {
+func SetAlias(name string, command string) error {
 	if !CheckFileExists(aliasFile) {
 		aliasDir := filepath.Join(aliasFile, "..")
 		if !CheckPathExists(aliasDir) {
 			errDir := os.MkdirAll(aliasDir, 0700)
 			if errDir != nil {
-				log.Fatalln(errDir)
+				return errDir
 			}
 		}
 		f, err := os.Create(aliasFile)
 		if err != nil {
-			log.Fatalln(err)
+			return err
 		}
 
 		err = f.Close()
 		if err != nil {
-			log.Println(err)
+			return err
 		}
 	}
 
 	contents, err := ioutil.ReadFile(aliasFile)
 	if err != nil {
-		log.Fatalln(err)
+		return err
 	}
 
 	lines := strings.Split(string(contents), "\n")
@@ -209,8 +209,9 @@ func SetAlias(name string, command string) {
 	output := strings.Join(lines, "\n")
 	err = ioutil.WriteFile(aliasFile, []byte(output), 0644)
 	if err != nil {
-		log.Fatalln(err)
+		return err
 	}
+	return nil
 }
 
 // GetAllAliases retrieves all of the aliases.
