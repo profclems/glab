@@ -10,6 +10,13 @@ import (
 // glab environment cache: <file: <key: value>>
 var envCache map[string]map[string]string
 
+func CheckPathExists(path string) bool {
+	if _, err := os.Stat(path); err == nil || !os.IsNotExist(err) {
+		return true
+	}
+	return false
+}
+
 // CheckFileExists : checks if a file exists and is not a directory.
 func CheckFileExists(filename string) bool {
 	info, err := os.Stat(filename)
