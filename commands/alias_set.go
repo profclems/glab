@@ -3,8 +3,8 @@ package commands
 import (
 	"fmt"
 
-	"github.com/profclems/glab/internal/utils"
 	"github.com/profclems/glab/internal/config"
+	"github.com/profclems/glab/internal/utils"
 
 	"github.com/MakeNowJust/heredoc"
 	"github.com/spf13/cobra"

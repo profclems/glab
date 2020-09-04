@@ -13,15 +13,15 @@ func Test_AliasSetCmd(t *testing.T) {
 	repo := copyTestRepo(t)
 	var cmd *exec.Cmd
 
-	tests := []struct{
-		Name string
-		args []string
-		wantErr bool
+	tests := []struct {
+		Name       string
+		args       []string
+		wantErr    bool
 		assertFunc func(t *testing.T, out string)
 	}{
 		{
-			Name: "Alias name is a command name",
-			args: []string{"mr", "'mr list'"},
+			Name:    "Alias name is a command name",
+			args:    []string{"mr", "'mr list'"},
 			wantErr: true,
 			assertFunc: func(t *testing.T, out string) {
 				assert.Contains(t, out, "could not create alias: \"mr\" is already a glab command")
