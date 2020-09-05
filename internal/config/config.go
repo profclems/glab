@@ -165,7 +165,7 @@ func SetEnv(key, value string) {
 	}
 
 	if !UseGlobalConfig && !CheckFileHasLine(".gitignore", configFileFileParentDir) {
-		ReadAndAppend(".gitignore", configFileFileParentDir)
+		ReadAndAppend(".gitignore", configFileFileParentDir + "\n")
 	}
 }
 
