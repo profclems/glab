@@ -238,7 +238,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     <td align="center"><a href="https://github.com/bgraf"><img src="https://avatars2.githubusercontent.com/u/2063428?v=4" width="100px;" alt=""/><br /><sub><b>Benjamin Graf</b></sub></a><br /><a href="https://github.com/profclems/glab/commits?author=bgraf" title="Code">💻</a></td>
   </tr>
   <tr>
-    <td align="center"><a href="https://qa.debian.org/developer.php?login=ah&comaint=yes"><img src="https://avatars1.githubusercontent.com/u/3367571?v=4" width="100px;" alt=""/><br /><sub><b>andhe</b></sub></a><br /><a href="https://github.com/profclems/glab/commits?author=andhe" title="Code">💻</a></td>
+    <td align="center"><a href="https://qa.debian.org/developer.php?login=ah&comaint=yes"><img src="https://avatars1.githubusercontent.com/u/3367571?v=4" width="100px;" alt=""/><br /><sub><b>andhe</b></sub></a><br /><a href="https://github.com/profclems/glab/commits?author=andhe" title="Code">💻</a> <a href="#security-andhe" title="Security">🛡️</a></td>
     <td align="center"><a href="https://zacharyspringer.com/"><img src="https://avatars3.githubusercontent.com/u/22923676?v=4" width="100px;" alt=""/><br /><sub><b>Zachary Springer</b></sub></a><br /><a href="#financial-Zachcodes" title="Financial">💵</a></td>
   </tr>
 </table>
