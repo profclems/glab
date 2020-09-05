@@ -1,7 +1,6 @@
 package config
 
 import (
-	"bufio"
 	"errors"
 	"fmt"
 	"io/ioutil"
@@ -13,6 +12,7 @@ import (
 
 	"github.com/profclems/glab/internal/manip"
 
+	"github.com/google/renameio"
 	"github.com/logrusorgru/aurora"
 	"github.com/spf13/cobra"
 	"github.com/tcnksm/go-gitconfig"
@@ -131,34 +131,39 @@ func SetEnv(key, value string) {
 
 	defer InvalidateEnvCacheForFile(cFile)
 
-	data, _ := ioutil.ReadFile(cFile)
+	data, err := ioutil.ReadFile(cFile)
+	if err != nil && !os.IsNotExist(err) {
+		log.Println("Failed to read/update env config:", err)
+		return
+	}
 
 	file := string(data)
-	line := 0
 	temp := strings.Split(file, "\n")
 	newData := ""
 	keyExists := false
 	newConfig := key + "=" + (value) + "\n"
 	for _, item := range temp {
-		//fmt.Println("[",line,"]",item)
+		if item == "" {
+			continue
+		}
+
 		env := strings.Split(item, "=")
-		justString := fmt.Sprint(item)
 		if env[0] == key {
 			newData += newConfig
 			keyExists = true
 		} else {
-			newData += justString + "\n"
+			newData += item + "\n"
 		}
-		line++
 	}
 	if !keyExists {
 		newData += newConfig
 	}
 	_ = os.MkdirAll(filepath.Join(cFile, ".."), 0755)
-	f, _ := os.Create(cFile) // Create a writer
-	w := bufio.NewWriter(f)
-	_, _ = w.WriteString(strings.Trim(newData, "\n"))
-	_ = w.Flush()
+	if err = renameio.WriteFile(cFile, []byte(newData), 0666); err != nil {
+		log.Println("Failed to update config file:", err)
+		return
+	}
+
 	if !UseGlobalConfig && !CheckFileHasLine(".gitignore", configFileFileParentDir) {
 		ReadAndAppend(".gitignore", configFileFileParentDir)
 	}
