@@ -54,7 +54,7 @@ func ReadAndAppend(file, text string) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	if _, err := f.Write([]byte("\n" + text)); err != nil {
+	if _, err := f.Write([]byte(text)); err != nil {
 		log.Fatal(err)
 	}
 	if err := f.Close(); err != nil {
