@@ -276,13 +276,13 @@ func TestGetDefaultBranch(t *testing.T) {
 			args: "profclems/test",
 		},
 		{
-			name: "Invalid repo",
-			want: "master",
-			args: "testssz",
+			name:    "Invalid repo",
+			want:    "master",
+			args:    "testssz",
 			wantErr: true,
 		},
 	}
-		for _, tt := range tests {
+	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got, err := GetDefaultBranch(tt.args)
 			if (err != nil) != tt.wantErr {

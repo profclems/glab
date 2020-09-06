@@ -101,9 +101,9 @@ func init() {
 // TODO: GetDefaultBranch looks really messy and should be fixed properly
 
 // GetDefaultBranch finds the repo's default branch
-func GetDefaultBranch(remote ...string) (string, error)  {
+func GetDefaultBranch(remote ...string) (string, error) {
 	var org string
-	if len(remote)>0 {
+	if len(remote) > 0 {
 		org = remote[0]
 	} else {
 		org = config.GetEnv("GIT_REMOTE_URL_VAR")
@@ -122,7 +122,7 @@ func GetDefaultBranch(remote ...string) (string, error)  {
 			p, t, u, org)
 	}
 	getDefBranch := exec.Command("git",
-		"remote","show", org)
+		"remote", "show", org)
 	output, err := run.PrepareCmd(getDefBranch).Output()
 	if err != nil {
 		return "master", err

@@ -34,7 +34,7 @@ func contains(arr []string, str string) bool {
 	return false
 }
 
-func fixRepoNamespace(repo string) (string, error)  {
+func fixRepoNamespace(repo string) (string, error) {
 	if !strings.Contains(repo, "/") {
 		u, err := currentUser()
 		if err != nil {
