@@ -1,0 +1,40 @@
+language: go
+
+os:
+  - linux
+
+go:
+  - 1.15.x
+
+# use containers which run faster and have cache
+sudo: false
+
+cache:
+  directories:
+    - $HOME/.cache/go-build
+    - $HOME/gopath/pkg/mod
+
+addons:
+  ssh_known_hosts:
+      - gitlab.com
+  apt:
+    packages:
+      - silversearcher-ag
+
+before_install:
+  - echo -e "Host *\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
+  - go get -t -v ./...
+  - echo -e "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDIMbG0UJADRYFO57mRi45tF2mycUhiJcG7WDnewHHJEDLIlg9m4wqvkAhRfrnZigfk27L9jO3GWr+iWnqyBD3e8LxNrLFcByZu0YqMp0hdgkAKZ+viWtQlCEGc4s8KIwWz+xJK9+UJiW3q2okOqqPBcXTT5wCzWU/AyNlpNN+T3KXSCrkvaw2SWLl1UmCHhkCr3S9HjXopAQNRmstRtGu04L929DfKKBmI9Mn3iihLE3+itSh8KnmYag/NwOufQpi2lA3vAELO+CKVKwOnJmlLXQ2vBEZuYrVuOTE/nFF4h7wKUYrfQ+JqKvjSM+bDpYDraw21TM1d322yM5ICr40ZgWveoLpcgx6rG8fn+MwH22yhULBnpDmz6kiTrJdCczmlpLghtosrbS4+MI3F9hQ5+Svvjg6bBkPLiocLQ1a9pK8fT/DZ6VQTD+q2g296/O55EF2TsZ2Lfgu6Cuvze7L39YIZcpe2VJzS3MW2eyCLrHllQbh237XMU76XGCcsICThXW0DhDDhXEigoNaRhFmrxtZwX3iRXkZKFQYN05tmccQ6Y3v1vhuTaqKASlMRHbelk0Zli9ZjMz520aBoilszBpbIzZSZB+3hT+ejQSoPH5tM6cq9Xa0wLsummbrs+reCyS7m/gZ+Hc6mvqeJcbmOqfB3QNzyJnA1T7FLC4DUJQ== clementsam75@gmail.com" > ~/.ssh/id_rsa.pub
+  - echo -e "-----BEGIN OPENSSH PRIVATE KEY-----\nb3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAACFwAAAAdzc2gtcn\nNhAAAAAwEAAQAAAgEAyDGxtFCQA0WBTue5kYuObRdpsnFIYiXBu1g53sBxyRAyyJYPZuMK\nr5AIUX652YoH5Nuy/Yztxlq/olp6sgQ93vC8TayxXAcmbtGKjKdIXYJACmfr4lrUJQhBnO\nLPCiMFs/sSSvflCYlt6tqJDqqjwXF00+cAs1lPwMjZaTTfk9yl0gq5L2sNkli5dVJgh4ZA\nq90vR416KQEDUZrLUbRrtOC/dvQ3yigZiPTJ94ooSxN/orUofCp5mGoPzcDrn0KYtpQN7w\nBCzvgilSsDpyZpS10NrwRGbmK1bjkxP5xReIe8ClGK30Piair40jPmw6WA62sNtUzNXd9t\nsjOSAq+NGYFr3qC6XIMeqxvH5/jMB9tsoVCwZ6Q5s+pIk6yXQnM5paS4IbaLK20uPjCNxf\nYUOfkr744OmwZDy4qHC0NWvaSvH0/w2elUEw/qtoNvevzueRBdk7Gdi34Lugrr83uy9/WC\nGXKXtlSc0tzFtnsgi6x5ZUG4dt+1zFO+lxgnLCAk4V1tA4Qw4VxIoKDWkYRZq8bWcF94kV\n5GShUGDdObZnHEOmN79b4bk2qigEpTER23pZNGZYvWYzM+dtGgaIpbMwaWyM2UmQft4U/n\no0EqDx+bTOnKvV2tMC7Lppm67Pq3gsku5v4Gfh3Opr6niXG5jqnwd0Dc8iZwNU+xSwuA1C\nUAAAdQ90jG0vdIxtIAAAAHc3NoLXJzYQAAAgEAyDGxtFCQA0WBTue5kYuObRdpsnFIYiXB\nu1g53sBxyRAyyJYPZuMKr5AIUX652YoH5Nuy/Yztxlq/olp6sgQ93vC8TayxXAcmbtGKjK\ndIXYJACmfr4lrUJQhBnOLPCiMFs/sSSvflCYlt6tqJDqqjwXF00+cAs1lPwMjZaTTfk9yl\n0gq5L2sNkli5dVJgh4ZAq90vR416KQEDUZrLUbRrtOC/dvQ3yigZiPTJ94ooSxN/orUofC\np5mGoPzcDrn0KYtpQN7wBCzvgilSsDpyZpS10NrwRGbmK1bjkxP5xReIe8ClGK30Piair4\n0jPmw6WA62sNtUzNXd9tsjOSAq+NGYFr3qC6XIMeqxvH5/jMB9tsoVCwZ6Q5s+pIk6yXQn\nM5paS4IbaLK20uPjCNxfYUOfkr744OmwZDy4qHC0NWvaSvH0/w2elUEw/qtoNvevzueRBd\nk7Gdi34Lugrr83uy9/WCGXKXtlSc0tzFtnsgi6x5ZUG4dt+1zFO+lxgnLCAk4V1tA4Qw4V\nxIoKDWkYRZq8bWcF94kV5GShUGDdObZnHEOmN79b4bk2qigEpTER23pZNGZYvWYzM+dtGg\naIpbMwaWyM2UmQft4U/no0EqDx+bTOnKvV2tMC7Lppm67Pq3gsku5v4Gfh3Opr6niXG5jq\nnwd0Dc8iZwNU+xSwuA1CUAAAADAQABAAACAC4xWUGz/SbkGMwuJ+FvhDOj3V2xSfRrpeIm\nn2PIn/i25iDmjzM8XDDaWTEEvrl1YhDqqMhchljog6NgoUMGO4h/n9OEb4A+nh2f+AowZ0\nA8V66PABzAvIa2+vzKUN+T6TL4UeY+gPjMXzJ7rnhV42c1WLG0cbLwfriLH69o5dXmadSn\naMeKOh10n4Z0tZVP4whFBy3JdVCUzUE9KID30opv+X3nKCBbVFkHsrqNhHKeUysmBetwmZ\nITlwXw5+1dnoMycmydcMz08HXe8P7WnCEpnYiuwdmiqR5/z99PoHThTQBMhHCz50B8HeHS\n3AJ04+RuVUFqMVDhxxwBTkWUYEgDY95YPYJAKzZT/GZUBfDCNhh+H+wU/yvGjPmpTN7KD5\ntpnRBPx7sJozG57+OOtuFWLR61GkEdyxEAGHqLiXbh4lQOP1YvceQCS+lhTFr4Jg03kEVr\nfdRoMPE6K1ZcTZoB8ggFKj25wCO3bcnSxhVmG6gZITe6aHyRrOO1qeMsJ45kSaG1iJ5Jkf\nLITfGAftZBpkLMUo/Iz8QTl0LJQSoKGgcKvY7O1PA9q2vGCctvIPJUqix1Lclm57/E0bX9\nBiNAh894P6xn0kj0dW6zOpo+g2DNIcm3SgDirqkQTl2BSjaVMdQ7YbH/EqiIJzqashwpvj\ntyDO82+5FK2fV9ezoZAAABAQC72A5UnQxLEzGvjRfLjRRIklDFynvRtl9K0oDtn+Jx5Drx\n6DP+HNu3SNSffDPLx5rMM72bSJn014bmj5o0KTPZPO6KpTrcIFJENp5ekYFfwXzxYOMf4O\nskFtiNDl2F5htbBwIsE+u1mS/5fOpe5JTbXgutXj1ztBuL/kI1vgk5lY5tBSQw7DjKc1y6\nFhdGaQSOJ4VedAg8QX5kbn2wXbGzvCkb9bai7meC0uzQvwcup7OsfPtPJ8PLNDYp7t0JIP\ndbHQWZDH0xNPrnx8QL3grHg54LmIzG/9uZQ5JimNpshWXzhD0bUaLYSUHrkqW/L5XBBKVj\n3e/EdrMySJm8pydyAAABAQD5DujqwwhBDnKnX8PpSZrLHu2mn33aVx+jRvwTLb3PgH7xre\naPYpUghlWPac6Kcwn4z61QNqaLhfufxn6JUreYd3DHDo9r2KNZtNjfUCjblpm2KhSKU0ZZ\n3ziko5ZSxbXFWVgVLK+u1zA47fwIWRNC9qiBpIcol0e+UzgrA4aBFUStHmh8ts0UzVj4P5\nEhauBVC0jp/T/v8urp0Uj74mQqN3C1kHXlpWaFsl1YgYvWbPuILltyd2LGzGmxP7R2vuWT\nJ6FOClgU1rcvI7skpjjEFUfQ0BDhlDKXDQqBJTDLz4pyn1GuS3b0aoi2Fd6yu3hdTt3zTV\nTKihulvJLWwTlHAAABAQDNxiCKDgodVimjdQBmp8IUFMZQ+pBAq+KydWqqQ7KAVcDM1Ofz\nHj8gOvbupdqqMRU8WVT+v/rYDQa/SY/gCb0Pnd25EvitFc3VbcVPhAswdeGgmbsnXtuBDq\ncQi3YeiHVJlftPOidjaab7K7VtiGPbbMKPgNfIuMIZ0C0lUQChfIYbq5Rfkdm8UkWfb5gY\ntd3jjCu3E0388WfY6J2xs3fYw/2jae7B80vUhcxPrhSMulZAYLamc/vXUMqWAlPfq5oGu2\n+ur1EtE9VVx78zJNdAtuN3ziuJEelM28QINRLmN8aCXbheJ8GjZ3EsxGhAFLCPBR8A1RqI\ngqefilUC/70zAAAAFmNsZW1lbnRzYW03NUBnbWFpbC5jb20BAgME\n-----END OPENSSH PRIVATE KEY-----" > ~/.ssh/id_rsa
+  - chmod 600 ~/.ssh/id_rsa*
+  - eval `ssh-agent -s`
+  - ssh-add ~/.ssh/id_rsa
+
+script:
+  - make tests
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
+
+notifications:
+  email: false
