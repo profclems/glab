@@ -3,9 +3,9 @@ package commands
 import (
 	"fmt"
 
-	"github.com/profclems/glab/internal/utils"
 	"github.com/profclems/glab/internal/git"
 	"github.com/profclems/glab/internal/manip"
+	"github.com/profclems/glab/internal/utils"
 
 	"github.com/spf13/cobra"
 	"github.com/xanzy/go-gitlab"

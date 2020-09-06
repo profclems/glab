@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-func Test_IssueCreate (t *testing.T) {
+func Test_IssueCreate(t *testing.T) {
 	rand.Seed(time.Now().UnixNano())
 	t.Parallel()
 	repo := copyTestRepo(t)
