@@ -34,7 +34,7 @@ var mrViewCmd = &cobra.Command{
 		gitlabClient, repo := git.InitGitlabClient()
 
 		if r, _ := cmd.Flags().GetString("repo"); r != "" {
-			repo = r
+			repo, _ = fixRepoNamespace(r)
 		}
 		opts := &gitlab.GetMergeRequestsOptions{}
 		opts.IncludeDivergedCommitsCount = gitlab.Bool(true)
@@ -151,7 +151,6 @@ var mrViewCmd = &cobra.Command{
 }
 
 func init() {
-	mrViewCmd.Flags().StringP("repo", "r", "", "Select another repository using the OWNER/REPO format. Supports group namespaces")
 	mrViewCmd.Flags().BoolP("comments", "c", false, "Show mr comments and activities")
 	mrViewCmd.Flags().BoolP("system-logs", "s", false, "Show system activities / logs")
 	mrViewCmd.Flags().BoolP("web", "w", false, "Open mr in a browser. Uses default browser or browser specified in BROWSER variable")

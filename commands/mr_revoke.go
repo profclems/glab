@@ -27,7 +27,7 @@ func revokeMergeRequest(cmd *cobra.Command, args []string) {
 		fmt.Println(color.Yellow.Sprint("Revoking approval for Merge Request #" + mergeID + "..."))
 		gitlabClient, repo := git.InitGitlabClient()
 		if r, _ := cmd.Flags().GetString("repo"); r != "" {
-			repo = r
+			repo, _ = fixRepoNamespace(r)
 		}
 		resp, _ := gitlabClient.MergeRequestApprovals.UnapproveMergeRequest(repo, manip.StringToInt(mergeID))
 		if resp != nil {

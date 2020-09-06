@@ -27,6 +27,9 @@ func listReleases(cmd *cobra.Command, args []string) error {
 	}
 
 	gitlabClient, repo := git.InitGitlabClient()
+	if r, _ := cmd.Flags().GetString("repo"); r != "" {
+		repo, _ = fixRepoNamespace(r)
+	}
 
 	if tag != "" {
 		release, _, err := gitlabClient.Releases.GetRelease(repo, tag)

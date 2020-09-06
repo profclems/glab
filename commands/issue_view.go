@@ -33,7 +33,7 @@ var issueViewCmd = &cobra.Command{
 		gitlabClient, repo := git.InitGitlabClient()
 
 		if r, _ := cmd.Flags().GetString("repo"); r != "" {
-			repo = r
+			repo, _ = fixRepoNamespace(r)
 		}
 
 		issue, _, err := gitlabClient.Issues.GetIssue(repo, pid)
@@ -160,7 +160,6 @@ func prettifyNilEmptyValues(value interface{}, defVal string) interface{} {
 }
 
 func init() {
-	issueViewCmd.Flags().StringP("repo", "r", "", "Select another repository using the OWNER/REPO format. Supports group namespaces")
 	issueViewCmd.Flags().BoolP("comments", "c", false, "Show issue comments and activities")
 	issueViewCmd.Flags().BoolP("web", "w", false, "Open issue in a browser. Uses default browser or browser specified in BROWSER variable")
 	issueViewCmd.Flags().IntP("page", "p", 1, "Page number")

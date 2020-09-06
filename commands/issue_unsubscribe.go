@@ -25,7 +25,7 @@ var issueUnsubscribeCmd = &cobra.Command{
 			mergeID := strings.TrimSpace(args[0])
 			gitlabClient, repo := git.InitGitlabClient()
 			if r, _ := cmd.Flags().GetString("repo"); r != "" {
-				repo = r
+				repo, _ = fixRepoNamespace(r)
 			}
 			arrIds := strings.Split(strings.Trim(mergeID, "[] "), ",")
 			for _, i2 := range arrIds {

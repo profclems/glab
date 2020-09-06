@@ -84,7 +84,7 @@ var issueCreateCmd = &cobra.Command{
 		}
 		gitlabClient, repo := git.InitGitlabClient()
 		if r, _ := cmd.Flags().GetString("repo"); r != "" {
-			repo = r
+			repo, _ = fixRepoNamespace(r)
 		}
 		issue, _, err := gitlabClient.Issues.CreateIssue(repo, l)
 		if err != nil {

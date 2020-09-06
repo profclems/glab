@@ -54,5 +54,6 @@ var releaseCmd = &cobra.Command{
 }
 
 func init() {
+	releaseCmd.PersistentFlags().StringP("repo", "R", "", "Select another repository using the OWNER/REPO format or the project ID. Supports group namespaces")
 	RootCmd.AddCommand(releaseCmd)
 }

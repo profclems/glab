@@ -44,7 +44,7 @@ func acceptMergeRequest(cmd *cobra.Command, args []string) {
 	}
 	gitlabClient, repo := git.InitGitlabClient()
 	if r, _ := cmd.Flags().GetString("repo"); r != "" {
-		repo = r
+		repo, _ = fixRepoNamespace(r)
 	}
 	mr, resp, _ := gitlabClient.MergeRequests.AcceptMergeRequest(repo, manip.StringToInt(mergeID), l)
 

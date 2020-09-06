@@ -32,7 +32,7 @@ func listLabels(cmd *cobra.Command, args []string) {
 
 	gitlabClient, repo := git.InitGitlabClient()
 	if r, _ := cmd.Flags().GetString("repo"); r != "" {
-		repo = r
+		repo, _ = fixRepoNamespace(r)
 	}
 	// List all labels
 	labels, _, err := gitlabClient.Labels.ListLabels(repo, l)

@@ -29,7 +29,7 @@ func listMergeRequestEligibleApprovers(cmd *cobra.Command, args []string) error 
 		fmt.Printf("\nListing Merge Request #%v eligible approvers\n", mergeID)
 		gitlabClient, repo := git.InitGitlabClient()
 		if r, _ := cmd.Flags().GetString("repo"); r != "" {
-			repo = r
+			repo, _ = fixRepoNamespace(r)
 		}
 		mrApprovals, _, err := gitlabClient.MergeRequestApprovals.GetApprovalState(repo, manip.StringToInt(mergeID))
 		if err != nil {

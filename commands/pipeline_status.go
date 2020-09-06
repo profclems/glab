@@ -2,6 +2,7 @@ package commands
 
 import (
 	"fmt"
+	"github.com/profclems/glab/internal/config"
 	"time"
 
 	"github.com/profclems/glab/internal/git"
@@ -32,9 +33,10 @@ var pipelineStatusCmd = &cobra.Command{
 		}
 		branch, _ := cmd.Flags().GetString("branch")
 		var repo string
-		rep, _ := cmd.Flags().GetString("repo")
-		if rep != "" {
-			repo = rep
+		if r, _ := cmd.Flags().GetString("repo"); r != "" {
+			repo, _ = fixRepoNamespace(r)
+		} else {
+			repo = config.GetRepo()
 		}
 		live, _ := cmd.Flags().GetBool("live")
 		var err error

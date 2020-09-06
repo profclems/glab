@@ -2,6 +2,7 @@ package commands
 
 import (
 	"fmt"
+	"log"
 	"strings"
 
 	"github.com/profclems/glab/internal/git"
@@ -37,12 +38,10 @@ func deleteMergeRequest(cmd *cobra.Command, args []string) error {
 			if issue != nil {
 				if issue.StatusCode == 204 {
 					fmt.Println(color.Green.Sprint("Merge Request Deleted Successfully"))
-				} else if issue.StatusCode == 404 {
-					fmt.Println(color.Red.Sprint("Merge Request does not exist"))
 				} else if issue.StatusCode == 401 {
-					fmt.Println(color.Red.Sprint("You are not authorized to perform this action"))
+					log.Println(color.Red.Sprint("you are not authorized to perform this action"))
 				} else {
-					fmt.Println(color.Red.Sprint("Could not complete request."))
+					log.Println(color.Red.Sprint(issue.Response.Status))
 				}
 			} else if err != nil {
 				return err

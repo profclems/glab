@@ -34,6 +34,17 @@ func contains(arr []string, str string) bool {
 	return false
 }
 
+func fixRepoNamespace(repo string) (string, error) {
+	if !strings.Contains(repo, "/") {
+		u, err := currentUser()
+		if err != nil {
+			return "", err
+		}
+		repo = u + "/" + repo
+	}
+	return repo, nil
+}
+
 var repoCmd = &cobra.Command{
 	Use:     "repo <command> [flags]",
 	Short:   `Work with GitLab repositories and projects`,

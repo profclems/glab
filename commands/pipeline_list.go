@@ -23,7 +23,7 @@ var pipelineListCmd = &cobra.Command{
 func listPipelines(cmd *cobra.Command, args []string) {
 	gitlabClient, repo := git.InitGitlabClient()
 	if r, _ := cmd.Flags().GetString("repo"); r != "" {
-		repo = r
+		repo, _ = fixRepoNamespace(r)
 	}
 	l := &gitlab.ListProjectPipelinesOptions{}
 	if m, _ := cmd.Flags().GetString("status"); m != "" {

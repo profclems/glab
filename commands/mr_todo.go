@@ -19,6 +19,9 @@ var mrToDoCmd = &cobra.Command{
 
 		gitlabClient, repo := git.InitGitlabClient()
 		mID := args[0]
+		if r, _ := cmd.Flags().GetString("repo"); r != "" {
+			repo, _ = fixRepoNamespace(r)
+		}
 
 		_, _, err := gitlabClient.MergeRequests.CreateTodo(repo, manip.StringToInt(mID))
 		if err != nil {

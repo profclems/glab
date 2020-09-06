@@ -20,7 +20,7 @@ var mrCreateNoteCmd = &cobra.Command{
 		mID := args[0]
 		body, err := cmd.Flags().GetString("message")
 		if r, _ := cmd.Flags().GetString("repo"); r != "" {
-			repo = r
+			repo, _ = fixRepoNamespace(r)
 		}
 		if err != nil {
 			return err

@@ -26,7 +26,7 @@ var issueReopenCmd = &cobra.Command{
 			issueID := strings.TrimSpace(args[0])
 			gitlabClient, repo := git.InitGitlabClient()
 			if r, _ := cmd.Flags().GetString("repo"); r != "" {
-				repo = r
+				repo, _ = fixRepoNamespace(r)
 			}
 			l := &gitlab.UpdateIssueOptions{}
 			l.StateEvent = gitlab.String("reopen")
