@@ -35,7 +35,7 @@ func approveMergeRequest(cmd *cobra.Command, args []string) {
 		fmt.Println(color.Yellow.Sprint("Approving Merge Request #" + mergeID + "..."))
 		gitlabClient, repo := git.InitGitlabClient()
 		if r, _ := cmd.Flags().GetString("repo"); r != "" {
-			repo = r
+			repo, _ = fixRepoNamespace(r)
 		}
 		_, resp, _ := gitlabClient.MergeRequestApprovals.ApproveMergeRequest(repo, manip.StringToInt(mergeID), l)
 		if resp != nil {

@@ -26,7 +26,7 @@ func issuesRelatedMergeRequest(cmd *cobra.Command, args []string) {
 		l := &gitlab.GetIssuesClosedOnMergeOptions{}
 		gitlabClient, repo := git.InitGitlabClient()
 		if r, _ := cmd.Flags().GetString("repo"); r != "" {
-			repo = r
+			repo, _ = fixRepoNamespace(r)
 		}
 		mr, _, err := gitlabClient.MergeRequests.GetIssuesClosedOnMerge(repo, manip.StringToInt(mergeID), l)
 		if err != nil {

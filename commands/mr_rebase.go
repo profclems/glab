@@ -25,7 +25,7 @@ func acceptRebaseRequest(cmd *cobra.Command, args []string) {
 	mergeID := strings.Trim(args[0], " ")
 	gitlabClient, repo := git.InitGitlabClient()
 	if r, _ := cmd.Flags().GetString("repo"); r != "" {
-		repo = r
+		repo, _ = fixRepoNamespace(r)
 	}
 	fmt.Println("Sending request...")
 	_, err := gitlabClient.MergeRequests.RebaseMergeRequest(repo, manip.StringToInt(mergeID))

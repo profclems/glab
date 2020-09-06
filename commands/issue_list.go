@@ -49,7 +49,7 @@ var issueListCmd = &cobra.Command{
 		}
 		gitlabClient, repo := git.InitGitlabClient()
 		if r, _ := cmd.Flags().GetString("repo"); r != "" {
-			repo = r
+			repo, _ = fixRepoNamespace(r)
 		}
 		if lb, _ := cmd.Flags().GetBool("mine"); lb {
 			u, _, _ := gitlabClient.Users.CurrentUser()

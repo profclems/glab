@@ -26,7 +26,7 @@ func reopenMergeRequestState(cmd *cobra.Command, args []string) {
 		mergeID := strings.Trim(args[0], " ")
 		gitlabClient, repo := git.InitGitlabClient()
 		if r, _ := cmd.Flags().GetString("repo"); r != "" {
-			repo = r
+			repo, _ = fixRepoNamespace(r)
 		}
 		l := &gitlab.UpdateMergeRequestOptions{}
 		l.StateEvent = gitlab.String("reopen")

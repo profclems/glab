@@ -46,6 +46,8 @@ func pipelineCITrace(cmd *cobra.Command, args []string) {
 	if repo == "" {
 		repo = git.GetRepo()
 	}
+	repo, _ = fixRepoNamespace(repo)
+
 	branch, _ := cmd.Flags().GetString("branch")
 	var err error
 	if branch == "" {

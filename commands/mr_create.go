@@ -3,6 +3,7 @@ package commands
 import (
 	"fmt"
 
+	"github.com/profclems/glab/internal/utils"
 	"github.com/profclems/glab/internal/git"
 	"github.com/profclems/glab/internal/manip"
 
@@ -23,15 +24,19 @@ var mrCreateCmd = &cobra.Command{
 			return nil
 		}
 		var sourceBranch string
-		targetBranch := "master"
 		var mergeTitle string
 		var mergeDescription string
+		var err error
 		l := &gitlab.CreateMergeRequestOptions{}
 
 		gitlabClient, repo := git.InitGitlabClient()
 		if r, _ := cmd.Flags().GetString("repo"); r != "" {
-			repo = r
+			repo, err = fixRepoNamespace(r)
+			if err != nil {
+				return err
+			}
 		}
+		targetBranch, err := git.GetDefaultBranch(repo)
 		if source, _ := cmd.Flags().GetString("source-branch"); source != "" {
 			sourceBranch = strings.Trim(source, "[] ")
 		} else {
@@ -75,14 +80,24 @@ var mrCreateCmd = &cobra.Command{
 			if err != nil {
 				return err
 			}
-			mergeTitle = strings.Trim(commit.Title, "'")
-			//fmt.Println(git.CommitBody(branchRef[0].))
+			mergeTitle = utils.Humanize(commit.Title)
+			if c, err := git.UncommittedChangeCount(); c != 0 {
+				if err != nil {
+					return err
+				}
+				fmt.Printf("warning: you have %v uncommitted changes\n", c)
+			}
+			err = git.Push(git.GetRemoteURL(), sourceBranch)
+			if err != nil {
+				return err
+			}
 		}
 		if t, _ := cmd.Flags().GetString("target-branch"); t != "" {
-			targetBranch = strings.Trim(t, "[] ")
-		} else {
-			targetBranch = manip.AskQuestionWithInput("Target Branch (Default is "+targetBranch+"):", targetBranch, false)
+			targetBranch = t
 		}
+		//} else {
+		//	targetBranch = manip.AskQuestionWithInput("Target Branch (Default is "+targetBranch+"):", targetBranch, false)
+		//}
 		isDraft, _ := cmd.Flags().GetBool("draft")
 		isWIP, _ := cmd.Flags().GetBool("wip")
 		if isDraft || isWIP {
@@ -147,7 +162,7 @@ func init() {
 	mrCreateCmd.Flags().BoolP("fill", "f", false, "Do not prompt for title/description and just use commit info")
 	mrCreateCmd.Flags().BoolP("draft", "", false, "Mark merge request as a draft")
 	mrCreateCmd.Flags().BoolP("wip", "", false, "Mark merge request as a work in progress. Alternative to --draft")
-	mrCreateCmd.Flags().BoolP("push", "", false, "Push commit changes after creating merge request. Make sure you have committed changes")
+	mrCreateCmd.Flags().BoolP("push", "", false, "Push committed changes after creating merge request. Make sure you have committed changes")
 	mrCreateCmd.Flags().StringP("title", "t", "", "Supply a title for merge request")
 	mrCreateCmd.Flags().StringP("description", "d", "", "Supply a description for merge request")
 	mrCreateCmd.Flags().StringP("label", "l", "", "Add label by name. Multiple labels should be comma separated")

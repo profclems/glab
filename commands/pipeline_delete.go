@@ -29,7 +29,7 @@ var pipelineDeleteCmd = &cobra.Command{
 func deletePipeline(cmd *cobra.Command, args []string) {
 	gitlabClient, repo := git.InitGitlabClient()
 	if r, _ := cmd.Flags().GetString("repo"); r != "" {
-		repo = r
+		repo, _ = fixRepoNamespace(r)
 	}
 	if m, _ := cmd.Flags().GetString("status"); m != "" {
 		l := &gitlab.ListProjectPipelinesOptions{}

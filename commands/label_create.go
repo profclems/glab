@@ -21,7 +21,7 @@ func createLabel(cmd *cobra.Command, args []string) {
 
 	gitlabClient, repo := git.InitGitlabClient()
 	if r, _ := cmd.Flags().GetString("repo"); r != "" {
-		repo = r
+		repo, _ = fixRepoNamespace(r)
 	}
 	l := &gitlab.CreateLabelOptions{}
 

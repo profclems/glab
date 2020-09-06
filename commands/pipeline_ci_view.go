@@ -61,6 +61,7 @@ var pipelineCIView = &cobra.Command{
 		if projectID == "" {
 			projectID = git.GetRepo()
 		}
+		projectID, _ = fixRepoNamespace(projectID)
 
 		refName, _ = cmd.Flags().GetString("branch")
 		if refName == "" {

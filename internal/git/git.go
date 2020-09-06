@@ -86,7 +86,8 @@ func getRepoNameWithNamespace(remoteURL string) (string, error) {
 	return repo, nil
 }
 
-// HasHub is true if git binary is installed
+/*
+// HasGit is true if git binary is installed
 var HasGit bool
 
 func init() {
@@ -94,6 +95,53 @@ func init() {
 	if err == nil {
 		HasGit = true
 	}
+}
+*/
+
+// TODO: GetDefaultBranch looks really messy and should be fixed properly
+
+// GetDefaultBranch finds the repo's default branch
+func GetDefaultBranch(remote ...string) (string, error)  {
+	var org string
+	if len(remote)>0 {
+		org = remote[0]
+	} else {
+		org = config.GetEnv("GIT_REMOTE_URL_VAR")
+	}
+	if strings.Contains(org, "/") {
+		t := config.GetEnv("GITLAB_TOKEN")
+		u := config.GetEnv("GITLAB_URI")
+		p := "https://"
+		if strings.HasPrefix(u, "https://") {
+			u = strings.TrimPrefix(u, "https://")
+		} else if strings.HasPrefix(u, "http://") {
+			u = strings.TrimPrefix(u, "http://")
+			p = "http://"
+		}
+		org = fmt.Sprintf("%soauth2:%s@%s/%s.git",
+			p, t, u, org)
+	}
+	getDefBranch := exec.Command("git",
+		"remote","show", org)
+	output, err := run.PrepareCmd(getDefBranch).Output()
+	if err != nil {
+		return "master", err
+	}
+
+	var headBranch string
+
+	for _, o := range strings.Split(string(output), "\n") {
+		o = strings.TrimSpace(o)
+		r, err := regexp.Compile(`(HEAD branch:)\s+`)
+		if err != nil {
+			return "master", err
+		}
+		if r.MatchString(o) {
+			headBranch = strings.TrimPrefix(o, "HEAD branch: ")
+			break
+		}
+	}
+	return headBranch, err
 }
 
 // InitGitlabClient : creates client
