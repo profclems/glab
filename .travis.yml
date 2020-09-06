@@ -15,6 +15,8 @@ cache:
     - $HOME/gopath/pkg/mod
 
 addons:
+  ssh_known_hosts:
+      - gitlab.com
   apt:
     packages:
       - silversearcher-ag
