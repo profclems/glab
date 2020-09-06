@@ -1,0 +1,32 @@
+language: go
+
+os:
+  - linux
+
+go:
+  - 1.15.x
+
+# use containers which run faster and have cache
+sudo: false
+
+cache:
+  directories:
+    - $HOME/.cache/go-build
+    - $HOME/gopath/pkg/mod
+
+addons:
+  apt:
+    packages:
+      - silversearcher-ag
+
+before_install:
+  - go get -t -v ./...
+
+script:
+  - make tests
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
+
+notifications:
+  email: false
