@@ -13,7 +13,8 @@ glab release <command> [flags]
 ### Options
 
 ```
-  -h, --help   help for release
+  -h, --help          help for release
+  -R, --repo string   Select another repository using the OWNER/REPO format or the project ID. Supports group namespaces
 ```
 
 ### SEE ALSO

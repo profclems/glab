@@ -17,6 +17,12 @@ glab release list [flags]
   -t, --tag string   Filter releases by tag <name>
 ```
 
+### Options inherited from parent commands
+
+```
+  -R, --repo string   Select another repository using the OWNER/REPO format or the project ID. Supports group namespaces
+```
+
 ### SEE ALSO
 
 * [glab release](glab_release.md)	 - Create, view and manage releases

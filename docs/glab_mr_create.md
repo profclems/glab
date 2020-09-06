@@ -23,7 +23,7 @@ glab mr create [flags]
   -l, --label string           Add label by name. Multiple labels should be comma separated
   -m, --milestone int          add milestone by <id> for merge request (default -1)
       --no-editor              Don't open editor to enter description. If set to true, uses prompt. Default is false
-      --push                   Push commit changes after creating merge request. Make sure you have committed changes
+      --push                   Push committed changes after creating merge request. Make sure you have committed changes
       --remove-source-branch   Remove Source Branch on merge
   -s, --source-branch string   The Branch you are creating the merge request. Default is the current branch.
   -b, --target-branch string   The target or base branch into which you want your code merged
