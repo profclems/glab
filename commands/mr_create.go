@@ -40,7 +40,7 @@ var mrCreateCmd = &cobra.Command{
 		if t, _ := cmd.Flags().GetString("target-branch"); t != "" {
 			targetBranch = t
 		} else {
-			targetBranch, _ =  git.GetDefaultBranch(repo)
+			targetBranch, _ = git.GetDefaultBranch(repo)
 		}
 		if source, _ := cmd.Flags().GetString("source-branch"); source != "" {
 			sourceBranch = strings.Trim(source, "[] ")
