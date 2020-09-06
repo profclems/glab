@@ -27,6 +27,7 @@ var mrCreateCmd = &cobra.Command{
 		var mergeTitle string
 		var mergeDescription string
 		var err error
+		var targetBranch string
 		l := &gitlab.CreateMergeRequestOptions{}
 
 		gitlabClient, repo := git.InitGitlabClient()
@@ -36,7 +37,11 @@ var mrCreateCmd = &cobra.Command{
 				return err
 			}
 		}
-		targetBranch, err := git.GetDefaultBranch(repo)
+		if t, _ := cmd.Flags().GetString("target-branch"); t != "" {
+			targetBranch = t
+		} else {
+			targetBranch, _ =  git.GetDefaultBranch(repo)
+		}
 		if source, _ := cmd.Flags().GetString("source-branch"); source != "" {
 			sourceBranch = strings.Trim(source, "[] ")
 		} else {
@@ -92,12 +97,6 @@ var mrCreateCmd = &cobra.Command{
 				return err
 			}
 		}
-		if t, _ := cmd.Flags().GetString("target-branch"); t != "" {
-			targetBranch = t
-		}
-		//} else {
-		//	targetBranch = manip.AskQuestionWithInput("Target Branch (Default is "+targetBranch+"):", targetBranch, false)
-		//}
 		isDraft, _ := cmd.Flags().GetBool("draft")
 		isWIP, _ := cmd.Flags().GetBool("wip")
 		if isDraft || isWIP {

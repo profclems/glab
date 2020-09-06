@@ -81,7 +81,7 @@ func TestMrCmd(t *testing.T) {
 
 		out := stripansi.Strip(string(b))
 		require.Contains(t, out, fmt.Sprintf("Deleting Merge Request #%s\n", mrID))
-		require.Contains(t, out, fmt.Sprintf("Merge Request Deleted Successfully"))
+		require.Contains(t, out, "Merge Request Deleted Successfully")
 	})
 }
 
