@@ -1,0 +1,40 @@
+language: go
+
+os:
+  - linux
+
+go:
+  - 1.15.x
+
+# use containers which run faster and have cache
+sudo: false
+
+cache:
+  directories:
+    - $HOME/.cache/go-build
+    - $HOME/gopath/pkg/mod
+
+addons:
+  ssh_known_hosts:
+      - gitlab.com
+  apt:
+    packages:
+      - silversearcher-ag
+
+before_install:
+  - echo -e "Host *\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
+  - go get -t -v ./...
+  - echo -e $TRAVIS_SSH_PUBLIC_KEY > ~/.ssh/id_rsa.pub
+  - echo -e $TRAVIS_SSH_PRIVATE_KEY > ~/.ssh/id_rsa
+  - chmod 600 ~/.ssh/id_rsa*
+  - eval `ssh-agent -s`
+  - ssh-add ~/.ssh/id_rsa
+
+script:
+  - make tests
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
+
+notifications:
+  email: false
