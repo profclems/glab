@@ -41,7 +41,7 @@ func TestMrCmd(t *testing.T) {
 		t.Log(out)
 		out = stripansi.Strip(out)
 		assert.Contains(t, out, "https://gitlab.com/glab-cli/test/-/merge_requests")
-		r := regexp.MustCompile("#\\S+")
+		r := regexp.MustCompile(`#\S+`)
 
 		//i := strings.Index(out, "/diffs\n")
 		//mrID = strings.TrimPrefix(out[:i], "https://gitlab.com/glab-cli/test/-/merge_requests/")
@@ -105,7 +105,7 @@ func Test_mrCmd_autofill(t *testing.T) {
 		t.Log(out)
 		out = stripansi.Strip(out)
 		require.Contains(t, out, "https://gitlab.com/glab-cli/test/-/merge_requests")
-		r := regexp.MustCompile("#\\S+")
+		r := regexp.MustCompile(`#\S+`)
 		mrID = strings.TrimPrefix(r.FindStringSubmatch(out)[0], "#")
 		t.Log(mrID)
 
@@ -124,7 +124,7 @@ func Test_mrCmd_autofill(t *testing.T) {
 		}
 		out := stripansi.Strip(string(b))
 		require.Contains(t, out, fmt.Sprintf("Deleting Merge Request #%s\n", mrID))
-		require.Contains(t, out, fmt.Sprintf("Merge Request Deleted Successfully"))
+		require.Contains(t, out, "Merge Request Deleted Successfully")
 	})
 
 }
