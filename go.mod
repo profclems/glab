@@ -5,6 +5,7 @@ go 1.13
 require (
 	github.com/AlecAivazis/survey/v2 v2.1.1
 	github.com/MakeNowJust/heredoc v1.0.0
+	github.com/acarl005/stripansi v0.0.0-20180116102854-5a71ef0e047d
 	github.com/charmbracelet/glamour v0.2.0
 	github.com/dustin/go-humanize v1.0.0
 	github.com/fatih/color v1.9.0 // indirect

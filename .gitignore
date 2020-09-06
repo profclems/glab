@@ -29,7 +29,7 @@ log.txt
 dist
 
 # GLab local config dir
-.glab-cli
+test/testdata/.glab-cli
 
 # The testdata-* copies created by the unit tests must be ignored or the tests
 # will encounter write errors as Git attempts to add the dirs to its index.

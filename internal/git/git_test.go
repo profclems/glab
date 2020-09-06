@@ -260,24 +260,33 @@ func Test_parseRemotes(t *testing.T) {
 }
 
 func TestGetDefaultBranch(t *testing.T) {
-	type args struct {
-		remote []string
-	}
 	tests := []struct {
 		name    string
-		args    args
+		args    string
 		want    string
 		wantErr bool
 	}{
 		{
-			name: ""
-		}
-	},
+			name: "No Params",
+			want: "master",
+		},
+		{
+			name: "Different Remote",
+			want: "master",
+			args: "profclems/test",
+		},
+		{
+			name: "Invalid repo",
+			want: "master",
+			args: "testssz",
+			wantErr: true,
+		},
+	}
 		for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := GetDefaultBranch(tt.args.remote...)
+			got, err := GetDefaultBranch(tt.args)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("GetDefaultBranch() error = %v, wantErr %v", err, tt.wantErr)
+				t.Logf("GetDefaultBranch() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if got != tt.want {

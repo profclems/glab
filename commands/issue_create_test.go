@@ -18,7 +18,6 @@ func Test_IssueCreate (t *testing.T) {
 		"-t", fmt.Sprintf("Testing Issue Title %v", rand.Intn(200)),
 		"-d", "This issue is created as a test",
 		"-l", "test,bug",
-		"--target-branch", "profclems",
 		"--weight", "1",
 		"--milestone", "1",
 		"--linked-mr", "3")
