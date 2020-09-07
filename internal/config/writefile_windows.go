@@ -1,8 +1,8 @@
 package config
 
 import (
-	"os"
 	"io/ioutil"
+	"os"
 )
 
 // Note: this is not atomic, but apparently there's no way to atomically
