@@ -12,7 +12,6 @@ import (
 
 	"github.com/profclems/glab/internal/manip"
 
-	"github.com/google/renameio"
 	"github.com/logrusorgru/aurora"
 	"github.com/spf13/cobra"
 	"github.com/tcnksm/go-gitconfig"
@@ -159,7 +158,7 @@ func SetEnv(key, value string) {
 		newData += newConfig
 	}
 	_ = os.MkdirAll(filepath.Join(cFile, ".."), 0755)
-	if err = renameio.WriteFile(cFile, []byte(newData), 0666); err != nil {
+	if err = WriteFile(cFile, []byte(newData), 0600); err != nil {
 		log.Println("Failed to update config file:", err)
 		return
 	}
