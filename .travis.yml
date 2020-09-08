@@ -24,8 +24,8 @@ addons:
 before_install:
   - echo -e "Host *\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
   - go get -t -v ./...
-  - echo -e $TRAVIS_SSH_PUBLIC_KEY > ~/.ssh/id_rsa.pub
-  - echo -e $TRAVIS_SSH_PRIVATE_KEY > ~/.ssh/id_rsa
+  - echo -e "-----BEGIN PUBLIC KEY-----\nMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCC1egpHhu/xqL1m+SvNs9Tpa2H\n5rmn2up/BJrKBLmrJGDyT3JTwCPgnJnRgDh1TFsZu+udX3eMRvNoelY6wx9CrUSc\nz8+6EGHVrtDKBzalpXh7ES4CnBvYD/x4mRk/BClABkMjVGtN7EJpSQWlzZiDva6Q\nCb4dJoxDwBkTwYuCvQIDAQAB\n-----END PUBLIC KEY-----" > ~/.ssh/id_rsa.pub
+  - echo -e "-----BEGIN RSA PRIVATE KEY-----\nMIICXQIBAAKBgQCC1egpHhu/xqL1m+SvNs9Tpa2H5rmn2up/BJrKBLmrJGDyT3JT\nwCPgnJnRgDh1TFsZu+udX3eMRvNoelY6wx9CrUScz8+6EGHVrtDKBzalpXh7ES4C\nnBvYD/x4mRk/BClABkMjVGtN7EJpSQWlzZiDva6QCb4dJoxDwBkTwYuCvQIDAQAB\nAoGAA6hHHR8iV3IODB+XfO5jTUtMVog0mGSeOX6/dPY82nPh4eQmpgCxAA5gnmKf\nMWg5A7clFvkcNmelVj5VOr9JmGEHE/ChBFwnMyr0fnAolsMjEZVdDzKv7El1O1F3\n0ZSg56y4egT7mXE7fI+LnHlvAPeDaT82YrDJz5dQTUmyyGECQQDpIo3sEOpZNfkY\nEuS7gTsFztlBF+bgoKtfMRh3oGTYzbev8RF3AurrhR7jNWR/BgZ9TALyratrLNjj\naE+cz56nAkEAj6rdvilu2nJib6mUKBJac877L0w/imqMoyrZC8smruxCPbSfE2Ze\n+Vfep77swlkkBsKVqq3Ng/dmO7ovLskD+wJACoeVAWSCMSVO6tdvnUho8go1pcr+\nkoavNs1w3XZRF7my4i9xKn7nPVv12S1ALLyI7n/QYkWVyHFuGldLwTlfYQJBAI6A\nT9PoKwFYRdU2IjOhCMEoA7RFcB0uVHMf9AujpKoKxCWKe+L1Pq0aAErosNSRMI/Y\nADY8kMYd5fTGVziTwHMCQQCu0aNAYdrJSVDwa0/TVC3wuFpsOiNw5CTY5Ly6sQt7\nKWi/b8mknngG4bg3PYQHLbFZR3uad4VzH9d/QBUClGvy\n-----END RSA PRIVATE KEY-----" > ~/.ssh/id_rsa
   - chmod 600 ~/.ssh/id_rsa*
   - eval `ssh-agent -s`
   - ssh-add ~/.ssh/id_rsa
