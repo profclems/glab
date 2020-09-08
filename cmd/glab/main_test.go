@@ -92,8 +92,6 @@ check your internet connection or status.gitlab.com or 'Run sudo gitlab-ctl stat
 	}
 }
 
-
-
 func TestExpandAlias(t *testing.T) {
 	t.Parallel()
 	err := config.SetAlias("test-co", "mr checkout")
