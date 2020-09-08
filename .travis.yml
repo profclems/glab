@@ -6,12 +6,11 @@ go:
 
 cache:
   directories:
-    - "$HOME/.cache/go-build"
-    - "$HOME/gopath/pkg/mod"
+  - "$HOME/.cache/go-build"
+  - "$HOME/gopath/pkg/mod"
 addons:
   ssh_known_hosts:
-    - gitlab.com
-
+  - gitlab.com
 before_install:
   - echo -e "Host *\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
   - go get -t -v ./...
@@ -33,7 +32,6 @@ after_success:
 
 notifications:
   email: false
-
 env:
   global:
-    secure: ItcDzznlPXck4Cj6lJAg2b3mdjvG+CnSJi02WPlDEHIXFTwa/iPERUUL+PTY3aVgEH7Zb+P9eXva1rLKVI5xhBtpEL2PATORZwLF9dofgr5wgT657lXQVdjDlt5W7qffht/8u7a8HqTUqmaFVBg9ZzqluL48CA5RuJPbzuiiu5K/1RVkWY851tIGyRDFi9dEGjYETqym77au0PR2nOIelOghYhJtqQmoniC8ASAmfQx+r6vDgFrp09GmCHoajGb/vwpfns93GF5Qv5S+WL9xGJCqTnsvXz4JmdS6UyK9mjyem2Obfv3UmNxsWdSdRzmTiOzkKI94nba7Nwa3BHfnCvY3if9DwGZ8SGYRXG+nJsAvrxIn+ak06FF6kAVBcMzJ+rPMTkMcbqu2ysXf9Xb+aBtK1qTbL4giti0iQ/38JQBPaH+9Wdz2+pJmirE4EoJp6aM4iTVk9nnZp57quuso5D4tMKmLJzWqrBgnDPLqYCTgTcwM64W3K9RObVZBksNlSMv7rEo0Q5Bh8lsQKuY/iBHZDqIrTBzQ724NtZwrwpjz82u1RXa8LIFcMEx9g2AvTdKTp8qBakFaJd8xWWiIccCGPHk7z+jCMBtZxypChHunfi9BN+Nwet0ixfnYuQC+YjyeCSwLM1tcVq+7y2b1r22QRLx2INPsVl7tH3cZo8w=
+    secure: Yo4OYHzldo3X3aqCbFdocz3jQ4EsUG44gyrBkHKd5ggQFTedug70zLyqG6SZORDAql6CEaH/IMzRi45NQhWqot5Ezv09/7J9BvELCk2HOgM111IC90BZHQW93OOr2WHwWvzFQDK1kXSJIlGubyD1GBQOFMSwV8hZQams/gGb7JUUwCBmYbX+rd0aMxtD6GGn/6WzlKO1mfFf/UPxvWMsiKx0TTti25q7gZmPIdS3yUFtlvuwqDUzRnzwNKYuEHHnClvWkNBg3I58a+nqrjGIuogh5NOIDSIFjdhtMy8L75N12WNXcQf36SA9BFz8xpdbgsK0I/cMerc03UNCA9CDxYStPxAmPwXnYsfdSRfcQv82U+OcBr56DPU0QPiDYv4o++kAt93RBcOmiVvDNZ28agJ+7Ajd8Yu5HLd12A+CKfuBqugc/8J8a0YpSJGchwb3xvtHWws06FfRQL3oSpslmlUqjRDTx/wLqJ1DETsSsWfruVYnnbNu+HUEMTKAjyMIV1hcLaH9vO3HUWWL6iUbusZxa1OkfiVVK3HyZF4aOLaPWTN5AB1ADaZ8ypequ9+2/xXi+YW6Ay0FyGtkIZNq28lbdbb7BcgtPUZaKFiFuWOw9qF8zJCOgUob5hrTBEL3JRoZry4+BMnxnxNMWo+UXsDJAzu3phD/EgnG4MzFGsY=
