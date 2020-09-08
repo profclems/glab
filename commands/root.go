@@ -2,12 +2,13 @@ package commands
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"strings"
 
-	"github.com/profclems/glab/internal/config"
 	"github.com/profclems/glab/internal/git"
 	"github.com/profclems/glab/internal/update"
+	"github.com/profclems/glab/internal/utils"
 
 	"github.com/MakeNowJust/heredoc"
 	"github.com/gookit/color"
@@ -68,20 +69,9 @@ var updateCmd = &cobra.Command{
 	Run:     checkForUpdate,
 }
 
-var configCmd = &cobra.Command{
-	Use:     "config [flags]",
-	Short:   `Configuration`,
-	Long:    ``,
-	Aliases: []string{"conf"},
-	Args:    cobra.MaximumNArgs(2),
-	Run:     config.Set,
-}
-
 func init() {
 	RootCmd.Flags().BoolP("version", "v", false, "show glab version information")
 	RootCmd.AddCommand(updateCmd)
-	initConfigCmd()
-	RootCmd.AddCommand(configCmd)
 }
 
 func er(msg interface{}) {
@@ -91,13 +81,6 @@ func er(msg interface{}) {
 func cmdErr(cmd *cobra.Command, args []string) {
 	color.Error.Println("Error: Unknown command:")
 	_ = cmd.Usage()
-}
-
-func initConfigCmd() {
-	configCmd.Flags().BoolP("global", "g", false, "Set configuration globally")
-	configCmd.Flags().StringP("url", "u", "", "specify the url of the gitlab server if self hosted (eg: https://gitlab.example.com).")
-	configCmd.Flags().StringP("remote-var", "o", "", "Shorthand name for the remote repository. An example of a remote shorthand name is `origin`")
-	configCmd.Flags().StringP("token", "t", "", "an authentication token for API requests.")
 }
 
 func isSuccessful(code int) bool {
@@ -186,4 +169,20 @@ func DisplayList(lInfo ListInfo) {
 		fmt.Println(emptyMessage)
 	}
 
+}
+
+func colorableOut(cmd *cobra.Command) io.Writer {
+	out := cmd.OutOrStdout()
+	if outFile, isFile := out.(*os.File); isFile {
+		return utils.NewColorable(outFile)
+	}
+	return out
+}
+
+func colorableErr(cmd *cobra.Command) io.Writer {
+	err := cmd.ErrOrStderr()
+	if outFile, isFile := err.(*os.File); isFile {
+		return utils.NewColorable(outFile)
+	}
+	return err
 }

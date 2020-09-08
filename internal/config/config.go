@@ -12,8 +12,6 @@ import (
 
 	"github.com/profclems/glab/internal/manip"
 
-	"github.com/logrusorgru/aurora"
-	"github.com/spf13/cobra"
 	"github.com/tcnksm/go-gitconfig"
 )
 
@@ -103,8 +101,16 @@ func SetGlobalPathDir() {
 
 // GetEnv : returns env variable value
 func GetEnv(key string) string {
+	if UseGlobalConfig {
+		env := GetKeyValueInFile(globalConfigFile, key) //Find variable in global env
+		if env == "NOTFOUND" || env == "OK" {
+			return ""
+		} else {
+			return env
+		}
+	}
 	if key != "" {
-		env := os.Getenv(key) //first get user defined variable via export
+		env := os.Getenv(key) //first get user defined variable from OS
 
 		if env == "" {
 			env = GetKeyValueInFile(configFile, key) //Find variable in local env
@@ -122,7 +128,7 @@ func GetEnv(key string) string {
 }
 
 // SetEnv : sets env variable
-func SetEnv(key, value string) {
+func SetEnv(key, value string) error {
 	cFile := configFile
 	if UseGlobalConfig {
 		cFile = globalConfigFile
@@ -132,8 +138,7 @@ func SetEnv(key, value string) {
 
 	data, err := ioutil.ReadFile(cFile)
 	if err != nil && !os.IsNotExist(err) {
-		log.Println("Failed to read/update env config:", err)
-		return
+		return err
 	}
 
 	file := string(data)
@@ -159,13 +164,13 @@ func SetEnv(key, value string) {
 	}
 	_ = os.MkdirAll(filepath.Join(cFile, ".."), 0755)
 	if err = WriteFile(cFile, []byte(newData), 0600); err != nil {
-		log.Println("Failed to update config file:", err)
-		return
+		return err
 	}
 
 	if !UseGlobalConfig && !CheckFileHasLine(".gitignore", configFileFileParentDir) {
 		ReadAndAppend(".gitignore", configFileFileParentDir+"\n")
 	}
+	return nil
 }
 
 // SetAlias sets an alias for a command
@@ -329,41 +334,10 @@ func GetRepo() string {
 	return strings.Trim(repo, "/")
 }
 
-func readAndSetEnv(question, env string) string {
+// PromptAndSetEnv : prompts user for value and writes to config
+func PromptAndSetEnv(question, env string) (envVal string, err error) {
 	envDefVal := GetEnv(env)
-	envVal := manip.AskQuestionWithInput(question, envDefVal, false)
-	SetEnv(env, envVal)
-	return envVal
-}
-
-func Set(cmd *cobra.Command, args []string) {
-	var isUpdated bool
-	if b, _ := cmd.Flags().GetBool("global"); b {
-		UseGlobalConfig = true
-	}
-	if b, _ := cmd.Flags().GetString("token"); b != "" {
-		SetEnv("GITLAB_TOKEN", b)
-		isUpdated = true
-	}
-	if b, _ := cmd.Flags().GetString("url"); b != "" {
-		SetEnv("GITLAB_URI", b)
-		isUpdated = true
-	}
-	if b, _ := cmd.Flags().GetString("remote-var"); b != "" {
-		SetEnv("GIT_REMOTE_URL_VAR", b)
-		isUpdated = true
-	}
-	if b, _ := cmd.Flags().GetString("pid"); b != "" {
-		SetEnv("GITLAB_PROJECT_ID", b)
-		isUpdated = true
-	}
-	if !isUpdated {
-		readAndSetEnv(fmt.Sprintf("Enter default Gitlab Host (Current Value: %s): ", GetEnv("GITLAB_URI")), "GITLAB_URI")
-		readAndSetEnv("Enter default Gitlab Token: ", "GITLAB_TOKEN")
-		readAndSetEnv(fmt.Sprintf("Enter Git remote url variable (Current Value: %s): ", GetEnv("GIT_REMOTE_URL_VAR")), "GIT_REMOTE_URL_VAR")
-		isUpdated = true
-	}
-	if isUpdated {
-		fmt.Println(aurora.Green("Environment variable(s) updated"))
-	}
+	envVal = manip.AskQuestionWithInput(question, envDefVal, false)
+	err = SetEnv(env, envVal)
+	return 
 }
