@@ -19,8 +19,9 @@ require (
 	github.com/hashicorp/go-version v1.2.1
 	github.com/logrusorgru/aurora v2.0.3+incompatible
 	github.com/lunixbochs/vtclean v1.0.0
-	github.com/mattn/go-colorable v0.1.7 // indirect
-	github.com/mgutz/ansi v0.0.0-20200706080929-d51e80ef957d // indirect
+	github.com/mattn/go-colorable v0.1.7
+	github.com/mattn/go-isatty v0.0.12
+	github.com/mgutz/ansi v0.0.0-20200706080929-d51e80ef957d
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/onsi/gomega v1.10.1 // indirect
 	github.com/otiai10/copy v1.2.0

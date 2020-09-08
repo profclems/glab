@@ -9,7 +9,9 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"reflect"
 	"strconv"
+	"strings"
 	"testing"
 	"time"
 
@@ -160,6 +162,10 @@ func copyTestRepo(log fatalLogger) string {
 	if err := os.Rename(dest+"/test.git", dest+"/.git"); err != nil {
 		log.Fatal(err)
 	}
+	// Move the test.glab-cli dir into the expected path at .glab-cli
+	if err := os.Rename(dest+"/test.glab-cli", dest+"/.glab-cli"); err != nil {
+		log.Fatal(err)
+	}
 	return dest
 }
 
@@ -170,4 +176,18 @@ func TestRootNoArg(t *testing.T) {
 	assert.Contains(t, string(b), `Usage:
   glab <command> <subcommand> [flags]
   glab [command]`)
+}
+
+func eq(t *testing.T, got interface{}, expected interface{}) {
+	t.Helper()
+	if !reflect.DeepEqual(got, expected) {
+		t.Errorf("expected: %v, got: %v", expected, got)
+	}
+}
+
+func firstLine(output []byte) string {
+	if i := bytes.IndexAny(output, "\n"); i >= 0 {
+		return strings.ReplaceAll(string(output)[0:i], "PASS", "")
+	}
+	return string(output)
 }
