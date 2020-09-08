@@ -85,7 +85,7 @@ func expandAlias(args []string) (expanded []string, err error) {
 
 	leftoverChecker := regexp.MustCompile(`\$\d`)
 	if leftoverChecker.MatchString(expansion) {
-		err = fmt.Errorf("Not enough arguments for alias: %s", expansion)
+		err = fmt.Errorf("not enough arguments for alias: %s", expansion)
 		return
 	}
 
@@ -126,17 +126,6 @@ func printError(out io.Writer, err error, cmd *cobra.Command, debug bool) {
 		}
 		_, _ = fmt.Fprintln(out, "check your internet connection or status.gitlab.com or 'Run sudo gitlab-ctl status' on your server if self-hosted")
 		return
-	}
-
-	if !debug {
-		re := regexp.MustCompile(`(?s){(.*)}`)
-		m := re.FindAllStringSubmatch(err.Error(), -1)
-		if len(m) != 0 {
-			if len(m[0]) >= 1 {
-				_, _ = fmt.Fprintln(out, m[0][1])
-				return
-			}
-		}
 	}
 	_, _ = fmt.Fprintln(out, err)
 

@@ -6,7 +6,9 @@ import (
 	"fmt"
 	"math/rand"
 	"net"
+	"reflect"
 	"strconv"
+	"strings"
 	"testing"
 	"time"
 
@@ -88,4 +90,88 @@ check your internet connection or status.gitlab.com or 'Run sudo gitlab-ctl stat
 			}
 		})
 	}
+}
+
+func TestExpandAlias(t *testing.T) {
+	t.Parallel()
+	err := config.SetAlias("test-co", "mr checkout")
+	if err != nil {
+		t.Error(err)
+	}
+	err = config.SetAlias("test-il", "issue list --author=\"$1\" --label=\"$2\"")
+	if err != nil {
+		t.Error(err)
+	}
+	err = config.SetAlias("test-ia", "issue list --author=\"$1\" --assignee=\"$1\"")
+	if err != nil {
+		t.Error(err)
+	}
+	for _, c := range []struct {
+		Args         string
+		ExpectedArgs []string
+		Err          string
+	}{
+		{"glab test-co", []string{"mr", "checkout"}, ""},
+		{"glab test-il", nil, `not enough arguments for alias: issue list --author="$1" --label="$2"`},
+		{"glab test-il vilmibm", nil, `not enough arguments for alias: issue list --author="vilmibm" --label="$2"`},
+		{"glab test-co 123", []string{"mr", "checkout", "123"}, ""},
+		{"glab test-il vilmibm epic", []string{"issue", "list", `--author=vilmibm`, `--label=epic`}, ""},
+		{"glab test-ia vilmibm", []string{"issue", "list", `--author=vilmibm`, `--assignee=vilmibm`}, ""},
+		{"glab test-ia $coolmoney$", []string{"issue", "list", `--author=$coolmoney$`, `--assignee=$coolmoney$`}, ""},
+		{"glab mr status", []string{"mr", "status"}, ""},
+		{"glab test-il vilmibm epic -R vilmibm/testing", []string{"issue", "list", "--author=vilmibm", "--label=epic", "-R", "vilmibm/testing"}, ""},
+		{"glab test-dne", []string{"test-dne"}, ""},
+		{"glab", []string{}, ""},
+		{"", []string{}, ""},
+	} {
+		var args []string
+		if c.Args != "" {
+			args = strings.Split(c.Args, " ")
+		}
+
+		out, err := expandAlias(args)
+
+		if err == nil && c.Err != "" {
+			t.Errorf("expected error %s for %s", c.Err, c.Args)
+			continue
+		}
+
+		if err != nil {
+			eq(t, err.Error(), c.Err)
+			continue
+		}
+
+		if len(out) == 0 && len(c.ExpectedArgs) == 0 {
+			continue
+		}
+		eq(t, out, c.ExpectedArgs)
+	}
+
+	err = config.DeleteAlias("test-co")
+	if err != nil {
+		t.Error(err)
+	}
+	err = config.DeleteAlias("test-il")
+	if err != nil {
+		t.Error(err)
+	}
+	err = config.DeleteAlias("test-ia")
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func eq(t *testing.T, got interface{}, expected interface{}) {
+	t.Helper()
+	if !reflect.DeepEqual(got, expected) {
+		t.Errorf("expected: %v, got: %v", expected, got)
+	}
+}
+
+func Test_initConfig(t *testing.T) {
+	initConfig()
+	config.UseGlobalConfig = true
+	eq(t, config.GetEnv("GITLAB_URI"), "https://gitlab.com")
+	eq(t, config.GetEnv("GIT_REMOTE_URL_VAR"), "origin")
+	config.UseGlobalConfig = false
 }
