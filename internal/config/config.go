@@ -339,5 +339,5 @@ func PromptAndSetEnv(question, env string) (envVal string, err error) {
 	envDefVal := GetEnv(env)
 	envVal = manip.AskQuestionWithInput(question, envDefVal, false)
 	err = SetEnv(env, envVal)
-	return 
+	return
 }
