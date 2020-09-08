@@ -18,8 +18,13 @@ var configCmd = &cobra.Command{
 	Short:   `Set and get glab settings`,
 	Long: heredoc.Doc(`Get and set key/value strings.
 		Current respected settings:
-		- git_protocol: https or ssh. Default is https.
+		- gitlab_token: Your gitlab access token, defaults to environment variables
+		- gitlab_uri: if unset, defaults to https://gitlab.com
+		- git_remote_url_var, if unset, defaults to origin
+		- browser: if unset, defaults to environment variables
 		- editor: if unset, defaults to environment variables.
+		- glamour_style: Your desired markdown renderer style. Options are dark, light, notty. Custom styles are allowed set a custom style
+https://github.com/charmbracelet/glamour#styles
 	`),
 	Aliases: []string{"conf"},
 	Args:    cobra.MaximumNArgs(2),
