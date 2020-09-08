@@ -30,6 +30,7 @@ $ glab pipeline list
 
 * [glab alias](glab_alias.md)	 - Create, list and delete aliases
 * [glab check-update](glab_check-update.md)	 - Check for latest glab releases
+* [glab completion](glab_completion.md)	 - Generate shell completion scripts
 * [glab config](glab_config.md)	 - Set and get glab settings
 * [glab issue](glab_issue.md)	 - Create, view and manage remote issues
 * [glab label](glab_label.md)	 - Manage labels on remote
