@@ -23,6 +23,7 @@ var configCmd = &cobra.Command{
 		- git_remote_url_var, if unset, defaults to origin
 		- browser: if unset, defaults to environment variables
 		- editor: if unset, defaults to environment variables.
+		- visual: alternative for editor. if unset, defaults to environment variables.
 		- glamour_style: Your desired markdown renderer style. Options are dark, light, notty. Custom styles are allowed set a custom style
 https://github.com/charmbracelet/glamour#styles
 	`),
@@ -61,7 +62,7 @@ var configGetCmd = &cobra.Command{
 	Long: `Get the value for a given configuration key.
 Examples:
   $ glab config get gitlab_uri
-  https://github.com
+  https://gitlab.com
   $ glab config get git_remote_url_var
   origin
 `,
@@ -75,7 +76,7 @@ var configSetCmd = &cobra.Command{
 	Long: `Update the configuration by setting a key to a value.
 Examples:
   $ glab config set editor vim
-  $ glab config get git_remote_url_var origin
+  $ glab config set git_remote_url_var origin
 `,
 	Args: cobra.ExactArgs(2),
 	RunE: configSet,
