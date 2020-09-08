@@ -11,11 +11,9 @@ import (
 	"github.com/spf13/cobra"
 )
 
-
-
 var configCmd = &cobra.Command{
-	Use:     "config [flags]",
-	Short:   `Set and get glab settings`,
+	Use:   "config [flags]",
+	Short: `Set and get glab settings`,
 	Long: heredoc.Doc(`Get and set key/value strings.
 		Current respected settings:
 		- gitlab_token: Your gitlab access token, defaults to environment variables
@@ -29,10 +27,8 @@ https://github.com/charmbracelet/glamour#styles
 	`),
 	Aliases: []string{"conf"},
 	Args:    cobra.MaximumNArgs(2),
-	RunE:     configFunc,
+	RunE:    configFunc,
 }
-
-
 
 func init() {
 	configCmd.Flags().BoolP("global", "g", false, "Set configuration globally")
@@ -47,8 +43,8 @@ func init() {
 
 	configGetCmd.Flags().StringP("host", "", "", "Get per-host setting")
 	configSetCmd.Flags().StringP("host", "", "", "Set per-host setting")
-	configSetCmd.Flags().BoolP("global", "g", false,"write to global ~/.config/glab-cli/.env file rather than the repository .glab-cli/config/.env")
-	configGetCmd.Flags().BoolP("global", "g", false,"Read from global config file (~/.config/glab-cli/.env). [Default: looks through OS → Local → Global]")
+	configSetCmd.Flags().BoolP("global", "g", false, "write to global ~/.config/glab-cli/.env file rather than the repository .glab-cli/config/.env")
+	configGetCmd.Flags().BoolP("global", "g", false, "Read from global config file (~/.config/glab-cli/.env). [Default: looks through OS → Local → Global]")
 
 	// TODO reveal and add usage once we properly support multiple hosts
 	_ = configGetCmd.Flags().MarkHidden("host")
@@ -97,10 +93,10 @@ Examples:
 func configGet(cmd *cobra.Command, args []string) error {
 	key := strings.ToUpper(args[0])
 	/*
-	hostname, err := cmd.Flags().GetString("host")
-	if err != nil {
-		return err
-	}
+		hostname, err := cmd.Flags().GetString("host")
+		if err != nil {
+			return err
+		}
 	*/
 
 	global, err := cmd.Flags().GetBool("global")
@@ -124,10 +120,10 @@ func configSet(cmd *cobra.Command, args []string) error {
 	key := strings.ToUpper(args[0])
 	value := args[1]
 	/*
-	hostname, err := cmd.Flags().GetString("host")
-	if err != nil {
-		return err
-	}
+		hostname, err := cmd.Flags().GetString("host")
+		if err != nil {
+			return err
+		}
 	*/
 
 	global, err := cmd.Flags().GetBool("global")
