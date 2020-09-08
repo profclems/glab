@@ -1,22 +1,16 @@
 language: go
-
 os:
   - linux
-
 go:
   - 1.15.x
 
-# use containers which run faster and have cache
-sudo: false
-
 cache:
   directories:
-    - $HOME/.cache/go-build
-    - $HOME/gopath/pkg/mod
-
+    - "$HOME/.cache/go-build"
+    - "$HOME/gopath/pkg/mod"
 addons:
   ssh_known_hosts:
-      - gitlab.com
+    - gitlab.com
 
 before_install:
   - echo -e "Host *\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
@@ -31,7 +25,15 @@ script:
   - make tests
 
 after_success:
+  - |
+    for r in $(ag -Q 'log.Fatal' | awk -F: '{ print "github.com/profclems/glab/" $1 ":" $2-1 "\\.[0-9][0-9]\\?," $2+1 }' | sed 's|/|\\/|g')
+      do sed -i "/$r/d" coverage.txt
+    done
   - bash <(curl -s https://codecov.io/bash)
 
 notifications:
   email: false
+
+env:
+  global:
+    secure: ItcDzznlPXck4Cj6lJAg2b3mdjvG+CnSJi02WPlDEHIXFTwa/iPERUUL+PTY3aVgEH7Zb+P9eXva1rLKVI5xhBtpEL2PATORZwLF9dofgr5wgT657lXQVdjDlt5W7qffht/8u7a8HqTUqmaFVBg9ZzqluL48CA5RuJPbzuiiu5K/1RVkWY851tIGyRDFi9dEGjYETqym77au0PR2nOIelOghYhJtqQmoniC8ASAmfQx+r6vDgFrp09GmCHoajGb/vwpfns93GF5Qv5S+WL9xGJCqTnsvXz4JmdS6UyK9mjyem2Obfv3UmNxsWdSdRzmTiOzkKI94nba7Nwa3BHfnCvY3if9DwGZ8SGYRXG+nJsAvrxIn+ak06FF6kAVBcMzJ+rPMTkMcbqu2ysXf9Xb+aBtK1qTbL4giti0iQ/38JQBPaH+9Wdz2+pJmirE4EoJp6aM4iTVk9nnZp57quuso5D4tMKmLJzWqrBgnDPLqYCTgTcwM64W3K9RObVZBksNlSMv7rEo0Q5Bh8lsQKuY/iBHZDqIrTBzQ724NtZwrwpjz82u1RXa8LIFcMEx9g2AvTdKTp8qBakFaJd8xWWiIccCGPHk7z+jCMBtZxypChHunfi9BN+Nwet0ixfnYuQC+YjyeCSwLM1tcVq+7y2b1r22QRLx2INPsVl7tH3cZo8w=
