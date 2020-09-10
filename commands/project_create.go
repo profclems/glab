@@ -27,10 +27,10 @@ func runCreateProject(cmd *cobra.Command, args []string) error {
 	}
 
 	var (
-		projectPath      string
-		visiblity gitlab.VisibilityValue
-		err       error
-		isPath	  bool
+		projectPath string
+		visiblity   gitlab.VisibilityValue
+		err         error
+		isPath      bool
 	)
 	if len(args) == 1 {
 		projectPath = args[0]
