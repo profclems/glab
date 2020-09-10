@@ -19,8 +19,8 @@ import (
 
 func displayMultiplePipelines(m []*gitlab.PipelineInfo, repo ...string) {
 	var (
-		projectID 	string
-		err			error
+		projectID string
+		err       error
 	)
 	if len(repo) > 0 {
 		projectID = repo[0]

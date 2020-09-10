@@ -137,8 +137,8 @@ type ListInfo struct {
 // Prints the list data on console
 func DisplayList(lInfo ListInfo, repo ...string) {
 	var (
-		projectID 	string
-		err			error
+		projectID string
+		err       error
 	)
 	if len(repo) > 0 {
 		projectID = repo[0]

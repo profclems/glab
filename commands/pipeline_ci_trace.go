@@ -42,7 +42,7 @@ func pipelineCITrace(cmd *cobra.Command, args []string) {
 	}
 	var jobID int
 	var repo string
-	var err	error
+	var err error
 	repo, _ = cmd.Flags().GetString("repo")
 	if repo == "" {
 		repo, err = git.GetRepo()
