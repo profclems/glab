@@ -2,9 +2,8 @@ package commands
 
 import (
 	"fmt"
-	"os"
-
 	"github.com/profclems/glab/internal/config"
+	"github.com/profclems/glab/internal/utils"
 
 	"github.com/spf13/cobra"
 )
@@ -14,12 +13,17 @@ var aliasDeleteCmd = &cobra.Command{
 	Short: `Delete an alias.`,
 	Long:  ``,
 	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
+		expansion := config.GetAlias(args[0])
 		err := config.DeleteAlias(args[0])
+
 		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
+			return fmt.Errorf("failed to delete alias %s: %w", args[0], err)
 		}
+		out := colorableOut(cmd)
+		redCheck := utils.Red("✓")
+		fmt.Fprintf(out, "%s Deleted alias %s; was %s\n", redCheck, args[0], expansion)
+		return nil
 	},
 }
 

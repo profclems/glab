@@ -52,6 +52,16 @@ func AskQuestionWithInput(question, defaultVal string, isRequired bool) string {
 	return str
 }
 
+// Confirm prompts user for a confirmation and returns a bool value
+func Confirm(question string) (confirmed bool, err error)  {
+	confirmed = false
+	prompt := &survey.Confirm{
+		Message: question,
+	}
+	err = survey.AskOne(prompt, &confirmed)
+	return
+}
+
 func AskQuestionWithMultiSelect(question string, options []string) []string {
 	labels := []string{}
 	prompt := &survey.MultiSelect{

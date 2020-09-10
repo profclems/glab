@@ -79,7 +79,8 @@ var mrCreateCmd = &cobra.Command{
 			commit, _ := git.LatestCommit(branch)
 			_, err := getCommit(repo, targetBranch)
 			if err != nil {
-				return fmt.Errorf("target branch %s does not exist on remote. Specify target branch with --target-branch flag", targetBranch)
+				return fmt.Errorf("target branch %s does not exist on remote. Specify target branch with --target-branch flag",
+					targetBranch)
 			}
 			mergeDescription, err = git.CommitBody(branch)
 			if err != nil {
@@ -92,7 +93,8 @@ var mrCreateCmd = &cobra.Command{
 				}
 				fmt.Printf("warning: you have %v uncommitted changes\n", c)
 			}
-			err = git.Push(git.GetRemoteURL(), sourceBranch)
+			remoteURL, err := git.GetRemoteURL()
+			err = git.Push(remoteURL, sourceBranch)
 			if err != nil {
 				return err
 			}

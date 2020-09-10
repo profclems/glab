@@ -196,7 +196,11 @@ func TestGetRepo(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := GetRepo(); got != tt.want {
+			got, err := GetRepo();
+			if err != nil {
+				t.Error(err)
+			}
+			if got != tt.want {
 				t.Errorf("GetRepo() = %v, want %v", got, tt.want)
 			}
 		})

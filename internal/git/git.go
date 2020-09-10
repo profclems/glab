@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"github.com/MakeNowJust/heredoc"
 	"log"
 	"net/url"
 	"os"
@@ -20,17 +19,19 @@ import (
 )
 
 // GetRepo returns the repo name of the git directory with the namespace like profclems/glab
-func GetRepo() string {
-	gitRemoteVar := GetRemoteURL()
+func GetRepo() (string, error) {
+	gitRemoteVar, err := GetRemoteURL()
+	if err != nil {
+
+	}
 	repo, err := getRepoNameWithNamespace(gitRemoteVar)
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		return "", err
 	}
-	return repo
+	return repo, nil
 }
 
-func GetRemoteURL() string {
+func GetRemoteURL() (string, error) {
 	remoteNickname := strings.TrimSpace(config.GetEnv("GIT_REMOTE_URL_VAR"))
 	if remoteNickname == "" {
 		remoteNickname = "origin"
@@ -38,28 +39,9 @@ func GetRemoteURL() string {
 
 	gitRemoteURL, err := gitconfig.Local("remote." + remoteNickname + ".url")
 	if err != nil {
-		fmt.Println(heredoc.Doc(`
-
-		Could not find remote url for gitlab in remote.` + remoteNickname + `.url
-		Possible errors:
-		- This directory may not be a git repository`))
-		if remoteNickname != "origin" {
-			fmt.Printf("- `%s` does not exist or is an invalid shorthand name for the remote repository. An example of a remote shorthand name is `origin`\n", remoteNickname)
-		}
-		fmt.Println(heredoc.Doc(`
-
-		Possible Fix:
-		- Make sure the directory is a git repository
-		- Run glab config -g --remote-var=<name>
-		NB: change <name> to the shorthand name.
-		`))
-		os.Exit(0)
+		return "", errors.New(`could not find remote url for gitlab in remote.` + remoteNickname + `.url`)
 	}
-	return gitRemoteURL
-}
-
-func GetRemoteBaseURL() string {
-	return strings.TrimSuffix(strings.ReplaceAll(GetRemoteURL(), GetRepo(), ""), ".git")
+	return gitRemoteURL, nil
 }
 
 // getRepoNameWithNamespace returns the the repo with its namespace (like profclems/glab). Respects group and subgroups names
@@ -145,18 +127,28 @@ func GetDefaultBranch(remote ...string) (string, error) {
 }
 
 // InitGitlabClient : creates client
-func InitGitlabClient() (*gitlab.Client, string) {
+func InitGitlabClient(returnWithRepo ...bool) (*gitlab.Client, string) {
+	getRepo := true
+	if len(returnWithRepo) > 0 {
+		getRepo = returnWithRepo[0]
+	}
 	baseUrl := strings.TrimRight(config.GetEnv("GITLAB_URI"), "/")
 	if baseUrl == "" {
 		baseUrl = "https://gitlab.com"
 	}
-	git, err := gitlab.NewClient(config.GetEnv("GITLAB_TOKEN"), gitlab.WithBaseURL(strings.TrimRight(config.GetEnv("GITLAB_URI"), "/")+"/api/v4"))
+	git, err := gitlab.NewClient(config.GetEnv("GITLAB_TOKEN"),
+		gitlab.WithBaseURL(strings.TrimRight(config.GetEnv("GITLAB_URI"), "/")+"/api/v4"))
 	if err != nil {
 		log.Fatalf("Failed to create client: %v", err)
 	}
 	projectID := config.GetEnv("GITLAB_PROJECT_ID")
-	if projectID == "" {
-		projectID = GetRepo()
+	if projectID == "" && getRepo {
+		projectID, err = GetRepo()
+		// FIXME: error should be properly handled.
+		//  maintained due to the function being used in several places
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 	return git, projectID
 }
@@ -296,7 +288,7 @@ func Commits(baseRef, headRef string) ([]*Commit, error) {
 		return []*Commit{}, err
 	}
 
-	commits := []*Commit{}
+	var commits []*Commit
 	sha := 0
 	title := 1
 	for _, line := range outputLines(output) {

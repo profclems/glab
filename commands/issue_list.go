@@ -59,7 +59,7 @@ var issueListCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		displayAllIssues(issues)
+		displayAllIssues(issues, repo)
 		return nil
 
 	},
