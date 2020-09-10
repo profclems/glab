@@ -21,7 +21,7 @@ func getProject(projectID interface{}) (*gitlab.Project, error) {
 }
 
 func createProject(opts *gitlab.CreateProjectOptions) (*gitlab.Project, error) {
-	gitlabClient, _ := git.InitGitlabClient()
+	gitlabClient, _ := git.InitGitlabClient(false)
 	project, _, err := gitlabClient.Projects.CreateProject(opts)
 	if err != nil {
 		return nil, err

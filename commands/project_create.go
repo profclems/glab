@@ -2,6 +2,13 @@ package commands
 
 import (
 	"fmt"
+	"github.com/profclems/glab/internal/manip"
+	"github.com/profclems/glab/internal/run"
+	"github.com/profclems/glab/internal/utils"
+	"os"
+	"path"
+
+	"github.com/profclems/glab/internal/git"
 
 	"github.com/spf13/cobra"
 	"github.com/xanzy/go-gitlab"
@@ -9,31 +16,40 @@ import (
 
 var projectCreateCmd = &cobra.Command{
 	Use:   "create [path] [flags]",
-	Short: `Create Gitlab project`,
+	Short: `Create a new Gitlab project/repository`,
 	Long:  ``,
 	RunE:  runCreateProject,
 }
 
 func runCreateProject(cmd *cobra.Command, args []string) error {
 	if len(args) > 1 {
-		_ = cmd.Help()
-		return nil
+		return cmd.Help()
 	}
 
 	var (
-		path      string
+		projectPath      string
 		visiblity gitlab.VisibilityValue
+		err       error
+		isPath	  bool
 	)
 	if len(args) == 1 {
-		path = args[0]
+		projectPath = args[0]
+	} else {
+		projectPath, err = git.ToplevelDir()
+		projectPath = path.Base(projectPath)
+		if err != nil {
+			return err
+		}
+		isPath = true
 	}
 
 	name, _ := cmd.Flags().GetString("name")
 
-	if path == "" && name == "" {
+	if projectPath == "" && name == "" {
 		fmt.Println("ERROR: Path or Name required to create project.")
-		_ = cmd.Usage()
-		return nil
+		return cmd.Usage()
+	} else if name == "" {
+		name = projectPath
 	}
 
 	description, _ := cmd.Flags().GetString("description")
@@ -52,7 +68,7 @@ func runCreateProject(cmd *cobra.Command, args []string) error {
 
 	opts := &gitlab.CreateProjectOptions{
 		Name:                 gitlab.String(name),
-		Path:                 gitlab.String(path),
+		Path:                 gitlab.String(projectPath),
 		Description:          gitlab.String(description),
 		DefaultBranch:        gitlab.String(defaultBranch),
 		TagList:              &tags,
@@ -65,10 +81,46 @@ func runCreateProject(cmd *cobra.Command, args []string) error {
 
 	project, err := createProject(opts)
 
+	out := colorableOut(cmd)
+	greenCheck := utils.Green("✓")
 	if err == nil {
-		fmt.Println("Project created: ", project.WebURL)
+		fmt.Fprintf(out, "%s Created repository %s on GitLab: %s\n", greenCheck, project.NameWithNamespace, project.WebURL)
+		if isPath {
+			_, err := git.AddRemote("origin", project.SSHURLToRepo)
+			if err != nil {
+				return err
+			}
+			fmt.Fprintf(out, "%s Added remote %s\n", greenCheck, project.SSHURLToRepo)
+
+		} else {
+			doSetup, err := manip.Confirm(fmt.Sprintf("Create a local project directory for %s?", project.NameWithNamespace))
+			if err != nil {
+				return err
+			}
+
+			if doSetup {
+				projectPath := project.Path
+
+				gitInit := git.GitCommand("init", projectPath)
+				gitInit.Stdout = os.Stdout
+				gitInit.Stderr = os.Stderr
+				err = run.PrepareCmd(gitInit).Run()
+				if err != nil {
+					return err
+				}
+				gitRemoteAdd := git.GitCommand("-C", projectPath, "remote", "add", "origin", project.SSHURLToRepo)
+				gitRemoteAdd.Stdout = os.Stdout
+				gitRemoteAdd.Stderr = os.Stderr
+				err = run.PrepareCmd(gitRemoteAdd).Run()
+				if err != nil {
+					return err
+				}
+
+				fmt.Fprintf(out, "%s Initialized repository in './%s/'\n", greenCheck, projectPath)
+			}
+		}
 	} else {
-		fmt.Println("Error creating project: ", err)
+		return fmt.Errorf("error creating project: %v", err)
 	}
 	return err
 }
