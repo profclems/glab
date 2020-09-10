@@ -94,6 +94,9 @@ var mrCreateCmd = &cobra.Command{
 				fmt.Printf("warning: you have %v uncommitted changes\n", c)
 			}
 			remoteURL, err := git.GetRemoteURL()
+			if err != nil {
+				return err
+			}
 			err = git.Push(remoteURL, sourceBranch)
 			if err != nil {
 				return err

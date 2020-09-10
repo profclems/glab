@@ -22,7 +22,7 @@ import (
 func GetRepo() (string, error) {
 	gitRemoteVar, err := GetRemoteURL()
 	if err != nil {
-
+		return "", err
 	}
 	repo, err := getRepoNameWithNamespace(gitRemoteVar)
 	if err != nil {
