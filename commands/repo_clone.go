@@ -42,7 +42,6 @@ var repoCloneCmd = &cobra.Command{
 		)
 
 		repo := args[0]
-		fmt.Println(repo)
 		u, _ := currentUser()
 		if !git.IsValidURL(repo) {
 			// Assuming that repo is a project ID if it is an integer
