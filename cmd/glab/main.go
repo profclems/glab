@@ -89,10 +89,13 @@ func initConfig() {
 	config.UseGlobalConfig = true
 
 	if config.GetEnv("GITLAB_URI") == "" {
-		config.SetEnv("GITLAB_URI", "https://gitlab.com")
+		_ = config.SetEnv("GITLAB_URI", "https://gitlab.com")
 	}
 	if config.GetEnv("GIT_REMOTE_URL_VAR") == "" {
-		config.SetEnv("GIT_REMOTE_URL_VAR", "origin")
+		_ = config.SetEnv("GIT_REMOTE_URL_VAR", "origin")
+	}
+	if config.GetEnv("GIT_PROTOCOL") == "" {
+		_ = config.SetEnv("GIT_PROTOCOL", "ssh")
 	}
 
 	config.UseGlobalConfig = false

@@ -137,11 +137,15 @@ func runCreateProject(cmd *cobra.Command, args []string) error {
 	if err == nil {
 		fmt.Fprintf(out, "%s Created repository %s on GitLab: %s\n", greenCheck, project.NameWithNamespace, project.WebURL)
 		if isPath {
-			_, err := git.AddRemote("origin", project.SSHURLToRepo)
+			remote, err := gitRemoteURL(project, &remoteArgs{})
 			if err != nil {
 				return err
 			}
-			fmt.Fprintf(out, "%s Added remote %s\n", greenCheck, project.SSHURLToRepo)
+			_, err = git.AddRemote("origin", remote)
+			if err != nil {
+				return err
+			}
+			fmt.Fprintf(out, "%s Added remote %s\n", greenCheck, remote)
 
 		} else if isTTY {
 			doSetup, err := manip.Confirm(fmt.Sprintf("Create a local project directory for %s?", project.NameWithNamespace))

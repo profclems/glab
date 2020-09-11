@@ -83,12 +83,20 @@ func init() {
 // TODO: GetDefaultBranch looks really messy and should be fixed properly
 
 // GetDefaultBranch finds the repo's default branch
+// Expects a maximum of two params with the first as remote and second as username
 func GetDefaultBranch(remote ...string) (string, error) {
 	var org string
+	var currentUser string
 	if len(remote) > 0 {
 		org = remote[0]
+		if len(remote) > 1 {
+			currentUser = remote[1]
+		}
 	} else {
 		org = config.GetEnv("GIT_REMOTE_URL_VAR")
+	}
+	if currentUser == "" {
+		currentUser = "oauth2"
 	}
 	if strings.Contains(org, "/") {
 		t := config.GetEnv("GITLAB_TOKEN")
@@ -100,8 +108,8 @@ func GetDefaultBranch(remote ...string) (string, error) {
 			u = strings.TrimPrefix(u, "http://")
 			p = "http://"
 		}
-		org = fmt.Sprintf("%soauth2:%s@%s/%s.git",
-			p, t, u, org)
+		org = fmt.Sprintf("%s%s:%s@%s/%s.git",
+			p, currentUser, t, u, org)
 	}
 	getDefBranch := exec.Command("git",
 		"remote", "show", org)
