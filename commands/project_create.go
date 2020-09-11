@@ -48,7 +48,7 @@ func runCreateProject(cmd *cobra.Command, args []string) error {
 		err         error
 		isPath      bool
 		namespaceID int
-		namespace	string
+		namespace   string
 	)
 	if len(args) == 1 {
 		projectPath = args[0]

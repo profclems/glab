@@ -38,7 +38,7 @@ func Test_projectCreateCmd(t *testing.T) {
 
 		rp := strings.Split(expectedPath, "/")[1]
 		require.Contains(t, string(b),
-		"✓ Created repository glab / "+rp+" on GitLab: https://gitlab.com/"+expectedPath+"\n✓ Added remote git@gitlab.com:"+expectedPath+".git\n")
+			"✓ Created repository glab / "+rp+" on GitLab: https://gitlab.com/"+expectedPath+"\n✓ Added remote git@gitlab.com:"+expectedPath+".git\n")
 
 		gitCmd := exec.Command("git", "remote", "get-url", "origin")
 		gitCmd.Dir = repo

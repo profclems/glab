@@ -37,7 +37,7 @@ func createProject(opts *gitlab.CreateProjectOptions) (*gitlab.Project, error) {
 	return project, nil
 }
 
-func getGroup(groupID interface{}) (*gitlab.Group, error)  {
+func getGroup(groupID interface{}) (*gitlab.Group, error) {
 	gitlabClient, _ := git.InitGitlabClient(false)
 	group, _, err := gitlabClient.Groups.GetGroup(groupID)
 	if err != nil {
