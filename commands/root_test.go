@@ -204,19 +204,19 @@ func Test_gitRemoteURL(t *testing.T) {
 		args    args
 		want    string
 		wantErr bool
-	} {
+	}{
 		{
 			name: "is_https",
 			args: args{
 				project: &gitlab.Project{
-					SSHURLToRepo: "git@gitlab.com:profclems/glab.git",
-					HTTPURLToRepo: "https://gitlab.com/profclems/glab.git",
+					SSHURLToRepo:      "git@gitlab.com:profclems/glab.git",
+					HTTPURLToRepo:     "https://gitlab.com/profclems/glab.git",
 					PathWithNamespace: "profclems/glab",
 				},
 				args: &remoteArgs{
 					protocol: "https",
-					token: "token",
-					url: "https://gitlab.com",
+					token:    "token",
+					url:      "https://gitlab.com",
 					username: "user",
 				},
 			},

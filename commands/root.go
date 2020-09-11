@@ -185,18 +185,19 @@ func DisplayList(lInfo ListInfo, repo ...string) {
 	}
 
 }
+
 type remoteArgs struct {
 	protocol string
-	token	 string
-	url		 string
+	token    string
+	url      string
 	username string
 }
 
-// gitRemoteURL returns correct git clone URL of a repo 
+// gitRemoteURL returns correct git clone URL of a repo
 // based on the user's git_protocol preference
 // args should be arranged as protocol, token, url, username
 
-func gitRemoteURL(project *gitlab.Project, args *remoteArgs) (string, error)  {
+func gitRemoteURL(project *gitlab.Project, args *remoteArgs) (string, error) {
 	var err error
 
 	if args.protocol == "" {
