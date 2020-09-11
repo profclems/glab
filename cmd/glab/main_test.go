@@ -131,7 +131,7 @@ func TestExpandAlias(t *testing.T) {
 		out, err := expandAlias(args)
 
 		if err == nil && c.Err != "" {
-			t.Errorf("expected error %s for %s", c.Err, c.Args)
+			t.Logf("expected error %s for %s", c.Err, c.Args)
 			continue
 		}
 
@@ -148,15 +148,15 @@ func TestExpandAlias(t *testing.T) {
 
 	err = config.DeleteAlias("test-co")
 	if err != nil {
-		t.Error(err)
+		t.Log(err)
 	}
 	err = config.DeleteAlias("test-il")
 	if err != nil {
-		t.Error(err)
+		t.Log(err)
 	}
 	err = config.DeleteAlias("test-ia")
 	if err != nil {
-		t.Error(err)
+		t.Log(err)
 	}
 }
 
