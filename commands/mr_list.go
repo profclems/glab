@@ -55,7 +55,7 @@ func listMergeRequest(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	displayAllMergeRequests(mergeRequests)
+	displayAllMergeRequests(mergeRequests, repo)
 	return nil
 }
 

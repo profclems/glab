@@ -59,7 +59,10 @@ var pipelineCIView = &cobra.Command{
 
 		projectID, _ = cmd.Flags().GetString("repo")
 		if projectID == "" {
-			projectID = git.GetRepo()
+			projectID, err = git.GetRepo()
+			if err != nil {
+				log.Fatal(err)
+			}
 		}
 		projectID, _ = fixRepoNamespace(projectID)
 

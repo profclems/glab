@@ -3,6 +3,7 @@ package commands
 import (
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"strings"
 
@@ -134,7 +135,19 @@ type ListInfo struct {
 }
 
 // Prints the list data on console
-func DisplayList(lInfo ListInfo) {
+func DisplayList(lInfo ListInfo, repo ...string) {
+	var (
+		projectID string
+		err       error
+	)
+	if len(repo) > 0 {
+		projectID = repo[0]
+	} else {
+		projectID, err = git.GetRepo()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
 	table := uitable.New()
 	table.MaxColWidth = 70
 	table.Wrap = lInfo.TableWrap
@@ -143,7 +156,7 @@ func DisplayList(lInfo ListInfo) {
 	if lInfo.Total > 0 {
 		description := lInfo.Description
 		if description == "" {
-			description = fmt.Sprintf("Showing %s %d of %d on %s\n\n", lInfo.Name, lInfo.Total, lInfo.Total, git.GetRepo())
+			description = fmt.Sprintf("Showing %s %d of %d on %s\n\n", lInfo.Name, lInfo.Total, lInfo.Total, projectID)
 		}
 		fmt.Println(description)
 		header := make([]interface{}, len(lInfo.Columns))
@@ -164,7 +177,7 @@ func DisplayList(lInfo ListInfo) {
 	} else {
 		emptyMessage := lInfo.EmptyMessage
 		if emptyMessage == "" {
-			emptyMessage = fmt.Sprintf("No %s available on %s", lInfo.Name, git.GetRepo())
+			emptyMessage = fmt.Sprintf("No %s available on %s", lInfo.Name, projectID)
 		}
 		fmt.Println(emptyMessage)
 	}

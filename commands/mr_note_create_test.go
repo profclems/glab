@@ -19,21 +19,21 @@ func Test_mrNoteCreate(t *testing.T) {
 	}{
 		{
 			name: "Has -m flag",
-			args: []string{"1", "-m", "Some test note"},
+			args: []string{"225", "-m", "Some test note"},
 			assertionFunc: func(t *testing.T, out string) {
 				require.Contains(t, out, "https://gitlab.com/glab-cli/test/merge_requests/1#note_")
 			},
 		},
 		{
 			name: "Has no flag",
-			args: []string{"1"},
+			args: []string{"225"},
 			assertionFunc: func(t *testing.T, out string) {
 				require.Contains(t, out, "aborted... Note has an empty message")
 			},
 		},
 		{
 			name: "With --repo flag",
-			args: []string{"1", "-m", "Some test note", "-R", "glab-cli/test"},
+			args: []string{"225", "-m", "Some test note", "-R", "glab-cli/test"},
 			assertionFunc: func(t *testing.T, out string) {
 				require.Contains(t, out, "https://gitlab.com/glab-cli/test/merge_requests/1#note_")
 			},

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"math"
 	"os"
 	"text/tabwriter"
@@ -16,7 +17,19 @@ import (
 	"github.com/xanzy/go-gitlab"
 )
 
-func displayMultiplePipelines(m []*gitlab.PipelineInfo) {
+func displayMultiplePipelines(m []*gitlab.PipelineInfo, repo ...string) {
+	var (
+		projectID string
+		err       error
+	)
+	if len(repo) > 0 {
+		projectID = repo[0]
+	} else {
+		projectID, err = git.GetRepo()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
 	// initialize tabwriter
 	w := new(tabwriter.Writer)
 
@@ -25,7 +38,7 @@ func displayMultiplePipelines(m []*gitlab.PipelineInfo) {
 
 	defer w.Flush()
 	if len(m) > 0 {
-		fmt.Printf("Showing pipelines %d of %d on %s\n\n", len(m), len(m), git.GetRepo())
+		fmt.Printf("Showing pipelines %d of %d on %s\n\n", len(m), len(m), projectID)
 		for _, pipeline := range m {
 			duration := utils.TimeToPrettyTimeAgo(*pipeline.CreatedAt)
 			var pipeState string
@@ -40,7 +53,7 @@ func displayMultiplePipelines(m []*gitlab.PipelineInfo) {
 			color.Printf("%s\t%s\t<magenta>(%s)</>\n", pipeState, pipeline.Ref, duration)
 		}
 	} else {
-		fmt.Println("No Pipelines available on " + git.GetRepo())
+		fmt.Println("No Pipelines available on " + projectID)
 	}
 }
 
@@ -235,7 +248,10 @@ func getPipelineFromBranch(ref, repo string) ([]*gitlab.Job, error) {
 	l.Page = 1
 	l.PerPage = 1
 	if repo == "" {
-		repo = git.GetRepo()
+		repo, err = git.GetRepo()
+		if err != nil {
+			return nil, err
+		}
 	}
 	pipes, err := getPipelines(l, repo)
 	if err != nil {
@@ -347,11 +363,11 @@ var pipelineCmd = &cobra.Command{
 	Short:   `Manage pipelines`,
 	Long:    ``,
 	Aliases: []string{"pipe"},
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		if len(args) == 0 || len(args) > 2 {
-			_ = cmd.Help()
-			return
+			return cmd.Help()
 		}
+		return nil
 	},
 }
 

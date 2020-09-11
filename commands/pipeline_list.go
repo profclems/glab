@@ -47,7 +47,7 @@ func listPipelines(cmd *cobra.Command, args []string) {
 		er(err)
 	}
 
-	displayMultiplePipelines(pipes)
+	displayMultiplePipelines(pipes, repo)
 }
 
 func init() {

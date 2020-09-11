@@ -2,6 +2,8 @@ package commands
 
 import (
 	"fmt"
+	"github.com/profclems/glab/internal/git"
+	"log"
 
 	"github.com/profclems/glab/internal/utils"
 
@@ -20,7 +22,19 @@ func displayMergeRequest(hm *gitlab.MergeRequest) {
 	fmt.Println(hm.WebURL)
 }
 
-func displayAllMergeRequests(m []*gitlab.MergeRequest) {
+func displayAllMergeRequests(m []*gitlab.MergeRequest, repo ...string) {
+	var (
+		projectID string
+		err       error
+	)
+	if len(repo) > 0 {
+		projectID = repo[0]
+	} else {
+		projectID, err = git.GetRepo()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
 	DisplayList(ListInfo{
 		Name:    "Merge Requests",
 		Columns: []string{"ID", "Title", "Branch"},
@@ -42,7 +56,7 @@ func displayAllMergeRequests(m []*gitlab.MergeRequest) {
 				return ""
 			}
 		},
-	})
+	}, projectID)
 }
 
 // mrCmd is merge request command

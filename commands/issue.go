@@ -2,6 +2,8 @@ package commands
 
 import (
 	"fmt"
+	"github.com/profclems/glab/internal/git"
+	"log"
 	"strings"
 
 	"github.com/profclems/glab/internal/utils"
@@ -11,7 +13,19 @@ import (
 	"github.com/xanzy/go-gitlab"
 )
 
-func displayAllIssues(m []*gitlab.Issue) {
+func displayAllIssues(m []*gitlab.Issue, repo ...string) {
+	var (
+		projectID string
+		err       error
+	)
+	if len(repo) > 0 {
+		projectID = repo[0]
+	} else {
+		projectID, err = git.GetRepo()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
 	DisplayList(ListInfo{
 		Name:    "issues",
 		Columns: []string{"IssueID", "Title", "Labels", "CreatedAt"},
@@ -38,7 +52,7 @@ func displayAllIssues(m []*gitlab.Issue) {
 				return ""
 			}
 		},
-	})
+	}, projectID)
 }
 
 func displayIssue(hm *gitlab.Issue) {

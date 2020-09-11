@@ -42,14 +42,17 @@ func pipelineCITrace(cmd *cobra.Command, args []string) {
 	}
 	var jobID int
 	var repo string
+	var err error
 	repo, _ = cmd.Flags().GetString("repo")
 	if repo == "" {
-		repo = git.GetRepo()
+		repo, err = git.GetRepo()
+		if err != nil {
+			er(err)
+		}
 	}
 	repo, _ = fixRepoNamespace(repo)
 
 	branch, _ := cmd.Flags().GetString("branch")
-	var err error
 	if branch == "" {
 		branch, err = git.CurrentBranch()
 		if err != nil {
