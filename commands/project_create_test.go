@@ -27,7 +27,7 @@ func Test_projectCreateCmd(t *testing.T) {
 		t.Logf("unable to delete project %s: %v", expectedPath, err)
 	}
 	t.Run("create", func(t *testing.T) {
-		cmd := exec.Command(glabBinaryPath, "repo", "create", "-g", "glab-cli")
+		cmd := exec.Command(glabBinaryPath, "repo", "create", "-g", "glab-cli", "--public")
 		cmd.Dir = repo
 
 		b, err := cmd.CombinedOutput()
@@ -63,7 +63,7 @@ func Test_projectCreateCmd(t *testing.T) {
 func Test_projectCreateCmdWithArgs(t *testing.T) {
 	t.Parallel()
 	repo := copyTestRepo(t)
-	expectedPath := fmt.Sprintf("glab-cli/unittest")
+	expectedPath := "glab-cli/unittest"
 
 	// remove the .git/config so no remotes exist
 	err := os.Remove(filepath.Join(repo, ".git/config"))
@@ -75,7 +75,7 @@ func Test_projectCreateCmdWithArgs(t *testing.T) {
 		t.Logf("unable to delete project %s: %v", expectedPath, err)
 	}
 	t.Run("create_with_args", func(t *testing.T) {
-		cmd := exec.Command(glabBinaryPath, "repo", "create", expectedPath)
+		cmd := exec.Command(glabBinaryPath, "repo", "create", expectedPath, "--public")
 		cmd.Dir = repo
 
 		b, err := cmd.CombinedOutput()
