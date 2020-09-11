@@ -44,7 +44,7 @@ var aliasSetCmd = &cobra.Command{
 		$ glab igrep user foo
 		#=> glab issue list --assignee="user" | grep "foo"
 	`),
-	Args:  cobra.ExactArgs(2),
+	Args: cobra.ExactArgs(2),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		aliasName := args[0]
 		aliasedCommand := args[1]

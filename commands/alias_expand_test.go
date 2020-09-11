@@ -27,7 +27,7 @@ func TestExpandAlias(t *testing.T) {
 	}
 
 	type args struct {
-		argv   []string
+		argv []string
 	}
 	tests := []struct {
 		name         string
@@ -39,7 +39,7 @@ func TestExpandAlias(t *testing.T) {
 		{
 			name: "no arguments",
 			args: args{
-				argv:   []string{},
+				argv: []string{},
 			},
 			wantExpanded: []string(nil),
 			wantIsShell:  false,
@@ -48,7 +48,7 @@ func TestExpandAlias(t *testing.T) {
 		{
 			name: "too few arguments",
 			args: args{
-				argv:   []string{"glab"},
+				argv: []string{"glab"},
 			},
 			wantExpanded: []string(nil),
 			wantIsShell:  false,
@@ -57,7 +57,7 @@ func TestExpandAlias(t *testing.T) {
 		{
 			name: "no expansion",
 			args: args{
-				argv:   []string{"glab", "mr", "status"},
+				argv: []string{"glab", "mr", "status"},
 			},
 			wantExpanded: []string{"mr", "status"},
 			wantIsShell:  false,
@@ -66,7 +66,7 @@ func TestExpandAlias(t *testing.T) {
 		{
 			name: "simple expansion",
 			args: args{
-				argv:   []string{"glab", "test-co"},
+				argv: []string{"glab", "test-co"},
 			},
 			wantExpanded: []string{"mr", "checkout"},
 			wantIsShell:  false,
@@ -75,7 +75,7 @@ func TestExpandAlias(t *testing.T) {
 		{
 			name: "adding arguments after expansion",
 			args: args{
-				argv:   []string{"glab", "test-co", "123"},
+				argv: []string{"glab", "test-co", "123"},
 			},
 			wantExpanded: []string{"mr", "checkout", "123"},
 			wantIsShell:  false,
@@ -84,7 +84,7 @@ func TestExpandAlias(t *testing.T) {
 		{
 			name: "not enough arguments for expansion",
 			args: args{
-				argv:   []string{"glab", "test-il"},
+				argv: []string{"glab", "test-il"},
 			},
 			wantExpanded: []string{},
 			wantIsShell:  false,
@@ -93,7 +93,7 @@ func TestExpandAlias(t *testing.T) {
 		{
 			name: "not enough arguments for expansion 2",
 			args: args{
-				argv:   []string{"glab", "test-il", "vilmibm"},
+				argv: []string{"glab", "test-il", "vilmibm"},
 			},
 			wantExpanded: []string{},
 			wantIsShell:  false,
@@ -102,7 +102,7 @@ func TestExpandAlias(t *testing.T) {
 		{
 			name: "satisfy expansion arguments",
 			args: args{
-				argv:   []string{"glab", "test-il", "vilmibm", "help wanted"},
+				argv: []string{"glab", "test-il", "vilmibm", "help wanted"},
 			},
 			wantExpanded: []string{"issue", "list", "--author=vilmibm", "--label=help wanted"},
 			wantIsShell:  false,
@@ -111,7 +111,7 @@ func TestExpandAlias(t *testing.T) {
 		{
 			name: "mixed positional and non-positional arguments",
 			args: args{
-				argv:   []string{"glab", "test-il", "vilmibm", "epic", "-R", "monalisa/testing"},
+				argv: []string{"glab", "test-il", "vilmibm", "epic", "-R", "monalisa/testing"},
 			},
 			wantExpanded: []string{"issue", "list", "--author=vilmibm", "--label=epic", "-R", "monalisa/testing"},
 			wantIsShell:  false,
@@ -120,7 +120,7 @@ func TestExpandAlias(t *testing.T) {
 		{
 			name: "dollar in expansion",
 			args: args{
-				argv:   []string{"glab", "test-ia", "$coolmoney$"},
+				argv: []string{"glab", "test-ia", "$coolmoney$"},
 			},
 			wantExpanded: []string{"issue", "list", "--author=$coolmoney$", "--assignee=$coolmoney$"},
 			wantIsShell:  false,

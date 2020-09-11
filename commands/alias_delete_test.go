@@ -29,7 +29,7 @@ func TestAliasDelete(t *testing.T) {
 			wantErr:    "no such alias test-nonexistent",
 		},
 		{
-			name: "delete one",
+			name:       "delete one",
 			cli:        "co-test",
 			wantStderr: "✓ Deleted alias co; was mr checkout\n",
 		},

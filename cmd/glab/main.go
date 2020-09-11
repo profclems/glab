@@ -47,7 +47,7 @@ func main() {
 		isShell := false
 		expandedArgs, isShell, err = commands.ExpandAlias(os.Args, nil)
 		if err != nil {
-			fmt.Fprintf(os.Stdout,"Failed to process alias: %s\n", err)
+			fmt.Fprintf(os.Stdout, "Failed to process alias: %s\n", err)
 			os.Exit(2)
 		}
 
