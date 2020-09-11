@@ -41,8 +41,8 @@ func Test_ciTrace(t *testing.T) {
 			args: []string{},
 			assertContains: func(t *testing.T, out string) {
 				assert.Contains(t, out, "Getting job trace...")
-				assert.Contains(t, out, "Showing logs for build1 job #716449913")
-				assert.Contains(t, out, "Checking out 5d3de07d as test-ci...")
+				assert.Contains(t, out, "Showing logs for build1 job #732481769")
+				assert.Contains(t, out, "Checking out 6caeb21d as test-ci...")
 				assert.Contains(t, out, "Do your build here")
 				assert.Contains(t, out, "$ echo \"Let's do some cleanup\"")
 				assert.Contains(t, out, "Job succeeded")
@@ -50,13 +50,9 @@ func Test_ciTrace(t *testing.T) {
 		},
 		{
 			desc: "Has arg with job-id",
-			args: []string{"716449943"},
+			args: []string{"732481782"},
 			assertContains: func(t *testing.T, out string) {
 				assert.Contains(t, out, "Getting job trace...")
-				assert.Contains(t, out, "Showing logs for deploy4 job #716449943")
-				assert.Contains(t, out, "Checking out 5d3de07d as test-ci...")
-				assert.Contains(t, out, "Anything to run such as dependencies or debugging")
-				assert.Contains(t, out, "$ echo \"Do a manual deploy here\"")
 				assert.Contains(t, out, "Job succeeded")
 			},
 		},
@@ -64,10 +60,7 @@ func Test_ciTrace(t *testing.T) {
 			desc: "On a specified repo with job ID",
 			args: []string{"-Rglab-cli/test", "716449943"},
 			assertContains: func(t *testing.T, out string) {
-				assert.Contains(t, out, "Showing logs for deploy4 job #716449943")
-				assert.Contains(t, out, "Checking out 5d3de07d as test-ci...")
-				assert.Contains(t, out, "Anything to run such as dependencies or debugging")
-				assert.Contains(t, out, "$ echo \"Do a manual deploy here\"")
+				assert.Contains(t, out, "Getting job trace...")
 				assert.Contains(t, out, "Job succeeded")
 			},
 		},

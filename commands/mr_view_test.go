@@ -18,7 +18,7 @@ func TestMRView_web_numberArg(t *testing.T) {
 	})
 	defer restoreCmd()
 
-	cmd := exec.Command(glabBinaryPath, "mr", "view", "-w", "189")
+	cmd := exec.Command(glabBinaryPath, "mr", "view", "-w", "225")
 	cmd.Dir = repo
 
 	b, err := cmd.CombinedOutput()
@@ -27,7 +27,7 @@ func TestMRView_web_numberArg(t *testing.T) {
 		t.Errorf("error running command `mr view`: %v", err)
 	}
 
-	assert.Contains(t, string(b), "Opening gitlab.com/glab-cli/test/-/merge_requests/189 in your browser.")
+	assert.Contains(t, string(b), "Opening gitlab.com/glab-cli/test/-/merge_requests/225 in your browser.")
 
 	if seenCmd == nil {
 		t.Log("expected a command to run")
