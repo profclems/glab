@@ -1,7 +1,7 @@
 package commands
 
 import (
-	"github.com/profclems/glab/internal/utils"
+	"github.com/profclems/glab/internal/config"
 	"os/exec"
 	"testing"
 
@@ -9,8 +9,8 @@ import (
 )
 
 func Test_AliasSetCmd(t *testing.T) {
-	t.Parallel()
 	repo := copyTestRepo(t)
+	_ = config.DeleteAlias("testmrl")
 	var cmd *exec.Cmd
 
 	tests := []struct {
@@ -29,9 +29,9 @@ func Test_AliasSetCmd(t *testing.T) {
 		},
 		{
 			Name: "Is valid",
-			args: []string{"mrl", "'mr list'"},
+			args: []string{"testmrl", "mr list"},
 			assertFunc: func(t *testing.T, out string) {
-				assert.Contains(t, out, utils.GreenCheck()+" Alias added")
+				assert.Contains(t, out, "- Adding alias for testmrl: mr list\n✓")
 			},
 		},
 	}

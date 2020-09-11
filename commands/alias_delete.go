@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/profclems/glab/internal/config"
 	"github.com/profclems/glab/internal/utils"
-
 	"github.com/spf13/cobra"
 )
 
@@ -15,6 +14,9 @@ var aliasDeleteCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		expansion := config.GetAlias(args[0])
+		if expansion == "" {
+			return fmt.Errorf("no such alias %s", args[0])
+		}
 		err := config.DeleteAlias(args[0])
 
 		if err != nil {
