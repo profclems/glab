@@ -3,17 +3,17 @@ package main
 import (
 	"errors"
 	"fmt"
+	"github.com/profclems/glab/internal/run"
 	"io"
 	"net"
 	"os"
-	"regexp"
+	"os/exec"
 	"strings"
 
 	"github.com/profclems/glab/commands"
 	"github.com/profclems/glab/internal/config"
 	"github.com/profclems/glab/internal/utils"
 
-	"github.com/google/shlex"
 	"github.com/spf13/cobra"
 )
 
@@ -44,13 +44,35 @@ func main() {
 	cmd, _, err := commands.RootCmd.Traverse(expandedArgs)
 	if err != nil || cmd == commands.RootCmd {
 		originalArgs := expandedArgs
-		expandedArgs, err = expandAlias(os.Args)
+		isShell := false
+		expandedArgs, isShell, err = commands.ExpandAlias(os.Args, nil)
 		if err != nil {
-			fmt.Printf("Failed to process alias: %s\n", err)
+			fmt.Fprintf(os.Stdout, "Failed to process alias: %s\n", err)
+			os.Exit(2)
 		}
 
 		if debug {
 			fmt.Printf("%v -> %v\n", originalArgs, expandedArgs)
+		}
+
+		if isShell {
+			externalCmd := exec.Command(expandedArgs[0], expandedArgs[1:]...)
+			externalCmd.Stderr = os.Stderr
+			externalCmd.Stdout = os.Stdout
+			externalCmd.Stdin = os.Stdin
+			preparedCmd := run.PrepareCmd(externalCmd)
+
+			err = preparedCmd.Run()
+			if err != nil {
+				if ee, ok := err.(*exec.ExitError); ok {
+					os.Exit(ee.ExitCode())
+				}
+
+				fmt.Fprintf(os.Stdout, "failed to run external command: %s", err)
+				os.Exit(3)
+			}
+
+			os.Exit(0)
 		}
 	}
 
@@ -60,43 +82,6 @@ func main() {
 		printError(os.Stderr, err, cmd, debug)
 		os.Exit(1)
 	}
-}
-
-func expandAlias(args []string) (expanded []string, err error) {
-	if len(args) < 2 {
-		// No subcommand
-		return
-	}
-	expanded = args[1:]
-
-	expansion := config.GetAlias(args[1])
-	if expansion == "" {
-		return
-	}
-
-	extraArgs := []string{}
-	for i, a := range args[2:] {
-		if !strings.Contains(expansion, "$") {
-			extraArgs = append(extraArgs, a)
-		} else {
-			expansion = strings.ReplaceAll(expansion, fmt.Sprintf("$%d", i+1), a)
-		}
-	}
-
-	leftoverChecker := regexp.MustCompile(`\$\d`)
-	if leftoverChecker.MatchString(expansion) {
-		err = fmt.Errorf("not enough arguments for alias: %s", expansion)
-		return
-	}
-
-	var newArgs []string
-	newArgs, err = shlex.Split(expansion)
-	if err != nil {
-		return
-	}
-
-	expanded = append(newArgs, extraArgs...)
-	return
 }
 
 func initConfig() {
