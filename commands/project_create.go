@@ -2,11 +2,13 @@ package commands
 
 import (
 	"fmt"
+	"github.com/MakeNowJust/heredoc"
 	"github.com/profclems/glab/internal/manip"
 	"github.com/profclems/glab/internal/run"
 	"github.com/profclems/glab/internal/utils"
 	"os"
 	"path"
+	"strings"
 
 	"github.com/profclems/glab/internal/git"
 
@@ -17,8 +19,22 @@ import (
 var projectCreateCmd = &cobra.Command{
 	Use:   "create [path] [flags]",
 	Short: `Create a new Gitlab project/repository`,
-	Long:  ``,
+	Long:  `Create a new GitHub repository.`,
+	Args:  cobra.MaximumNArgs(1),
 	RunE:  runCreateProject,
+	Example: heredoc.Doc(`
+			# create a repository under your account using the current directory name
+			$ glab repo create
+
+			# create a repository under a group using the current directory name
+			$ glab repo create --group glab-cli
+
+			# create a repository with a specific name
+			$ glab repo create my-project
+
+			# create a repository for a group
+			$ glab repo create glab-cli/my-project
+	  `),
 }
 
 func runCreateProject(cmd *cobra.Command, args []string) error {
@@ -31,9 +47,16 @@ func runCreateProject(cmd *cobra.Command, args []string) error {
 		visiblity   gitlab.VisibilityValue
 		err         error
 		isPath      bool
+		namespaceID int
+		namespace	string
 	)
 	if len(args) == 1 {
 		projectPath = args[0]
+		if strings.Contains(projectPath, "/") {
+			pp := strings.Split(projectPath, "/")
+			projectPath = pp[1]
+			namespace = pp[0]
+		}
 	} else {
 		projectPath, err = git.ToplevelDir()
 		projectPath = path.Base(projectPath)
@@ -41,6 +64,22 @@ func runCreateProject(cmd *cobra.Command, args []string) error {
 			return err
 		}
 		isPath = true
+	}
+
+	group, err := cmd.Flags().GetString("group")
+	if err != nil {
+		return fmt.Errorf("could not parse group flag: %v", err)
+	}
+	if group != "" {
+		namespace = group
+	}
+
+	if namespace != "" {
+		group, err := getGroup(namespace)
+		if err != nil {
+			return fmt.Errorf("could not find group or namespace %s: %v", namespace, err)
+		}
+		namespaceID = group.ID
 	}
 
 	name, _ := cmd.Flags().GetString("name")
@@ -79,10 +118,22 @@ func runCreateProject(cmd *cobra.Command, args []string) error {
 		opts.Visibility = &visiblity
 	}
 
+	if namespaceID != 0 {
+		opts.NamespaceID = &namespaceID
+	}
+
 	project, err := createProject(opts)
 
 	out := colorableOut(cmd)
 	greenCheck := utils.Green("✓")
+	isTTY := false
+	if outFile, isFile := out.(*os.File); isFile {
+		isTTY = utils.IsTerminal(outFile)
+		if isTTY {
+			// FIXME: duplicates colorableOut
+			out = utils.NewColorable(outFile)
+		}
+	}
 	if err == nil {
 		fmt.Fprintf(out, "%s Created repository %s on GitLab: %s\n", greenCheck, project.NameWithNamespace, project.WebURL)
 		if isPath {
@@ -92,7 +143,7 @@ func runCreateProject(cmd *cobra.Command, args []string) error {
 			}
 			fmt.Fprintf(out, "%s Added remote %s\n", greenCheck, project.SSHURLToRepo)
 
-		} else {
+		} else if isTTY {
 			doSetup, err := manip.Confirm(fmt.Sprintf("Create a local project directory for %s?", project.NameWithNamespace))
 			if err != nil {
 				return err
@@ -127,6 +178,7 @@ func runCreateProject(cmd *cobra.Command, args []string) error {
 
 func init() {
 	projectCreateCmd.Flags().StringP("name", "n", "", "Name of the new project")
+	projectCreateCmd.Flags().StringP("group", "g", "", "Namespace/group for the new project (defaults to the current user’s namespace)")
 	projectCreateCmd.Flags().StringP("description", "d", "", "Description of the new project")
 	projectCreateCmd.Flags().String("defaultBranch", "", "Default branch of the project. If not provided, `master` by default.")
 	projectCreateCmd.Flags().StringArrayP("tag", "t", []string{}, "The list of tags for the project.")

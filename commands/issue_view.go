@@ -5,7 +5,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/profclems/glab/internal/browser"
 	"github.com/profclems/glab/internal/git"
 	"github.com/profclems/glab/internal/manip"
 	"github.com/profclems/glab/internal/utils"
@@ -41,14 +40,8 @@ var issueViewCmd = &cobra.Command{
 			return err
 		}
 		if lb, _ := cmd.Flags().GetBool("web"); lb { //open in browser if --web flag is specified
-			a, err := browser.Command(issue.WebURL)
-			if err != nil {
-				return err
-			}
-			if err := a.Run(); err != nil {
-				return err
-			}
-			return nil
+			fmt.Fprintf(cmd.ErrOrStderr(), "Opening %s in your browser.\n", utils.DisplayURL(issue.WebURL))
+			return utils.OpenInBrowser(issue.WebURL)
 		}
 		var issueState string
 		if issue.State == "opened" {

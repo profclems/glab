@@ -2,11 +2,9 @@ package commands
 
 import (
 	"fmt"
-	"log"
 	"strings"
 	"time"
 
-	"github.com/profclems/glab/internal/browser"
 	"github.com/profclems/glab/internal/git"
 	"github.com/profclems/glab/internal/manip"
 	"github.com/profclems/glab/internal/utils"
@@ -24,10 +22,10 @@ var mrViewCmd = &cobra.Command{
 	Long:    ``,
 	Aliases: []string{"show"},
 	Args:    cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		if len(args) == 0 || len(args) > 1 {
 			cmdErr(cmd, args)
-			return
+			return nil
 		}
 		pid := manip.StringToInt(args[0])
 
@@ -43,17 +41,11 @@ var mrViewCmd = &cobra.Command{
 
 		mr, _, err := gitlabClient.MergeRequests.GetMergeRequest(repo, pid, opts)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 		if lb, _ := cmd.Flags().GetBool("web"); lb { //open in browser if --web flag is specified
-			a, err := browser.Command(mr.WebURL)
-			if err != nil {
-				er(err)
-			}
-			if err := a.Run(); err != nil {
-				er(err)
-			}
-			return
+			fmt.Fprintf(cmd.ErrOrStderr(), "Opening %s in your browser.\n", utils.DisplayURL(mr.WebURL))
+			return utils.OpenInBrowser(mr.WebURL)
 		}
 		showSystemLog, _ := cmd.Flags().GetBool("system-logs")
 		var mrState string
@@ -147,6 +139,7 @@ var mrViewCmd = &cobra.Command{
 				fmt.Println("There are no comments on this mr")
 			}
 		}
+		return nil
 	},
 }
 
