@@ -48,7 +48,7 @@ func Test_projectCreateCmd(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		eq(t, string(remote), "git@gitlab.com:"+expectedPath+"\n")
+		eq(t, string(remote), "git@gitlab.com:"+expectedPath+".git\n")
 	})
 	p, err := getProject(expectedPath)
 	if err != nil {
@@ -61,7 +61,6 @@ func Test_projectCreateCmd(t *testing.T) {
 }
 
 func Test_projectCreateCmdWithArgs(t *testing.T) {
-	t.Parallel()
 	repo := copyTestRepo(t)
 	expectedPath := "glab-cli/unittest"
 
@@ -86,16 +85,10 @@ func Test_projectCreateCmdWithArgs(t *testing.T) {
 
 		require.Contains(t, string(b),
 			"✓ Created repository glab / unittest on GitLab: https://gitlab.com/"+expectedPath+"\n")
-
-		gitCmd := exec.Command("git", "remote", "get-url", "origin")
-		gitCmd.Dir = repo
-		gitCmd.Stdout = nil
-		gitCmd.Stderr = nil
-		remote, err := gitCmd.CombinedOutput()
+		err = initialiseRepo(expectedPath, "git@gitlab.com:"+expectedPath+".git")
 		if err != nil {
 			t.Fatal(err)
 		}
-		eq(t, string(remote), "git@gitlab.com:"+expectedPath+"\n")
 	})
 	p, err := getProject(expectedPath)
 	if err != nil {

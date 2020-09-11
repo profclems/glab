@@ -151,22 +151,10 @@ func runCreateProject(cmd *cobra.Command, args []string) error {
 
 			if doSetup {
 				projectPath := project.Path
-
-				gitInit := git.GitCommand("init", projectPath)
-				gitInit.Stdout = os.Stdout
-				gitInit.Stderr = os.Stderr
-				err = run.PrepareCmd(gitInit).Run()
+				err = initialiseRepo(projectPath, project.SSHURLToRepo)
 				if err != nil {
 					return err
 				}
-				gitRemoteAdd := git.GitCommand("-C", projectPath, "remote", "add", "origin", project.SSHURLToRepo)
-				gitRemoteAdd.Stdout = os.Stdout
-				gitRemoteAdd.Stderr = os.Stderr
-				err = run.PrepareCmd(gitRemoteAdd).Run()
-				if err != nil {
-					return err
-				}
-
 				fmt.Fprintf(out, "%s Initialized repository in './%s/'\n", greenCheck, projectPath)
 			}
 		}
@@ -174,6 +162,25 @@ func runCreateProject(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("error creating project: %v", err)
 	}
 	return err
+}
+
+func initialiseRepo(projectPath, remoteURL string) error   {
+
+	gitInit := git.GitCommand("init", projectPath)
+	gitInit.Stdout = os.Stdout
+	gitInit.Stderr = os.Stderr
+	err := run.PrepareCmd(gitInit).Run()
+	if err != nil {
+		return err
+	}
+	gitRemoteAdd := git.GitCommand("-C", projectPath, "remote", "add", "origin", remoteURL)
+	gitRemoteAdd.Stdout = os.Stdout
+	gitRemoteAdd.Stderr = os.Stderr
+	err = run.PrepareCmd(gitRemoteAdd).Run()
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func init() {
