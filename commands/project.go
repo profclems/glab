@@ -7,7 +7,7 @@ import (
 )
 
 func getProject(projectID interface{}) (*gitlab.Project, error) {
-	gitlabClient, _ := git.InitGitlabClient()
+	gitlabClient, _ := git.InitGitlabClient(false)
 	opts := &gitlab.GetProjectOptions{
 		Statistics:           gitlab.Bool(true),
 		License:              gitlab.Bool(true),

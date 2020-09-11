@@ -9,7 +9,7 @@ import (
 )
 
 func currentUser() (string, error) {
-	gLab, _ := git.InitGitlabClient()
+	gLab, _ := git.InitGitlabClient(false)
 	u, _, err := gLab.Users.CurrentUser()
 	if err != nil {
 		return "", err
@@ -18,7 +18,7 @@ func currentUser() (string, error) {
 }
 
 func getUser(uid int) (*gitlab.User, error) {
-	gLab, _ := git.InitGitlabClient()
+	gLab, _ := git.InitGitlabClient(false)
 	u, _, err := gLab.Users.GetUser(uid)
 	if err != nil {
 		return nil, err
@@ -35,7 +35,7 @@ func getUsername(uid int) string {
 }
 
 func getUserActivities() ([]*gitlab.UserActivity, error) {
-	gLab, _ := git.InitGitlabClient()
+	gLab, _ := git.InitGitlabClient(false)
 	l := &gitlab.GetUserActivitiesOptions{}
 	ua, _, err := gLab.Users.GetUserActivities(l)
 	if err != nil {
