@@ -54,6 +54,8 @@ curl -s https://raw.githubusercontent.com/profclems/glab/trunk/scripts/quick_ins
 ```
 *Installs into `usr/local/bin`*
 
+**NOTE**: Please take care when running scripts in this fashion. Consider peaking at the install script itself and verify that it works as intended.
+
 ### Windows
 Available for download on scoop or manually as an installable executable file or a Portable archived file in tar and zip formats at the [releases page](https://github.com/profclems/glab/releases/latest).
 Download and install now at the [releases page](https://github.com/profclems/glab/releases/latest).
@@ -151,31 +153,29 @@ If a supported binary for your OS is not found at the [releases page](https://gi
 
 
 ## Configuration
-**To set configuration for current directory (must be a git repository)**
-```sh
-glab config  // Will be prompted for details
-
-or
-
-glab config --token=<YOUR-GITLAB-ACCESS-TOKEN> --url=https://gitlab.com --remote-var=origin
-```
+Get a GitLab access token at https://gitlab.com/profile/personal_access_tokens or https://gitlab.example.com/profile/personal_access_tokens if self-hosted.
 **To set configuration globally**
 ```sh
-glab config --global // Will be prompted for details
-
+glab config -g # Will be prompted for details
+```
 or
-
-glab config --global --token=<YOUR-GITLAB-ACCESS-TOKEN> --url=https://gitlab.com  --remote-var=origin
-```
-**For initial releases up to v1.6.1**
 ```sh
-glab config --token=<YOUR-GITLAB-ACCESS-TOKEN> --url=https://gitlab.com --pid=<YOUR-GITLAB-PROJECT-ID> --repo=OWNER/REPO
+glab config -g --token=<YOUR-GITLAB-ACCESS-TOKEN> --url=https://gitlab.com  --remote-var=origin
 ```
+**To set configuration for current directory (must be a git repository)**
+```sh
+glab config init  # Will be prompted for details
+```
+or
+```sh
+glab config --token=<YOUR-GITLAB-ACCESS-TOKEN> --url=https://gitlab.com --remote-var=origin
+```
+
 ### Example
 ```sh
 glab config --token=sometoken --url=https://gitlab.com --pid=someprojectid --repo=profclems/glab
 ```
-**NB**: Change gitlab.com to company or group's gitlab url if self-hosted
+**NB**: Change gitlab.com to company or group's gitlab url (eg. gitlab.example.com) if self-hosted
 
 ## Environment Variables
   ```sh

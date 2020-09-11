@@ -82,4 +82,4 @@ check your internet connection or status.gitlab.com or 'Run sudo gitlab-ctl stat
 			}
 		})
 	}
-}
+}]
