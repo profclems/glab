@@ -2,6 +2,8 @@ package commands
 
 import (
 	"fmt"
+	"github.com/profclems/glab/internal/config"
+	"github.com/xanzy/go-gitlab"
 	"io"
 	"log"
 	"os"
@@ -182,6 +184,52 @@ func DisplayList(lInfo ListInfo, repo ...string) {
 		fmt.Println(emptyMessage)
 	}
 
+}
+type remoteArgs struct {
+	protocol string
+	token	 string
+	url		 string
+	username string
+}
+
+// gitRemoteURL returns correct git clone URL of a repo 
+// based on the user's git_protocol preference
+// args should be arranged as protocol, token, url, username
+
+func gitRemoteURL(project *gitlab.Project, args *remoteArgs) (string, error)  {
+	var err error
+
+	if args.protocol == "" {
+		args.protocol = config.GetEnv("GIT_PROTOCOL")
+	}
+	if args.protocol == "https" {
+		if args.token == "" {
+			args.token = config.GetEnv("GITLAB_TOKEN")
+		}
+		if args.url == "" {
+			args.url = config.GetEnv("GITLAB_URI")
+		}
+		if args.username == "" {
+			args.username, err = currentUser()
+			if err != nil {
+				return "", err
+			}
+			if args.username == "" {
+				args.username = "oauth2"
+			}
+		}
+
+		args.protocol = "https://"
+		if strings.Contains(args.url, "https://") {
+			args.url = strings.TrimPrefix(args.url, "https://")
+		} else if strings.HasPrefix(args.url, "http://") {
+			args.url = strings.TrimPrefix(args.url, "http://")
+			args.protocol = "http://"
+		}
+		return fmt.Sprintf("%s%s:%s@%s/%s.git",
+			args.protocol, args.username, args.token, args.url, project.PathWithNamespace), nil
+	}
+	return project.SSHURLToRepo, nil
 }
 
 func colorableOut(cmd *cobra.Command) io.Writer {

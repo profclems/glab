@@ -3,6 +3,7 @@ package commands
 import (
 	"bytes"
 	"fmt"
+	"github.com/xanzy/go-gitlab"
 	"io"
 	"log"
 	"math/rand"
@@ -190,4 +191,59 @@ func firstLine(output []byte) string {
 		return strings.ReplaceAll(string(output)[0:i], "PASS", "")
 	}
 	return string(output)
+}
+
+func Test_gitRemoteURL(t *testing.T) {
+	type args struct {
+		project *gitlab.Project
+		args    *remoteArgs
+	}
+
+	for _, tt := range []struct {
+		name    string
+		args    args
+		want    string
+		wantErr bool
+	} {
+		{
+			name: "is_https",
+			args: args{
+				project: &gitlab.Project{
+					SSHURLToRepo: "git@gitlab.com:profclems/glab.git",
+					HTTPURLToRepo: "https://gitlab.com/profclems/glab.git",
+					PathWithNamespace: "profclems/glab",
+				},
+				args: &remoteArgs{
+					protocol: "https",
+					token: "token",
+					url: "https://gitlab.com",
+					username: "user",
+				},
+			},
+			want: "https://user:token@gitlab.com/profclems/glab.git",
+		},
+		{
+			name: "is_ssh",
+			args: args{
+				project: &gitlab.Project{
+					SSHURLToRepo: "git@gitlab.com:profclems/glab.git",
+				},
+				args: &remoteArgs{
+					protocol: "ssh",
+				},
+			},
+			want: "git@gitlab.com:profclems/glab.git",
+		},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := gitRemoteURL(tt.args.project, tt.args.args)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("gitRemoteURL() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("gitRemoteURL() got = %v, want %v", got, tt.want)
+			}
+		})
+	}
 }

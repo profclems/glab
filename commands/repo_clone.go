@@ -55,7 +55,10 @@ var repoCloneCmd = &cobra.Command{
 			if err != nil {
 				return err
 			}
-			repo = project.SSHURLToRepo
+			repo, err = gitRemoteURL(project, &remoteArgs{})
+			if err != nil {
+				return err
+			}
 		} else if !strings.HasSuffix(repo, ".git") {
 			repo += ".git"
 		}
@@ -79,7 +82,8 @@ var repoCloneCmd = &cobra.Command{
 				if err != nil {
 					return err
 				}
-				err = git.AddUpstreamRemote(fProject.SSHURLToRepo, dir)
+				repoURL, err := gitRemoteURL(fProject, &remoteArgs{})
+				err = git.AddUpstreamRemote(repoURL, dir)
 				if err != nil {
 					return err
 				}
