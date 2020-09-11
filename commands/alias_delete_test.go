@@ -31,7 +31,7 @@ func TestAliasDelete(t *testing.T) {
 		{
 			name:       "delete one",
 			cli:        "co-test",
-			wantStderr: "✓ Deleted alias co; was mr checkout\n",
+			wantStderr: "✓ Deleted alias co-test; was mr checkout\n",
 		},
 	}
 	for _, tt := range tests {

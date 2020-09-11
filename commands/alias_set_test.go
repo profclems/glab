@@ -1,10 +1,12 @@
 package commands
 
 import (
-	"github.com/profclems/glab/internal/config"
 	"os/exec"
 	"testing"
 
+	"github.com/profclems/glab/internal/config"
+
+	"github.com/acarl005/stripansi"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -48,6 +50,7 @@ func Test_AliasSetCmd(t *testing.T) {
 				t.Fatal(err)
 			}
 			out := string(b)
+			out = stripansi.Strip(out)
 			test.assertFunc(t, out)
 		})
 	}
