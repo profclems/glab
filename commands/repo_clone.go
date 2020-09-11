@@ -83,6 +83,9 @@ var repoCloneCmd = &cobra.Command{
 					return err
 				}
 				repoURL, err := gitRemoteURL(fProject, &remoteArgs{})
+				if err != nil {
+					return err
+				}
 				err = git.AddUpstreamRemote(repoURL, dir)
 				if err != nil {
 					return err
