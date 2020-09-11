@@ -164,7 +164,7 @@ func runCreateProject(cmd *cobra.Command, args []string) error {
 	return err
 }
 
-func initialiseRepo(projectPath, remoteURL string) error   {
+func initialiseRepo(projectPath, remoteURL string) error {
 
 	gitInit := git.GitCommand("init", projectPath)
 	gitInit.Stdout = os.Stdout
