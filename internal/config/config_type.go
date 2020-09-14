@@ -12,9 +12,9 @@ import (
 )
 
 const (
-	defaultGitProtocol 	= "ssh"
+	defaultGitProtocol  = "ssh"
 	defaultGlamourStyle = "dark"
-	defaultHostname    	= "gitlab.com"
+	defaultHostname     = "gitlab.com"
 )
 
 // This interface describes interacting with some persistent configuration for glab.
@@ -240,8 +240,8 @@ func NewBlankRoot() *yaml.Node {
 								Content: []*yaml.Node{
 									{
 										HeadComment: "What protocol to use to access the api endpoint. Supported values: http, https",
-										Kind:  yaml.ScalarNode,
-										Value: "protocol",
+										Kind:        yaml.ScalarNode,
+										Value:       "protocol",
 									},
 									{
 										Kind:  yaml.ScalarNode,
@@ -249,8 +249,8 @@ func NewBlankRoot() *yaml.Node {
 									},
 									{
 										HeadComment: "Your GitLab access token. Get an access token at https://gitlab.com/profile/personal_access_tokens",
-										Kind:  yaml.ScalarNode,
-										Value: "token",
+										Kind:        yaml.ScalarNode,
+										Value:       "token",
 									},
 									{
 										Kind:  yaml.ScalarNode,
@@ -306,7 +306,7 @@ func (c *fileConfig) Root() *yaml.Node {
 func (c *fileConfig) Get(hostname, key string) (string, error) {
 	var env string
 	envEq := EnvKeyEquivalence(key)
-	for  _, e := range envEq {
+	for _, e := range envEq {
 		if val := os.Getenv(e); val != "" {
 			env = val
 			break

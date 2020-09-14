@@ -40,7 +40,7 @@ func ConfigFile() string {
 	return path.Join(ConfigDir(), "config.yml")
 }
 
-func Init() (Config, error)  {
+func Init() (Config, error) {
 	if cachedConfig != nil || configError != nil {
 		return cachedConfig, configError
 	}

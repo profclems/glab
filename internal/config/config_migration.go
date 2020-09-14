@@ -54,7 +54,7 @@ func migrateGlobalConfigDir() error {
 }
 
 // migrateOldAliasFile renames alias file from old aliases.format to aliases.yml
-func migrateOldAliasFile() error  {
+func migrateOldAliasFile() error {
 	oldAliasFile := filepath.Join(globalPathDir, "aliases.format")
 	if CheckFileExists(oldAliasFile) {
 		if err := os.Rename(oldAliasFile, aliasFile); err == nil {
