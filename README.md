@@ -45,13 +45,12 @@ By donating $5 or more you can support the ongoing development of this project. 
 
 ### Individuals
 
-This project exists thanks to all the people who contribute. [[Contribute](CONTRIBUTING.md)].
-<a href="https://opencollective.com/glab"><img src="https://opencollective.com/glab/contributors.svg?width=890" /></a>
+This project exists thanks to all the people who contribute. [[Contribute](https://github.com/profclems/glab/blob/trunk/.github/CONTRIBUTING.md)].
+<a href="https://opencollective.com/glab/contribute"><img src="https://opencollective.com/glab/contributors.svg?width=890" /></a>
 
 ### Backers
 
-Thank you to all our backers! 🙏 [[Become a backer](https://opencollective.com/glab#backer)]
-
+Thank you to all our backers! 🙏 [[Become a backer](https://opencollective.com/glab/contribute)]
 <a href="https://opencollective.com/glab#backers" target="_blank"><img src="https://opencollective.com/glab/backers.svg?width=890"></a>
 
 ## Installation
