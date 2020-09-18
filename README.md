@@ -40,6 +40,20 @@ GLab is an open source Gitlab Cli tool written in Go (golang) to help work seaml
 ## Learn More
 Read the [documentation](https://clementsam.tech/glab) for more information on this tool.
 
+## Support `glab` 💖
+By donating $5 or more you can support the ongoing development of this project. We'll appreciate some support. Thank you to all our supporters! 🙏 [[Contribute](https://opencollective.com/glab/contribute)]
+
+### Individuals
+
+This project exists thanks to all the people who contribute. [[Contribute](CONTRIBUTING.md)].
+<a href="https://opencollective.com/glab"><img src="https://opencollective.com/glab/contributors.svg?width=890" /></a>
+
+### Backers
+
+Thank you to all our backers! 🙏 [[Become a backer](https://opencollective.com/glab#backer)]
+
+<a href="https://opencollective.com/glab#backers" target="_blank"><img src="https://opencollective.com/glab/backers.svg?width=890"></a>
+
 ## Installation
 Download a binary suitable for your OS at the [releases page](https://github.com/profclems/glab/releases/latest).
 
@@ -199,17 +213,15 @@ glab config --token=sometoken --url=https://gitlab.com --pid=someprojectid --rep
   Available options are (dark|light|notty) or set a custom style
   https://github.com/charmbracelet/glamour#styles
   ```
+  
 ## ToDo
 Aside adding more features, the biggest thing this tool still needs is tests 😞
 
 ## Issues
 If you have an issue: report it on the [issue tracker](https://github.com/profclems/glab/issues)
-## Contributions
-Thanks for considering contributing to this project!
 
-Please read the [contributions guide](https://github.com/profclems/glab/blob/trunk/.github/CONTRIBUTING.md) and [Code of conduct](https://github.com/profclems/glab/blob/trunk/.github/CODE_OF_CONDUCT.md). 
-
-Feel free to open an issue or submit a pull request!
+## Contributing
+Feel like contributing? That's awesome! We have a [contributing guide](https://github.com/profclems/glab/blob/trunk/.github/CONTRIBUTING.md) and [Code of conduct](https://github.com/profclems/glab/blob/trunk/.github/CODE_OF_CONDUCT.md) to help guide you
 
 ## Contributors ✨
 
@@ -253,8 +265,3 @@ This project follows the [all-contributors](https://github.com/all-contributors/
 Copyright © [Clement Sam](https://clementsam.tech)
 
 `glab` is open-sourced software licensed under the [MIT](LICENSE) license.
-
-## Author
-Built with ❤ by [Clement Sam](https://clementsam.tech)
-
-[![image](https://cdn.buymeacoffee.com/buttons/default-green.png)](https://www.buymeacoffee.com/profclems)
