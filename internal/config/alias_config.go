@@ -2,11 +2,13 @@ package config
 
 import (
 	"fmt"
+	"gopkg.in/yaml.v3"
 	"path"
 )
 
-func aliasesConfigFile(filename string) string {
-	return path.Join(path.Dir(filename), "aliases.yml")
+func aliasesConfigFile() string {
+	fmt.Println(path.Join(globalPathDir, "aliases.yml"))
+	return path.Join(globalPathDir, "aliases.yml")
 }
 
 type AliasConfig struct {
@@ -23,7 +25,7 @@ func (a *AliasConfig) Get(alias string) (string, bool) {
 	return value, value != ""
 }
 
-func (a *AliasConfig) Add(alias, expansion string) error {
+func (a *AliasConfig) Set(alias, expansion string) error {
 	err := a.SetStringValue(alias, expansion)
 	if err != nil {
 		return fmt.Errorf("failed to update config: %w", err)
@@ -40,11 +42,19 @@ func (a *AliasConfig) Add(alias, expansion string) error {
 func (a *AliasConfig) Delete(alias string) error {
 	a.RemoveEntry(alias)
 
-	err := a.Parent.Write()
+	return a.Write()
+}
+
+func (a *AliasConfig) Write() error {
+	aliasesBytes, err := yaml.Marshal(a.ConfigMap.Root)
+	if err != nil {
+		return err
+	}
+	err = WriteConfigFile(aliasesConfigFile(), yamlNormalize(aliasesBytes))
+
 	if err != nil {
 		return fmt.Errorf("failed to write config: %w", err)
 	}
-
 	return nil
 }
 

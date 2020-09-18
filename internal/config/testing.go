@@ -25,7 +25,7 @@ func StubWriteConfig(wc io.Writer, wh io.Writer) func() {
 		case "config.yml":
 			_, err := wc.Write(data)
 			return err
-		case "hosts.yml":
+		case "aliases.yml":
 			_, err := wh.Write(data)
 			return err
 		default:
@@ -37,7 +37,7 @@ func StubWriteConfig(wc io.Writer, wh io.Writer) func() {
 	}
 }
 
-func StubConfig(main, hosts string) func() {
+func StubConfig(main, aliases string) func() {
 	orig := ReadConfigFile
 	ReadConfigFile = func(fn string) ([]byte, error) {
 		switch path.Base(fn) {
@@ -47,11 +47,11 @@ func StubConfig(main, hosts string) func() {
 			} else {
 				return []byte(main), nil
 			}
-		case "hosts.yml":
-			if hosts == "" {
+		case "aliases.yml":
+			if aliases == "" {
 				return []byte(nil), os.ErrNotExist
 			} else {
-				return []byte(hosts), nil
+				return []byte(aliases), nil
 			}
 		default:
 			return []byte(nil), fmt.Errorf("read from unstubbed file: %q", fn)

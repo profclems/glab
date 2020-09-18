@@ -2,12 +2,7 @@ package config
 
 import (
 	"fmt"
-	"path"
 )
-
-func hostsConfigFile(filename string) string {
-	return path.Join(path.Dir(filename), "hosts.yml")
-}
 
 func (c *fileConfig) configForHost(hostname string) (*HostConfig, error) {
 	hosts, err := c.hostEntries()

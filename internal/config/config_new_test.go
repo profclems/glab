@@ -3,6 +3,7 @@ package config
 import (
 	"bytes"
 	"fmt"
+	"os"
 	"reflect"
 	"testing"
 
@@ -21,53 +22,78 @@ func Test_parseConfig(t *testing.T) {
 	defer StubConfig(`---
 hosts:
   gitlab.com:
-    user: monalisa
+    username: monalisa
     token: OTOKEN
+aliases:
 `, "")()
+	// prevent using env variable for test
+	envToken := os.Getenv("GITLAB_TOKEN")
+	if envToken != "" {
+		_ = os.Setenv("GITLAB_TOKEN", "")
+	}
 	config, err := ParseConfig("config.yml")
 	eq(t, err, nil)
-	user, err := config.Get("gitlab.com", "user")
+	username, err := config.Get("gitlab.com", "username")
 	eq(t, err, nil)
-	eq(t, user, "monalisa")
+	eq(t, username, "monalisa")
 	token, err := config.Get("gitlab.com", "token")
 	eq(t, err, nil)
 	eq(t, token, "OTOKEN")
+	if envToken != "" {
+		_ = os.Setenv("GITLAB_TOKEN", "")
+	}
 }
 
 func Test_parseConfig_multipleHosts(t *testing.T) {
 	defer StubConfig(`---
 hosts:
   gitlab.example.com:
-    user: wronguser
+    username: wrongusername
     token: NOTTHIS
   gitlab.com:
-    user: monalisa
+    username: monalisa
     token: OTOKEN
 `, "")()
+	// prevent using env variable for test
+	envToken := os.Getenv("GITLAB_TOKEN")
+	if envToken != "" {
+		_ = os.Setenv("GITLAB_TOKEN", "")
+	}
 	config, err := ParseConfig("config.yml")
 	eq(t, err, nil)
-	user, err := config.Get("gitlab.com", "user")
+	username, err := config.Get("gitlab.com", "username")
 	eq(t, err, nil)
-	eq(t, user, "monalisa")
+	eq(t, username, "monalisa")
 	token, err := config.Get("gitlab.com", "token")
 	eq(t, err, nil)
 	eq(t, token, "OTOKEN")
+	if envToken != "" {
+		_ = os.Setenv("GITLAB_TOKEN", "")
+	}
 }
 
-func Test_parseConfig_hostsFile(t *testing.T) {
+func Test_parseConfig_AliasesFile(t *testing.T) {
 	defer StubConfig("", `---
 gitlab.com:
-  user: monalisa
+  username: monalisa
   token: OTOKEN
 `)()
+	// prevent using env variable for test
+	envToken := os.Getenv("GITLAB_TOKEN")
+	if envToken != "" {
+		_ = os.Setenv("GITLAB_TOKEN", "")
+	}
 	config, err := ParseConfig("config.yml")
 	eq(t, err, nil)
-	user, err := config.Get("gitlab.com", "user")
+	username, err := config.Get("gitlab.com", "username")
 	eq(t, err, nil)
-	eq(t, user, "monalisa")
+	eq(t, username, "monalisa")
 	token, err := config.Get("gitlab.com", "token")
 	eq(t, err, nil)
 	eq(t, token, "OTOKEN")
+	if envToken != "" {
+		_ = os.Setenv("GITLAB_TOKEN", "")
+	}
 }
 
 func Test_parseConfig_hostFallback(t *testing.T) {
@@ -75,10 +101,10 @@ func Test_parseConfig_hostFallback(t *testing.T) {
 git_protocol: ssh
 `, `---
 gitlab.com:
-    user: monalisa
+    username: monalisa
     token: OTOKEN
-example.com:
-    user: wronguser
+gitlab.example.com:
+    username: wrongusername
     token: NOTTHIS
     git_protocol: https
 `)()
@@ -98,26 +124,27 @@ example.com:
 func Test_ParseConfig_migrateConfig(t *testing.T) {
 	defer StubConfig(`---
 gitlab.com:
-  - user: keiyuri
+  - username: keiyuri
     token: 123456
-`, "")()
+`, `ci: pipeline ci
+co: mr checkout
+`)()
 
 	mainBuf := bytes.Buffer{}
-	hostsBuf := bytes.Buffer{}
-	defer StubWriteConfig(&mainBuf, &hostsBuf)()
+	aliasesBuf := bytes.Buffer{}
+	defer StubWriteConfig(&mainBuf, &aliasesBuf)()
 	defer StubBackupConfig()()
 
 	_, err := ParseConfig("config.yml")
 	assert.Nil(t, err)
 
-	expectedMain := "# What protocol to use when performing git operations. Supported values: ssh, https\ngit_protocol: https\n# What editor gh should run when creating issues, pull requests, etc. If blank, will refer to environment.\neditor:\n# When to interactively prompt. This is a global config that cannot be overriden by hostname. Supported values: enabled, disabled\nprompt: enabled\n# Aliases allow you to create nicknames for gh commands\naliases:\n    co: pr checkout\n"
-	expectedHosts := `gitlab.com:
-    user: keiyuri
-    token: "123456"
+	expectedMain := "# What protocol to use when performing git operations. Supported values: ssh, https\ngit_protocol: ssh\n# What editor glab should run when creating issues, merge requests, etc.  This is a global config that cannot be overridden by hostname.\neditor:\n# What browser glab should run when opening links. This is a global config that cannot be overridden by hostname.\nbrowser:\n# Git remote alias which glab should use when fetching the remote url. This can be overridden by hostname\nremote_alias: origin\n# Set your desired markdown renderer style. Available options are [dark, light, notty] or set a custom style. Refer to https://github.com/charmbracelet/glamour#styles\nglamour_style: dark\n# Allow glab to automatically check for updates and notify you when there are new updates\ncheck_update: false\n# configuration specific for gitlab instances\nhosts:\n    gitlab.com:\n        # What protocol to use to access the api endpoint. Supported values: http, https\n        protocol: https\n        # Your GitLab access token. Get an access token at https://gitlab.com/profile/personal_access_tokens\n        token: 123456\n        username: keiyuri\n"
+	expectedAliases := `ci: pipeline ci
+co: mr checkout
 `
 
 	assert.Equal(t, expectedMain, mainBuf.String())
-	assert.Equal(t, expectedHosts, hostsBuf.String())
+	assert.Equal(t, expectedAliases, aliasesBuf.String())
 }
 
 func Test_parseConfigFile(t *testing.T) {

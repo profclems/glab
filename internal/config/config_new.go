@@ -3,7 +3,6 @@ package config
 import (
 	"errors"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"os"
 	"path"
@@ -45,14 +44,14 @@ func Init() (Config, error) {
 		return cachedConfig, configError
 	}
 	cachedConfig, configError = ParseDefaultConfig()
-	if errors.Is(configError, os.ErrNotExist) {
-		cachedConfig = NewBlankConfig()
-		ugc := UseGlobalConfig
+
+	if os.IsNotExist(configError) {
+		UseGlobalConfigDefaultValue := UseGlobalConfig
 		UseGlobalConfig = true
-		if err := cachedConfig.Write(); err != nil {
+		if err := cachedConfig.WriteAll(); err != nil {
 			return nil, err
 		}
-		UseGlobalConfig = ugc
+		UseGlobalConfig = UseGlobalConfigDefaultValue
 		configError = nil
 	}
 	return cachedConfig, configError
@@ -63,15 +62,9 @@ func ParseDefaultConfig() (Config, error) {
 }
 
 var ReadConfigFile = func(filename string) ([]byte, error) {
-	f, err := os.Open(filename)
+	data, err := ioutil.ReadFile(filename)
 	if err != nil {
 		return nil, pathError(err)
-	}
-	defer f.Close()
-
-	data, err := ioutil.ReadAll(f)
-	if err != nil {
-		return nil, err
 	}
 
 	return data, nil
@@ -86,12 +79,7 @@ var WriteConfigFile = func(filename string, data []byte) error {
 	if err != nil && !os.IsNotExist(err) {
 		return err
 	}
-
 	err = WriteFile(filename, data, 0600)
-	if err == nil {
-		err = io.ErrShortWrite
-	}
-
 	return err
 }
 
@@ -176,9 +164,11 @@ func migrateConfig(filename string) error {
 
 func ParseConfig(filename string) (Config, error) {
 	_, root, err := parseConfigFile(filename)
+	var confError error
 	if err != nil {
 		if os.IsNotExist(err) {
 			root = NewBlankRoot()
+			confError = err
 		} else {
 			return nil, err
 		}
@@ -195,11 +185,11 @@ func ParseConfig(filename string) (Config, error) {
 			return nil, fmt.Errorf("failed to reparse migrated config: %w", err)
 		}
 	} else {
-		if _, hostsRoot, err := parseConfigFile(aliasesConfigFile(filename)); err == nil {
-			if len(hostsRoot.Content[0].Content) > 0 {
+		if _, aliasesRoot, err := parseConfigFile(aliasesConfigFile()); err == nil {
+			if len(aliasesRoot.Content[0].Content) > 0 {
 				newContent := []*yaml.Node{
 					{Value: "aliases"},
-					hostsRoot.Content[0],
+					aliasesRoot.Content[0],
 				}
 				restContent := root.Content[0].Content
 				root.Content[0].Content = append(newContent, restContent...)
@@ -209,7 +199,7 @@ func ParseConfig(filename string) (Config, error) {
 		}
 	}
 
-	return NewConfig(root), nil
+	return NewConfig(root), confError
 }
 
 func pathError(err error) error {

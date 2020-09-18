@@ -25,8 +25,10 @@ type Config interface {
 	UnsetHost(string)
 	Hosts() ([]string, error)
 	Aliases() (*AliasConfig, error)
-	CheckWriteable(string, string) error
+	// Write writes to the config.yml file
 	Write() error
+	// WriteAll saves all the available configuration file types
+	WriteAll() error
 }
 
 type NotFoundError struct {
@@ -54,7 +56,7 @@ func Default() string {
 	return defaultHostname
 }
 
-// IsEnterprise reports whether a non-normalized host name looks like a GHE instance
+// IsSelfHosted reports whether a non-normalized host name looks like a Self-hosted GitLab instance
 func IsSelfHosted(h string) bool {
 	return NormalizeHostname(h) != defaultHostname
 }
@@ -222,6 +224,15 @@ func NewBlankRoot() *yaml.Node {
 					{
 						Kind:  yaml.ScalarNode,
 						Value: defaultGlamourStyle,
+					},
+					{
+						HeadComment: "Allow glab to automatically check for updates and notify you when there are new updates",
+						Kind:        yaml.ScalarNode,
+						Value:       "check_update",
+					},
+					{
+						Kind:  yaml.ScalarNode,
+						Value: "false",
 					},
 					{
 						HeadComment: "configuration specific for gitlab instances",
@@ -393,19 +404,13 @@ func (c *fileConfig) UnsetHost(hostname string) {
 	cm.RemoveEntry(hostname)
 }
 
-func (c *fileConfig) CheckWriteable(hostname, key string) error {
-	// TODO: check filesystem permissions
-	return nil
-}
-
 func (c *fileConfig) Write() error {
 	mainData := yaml.Node{Kind: yaml.MappingNode}
-	aliasesData := yaml.Node{Kind: yaml.MappingNode}
 
 	nodes := c.documentRoot.Content[0].Content
 	for i := 0; i < len(nodes)-1; i += 2 {
 		if nodes[i].Value == "aliases" {
-			aliasesData.Content = append(aliasesData.Content, nodes[i+1].Content...)
+			continue
 		} else {
 			mainData.Content = append(mainData.Content, nodes[i], nodes[i+1])
 		}
@@ -417,17 +422,20 @@ func (c *fileConfig) Write() error {
 	}
 
 	filename := ConfigFile()
-	err = WriteConfigFile(filename, yamlNormalize(mainBytes))
+	return WriteConfigFile(filename, yamlNormalize(mainBytes))
+}
+
+func (c *fileConfig) WriteAll() error {
+	err := c.Write()
 	if err != nil {
 		return err
 	}
 
-	aliasesBytes, err := yaml.Marshal(&aliasesData)
+	aliases, err := c.Aliases()
 	if err != nil {
 		return err
 	}
-
-	return WriteConfigFile(aliasesConfigFile(filename), yamlNormalize(aliasesBytes))
+	return aliases.Write()
 }
 
 func yamlNormalize(b []byte) []byte {
