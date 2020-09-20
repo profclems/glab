@@ -20,7 +20,7 @@ import (
 // Version is set at build
 var version string
 
-// build is set at build
+// build is set dynamically at build
 var build string
 
 // usage mode is set at build to either "dev" or "prod" depending how binary is created
@@ -31,7 +31,7 @@ func main() {
 	commands.Version = version
 	commands.Build = build
 
-	initConfig()
+	//_, _ = initConfig()
 	if usageMode == "dev" {
 		debug = true
 	}
@@ -84,8 +84,10 @@ func main() {
 	}
 }
 
-func initConfig() {
-	config.SetGlobalPathDir()
+func initConfig() (config.Config, error) {
+	if err := config.SetGlobalPathDir(); err != nil {
+		return nil, err
+	}
 	config.UseGlobalConfig = true
 
 	if config.GetEnv("GITLAB_URI") == "" {
@@ -99,6 +101,7 @@ func initConfig() {
 	}
 
 	config.UseGlobalConfig = false
+	return config.Init()
 }
 
 func printError(out io.Writer, err error, cmd *cobra.Command, debug bool) {

@@ -2,7 +2,7 @@ package commands
 
 import (
 	"fmt"
-	"github.com/profclems/glab/internal/config"
+	"github.com/profclems/glab/internal/utils"
 	"time"
 
 	"github.com/profclems/glab/internal/git"
@@ -26,24 +26,27 @@ var pipelineStatusCmd = &cobra.Command{
 	`),
 	Long: ``,
 	Args: cobra.ExactArgs(0),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
+		var err error
 		if len(args) != 0 {
 			cmdErr(cmd, args)
-			return
+			return nil
 		}
 		branch, _ := cmd.Flags().GetString("branch")
 		var repo string
 		if r, _ := cmd.Flags().GetString("repo"); r != "" {
 			repo, _ = fixRepoNamespace(r)
 		} else {
-			repo = config.GetRepo()
+			repo, err = git.GetRepo()
+			if err != nil {
+				return err
+			}
 		}
 		live, _ := cmd.Flags().GetBool("live")
-		var err error
 		if branch == "" {
 			branch, err = git.CurrentBranch()
 			if err != nil {
-				er(err)
+				return err
 			}
 		}
 		l := &gitlab.ListProjectPipelinesOptions{
@@ -56,7 +59,7 @@ var pipelineStatusCmd = &cobra.Command{
 		//pid := manip.StringToInt(args[0])
 		pipes, err := getPipelines(l, repo)
 		if err != nil {
-			er(err)
+			return err
 		}
 		if len(pipes) == 1 {
 			runningPipeline := pipes[0]
@@ -69,8 +72,7 @@ var pipelineStatusCmd = &cobra.Command{
 			for isRunning {
 				jobs, err := getPipelineJobs(runningPipeline.ID, repo)
 				if err != nil {
-					er(err)
-					return
+					return err
 				}
 				for _, job := range jobs {
 					duration := fmtDuration(job.Duration)
@@ -93,8 +95,7 @@ var pipelineStatusCmd = &cobra.Command{
 				if runningPipeline.Status == "running" && live {
 					pipes, err = getPipelines(l, repo)
 					if err != nil {
-						er(err)
-						return
+						return err
 					}
 					runningPipeline = pipes[0]
 				} else {
@@ -112,12 +113,11 @@ var pipelineStatusCmd = &cobra.Command{
 						} else {
 							_, err = retryPipeline(runningPipeline.ID, repo)
 							if err != nil {
-								er(err)
+								return err
 							}
 							pipes, err = getPipelines(l, repo)
 							if err != nil {
-								er(err)
-								return
+								return err
 							}
 							runningPipeline = pipes[0]
 							isRunning = true
@@ -133,9 +133,10 @@ var pipelineStatusCmd = &cobra.Command{
 					fmt.Println("logs")
 				}
 			}
-		} else {
-			er("No pipelines running or available on " + branch + " branch")
 		}
+		redCheck := utils.Red("✘")
+		fmt.Fprintf(colorableErr(cmd), "%s No pipelines running or available on %s branch\n", redCheck, branch)
+		return nil
 	},
 }
 
