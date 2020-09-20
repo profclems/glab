@@ -258,6 +258,8 @@ github.com/wadey/gocovmerge v0.0.0-20160331181800-b5bfa59ec0ad h1:W0LEBv82YCGEtc
 github.com/wadey/gocovmerge v0.0.0-20160331181800-b5bfa59ec0ad/go.mod h1:Hy8o65+MXnS6EwGElrSRjUzQDLXreJlzYLlWiHtt8hM=
 github.com/xanzy/go-gitlab v0.37.0 h1:Z/CQkjj5VwbWVYVL7S70kS/TFj5H/pJumV7xbJ0YUQ8=
 github.com/xanzy/go-gitlab v0.37.0/go.mod h1:sPLojNBn68fMUWSxIJtdVVIP8uSBYqesTfDUseX11Ug=
+github.com/xanzy/go-gitlab v0.38.1 h1:st5/Ag4h8CqVfp3LpOWW0Jd4jYHTGETwu0KksYDPnYE=
+github.com/xanzy/go-gitlab v0.38.1/go.mod h1:sPLojNBn68fMUWSxIJtdVVIP8uSBYqesTfDUseX11Ug=
 github.com/xiang90/probing v0.0.0-20190116061207-43a291ad63a2/go.mod h1:UETIi67q53MR2AWcXfiuqkDkRtnGDLqkBTpCHuJHxtU=
 github.com/xordataexchange/crypt v0.0.3-0.20170626215501-b2862e3d0a77/go.mod h1:aYKd//L2LvnjZzWKhF00oedf4jCCReLcmhLdhm1A27Q=
 github.com/yuin/goldmark v1.2.0 h1:WOOcyaJPlzb8fZ8TloxFe8QZkhOOJx87leDa9MIT9dc=
