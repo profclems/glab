@@ -67,7 +67,7 @@ hosts:
 	eq(t, err, nil)
 	eq(t, token, "OTOKEN")
 	if envToken != "" {
-		_ = os.Setenv("GITLAB_TOKEN", "")
+		_ = os.Setenv("GITLAB_TOKEN", envToken)
 	}
 }
 
@@ -92,8 +92,61 @@ hosts:
 	token, err := config.Get("gitlab.com", "token")
 	eq(t, err, nil)
 	eq(t, token, "OTOKEN")
+
 	if envToken != "" {
-		_ = os.Setenv("GITLAB_TOKEN", "")
+		_ = os.Setenv("GITLAB_TOKEN", envToken)
+	}
+}
+
+func Test_parseConfig_Local(t *testing.T) {
+	defer StubConfig(`---
+git_protocol: ssh
+editor: vim
+local:
+  git_protocol: https
+  editor: nano
+`, `
+`)()
+	config, err := ParseConfig("config.yml")
+	eq(t, err, nil)
+	gitProtocol, err := config.Get("", "git_protocol")
+	eq(t, err, nil)
+	eq(t, gitProtocol, "https")
+	editor, err := config.Get("", "editor")
+	eq(t, err, nil)
+	eq(t, editor, "nano")
+}
+
+func Test_Get_configReadSequence(t *testing.T) {
+	defer StubConfig(`---
+git_protocol: ssh
+editor: vim
+browser: mozilla
+local:
+  git_protocol: https
+  editor:
+  browser: chrome
+`, `
+`)()
+
+	envVar := os.Getenv("BROWSER")
+	_ = os.Setenv("BROWSER", "opera")
+
+	config, err := ParseConfig("config.yml")
+	eq(t, err, nil)
+	gitProtocol, err := config.Get("", "git_protocol")
+	eq(t, err, nil)
+	eq(t, gitProtocol, "https")
+	token, err := config.Get("", "editor")
+	eq(t, err, nil)
+	eq(t, token, "vim")
+	browser, err := config.Get("", "browser")
+	eq(t, err, nil)
+	eq(t, browser, "opera")
+	l, _ := config.Local()
+	t.Log(l.All())
+	if envVar != "" {
+		_ = os.Setenv("BROWSER", envVar)
 	}
 }
 

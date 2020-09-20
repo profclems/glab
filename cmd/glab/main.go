@@ -31,7 +31,7 @@ func main() {
 	commands.Version = version
 	commands.Build = build
 
-	_, _ = initConfig()
+	//_, _ = initConfig()
 	if usageMode == "dev" {
 		debug = true
 	}

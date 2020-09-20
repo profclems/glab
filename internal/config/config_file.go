@@ -18,22 +18,16 @@ var configError error
 
 // ConfigDir returns the config directory
 func ConfigDir() string {
-	var dir string
-	if UseGlobalConfig {
-		usrHome := os.Getenv("XDG_CONFIG_HOME")
+	usrHome := os.Getenv("XDG_CONFIG_HOME")
+	if usrHome == "" {
+		usrHome = os.Getenv("HOME")
 		if usrHome == "" {
-			usrHome = os.Getenv("HOME")
-			if usrHome == "" {
-				usrHome, _ = homedir.Expand("~/.config")
-			} else {
-				usrHome = filepath.Join(usrHome, ".config")
-			}
+			usrHome, _ = homedir.Expand("~/.config")
+		} else {
+			usrHome = filepath.Join(usrHome, ".config")
 		}
-		dir = filepath.Join(usrHome, "glab-cli")
-	} else {
-		dir = ".glab-cli/config"
 	}
-	return dir
+	return filepath.Join(usrHome, "glab-cli")
 }
 
 // ConfigFile returns the config file path
@@ -49,12 +43,9 @@ func Init() (Config, error) {
 	cachedConfig, configError = ParseDefaultConfig()
 
 	if os.IsNotExist(configError) {
-		useGlobalConfigDefaultValue := UseGlobalConfig
-		UseGlobalConfig = true
 		if err := cachedConfig.WriteAll(); err != nil {
 			return nil, err
 		}
-		UseGlobalConfig = useGlobalConfigDefaultValue
 		configError = nil
 	}
 	return cachedConfig, configError
@@ -84,10 +75,6 @@ var WriteConfigFile = func(filename string, data []byte) error {
 	}
 	err = WriteFile(filename, data, 0600)
 	return err
-}
-
-var BackupConfigFile = func(filename string) error {
-	return os.Rename(filename, filename+".bak")
 }
 
 func parseConfigFile(filename string) ([]byte, *yaml.Node, error) {
@@ -135,7 +122,7 @@ func ParseConfig(filename string) (Config, error) {
 	}
 
 	// Load local config file
-	if _, localRoot, err := parseConfigFile(localConfigFile()); err == nil {
+	if _, localRoot, err := parseConfigFile(LocalConfigFile()); err == nil {
 		if len(localRoot.Content[0].Content) > 0 {
 			newContent := []*yaml.Node{
 				{Value: "local"},

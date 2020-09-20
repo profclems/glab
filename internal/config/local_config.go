@@ -1,6 +1,7 @@
 package config
 
 import (
+	"errors"
 	"fmt"
 	"gopkg.in/yaml.v3"
 	"path"
@@ -11,12 +12,16 @@ type LocalConfig struct {
 	Parent Config
 }
 
-func localConfigFile() (conf string) {
-	useGlobalConfigDefaultValue := UseGlobalConfig
-	UseGlobalConfig = false
-	conf = path.Join(ConfigFile())
-	UseGlobalConfig = useGlobalConfigDefaultValue
-	return
+// LocalConfigDir returns the local config path in map
+// which must be joined for complete path
+var LocalConfigDir = func() []string {
+	return []string{".glab-cli", "config"}
+}
+
+// LocalConfigFile returns the config file name with full path
+var LocalConfigFile = func() string {
+	configFile := append(LocalConfigDir(), "config.yml")
+	return path.Join(configFile...)
 }
 
 func (a *LocalConfig) Get(key string) (string, bool) {
@@ -51,15 +56,26 @@ func (a *LocalConfig) Delete(key string) error {
 }
 
 func (a *LocalConfig) Write() error {
+	// Check if it's a git repository
+	if CheckPathExists(".git") {
+		return errors.New("not a git repository")
+	}
+
 	localConfigBytes, err := yaml.Marshal(a.ConfigMap.Root)
 	if err != nil {
 		return err
 	}
-	err = WriteConfigFile(localConfigFile(), yamlNormalize(localConfigBytes))
+	err = WriteConfigFile(LocalConfigFile(), yamlNormalize(localConfigBytes))
 
 	if err != nil {
 		return fmt.Errorf("failed to write config: %w", err)
 	}
+
+	// Append local config dir if not already ignored in the .gitignore file
+	if !CheckFileHasLine(".gitignore", LocalConfigDir()[0]) {
+		ReadAndAppend(".gitignore", LocalConfigDir()[0]+"\n")
+	}
+
 	return nil
 }
 

@@ -28,6 +28,10 @@ func StubWriteConfig(wc io.Writer, wh io.Writer) func() {
 
 func StubConfig(main, aliases string) func() {
 	orig := ReadConfigFile
+	origLoc := LocalConfigFile
+	LocalConfigFile = func() string {
+		return path.Join(LocalConfigDir()...)
+	}
 	ReadConfigFile = func(fn string) ([]byte, error) {
 		switch path.Base(fn) {
 		case "config.yml":
@@ -49,5 +53,6 @@ func StubConfig(main, aliases string) func() {
 	}
 	return func() {
 		ReadConfigFile = orig
+		LocalConfigFile = origLoc
 	}
 }

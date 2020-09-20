@@ -363,10 +363,10 @@ func (c *fileConfig) GetWithSource(hostname, key string) (string, string, error)
 		if err != nil && errors.As(err, &notFound) {
 			return defaultFor(key), defaultSource, nil
 		} else if err != nil {
-			return "", localConfigFile(), err
+			return "", LocalConfigFile(), err
 		}
 	} else if value != "" {
-		defaultSource = localConfigFile()
+		defaultSource = LocalConfigFile()
 	}
 
 	if value == "" {
