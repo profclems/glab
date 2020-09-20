@@ -16,6 +16,7 @@ import (
 var cachedConfig Config
 var configError error
 
+// ConfigDir returns the config directory
 func ConfigDir() string {
 	var dir string
 	if UseGlobalConfig {
@@ -35,23 +36,26 @@ func ConfigDir() string {
 	return dir
 }
 
+// ConfigFile returns the config file path
 func ConfigFile() string {
 	return path.Join(ConfigDir(), "config.yml")
 }
 
-func Init() (Config, error) {
+
+// Init initialises and returns the cached configuration
+func Init() (Config, error)  {
 	if cachedConfig != nil || configError != nil {
 		return cachedConfig, configError
 	}
 	cachedConfig, configError = ParseDefaultConfig()
 
 	if os.IsNotExist(configError) {
-		UseGlobalConfigDefaultValue := UseGlobalConfig
+		useGlobalConfigDefaultValue := UseGlobalConfig
 		UseGlobalConfig = true
 		if err := cachedConfig.WriteAll(); err != nil {
 			return nil, err
 		}
-		UseGlobalConfig = UseGlobalConfigDefaultValue
+		UseGlobalConfig = useGlobalConfigDefaultValue
 		configError = nil
 	}
 	return cachedConfig, configError
@@ -168,7 +172,7 @@ func ParseConfig(filename string) (Config, error) {
 	if err != nil {
 		if os.IsNotExist(err) {
 			root = NewBlankRoot()
-			confError = err
+			confError = os.ErrNotExist
 		} else {
 			return nil, err
 		}
@@ -185,6 +189,18 @@ func ParseConfig(filename string) (Config, error) {
 			return nil, fmt.Errorf("failed to reparse migrated config: %w", err)
 		}
 	} else {
+		// Load local config file
+		if _, localRoot, err := parseConfigFile(localConfigFile()); err == nil {
+			if len(localRoot.Content[0].Content) > 0 {
+				newContent := []*yaml.Node{
+					{Value: "local"},
+					localRoot.Content[0],
+				}
+				restContent := root.Content[0].Content
+				root.Content[0].Content = append(newContent, restContent...)
+			}
+		}
+		// Load aliases config file
 		if _, aliasesRoot, err := parseConfigFile(aliasesConfigFile()); err == nil {
 			if len(aliasesRoot.Content[0].Content) > 0 {
 				newContent := []*yaml.Node{

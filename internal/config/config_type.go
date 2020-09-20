@@ -25,6 +25,7 @@ type Config interface {
 	UnsetHost(string)
 	Hosts() ([]string, error)
 	Aliases() (*AliasConfig, error)
+	Local() (*LocalConfig, error)
 	// Write writes to the config.yml file
 	Write() error
 	// WriteAll saves all the available configuration file types
@@ -38,10 +39,6 @@ type NotFoundError struct {
 type HostConfig struct {
 	ConfigMap
 	Host string
-}
-
-type LocalConfig struct {
-	ConfigMap
 }
 
 // This type implements a low-level get/set config that is backed by an in-memory tree of Yaml
@@ -357,14 +354,19 @@ func (c *fileConfig) GetWithSource(hostname, key string) (string, string, error)
 	// TODO: avoid hard-coding this
 	defaultSource := "~/config/glab-cli/config.yml"
 
-	value, err := c.GetStringValue(key)
-
+	l, _ := c.Local()
+	value, err := l.GetStringValue(key)
 	var notFound *NotFoundError
 
-	if err != nil && errors.As(err, &notFound) {
-		return defaultFor(key), defaultSource, nil
-	} else if err != nil {
-		return "", defaultSource, err
+	if (err != nil && errors.As(err, &notFound)) || value == "" {
+		value, err = c.GetStringValue(key)
+		if err != nil && errors.As(err, &notFound) {
+			return defaultFor(key), defaultSource, nil
+		} else if err != nil {
+			return "", localConfigFile(), err
+		}
+	} else if value != "" {
+		defaultSource = localConfigFile()
 	}
 
 	if value == "" {
@@ -409,7 +411,7 @@ func (c *fileConfig) Write() error {
 
 	nodes := c.documentRoot.Content[0].Content
 	for i := 0; i < len(nodes)-1; i += 2 {
-		if nodes[i].Value == "aliases" {
+		if nodes[i].Value == "aliases" || nodes[i].Value == "local" {
 			continue
 		} else {
 			mainData.Content = append(mainData.Content, nodes[i], nodes[i+1])
@@ -443,6 +445,57 @@ func yamlNormalize(b []byte) []byte {
 		return []byte{}
 	}
 	return b
+}
+
+func (c *fileConfig) Local() (*LocalConfig, error)  {
+	entry, err := c.FindEntry("local")
+	var nfe *NotFoundError
+	notFound := errors.As(err, &nfe)
+	if err != nil && !notFound {
+		return nil, err
+	}
+
+	var toInsert []*yaml.Node
+
+	keyNode := entry.KeyNode
+	valueNode := entry.ValueNode
+
+	if keyNode == nil {
+		keyNode = &yaml.Node{
+			Kind:  yaml.ScalarNode,
+			Value: "local",
+		}
+		toInsert = append(toInsert, keyNode)
+	}
+
+	if valueNode == nil || valueNode.Kind != yaml.MappingNode {
+		valueNode = &yaml.Node{
+			Kind:  yaml.MappingNode,
+			Value: "",
+		}
+		toInsert = append(toInsert, valueNode)
+	}
+
+	if len(toInsert) > 0 {
+		var newContent []*yaml.Node
+		if notFound {
+			newContent = append(c.Root().Content, keyNode, valueNode)
+		} else {
+			for i := 0; i < len(c.Root().Content); i++ {
+				if i == entry.Index {
+					newContent = append(newContent, keyNode, valueNode)
+					i++
+				} else {
+					newContent = append(newContent, c.Root().Content[i])
+				}
+			}
+		}
+		c.Root().Content = newContent
+	}
+	return &LocalConfig{
+		Parent:    c,
+		ConfigMap: ConfigMap{Root: valueNode},
+	}, nil
 }
 
 func (c *fileConfig) Aliases() (*AliasConfig, error) {

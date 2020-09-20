@@ -7,7 +7,6 @@ import (
 )
 
 func aliasesConfigFile() string {
-	fmt.Println(path.Join(globalPathDir, "aliases.yml"))
 	return path.Join(globalPathDir, "aliases.yml")
 }
 
@@ -31,7 +30,7 @@ func (a *AliasConfig) Set(alias, expansion string) error {
 		return fmt.Errorf("failed to update config: %w", err)
 	}
 
-	err = a.Parent.Write()
+	err = a.Write()
 	if err != nil {
 		return fmt.Errorf("failed to write config: %w", err)
 	}
