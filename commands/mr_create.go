@@ -114,7 +114,7 @@ var mrCreateCmd = &cobra.Command{
 		mergeLabel, _ := cmd.Flags().GetString("label")
 		l.Title = gitlab.String(mergeTitle)
 		l.Description = gitlab.String(mergeDescription)
-		l.Labels = &gitlab.Labels{mergeLabel}
+		l.Labels = gitlab.Labels{mergeLabel}
 		l.SourceBranch = gitlab.String(sourceBranch)
 		l.TargetBranch = gitlab.String(targetBranch)
 		if milestone, _ := cmd.Flags().GetInt("milestone"); milestone != -1 {
