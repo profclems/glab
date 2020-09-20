@@ -42,24 +42,24 @@ func TestIsSelfHosted(t *testing.T) {
 
 func Test_fileConfig_Set(t *testing.T) {
 	mainBuf := bytes.Buffer{}
-	hostsBuf := bytes.Buffer{}
-	defer StubWriteConfig(&mainBuf, &hostsBuf)()
+	aliasesBuf := bytes.Buffer{}
+	defer StubWriteConfig(&mainBuf, &aliasesBuf)()
 
 	c := NewBlankConfig()
 	assert.NoError(t, c.Set("", "editor", "nano"))
 	assert.NoError(t, c.Set("gitlab.com", "git_protocol", "ssh"))
 	assert.NoError(t, c.Set("example.com", "editor", "vim"))
 	assert.NoError(t, c.Set("gitlab.com", "username", "hubot"))
-	assert.NoError(t, c.Write())
+	assert.NoError(t, c.WriteAll())
+	//a, _ := c.Aliases()
+	//assert.NoError(t, a.Set("co", "mr checkout"))
+	//assert.NoError(t, a.Write())
 
 	expected := "# What protocol to use when performing git operations. Supported values: ssh, https\ngit_protocol: ssh\n# What editor glab should run when creating issues, merge requests, etc.  This is a global config that cannot be overridden by hostname.\neditor: nano\n# What browser glab should run when opening links. This is a global config that cannot be overridden by hostname.\nbrowser:\n# Git remote alias which glab should use when fetching the remote url. This can be overridden by hostname\nremote_alias: origin\n# Set your desired markdown renderer style. Available options are [dark, light, notty] or set a custom style. Refer to https://github.com/charmbracelet/glamour#styles\nglamour_style: dark\n# Allow glab to automatically check for updates and notify you when there are new updates\ncheck_update: false\n# configuration specific for gitlab instances\nhosts:\n    gitlab.com:\n        # What protocol to use to access the api endpoint. Supported values: http, https\n        protocol: https\n        # Your GitLab access token. Get an access token at https://gitlab.com/profile/personal_access_tokens\n        token:\n        git_protocol: ssh\n        username: hubot\n    example.com:\n        editor: vim\n"
 	assert.Equal(t, expected, mainBuf.String())
-	assert.Equal(t, `gitlab.com:
-    git_protocol: ssh
-    username: hubot
-gitlab.example.com:
-    editor: vim
-`, hostsBuf.String())
+	assert.Equal(t, `ci: pipeline ci
+co: mr checkout
+`, aliasesBuf.String())
 }
 
 func Test_defaultConfig(t *testing.T) {

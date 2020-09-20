@@ -7,17 +7,6 @@ import (
 	"path"
 )
 
-func StubBackupConfig() func() {
-	orig := BackupConfigFile
-	BackupConfigFile = func(_ string) error {
-		return nil
-	}
-
-	return func() {
-		BackupConfigFile = orig
-	}
-}
-
 func StubWriteConfig(wc io.Writer, wh io.Writer) func() {
 	orig := WriteConfigFile
 	WriteConfigFile = func(fn string, data []byte) error {

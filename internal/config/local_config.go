@@ -17,12 +17,12 @@ func localConfigFile() (conf string) {
 	UseGlobalConfig = false
 	conf = path.Join(ConfigFile())
 	UseGlobalConfig = useGlobalConfigDefaultValue
-	fmt.Println(conf)
 	return
 }
 
 
 func (a *LocalConfig) Get(key string) (string, bool) {
+	key = ConfigKeyEquivalence(key)
 	if a.Empty() {
 		return "", false
 	}
@@ -32,6 +32,7 @@ func (a *LocalConfig) Get(key string) (string, bool) {
 }
 
 func (a *LocalConfig) Set(key, value string) error {
+	key = ConfigKeyEquivalence(key)
 	err := a.SetStringValue(key, value)
 	if err != nil {
 		return fmt.Errorf("failed to update config: %w", err)

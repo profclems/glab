@@ -123,49 +123,6 @@ func parseConfigData(data []byte) (*yaml.Node, error) {
 	return &root, nil
 }
 
-func isLegacy(root *yaml.Node) bool {
-	for _, v := range root.Content[0].Content {
-		if v.Value == "gitlab.com" {
-			return true
-		}
-	}
-
-	return false
-}
-
-func migrateConfig(filename string) error {
-	b, err := ReadConfigFile(filename)
-	if err != nil {
-		return err
-	}
-
-	var hosts map[string][]yaml.Node
-	err = yaml.Unmarshal(b, &hosts)
-	if err != nil {
-		return fmt.Errorf("error decoding legacy format: %w", err)
-	}
-
-	cfg := NewBlankConfig()
-	for hostname, entries := range hosts {
-		if len(entries) < 1 {
-			continue
-		}
-		mapContent := entries[0].Content
-		for i := 0; i < len(mapContent)-1; i += 2 {
-			if err := cfg.Set(hostname, mapContent[i].Value, mapContent[i+1].Value); err != nil {
-				return err
-			}
-		}
-	}
-
-	err = BackupConfigFile(filename)
-	if err != nil {
-		return fmt.Errorf("failed to back up existing config: %w", err)
-	}
-
-	return cfg.Write()
-}
-
 func ParseConfig(filename string) (Config, error) {
 	_, root, err := parseConfigFile(filename)
 	var confError error
@@ -177,43 +134,33 @@ func ParseConfig(filename string) (Config, error) {
 			return nil, err
 		}
 	}
-	if isLegacy(root) {
 
-		err = migrateConfig(filename)
-		if err != nil {
-			return nil, fmt.Errorf("error migrating legacy config: %w", err)
-		}
-
-		_, root, err = parseConfigFile(filename)
-		if err != nil {
-			return nil, fmt.Errorf("failed to reparse migrated config: %w", err)
-		}
-	} else {
-		// Load local config file
-		if _, localRoot, err := parseConfigFile(localConfigFile()); err == nil {
-			if len(localRoot.Content[0].Content) > 0 {
-				newContent := []*yaml.Node{
-					{Value: "local"},
-					localRoot.Content[0],
-				}
-				restContent := root.Content[0].Content
-				root.Content[0].Content = append(newContent, restContent...)
+	// Load local config file
+	if _, localRoot, err := parseConfigFile(localConfigFile()); err == nil {
+		if len(localRoot.Content[0].Content) > 0 {
+			newContent := []*yaml.Node{
+				{Value: "local"},
+				localRoot.Content[0],
 			}
-		}
-		// Load aliases config file
-		if _, aliasesRoot, err := parseConfigFile(aliasesConfigFile()); err == nil {
-			if len(aliasesRoot.Content[0].Content) > 0 {
-				newContent := []*yaml.Node{
-					{Value: "aliases"},
-					aliasesRoot.Content[0],
-				}
-				restContent := root.Content[0].Content
-				root.Content[0].Content = append(newContent, restContent...)
-			}
-		} else if !errors.Is(err, os.ErrNotExist) {
-			return nil, err
+			restContent := root.Content[0].Content
+			root.Content[0].Content = append(newContent, restContent...)
 		}
 	}
+
+	// Load aliases config file
+	if _, aliasesRoot, err := parseConfigFile(aliasesConfigFile()); err == nil {
+		if len(aliasesRoot.Content[0].Content) > 0 {
+			newContent := []*yaml.Node{
+				{Value: "aliases"},
+				aliasesRoot.Content[0],
+			}
+			restContent := root.Content[0].Content
+			root.Content[0].Content = append(newContent, restContent...)
+		}
+	} else if !errors.Is(err, os.ErrNotExist) {
+		return nil, err
+	}
+
 
 	return NewConfig(root), confError
 }
