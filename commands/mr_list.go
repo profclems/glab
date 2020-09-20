@@ -47,6 +47,10 @@ func listMergeRequest(cmd *cobra.Command, args []string) error {
 		l.PerPage = p
 	}
 
+	if mine, _ := cmd.Flags().GetBool("mine"); mine {
+		l.Scope = gitlab.String("assigned_to_me")
+	}
+
 	gitlabClient, repo := git.InitGitlabClient()
 	if r, _ := cmd.Flags().GetString("repo"); r != "" {
 		repo, _ = fixRepoNamespace(r)
@@ -68,5 +72,6 @@ func init() {
 	mrListCmd.Flags().BoolP("merged", "m", false, "Get only merged merge requests")
 	mrListCmd.Flags().IntP("page", "p", 1, "Page number")
 	mrListCmd.Flags().IntP("per-page", "P", 20, "Number of items to list per page")
+	mrListCmd.Flags().BoolP("mine", "", false, "Get only merge requests assigned to me")
 	mrCmd.AddCommand(mrListCmd)
 }
