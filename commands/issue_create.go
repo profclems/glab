@@ -57,7 +57,7 @@ var issueCreateCmd = &cobra.Command{
 			}
 		}
 		l.Title = gitlab.String(issueTitle)
-		l.Labels = &gitlab.Labels{issueLabel}
+		l.Labels = gitlab.Labels{issueLabel}
 		l.Description = &issueDescription
 		if confidential, _ := cmd.Flags().GetBool("confidential"); confidential {
 			l.Confidential = gitlab.Bool(confidential)
