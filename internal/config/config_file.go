@@ -41,9 +41,8 @@ func ConfigFile() string {
 	return path.Join(ConfigDir(), "config.yml")
 }
 
-
 // Init initialises and returns the cached configuration
-func Init() (Config, error)  {
+func Init() (Config, error) {
 	if cachedConfig != nil || configError != nil {
 		return cachedConfig, configError
 	}
@@ -160,7 +159,6 @@ func ParseConfig(filename string) (Config, error) {
 	} else if !errors.Is(err, os.ErrNotExist) {
 		return nil, err
 	}
-
 
 	return NewConfig(root), confError
 }

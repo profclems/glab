@@ -11,7 +11,6 @@ type LocalConfig struct {
 	Parent Config
 }
 
-
 func localConfigFile() (conf string) {
 	useGlobalConfigDefaultValue := UseGlobalConfig
 	UseGlobalConfig = false
@@ -19,7 +18,6 @@ func localConfigFile() (conf string) {
 	UseGlobalConfig = useGlobalConfigDefaultValue
 	return
 }
-
 
 func (a *LocalConfig) Get(key string) (string, bool) {
 	key = ConfigKeyEquivalence(key)

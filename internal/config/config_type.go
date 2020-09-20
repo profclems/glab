@@ -447,7 +447,7 @@ func yamlNormalize(b []byte) []byte {
 	return b
 }
 
-func (c *fileConfig) Local() (*LocalConfig, error)  {
+func (c *fileConfig) Local() (*LocalConfig, error) {
 	entry, err := c.FindEntry("local")
 	var nfe *NotFoundError
 	notFound := errors.As(err, &nfe)
