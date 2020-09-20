@@ -31,7 +31,7 @@ func main() {
 	commands.Version = version
 	commands.Build = build
 
-	//_, _ = initConfig()
+	_, _ = initConfig()
 	if usageMode == "dev" {
 		debug = true
 	}
@@ -101,7 +101,8 @@ func initConfig() (config.Config, error) {
 	}
 
 	config.UseGlobalConfig = false
-	return config.Init()
+	//return config.Init()
+	return nil, nil
 }
 
 func printError(out io.Writer, err error, cmd *cobra.Command, debug bool) {
