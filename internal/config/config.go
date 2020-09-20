@@ -3,16 +3,14 @@ package config
 import (
 	"errors"
 	"fmt"
+	"github.com/mitchellh/go-homedir"
 	"io/ioutil"
 	"log"
 	"os"
-	"os/user"
 	"path/filepath"
 	"strings"
 
 	"github.com/profclems/glab/internal/manip"
-
-	"github.com/tcnksm/go-gitconfig"
 )
 
 var (
@@ -22,25 +20,15 @@ var (
 	configFileFileParentDir = ".glab-cli"
 	configFile              = configFileFileParentDir + "/config/.env"
 	globalConfigFile        = configFile
-	aliasFile               = configFileFileParentDir + "/config/aliases.format"
+	aliasFile               = configFileFileParentDir + "/config/aliases.yml"
 )
 
-func getOldGlobalConfigDir() string {
-	usr, err := user.Current()
-	if err != nil {
-		log.Fatal(err)
-	}
-	return filepath.Join(usr.HomeDir, ".glab-cli", "config")
-}
-
-func getXdgGlobalConfigDir() string {
+func getXdgGlobalConfigDir() (string, error) {
 	cfgDir := os.Getenv("XDG_CONFIG_HOME")
 	if cfgDir == "" {
 		homeDir := os.Getenv("HOME")
 		if homeDir == "" {
-			if usr, err := user.Current(); err == nil {
-				homeDir = usr.HomeDir
-			}
+			homeDir, _ = homedir.Dir()
 		}
 		if homeDir != "" {
 			cfgDir = filepath.Join(homeDir, ".config/")
@@ -48,55 +36,34 @@ func getXdgGlobalConfigDir() string {
 	}
 
 	if cfgDir == "" {
-		log.Fatal("Could not determine XDG_CONFIG_HOME directory.")
+		return "", fmt.Errorf("could not determine XDG_CONFIG_HOME directory")
 	}
 
-	return filepath.Join(cfgDir, "glab-cli")
+	return filepath.Join(cfgDir, "glab-cli"), nil
 }
 
-func migrateGlobalConfigDir() {
-	// check if xdg directory exists, bail if so.
-	newConfigDir := getXdgGlobalConfigDir()
-	if CheckPathExists(newConfigDir) {
-		return
+// SetGlobalPathDir sets the directory for the global config file
+func SetGlobalPathDir() error {
+	err := migrateGlobalConfigDir()
+	if err != nil {
+		return err
 	}
 
-	// check if old config dir exists, or there's nothing to migrate.
-	oldConfigDir := getOldGlobalConfigDir()
-	if !CheckPathExists(oldConfigDir) {
-		return
+	globalPathDir, err = getXdgGlobalConfigDir()
+	if err != nil {
+		return err
 	}
-
-	// do the migration
-	log.Println("Migrating config dir to XDG_CONFIG_HOME.")
-
-	// First make sure parent directory exists
-	if !CheckPathExists(filepath.Join(newConfigDir, "..")) {
-		if err := os.MkdirAll(filepath.Join(newConfigDir, ".."), os.ModePerm); err != nil {
-			fmt.Println("Failed to create new parent config dir:", err)
-		}
-	}
-
-	if err := os.Rename(oldConfigDir, newConfigDir); err != nil {
-		fmt.Println("Failed to move config dir:", err)
-	}
-
-	// cleanup: remove parent directory tree of oldConfigDir if empty
-	_ = os.Remove(filepath.Join(oldConfigDir, ".."))
-}
-
-func SetGlobalPathDir() {
-	migrateGlobalConfigDir()
-
-	globalPathDir = getXdgGlobalConfigDir()
-
-	if !CheckPathExists(globalPathDir) && CheckPathExists(getOldGlobalConfigDir()) {
+	if oldCfg, _ := getOldGlobalConfigDir(); !CheckPathExists(globalPathDir) && CheckPathExists(oldCfg) {
 		// Migration apparently failed, use old dir.
-		globalPathDir = getOldGlobalConfigDir()
+		globalPathDir = oldCfg
 	}
 
 	globalConfigFile = filepath.Join(globalPathDir, filepath.Base(configFile))
-	aliasFile = filepath.Join(globalPathDir, "aliases.format")
+	aliasFile = filepath.Join(globalPathDir, "aliases.yml")
+	if err := migrateOldAliasFile(); err != nil {
+		return err
+	}
+	return nil
 }
 
 // GetEnv : returns env variable value
@@ -162,7 +129,7 @@ func SetEnv(key, value string) error {
 	if !keyExists {
 		newData += newConfig
 	}
-	_ = os.MkdirAll(filepath.Join(cFile, ".."), 0755)
+	_ = os.MkdirAll(filepath.Join(cFile, ".."), 0700)
 	if err = WriteFile(cFile, []byte(newData), 0600); err != nil {
 		return err
 	}
@@ -219,7 +186,7 @@ func SetAlias(name string, command string) error {
 	}
 
 	output := strings.Join(lines, "\n")
-	err = ioutil.WriteFile(aliasFile, []byte(output), 0644)
+	err = ioutil.WriteFile(aliasFile, []byte(output), 0600)
 	if err != nil {
 		return err
 	}
@@ -310,28 +277,12 @@ func DeleteAlias(name string) error {
 	}
 
 	output := strings.Join(lines, "\n")
-	err = ioutil.WriteFile(aliasFile, []byte(output), 0644)
+	err = WriteFile(aliasFile, []byte(output), 0644)
 	if err != nil {
-		log.Fatalln(err)
+		return err
 	}
 
 	return nil
-}
-
-func GetRepo() string {
-	gitRemoteVar, err := gitconfig.Entire("remote." + GetEnv("GIT_REMOTE_URL_VAR") + ".url")
-	if err != nil {
-		log.Fatal("Could not find remote url for gitlab. Run git config init")
-	}
-	repoBaseUrl := strings.Trim(GetEnv("GITLAB_URI"), "/ ")
-	repoBaseUrl = strings.TrimPrefix(repoBaseUrl, "https://")
-	repoBaseUrl = strings.TrimPrefix(repoBaseUrl, "http://")
-	repo := strings.TrimSuffix(gitRemoteVar, ".git")
-	repo = strings.TrimPrefix(repo, repoBaseUrl)
-	repo = strings.TrimPrefix(repo, "https://"+repoBaseUrl)
-	repo = strings.TrimPrefix(repo, "http://"+repoBaseUrl)
-	repo = strings.TrimPrefix(repo, "git@"+repoBaseUrl+":")
-	return strings.Trim(repo, "/")
 }
 
 // PromptAndSetEnv : prompts user for value and writes to config

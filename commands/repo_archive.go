@@ -8,7 +8,6 @@ import (
 	"os"
 	"strings"
 
-	"github.com/profclems/glab/internal/config"
 	"github.com/profclems/glab/internal/git"
 
 	"github.com/MakeNowJust/heredoc"
@@ -33,7 +32,7 @@ var repoArchiveCmd = &cobra.Command{
 	`),
 	Args: cobra.MaximumNArgs(2),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		repo := config.GetRepo()
+		repo, _ := git.GetRepo()
 		var name string
 		if len(args) != 0 {
 			repo = args[0]
