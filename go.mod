@@ -13,7 +13,7 @@ require (
 	github.com/gdamore/tcell v1.4.0
 	github.com/google/renameio v0.1.0
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510
-	github.com/gookit/color v1.3.0
+	github.com/gookit/color v1.3.1
 	github.com/gosuri/uilive v0.0.4
 	github.com/gosuri/uitable v0.0.4
 	github.com/hashicorp/go-version v1.2.1
