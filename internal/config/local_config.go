@@ -57,7 +57,7 @@ func (a *LocalConfig) Delete(key string) error {
 
 func (a *LocalConfig) Write() error {
 	// Check if it's a git repository
-	if CheckPathExists(".git") {
+	if !CheckPathExists(".git") {
 		return errors.New("not a git repository")
 	}
 

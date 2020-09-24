@@ -2,14 +2,16 @@ package utils
 
 import (
 	"fmt"
+	"github.com/spf13/cobra"
+	"io"
 	"net/url"
+	"os"
 	"strings"
 	"time"
 
 	"github.com/profclems/glab/internal/config"
 
 	"github.com/charmbracelet/glamour"
-	"github.com/gookit/color"
 	"github.com/profclems/glab/internal/browser"
 	"github.com/profclems/glab/internal/run"
 )
@@ -93,10 +95,6 @@ func Humanize(s string) string {
 	return strings.Map(h, s)
 }
 
-func IsURL(s string) bool {
-	return strings.HasPrefix(s, "http:/") || strings.HasPrefix(s, "https:/")
-}
-
 func DisplayURL(urlStr string) string {
 	u, err := url.Parse(urlStr)
 	if err != nil {
@@ -106,5 +104,21 @@ func DisplayURL(urlStr string) string {
 }
 
 func GreenCheck() string {
-	return color.Green.Sprintf("✓")
+	return Green("✓")
+}
+
+func ColorableOut(cmd *cobra.Command) io.Writer {
+	out := cmd.OutOrStdout()
+	if outFile, isFile := out.(*os.File); isFile {
+		return NewColorable(outFile)
+	}
+	return out
+}
+
+func ColorableErr(cmd *cobra.Command) io.Writer {
+	err := cmd.ErrOrStderr()
+	if outFile, isFile := err.(*os.File); isFile {
+		return NewColorable(outFile)
+	}
+	return err
 }

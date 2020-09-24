@@ -22,32 +22,44 @@ GOURL ?= github.com/profclems/glab
 BUILDLOC ?= ./bin/glab
 
 build:
-	go build -trimpath -ldflags "$(GO_LDFLAGS) -X  main.usageMode=prod" -o $(BUILDLOC) $(GOURL)/cmd/glab
+	go build -trimpath -ldflags "$(GO_LDFLAGS) -X main.debugMode=false" -o $(BUILDLOC) $(GOURL)/cmd/glab
+.PHONY: build
 
+clean:
+	rm -rf ./bin ./.glab-cli ./test/testdata-* ./coverage.txt coverage-*
+.PHONY: clean
+
+.PHONY: install
 install:
-	GO111MODULE=on go install -trimpath -ldflags "$(GO_LDFLAGS)-sources -X  main.usageMode=prod" $(GOURL)/cmd/glab
+	GO111MODULE=on go install -trimpath -ldflags "$(GO_LDFLAGS) -X main.debugMode=false" $(GOURL)/cmd/glab
 
+.PHONY: run
 run:
-	go run -trimpath -ldflags "$(GO_LDFLAGS) -X main.usageMode=dev" ./cmd/glab $(var)
+	go run -trimpath -ldflags "$(GO_LDFLAGS) -X main.debugMode=true" ./cmd/glab $(run)
 
-tests:
+.PHONY: test
+test: clean
 	bash -c "trap 'trap - SIGINT SIGTERM ERR; rm coverage-* 2>&1 > /dev/null; exit 1' SIGINT SIGTERM ERR; $(MAKE) internal-test"
 
+.PHONY: internal-test
 internal-test:
-	rm coverage-* 2>&1 > /dev/null || true
-	GO111MODULE=on go test -coverprofile=coverage-main.out -covermode=count -coverpkg ./... -run=$(run) $(GOURL)/cmd/glab $(GOURL)/commands $(GOURL)/internal/...
+	GO111MODULE=on go test -coverprofile=coverage-main.out -covermode=count -coverpkg ./... -run=$(run) $(GOURL)/cmd/glab $(GOURL)/commands/... $(GOURL)/internal/...
 	go get -u github.com/wadey/gocovmerge
 	gocovmerge coverage-*.out > coverage.txt && rm coverage-*.out
 
+.PHONY: rt
 rt: #Test release
 	goreleaser --snapshot --skip-publish --rm-dist
 
+.PHONY: rtdebug
 rtdebug: #Test release
 	goreleaser --snapshot --skip-publish --rm-dist --debug
 
+.PHONY: release
 release:
-	goreleaser $(var)
+	goreleaser $(run)
 
+.PHONY: gen-docs
 gen-docs:
 	go run ./cmd/gen-docs/docs.go
 	cp ./docs/glab.md ./docs/index.md

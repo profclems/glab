@@ -28,7 +28,7 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/rivo/tview v0.0.0-20200712113419-c65badfc3d92
 	github.com/spf13/cobra v1.0.0
-	github.com/spf13/pflag v1.0.5 // indirect
+	github.com/spf13/pflag v1.0.5
 	github.com/stretchr/testify v1.6.1
 	github.com/tcnksm/go-gitconfig v0.1.2
 	github.com/wadey/gocovmerge v0.0.0-20160331181800-b5bfa59ec0ad // indirect
@@ -37,7 +37,7 @@ require (
 	golang.org/x/oauth2 v0.0.0-20190604053449-0f29369cfe45 // indirect
 	golang.org/x/sys v0.0.0-20200808120158-1030fc2bf1d9 // indirect
 	golang.org/x/text v0.3.3 // indirect
-	golang.org/x/tools v0.0.0-20200911193555-6422fca01df9 // indirect
+	golang.org/x/tools v0.0.0-20200922162830-aeb8e3692911 // indirect
 	google.golang.org/appengine v1.6.1 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c
 )

@@ -3,12 +3,12 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"github.com/profclems/glab/commands/cmdutils"
 	"net"
 	"testing"
 
 	"github.com/pkg/errors"
 	"github.com/profclems/glab/internal/config"
-	"github.com/profclems/glab/internal/utils"
 	"github.com/spf13/cobra"
 )
 
@@ -56,7 +56,7 @@ check your internet connection or status.gitlab.com or 'Run sudo gitlab-ctl stat
 		{
 			name: "Cobra flag error",
 			args: args{
-				err:   &utils.FlagError{Err: errors.New("unknown flag --foo")},
+				err:   &cmdutils.FlagError{Err: errors.New("unknown flag --foo")},
 				cmd:   cmd,
 				debug: false,
 			},

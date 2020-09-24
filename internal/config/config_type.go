@@ -3,6 +3,7 @@ package config
 import (
 	"bytes"
 	"fmt"
+	"github.com/profclems/glab/internal/glinstance"
 	"os"
 	"sort"
 	"strings"
@@ -15,6 +16,7 @@ const (
 	defaultGitProtocol  = "ssh"
 	defaultGlamourStyle = "dark"
 	defaultHostname     = "gitlab.com"
+	defaultApiProtocol  = "https"
 )
 
 // This interface describes interacting with some persistent configuration for glab.
@@ -46,26 +48,6 @@ type HostConfig struct {
 // comments that were present when the yaml was parsed.
 type ConfigMap struct {
 	Root *yaml.Node
-}
-
-// Default returns the host name of the default GitLab instance
-func Default() string {
-	return defaultHostname
-}
-
-// IsSelfHosted reports whether a non-normalized host name looks like a Self-hosted GitLab instance
-func IsSelfHosted(h string) bool {
-	return NormalizeHostname(h) != defaultHostname
-}
-
-// NormalizeHostname returns the canonical host name of a GitLab instance
-// Taking cover in case GitLab allows subdomains on gitlab.com https://gitlab.com/gitlab-org/gitlab/-/issues/26703
-func NormalizeHostname(h string) string {
-	hostname := strings.ToLower(h)
-	if strings.HasSuffix(hostname, "."+defaultHostname) {
-		return defaultHostname
-	}
-	return hostname
 }
 
 func (cm *ConfigMap) Empty() bool {
@@ -249,7 +231,7 @@ func NewBlankRoot() *yaml.Node {
 									{
 										HeadComment: "What protocol to use to access the api endpoint. Supported values: http, https",
 										Kind:        yaml.ScalarNode,
-										Value:       "protocol",
+										Value:       "api_protocol",
 									},
 									{
 										Kind:  yaml.ScalarNode,
@@ -578,7 +560,7 @@ func (c *fileConfig) Hosts() ([]string, error) {
 		hostnames = append(hostnames, entry.Host)
 	}
 
-	sort.SliceStable(hostnames, func(i, j int) bool { return hostnames[i] == Default() })
+	sort.SliceStable(hostnames, func(i, j int) bool { return hostnames[i] == glinstance.Default() })
 
 	return hostnames, nil
 }
@@ -641,6 +623,8 @@ func defaultFor(key string) string {
 		return defaultHostname
 	case "git_protocol":
 		return defaultGitProtocol
+	case "api_protocol":
+		return defaultApiProtocol
 	default:
 		return ""
 	}

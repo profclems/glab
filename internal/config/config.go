@@ -286,9 +286,7 @@ func DeleteAlias(name string) error {
 }
 
 // PromptAndSetEnv : prompts user for value and writes to config
-func PromptAndSetEnv(question, env string) (envVal string, err error) {
-	envDefVal := GetEnv(env)
-	envVal = manip.AskQuestionWithInput(question, envDefVal, false)
-	err = SetEnv(env, envVal)
+func Prompt(question, defaultVal string) (envVal string, err error) {
+	envVal = manip.AskQuestionWithInput(question, defaultVal, false)
 	return
 }
