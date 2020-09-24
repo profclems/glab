@@ -13,8 +13,8 @@ import (
 )
 
 var (
-	gLabClient	*gitlab.Client
-	err		error
+	gLabClient *gitlab.Client
+	err        error
 )
 
 // Init initializes a gitlab client for use throughout glab.

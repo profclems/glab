@@ -37,14 +37,14 @@ func IsSelfHosted(h string) bool {
 // Taking cover in case GitLab allows subdomains on gitlab.com https://gitlab.com/gitlab-org/gitlab/-/issues/26703
 func NormalizeHostname(h string) string {
 	hostname := strings.ToLower(h)
-	if strings.HasSuffix(hostname, "." + Default()) {
+	if strings.HasSuffix(hostname, "."+Default()) {
 		return Default()
 	}
 	return hostname
 }
 
 // StripHostProtocol strips the url protocol and returns the hostname and the protocol
-func StripHostProtocol(h string) (hostname, protocol string)  {
+func StripHostProtocol(h string) (hostname, protocol string) {
 	hostname = NormalizeHostname(h)
 	if strings.HasPrefix(hostname, "http://") {
 		protocol = "http"

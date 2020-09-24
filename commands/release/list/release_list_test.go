@@ -11,15 +11,15 @@ import (
 func TestNewCmdReleaseList(t *testing.T) {
 
 	tests := []struct {
-		name string
-		repo string
-		tag string
+		name       string
+		repo       string
+		tag        string
 		stdOutFunc func(t *testing.T, out string)
-		stdErr string
-		wantErr bool
+		stdErr     string
+		wantErr    bool
 	}{
 		{
-			name: "releases list on test repo",
+			name:    "releases list on test repo",
 			wantErr: false,
 			stdOutFunc: func(t *testing.T, out string) {
 				assert.Contains(t, out, "Showing releases")
@@ -27,32 +27,32 @@ func TestNewCmdReleaseList(t *testing.T) {
 			},
 		},
 		{
-			name: "get release by tag on test repo",
+			name:    "get release by tag on test repo",
 			wantErr: false,
-			tag: "v0.0.1-beta",
+			tag:     "v0.0.1-beta",
 			stdOutFunc: func(t *testing.T, out string) {
 				assert.Contains(t, out, "5d3de07d - v0.0.1-beta")
 			},
 		},
 		{
-			name: "releases list on custom repo",
+			name:    "releases list on custom repo",
 			wantErr: false,
-			repo: "profclems/glab",
+			repo:    "profclems/glab",
 			stdOutFunc: func(t *testing.T, out string) {
 				assert.Contains(t, out, "Showing releases")
 				assert.Contains(t, out, "on profclems/glab")
 			},
 		},
 		{
-			name: "ERR - wrong repo",
+			name:    "ERR - wrong repo",
 			wantErr: true,
-			repo: "profclems/gla",
+			repo:    "profclems/gla",
 		},
 		{
-			name: "ERR - wrong repo with tag",
+			name:    "ERR - wrong repo with tag",
 			wantErr: true,
-			repo: "profclems/gla",
-			tag: "v0.0.1-beta",
+			repo:    "profclems/gla",
+			tag:     "v0.0.1-beta",
 		},
 	}
 	for _, tt := range tests {

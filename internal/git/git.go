@@ -365,7 +365,6 @@ type Remote struct {
 	PushURL  *url.URL
 }
 
-
 func (r *Remote) String() string {
 	return r.Name
 }

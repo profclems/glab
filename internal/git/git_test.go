@@ -282,20 +282,20 @@ func TestGetDefaultBranch(t *testing.T) {
 
 func TestGetRemoteURL(t *testing.T) {
 	tests := []struct {
-		name    string
+		name        string
 		remoteAlias string
-		want    string
-		wantErr bool
+		want        string
+		wantErr     bool
 	}{
 		{
-			name: "isInvalid",
+			name:        "isInvalid",
 			remoteAlias: "someorigin",
-			wantErr: true,
+			wantErr:     true,
 		},
 		{
-			name: "isInvalid",
+			name:        "isInvalid",
 			remoteAlias: "origin",
-			want: "profclems/glab.git",
+			want:        "profclems/glab.git",
 		},
 	}
 	for _, tt := range tests {

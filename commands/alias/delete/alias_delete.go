@@ -12,7 +12,7 @@ import (
 
 type DeleteOptions struct {
 	Config func() (config.Config, error)
-	Name string
+	Name   string
 }
 
 func NewCmdDelete(f *cmdutils.Factory, runF func(*DeleteOptions) error) *cobra.Command {

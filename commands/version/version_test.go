@@ -29,5 +29,5 @@ func Test_Version(t *testing.T) {
 	os.Stdout = old // restoring the real stdout
 	out := <-outC
 
-	assert.Contains(t, out,"glab v1.0.0 (2020-01-01)")
+	assert.Contains(t, out, "glab v1.0.0 (2020-01-01)")
 }

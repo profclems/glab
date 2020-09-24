@@ -7,7 +7,6 @@ import (
 	"testing"
 )
 
-
 func Test_RemoteURL(t *testing.T) {
 	type args struct {
 		project *gitlab.Project
@@ -79,7 +78,6 @@ func Test_RemoteURL(t *testing.T) {
 		})
 	}
 }
-
 
 func Test_repoFromURL(t *testing.T) {
 	tests := []struct {
@@ -212,16 +210,16 @@ func TestFromFullName(t *testing.T) {
 			wantErr: errors.New(`expected the "[HOST/]OWNER/[NAMESPACE/]REPO" format, got "OWNER"`),
 		},
 		{
-			name:    "group namespace",
-			input:   "a/b/c/d",
+			name:      "group namespace",
+			input:     "a/b/c/d",
 			wantHost:  "a",
 			wantOwner: "b",
 			wantName:  "c/d",
 			wantErr:   nil,
 		},
 		{
-			name:    "with group namespace",
-			input:   "gitlab.com/owner/namespace/repo",
+			name:      "with group namespace",
+			input:     "gitlab.com/owner/namespace/repo",
 			wantHost:  "gitlab.com",
 			wantOwner: "owner",
 			wantName:  "namespace/repo",
@@ -287,29 +285,29 @@ func TestFromFullName(t *testing.T) {
 func TestFullNameFromURL(t *testing.T) {
 
 	tests := []struct {
-		name    string
+		name      string
 		remoteURL string
-		want    string
-		wantErr error
+		want      string
+		wantErr   error
 	}{
 		{
 			remoteURL: "gitlab.com/profclems/glab.git",
-			wantErr: errors.New("cannot parse remote: gitlab.com/profclems/glab.git"),
+			wantErr:   errors.New("cannot parse remote: gitlab.com/profclems/glab.git"),
 		},
 		{
 			remoteURL: "https://gitlab.com/profclems/glab.git",
-			want: "profclems/glab",
-			wantErr: nil,
+			want:      "profclems/glab",
+			wantErr:   nil,
 		},
 		{
 			remoteURL: "https://gitlab.com/owner/namespace/repo.git",
-			want: "owner/namespace/repo",
-			wantErr: nil,
+			want:      "owner/namespace/repo",
+			wantErr:   nil,
 		},
 		{
 			remoteURL: "git@gitlab.com:owner/namespace/repo.git",
-			want: "owner/namespace/repo",
-			wantErr: nil,
+			want:      "owner/namespace/repo",
+			wantErr:   nil,
 		},
 	}
 	for _, tt := range tests {

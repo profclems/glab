@@ -7,7 +7,7 @@ import (
 	"github.com/xanzy/go-gitlab"
 )
 
-func DisplayAllReleases(rs []*gitlab.Release, repo string) *uitable.Table{
+func DisplayAllReleases(rs []*gitlab.Release, repo string) *uitable.Table {
 	return utils.DisplayList(utils.ListInfo{
 		Name:    "releases",
 		Columns: []string{"Name", "Tag", "CreatedAt"},

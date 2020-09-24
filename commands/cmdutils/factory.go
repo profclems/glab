@@ -22,7 +22,7 @@ type Factory struct {
 	Branch     func() (string, error)
 }
 
-func (f *Factory) NewClient(repo string) (*Factory, error)   {
+func (f *Factory) NewClient(repo string) (*Factory, error) {
 	f.BaseRepo = func() (glrepo.Interface, error) {
 		return glrepo.FromFullName(repo)
 	}
@@ -37,7 +37,7 @@ func (f *Factory) NewClient(repo string) (*Factory, error)   {
 	return f, nil
 }
 
-func httpClientFunc(cfg config.Config, repo glrepo.Interface) (*gitlab.Client, error)  {
+func httpClientFunc(cfg config.Config, repo glrepo.Interface) (*gitlab.Client, error) {
 	token, _ := cfg.Get(repo.RepoHost(), "token")
 	tlsVerify, _ := cfg.Get(repo.RepoHost(), "skip_tls_verify")
 	skipTlsVerify, _ := strconv.ParseBool(tlsVerify)
@@ -62,7 +62,6 @@ func New(cachedConfig config.Config, configError error) *Factory {
 		return cachedConfig, configError
 	}
 
-
 	rr := &remoteResolver{
 		readRemotes: git.Remotes,
 		getConfig:   configFunc,
@@ -78,7 +77,7 @@ func New(cachedConfig config.Config, configError error) *Factory {
 		return glrepo.FromURL(remotes[0].FetchURL)
 	}
 	return &Factory{
-		Config:    configFunc,
+		Config:  configFunc,
 		Remotes: remotesFunc,
 		HttpClient: func() (*gitlab.Client, error) {
 			cfg, err := configFunc()

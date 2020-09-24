@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-func NewCheckUpdateCmd(version, build string) *cobra.Command  {
+func NewCheckUpdateCmd(version, build string) *cobra.Command {
 	// versionCmd represents the version command
 	var cmd = &cobra.Command{
 		Use:     "check-update",

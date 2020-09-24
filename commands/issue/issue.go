@@ -7,7 +7,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func NewCmdIssue(f *cmdutils.Factory) *cobra.Command  {
+func NewCmdIssue(f *cmdutils.Factory) *cobra.Command {
 	var issueCmd = &cobra.Command{
 		Use:   "issue [command] [flags]",
 		Short: `Work with GitLab issues`,

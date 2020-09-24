@@ -38,15 +38,14 @@ https://github.com/charmbracelet/glamour#styles
 	return configCmd
 }
 
-
 func NewCmdConfigGet(f *cmdutils.Factory) *cobra.Command {
 	var hostname string
 
 	cmd := &cobra.Command{
 		Use:   "get <key>",
 		Short: "Prints the value of a given configuration key",
-		Long: `Get the value for a given configuration key.`,
-		Example:`
+		Long:  `Get the value for a given configuration key.`,
+		Example: `
   $ glab config get gitlab_uri
   https://gitlab.com
   $ glab config get git_remote_url_var
@@ -87,7 +86,7 @@ func NewCmdConfigSet(f *cmdutils.Factory) *cobra.Command {
 Use glab config set --global if you want to set a global config. 
 Specifying the --hostname flag also saves in the global config file
 `,
-		Example:`
+		Example: `
   $ glab config set editor vim
   $ glab config set git_remote_url_var origin
 `,
@@ -100,7 +99,7 @@ Specifying the --hostname flag also saves in the global config file
 
 			localCfg, _ := cfg.Local()
 
-			isGlobal, _ :=cmd.Flags().GetBool("global")
+			isGlobal, _ := cmd.Flags().GetBool("global")
 
 			key, value := args[0], args[1]
 			if isGlobal || hostname != "" {
@@ -131,8 +130,7 @@ Specifying the --hostname flag also saves in the global config file
 	return cmd
 }
 
-
-func NewCmdConfigInit (f *cmdutils.Factory) *cobra.Command {
+func NewCmdConfigInit(f *cmdutils.Factory) *cobra.Command {
 	var configInitCmd = &cobra.Command{
 		Use:   "init",
 		Short: "Shows a prompt to set basic glab configuration",
@@ -169,7 +167,7 @@ func configInit(cmd *cobra.Command, f *cmdutils.Factory) error {
 		return err
 	}
 
-	token, _ := cfg.Get( host, "token")
+	token, _ := cfg.Get(host, "token")
 	token, err = config.Prompt("Enter Gitlab Token: ", token)
 	if err != nil {
 		return err

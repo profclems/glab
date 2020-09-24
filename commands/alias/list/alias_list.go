@@ -65,7 +65,7 @@ func listRun(cmd *cobra.Command, opts *ListOptions) error {
 	for _, alias := range keys {
 		table.AddRow(alias, aliasMap[alias])
 	}
-	fmt.Fprintf(utils.ColorableOut(cmd),"%v", table)
+	fmt.Fprintf(utils.ColorableOut(cmd), "%v", table)
 
 	return nil
 }

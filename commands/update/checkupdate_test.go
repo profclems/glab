@@ -11,9 +11,9 @@ func TestNewCheckUpdateCmd(t *testing.T) {
 		build   string
 	}
 	tests := []struct {
-		name string
-		args args
-		want *cobra.Command
+		name    string
+		args    args
+		want    *cobra.Command
 		wantErr bool
 	}{
 		{

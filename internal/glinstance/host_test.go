@@ -30,7 +30,7 @@ func TestIsSelfHosted(t *testing.T) {
 		},
 		{
 			name: "self hosted",
-			args: args{h:"example.com"},
+			args: args{h: "example.com"},
 			want: true,
 		},
 	}
@@ -155,26 +155,26 @@ func TestStripHostProtocol(t *testing.T) {
 		wantProtocol string
 	}{
 		{
-			name: "url with https protocol",
-			hostname: "https://gitlab.com",
+			name:         "url with https protocol",
+			hostname:     "https://gitlab.com",
 			wantHostname: "gitlab.com",
 			wantProtocol: "https",
 		},
 		{
-			name: "https url with ending slash",
-			hostname: "https://gitlab.com/",
+			name:         "https url with ending slash",
+			hostname:     "https://gitlab.com/",
 			wantHostname: "gitlab.com",
 			wantProtocol: "https",
 		},
 		{
-			name: "url with http protocol",
-			hostname: "http://gitlab.com/",
+			name:         "url with http protocol",
+			hostname:     "http://gitlab.com/",
 			wantHostname: "gitlab.com",
 			wantProtocol: "http",
 		},
 		{
-			name: "http url with ending slash",
-			hostname: "http://gitlab.com/",
+			name:         "http url with ending slash",
+			hostname:     "http://gitlab.com/",
 			wantHostname: "gitlab.com",
 			wantProtocol: "http",
 		},

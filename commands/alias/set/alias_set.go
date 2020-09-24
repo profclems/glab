@@ -12,8 +12,9 @@ import (
 	"github.com/google/shlex"
 	"github.com/spf13/cobra"
 )
+
 type SetOptions struct {
-	Config func() (config.Config, error)
+	Config    func() (config.Config, error)
 	Name      string
 	Expansion string
 	IsShell   bool

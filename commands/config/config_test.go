@@ -94,7 +94,7 @@ func TestConfigGet(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			var stderr bytes.Buffer
 			var stdout bytes.Buffer
-			f := &cmdutils.Factory {
+			f := &cmdutils.Factory{
 				Config: func() (config.Config, error) {
 					return tt.config, nil
 				},
@@ -146,7 +146,7 @@ func TestConfigSet(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			var stderr bytes.Buffer
 			var stdout bytes.Buffer
-			f := &cmdutils.Factory {
+			f := &cmdutils.Factory{
 				Config: func() (config.Config, error) {
 					return tt.config, nil
 				},
