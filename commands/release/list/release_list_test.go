@@ -32,12 +32,12 @@ func TestNewCmdReleaseList(t *testing.T) {
 
 		}
 		return &gitlab.Release{
-			TagName: tag,
-			Name: tag,
+			TagName:     tag,
+			Name:        tag,
 			Description: "Dummy description for " + tag,
 			Author: author{
-				ID: 1,
-				Name: "John Dev Wick",
+				ID:       1,
+				Name:     "John Dev Wick",
 				Username: "jdwick",
 			},
 			CreatedAt: &timer,
@@ -50,12 +50,12 @@ func TestNewCmdReleaseList(t *testing.T) {
 			return nil, errors.New("fatal: wrong Repository")
 		}
 		return append([]*gitlab.Release{}, &gitlab.Release{
-			TagName: "0.1.0",
-			Name: "Initial Release",
+			TagName:     "0.1.0",
+			Name:        "Initial Release",
 			Description: "Dummy description for 0.1.0",
 			Author: author{
-				ID: 1,
-				Name: "John Dev Wick",
+				ID:       1,
+				Name:     "John Dev Wick",
 				Username: "jdwick",
 			},
 			CreatedAt: &timer,

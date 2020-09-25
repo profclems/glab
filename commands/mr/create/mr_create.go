@@ -24,13 +24,13 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 		Args:    cobra.ExactArgs(0),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var (
-				sourceBranch string
-				mergeTitle string
+				sourceBranch     string
+				mergeTitle       string
 				mergeDescription string
-				err error
-				targetBranch string
+				err              error
+				targetBranch     string
 			)
-			
+
 			out := utils.ColorableOut(cmd)
 			l := &gitlab.CreateMergeRequestOptions{}
 
@@ -159,7 +159,7 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 				}
 				l.AssigneeIDs = t2
 			}
-			
+
 			if c, _ := cmd.Flags().GetBool("create-source-branch"); c {
 				lb := &gitlab.CreateBranchOptions{
 					Branch: gitlab.String(sourceBranch),
@@ -174,7 +174,7 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 				}
 			}
 
-			mr,  err := api.CreateMR(apiClient, repo, l)
+			mr, err := api.CreateMR(apiClient, repo, l)
 			if err != nil {
 				return err
 			}

@@ -31,4 +31,3 @@ func TestNewCmdLabel(t *testing.T) {
 
 	assert.Contains(t, out, "Use \"label [command] --help\" for more information about a command.\n")
 }
-

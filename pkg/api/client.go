@@ -9,7 +9,6 @@ import (
 	"net/http"
 	"time"
 
-
 	"github.com/profclems/glab/internal/glinstance"
 	"github.com/xanzy/go-gitlab"
 )

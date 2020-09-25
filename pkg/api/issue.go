@@ -5,7 +5,7 @@ import (
 	"github.com/xanzy/go-gitlab"
 )
 
-var ListIssueNotes = func(client *gitlab.Client, projectID interface{}, issueID int, opts *gitlab.ListIssueNotesOptions) ([]*gitlab.Note, error)  {
+var ListIssueNotes = func(client *gitlab.Client, projectID interface{}, issueID int, opts *gitlab.ListIssueNotesOptions) ([]*gitlab.Note, error) {
 	if client == nil {
 		client = apiClient
 	}
@@ -16,7 +16,7 @@ var ListIssueNotes = func(client *gitlab.Client, projectID interface{}, issueID 
 	return notes, nil
 }
 
-var UpdateIssue = func(client *gitlab.Client, projectID interface{}, issueID int, opts *gitlab.UpdateIssueOptions) (*gitlab.Issue, error)  {
+var UpdateIssue = func(client *gitlab.Client, projectID interface{}, issueID int, opts *gitlab.UpdateIssueOptions) (*gitlab.Issue, error) {
 	if client == nil {
 		client = apiClient
 	}
@@ -28,7 +28,7 @@ var UpdateIssue = func(client *gitlab.Client, projectID interface{}, issueID int
 	return issue, nil
 }
 
-var GetIssue = func(client *gitlab.Client, projectID interface{}, issueID int) (*gitlab.Issue, error)  {
+var GetIssue = func(client *gitlab.Client, projectID interface{}, issueID int) (*gitlab.Issue, error) {
 	if client == nil {
 		client = apiClient
 	}
@@ -40,7 +40,7 @@ var GetIssue = func(client *gitlab.Client, projectID interface{}, issueID int) (
 	return issue, nil
 }
 
-var ListIssues = func(client *gitlab.Client, projectID interface{}, opts *gitlab.ListProjectIssuesOptions) ([]*gitlab.Issue, error)  {
+var ListIssues = func(client *gitlab.Client, projectID interface{}, opts *gitlab.ListProjectIssuesOptions) ([]*gitlab.Issue, error) {
 	issues, _, err := apiClient.Issues.ListProjectIssues(projectID, opts)
 	if err != nil {
 		return nil, err
@@ -49,7 +49,7 @@ var ListIssues = func(client *gitlab.Client, projectID interface{}, opts *gitlab
 	return issues, nil
 }
 
-var CreateIssue = func(client *gitlab.Client, projectID interface{}, opts *gitlab.CreateIssueOptions) (*gitlab.Issue, error)  {
+var CreateIssue = func(client *gitlab.Client, projectID interface{}, opts *gitlab.CreateIssueOptions) (*gitlab.Issue, error) {
 	if client == nil {
 		client = apiClient
 	}

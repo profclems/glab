@@ -14,7 +14,6 @@ import (
 	"github.com/xanzy/go-gitlab"
 )
 
-
 func NewCmdClose(f *cmdutils.Factory) *cobra.Command {
 	var mrCloseCmd = &cobra.Command{
 		Use:   "close <id>",

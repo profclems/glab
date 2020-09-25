@@ -4,7 +4,7 @@ import (
 	"github.com/xanzy/go-gitlab"
 )
 
-var ApproveMR = func(client *gitlab.Client, projectID interface{}, mrID int, opts *gitlab.ApproveMergeRequestOptions) (*gitlab.MergeRequestApprovals, error)  {
+var ApproveMR = func(client *gitlab.Client, projectID interface{}, mrID int, opts *gitlab.ApproveMergeRequestOptions) (*gitlab.MergeRequestApprovals, error) {
 	if client == nil {
 		client = apiClient
 	}
@@ -16,7 +16,7 @@ var ApproveMR = func(client *gitlab.Client, projectID interface{}, mrID int, opt
 	return mr, nil
 }
 
-var GetMRApprovalState = func(client *gitlab.Client, projectID interface{}, mrID int, opts ...gitlab.RequestOptionFunc) (*gitlab.MergeRequestApprovalState, error)  {
+var GetMRApprovalState = func(client *gitlab.Client, projectID interface{}, mrID int, opts ...gitlab.RequestOptionFunc) (*gitlab.MergeRequestApprovalState, error) {
 	if client == nil {
 		client = apiClient
 	}
@@ -28,7 +28,7 @@ var GetMRApprovalState = func(client *gitlab.Client, projectID interface{}, mrID
 	return mrApprovals, nil
 }
 
-var GetMR = func(client *gitlab.Client, projectID interface{}, mrID int, opts *gitlab.GetMergeRequestsOptions) (*gitlab.MergeRequest, error)  {
+var GetMR = func(client *gitlab.Client, projectID interface{}, mrID int, opts *gitlab.GetMergeRequestsOptions) (*gitlab.MergeRequest, error) {
 	if client == nil {
 		client = apiClient
 	}
@@ -40,7 +40,7 @@ var GetMR = func(client *gitlab.Client, projectID interface{}, mrID int, opts *g
 	return mr, nil
 }
 
-var ListMRs = func(client *gitlab.Client, projectID interface{}, opts *gitlab.ListProjectMergeRequestsOptions) ([]*gitlab.MergeRequest, error)  {
+var ListMRs = func(client *gitlab.Client, projectID interface{}, opts *gitlab.ListProjectMergeRequestsOptions) ([]*gitlab.MergeRequest, error) {
 	if client == nil {
 		client = apiClient
 	}
@@ -52,7 +52,7 @@ var ListMRs = func(client *gitlab.Client, projectID interface{}, opts *gitlab.Li
 	return mrs, nil
 }
 
-var UpdateMR = func(client *gitlab.Client, projectID interface{}, mrID int, opts *gitlab.UpdateMergeRequestOptions) (*gitlab.MergeRequest, error)  {
+var UpdateMR = func(client *gitlab.Client, projectID interface{}, mrID int, opts *gitlab.UpdateMergeRequestOptions) (*gitlab.MergeRequest, error) {
 	if client == nil {
 		client = apiClient
 	}
@@ -85,10 +85,10 @@ var MergeMR = func(client *gitlab.Client, projectID interface{}, mrID int, opts 
 		return nil, err
 	}
 
-	return mrs,  nil
+	return mrs, nil
 }
 
-var CreateMR = func(client *gitlab.Client, projectID interface{}, opts *gitlab.CreateMergeRequestOptions) (*gitlab.MergeRequest, error)  {
+var CreateMR = func(client *gitlab.Client, projectID interface{}, opts *gitlab.CreateMergeRequestOptions) (*gitlab.MergeRequest, error) {
 	if client == nil {
 		client = apiClient
 	}
@@ -100,7 +100,7 @@ var CreateMR = func(client *gitlab.Client, projectID interface{}, opts *gitlab.C
 	return mr, nil
 }
 
-var GetMRLinkedIssues = func(client *gitlab.Client, projectID interface{}, mrID int,  opts *gitlab.GetIssuesClosedOnMergeOptions) ([]*gitlab.Issue, error)  {
+var GetMRLinkedIssues = func(client *gitlab.Client, projectID interface{}, mrID int, opts *gitlab.GetIssuesClosedOnMergeOptions) ([]*gitlab.Issue, error) {
 	if client == nil {
 		client = apiClient
 	}

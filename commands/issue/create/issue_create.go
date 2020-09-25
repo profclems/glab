@@ -25,10 +25,10 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			l := &gitlab.CreateIssueOptions{}
 			var (
-				issueTitle string
-				issueLabel string
+				issueTitle       string
+				issueLabel       string
 				issueDescription string
-				err error
+				err              error
 			)
 
 			if r, _ := cmd.Flags().GetString("repo"); r != "" {

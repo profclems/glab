@@ -626,7 +626,7 @@ func defaultFor(key string) string {
 // GetFromEnv is just a wrapper for os.GetEnv but checks for matching names used in previous glab versions and
 // retrieves the value of the environment if any of the matching names has been set.
 // It returns the value, which will be empty if the variable is not present.
-func GetFromEnv(key string) (value string)  {
+func GetFromEnv(key string) (value string) {
 	envEq := EnvKeyEquivalence(key)
 	for _, e := range envEq {
 		if val := os.Getenv(e); val != "" {

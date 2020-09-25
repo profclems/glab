@@ -89,7 +89,6 @@ var repoArchiveCmd = &cobra.Command{
 	},
 }
 
-
 //CloneWriter w
 type CloneWriter struct {
 	Total uint64
@@ -126,7 +125,6 @@ func fixRepoNamespace(repo string) (string, error) {
 	}
 	return repo, nil
 }
-
 
 func init() {
 	repoArchiveCmd.Flags().StringP("format", "f", "zip", "Optionally Specify format if you want a downloaded archive: {tar.gz|tar.bz2|tbz|tbz2|tb2|bz2|tar|zip} (Default: zip)")

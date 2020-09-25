@@ -19,7 +19,7 @@ func NewCmdList(f *cmdutils.Factory) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var (
 				state string
-				err error
+				err   error
 			)
 
 			if r, _ := cmd.Flags().GetString("repo"); r != "" {

@@ -41,10 +41,10 @@ func NewCmdSubscribe(f *cmdutils.Factory) *cobra.Command {
 
 			arrIds := strings.Split(strings.Trim(mergeID, "[] "), ",")
 			for _, i2 := range arrIds {
-				fmt.Fprintln(out, "- Subscribing to Issue #" + i2)
+				fmt.Fprintln(out, "- Subscribing to Issue #"+i2)
 				issue, err := api.SubscribeToIssue(apiClient, repo.FullName(), manip.StringToInt(i2), nil)
 				if err != nil {
-					fmt.Fprintln(out, utils.GreenCheck(), "Subscribed to issue #" + i2)
+					fmt.Fprintln(out, utils.GreenCheck(), "Subscribed to issue #"+i2)
 					fmt.Fprintln(out, issueutils.DisplayIssue(issue))
 				}
 			}
