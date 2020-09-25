@@ -3,6 +3,7 @@ package close
 import (
 	"fmt"
 	"github.com/profclems/glab/internal/utils"
+	"github.com/profclems/glab/pkg/api"
 	"strings"
 
 	"github.com/profclems/glab/commands/cmdutils"
@@ -28,7 +29,7 @@ func NewCmdClose(f *cmdutils.Factory) *cobra.Command {
 					return err
 				}
 			}
-			gLabClient, err := f.HttpClient()
+			apiClient, err := f.HttpClient()
 			if err != nil {
 				return err
 			}
@@ -37,14 +38,12 @@ func NewCmdClose(f *cmdutils.Factory) *cobra.Command {
 				return err
 			}
 
-			fmt.Println(repo)
-
 			l := &gitlab.UpdateIssueOptions{}
 			l.StateEvent = gitlab.String("close")
 			arrIds := strings.Split(strings.Trim(issueID, "[] "), ",")
 			for _, i2 := range arrIds {
 				fmt.Fprintln(utils.ColorableOut(cmd), "- Closing Issue...")
-				issue, _, err := gLabClient.Issues.UpdateIssue(repo.FullName(), manip.StringToInt(i2), l)
+				issue, err := api.UpdateIssue(apiClient, repo.FullName(), manip.StringToInt(i2), l)
 				if err != nil {
 					return err
 				}

@@ -2,6 +2,8 @@ package list
 
 import (
 	"fmt"
+	"github.com/profclems/glab/pkg/api"
+
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/commands/release/releaseutils"
 	"github.com/profclems/glab/internal/utils"
@@ -41,7 +43,7 @@ func listReleases(cmd *cobra.Command, args []string) error {
 			return err
 		}
 	}
-	gLabClient, err := factory.HttpClient()
+	apiClient, err := factory.HttpClient()
 	if err != nil {
 		return err
 	}
@@ -51,13 +53,13 @@ func listReleases(cmd *cobra.Command, args []string) error {
 	}
 
 	if tag != "" {
-		release, _, err := gLabClient.Releases.GetRelease(repo.FullName(), tag)
+		release, err := api.GetRelease(apiClient, repo.FullName(), tag)
 		if err != nil {
 			return err
 		}
 		fmt.Fprintln(utils.ColorableOut(cmd), releaseutils.DisplayRelease(release))
 	} else {
-		releases, _, err := gLabClient.Releases.ListReleases(repo.FullName(), l)
+		releases, err := api.ListReleases(apiClient, repo.FullName(), l)
 		if err != nil {
 			return err
 		}

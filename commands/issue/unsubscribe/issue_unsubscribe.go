@@ -4,52 +4,53 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/profclems/glab/internal/git"
+	"github.com/profclems/glab/commands/cmdutils"
+	"github.com/profclems/glab/commands/issue/issueutils"
 	"github.com/profclems/glab/internal/manip"
+	"github.com/profclems/glab/internal/utils"
+	"github.com/profclems/glab/pkg/api"
 
 	"github.com/spf13/cobra"
 )
 
-var issueUnsubscribeCmd = &cobra.Command{
-	Use:     "unsubscribe <id>",
-	Short:   `Unsubscribe to an issue`,
-	Long:    ``,
-	Aliases: []string{"unsub"},
-	Args:    cobra.ExactArgs(1),
-	RunE: func(cmd *cobra.Command, args []string) error {
-		if len(args) > 1 {
-			cmdErr(cmd, args)
-			return nil
-		}
-		if len(args) > 0 {
-			mergeID := strings.TrimSpace(args[0])
-			gitlabClient, repo := git.InitGitlabClient()
+func NewCmdUnsubscribe(f *cmdutils.Factory) *cobra.Command {
+	var issueUnsubscribeCmd = &cobra.Command{
+		Use:     "unsubscribe <id>",
+		Short:   `Unsubscribe to an issue`,
+		Long:    ``,
+		Aliases: []string{"unsub"},
+		Args:    cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			var err error
+			out := utils.ColorableOut(cmd)
 			if r, _ := cmd.Flags().GetString("repo"); r != "" {
-				repo, _ = fixRepoNamespace(r)
+				f, err = f.NewClient(r)
+				if err != nil {
+					return err
+				}
 			}
+			apiClient, err := f.HttpClient()
+			if err != nil {
+				return err
+			}
+			repo, err := f.BaseRepo()
+			if err != nil {
+				return err
+			}
+			mergeID := strings.TrimSpace(args[0])
+
 			arrIds := strings.Split(strings.Trim(mergeID, "[] "), ",")
 			for _, i2 := range arrIds {
-				fmt.Println("Unsubscribing to Issue #" + i2)
-				issue, resp, err := gitlabClient.Issues.UnsubscribeFromIssue(repo, manip.StringToInt(i2))
+				fmt.Println("Unsubscribing from Issue #" + i2)
+				issue, err := api.UnsubscribeFromIssue(apiClient, repo.FullName(), manip.StringToInt(i2), nil)
 				if err != nil {
-					return nil
-				}
-				if isSuccessful(resp.StatusCode) {
-					fmt.Println("Unsubscribed to issue #" + i2)
-					displayIssue(issue)
-				} else if resp.StatusCode == 404 {
-					er("Issue does not exist")
-				} else {
-					er(resp.Status)
+					fmt.Fprintln(out, utils.Red("✔"), "Unsubscribed from issue #"+i2)
+					fmt.Fprintln(out, issueutils.DisplayIssue(issue))
 				}
 			}
-		} else {
-			cmdErr(cmd, args)
-		}
-		return nil
-	},
-}
+			return nil
+		},
+	}
 
-func init() {
-	issueCmd.AddCommand(issueUnsubscribeCmd)
+	return issueUnsubscribeCmd
 }

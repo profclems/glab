@@ -4,55 +4,57 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/profclems/glab/internal/git"
+	"github.com/profclems/glab/commands/cmdutils"
+	"github.com/profclems/glab/commands/issue/issueutils"
 	"github.com/profclems/glab/internal/manip"
+	"github.com/profclems/glab/internal/utils"
+	"github.com/profclems/glab/pkg/api"
 
 	"github.com/spf13/cobra"
 	"github.com/xanzy/go-gitlab"
 )
 
-var issueReopenCmd = &cobra.Command{
-	Use:     "reopen <id>",
-	Short:   `Reopen a closed issue`,
-	Long:    ``,
-	Aliases: []string{"open"},
-	Args:    cobra.ExactArgs(1),
-	RunE: func(cmd *cobra.Command, args []string) error {
-		if len(args) > 1 {
-			cmdErr(cmd, args)
-			return nil
-		}
-		if len(args) > 0 {
-			issueID := strings.TrimSpace(args[0])
-			gitlabClient, repo := git.InitGitlabClient()
+func NewCmdReopen(f *cmdutils.Factory) *cobra.Command {
+	var issueReopenCmd = &cobra.Command{
+		Use:     "reopen <id>",
+		Short:   `Reopen a closed issue`,
+		Long:    ``,
+		Aliases: []string{"open"},
+		Args:    cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			var err error
+			out := utils.ColorableOut(cmd)
 			if r, _ := cmd.Flags().GetString("repo"); r != "" {
-				repo, _ = fixRepoNamespace(r)
+				f, err = f.NewClient(r)
+				if err != nil {
+					return err
+				}
 			}
+			gLabClient, err := f.HttpClient()
+			if err != nil {
+				return err
+			}
+			repo, err := f.BaseRepo()
+			if err != nil {
+				return err
+			}
+			issueID := strings.TrimSpace(args[0])
+
 			l := &gitlab.UpdateIssueOptions{}
 			l.StateEvent = gitlab.String("reopen")
 			arrIds := strings.Split(strings.Trim(issueID, "[] "), ",")
 			for _, i2 := range arrIds {
-				fmt.Println("Reopening Issue...")
-				issue, resp, err := gitlabClient.Issues.UpdateIssue(repo, manip.StringToInt(i2), l)
+				fmt.Fprintln(out, "- Reopening Issue...")
+				issue, err := api.UpdateIssue(gLabClient, repo.FullName(), manip.StringToInt(i2), l)
 				if err != nil {
 					return err
 				}
-				if isSuccessful(resp.StatusCode) {
-					fmt.Println("Issue #" + i2 + " eopened")
-					displayIssue(issue)
-				} else if resp.StatusCode == 404 {
-					er("Issue does not exist")
-				} else {
-					er(resp.Status)
-				}
+				fmt.Fprintln(out, utils.GreenCheck(), "Issue #"+i2+" reopened")
+				fmt.Fprintln(out, issueutils.DisplayIssue(issue))
 			}
-		} else {
-			cmdErr(cmd, args)
-		}
-		return nil
-	},
-}
+			return nil
+		},
+	}
 
-func init() {
-	issueCmd.AddCommand(issueReopenCmd)
+	return issueReopenCmd
 }

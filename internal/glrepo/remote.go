@@ -2,9 +2,10 @@ package glrepo
 
 import (
 	"fmt"
-	"github.com/profclems/glab/internal/git"
 	"net/url"
 	"strings"
+
+	"github.com/profclems/glab/internal/git"
 )
 
 // Remotes represents a set of git remotes
@@ -22,7 +23,7 @@ func (r Remotes) FindByName(names ...string) (*Remote, error) {
 	return nil, fmt.Errorf("no GitLab remotes found")
 }
 
-// FindByRepo returns the first Remote that points to a specific GitHub repository
+// FindByRepo returns the first Remote that points to a specific GitLab repository
 func (r Remotes) FindByRepo(owner, name string) (*Remote, error) {
 	for _, rem := range r {
 		if strings.EqualFold(rem.RepoOwner(), owner) && strings.EqualFold(rem.RepoName(), name) {
@@ -52,7 +53,7 @@ func (r Remotes) Less(i, j int) bool {
 	return remoteNameSortScore(r[i].Name) > remoteNameSortScore(r[j].Name)
 }
 
-// Remote represents a git remote mapped to a GitHub repository
+// Remote represents a git remote mapped to a GitLab repository
 type Remote struct {
 	*git.Remote
 	Repo Interface
@@ -62,17 +63,17 @@ func (r Remote) FullName() string {
 	return r.Repo.FullName()
 }
 
-// RepoName is the name of the GitHub repository
+// RepoName is the name of the GitLab repository
 func (r Remote) RepoName() string {
 	return r.Repo.RepoName()
 }
 
-// RepoOwner is the name of the GitHub account that owns the repo
+// RepoOwner is the name of the GitLab account that owns the repo
 func (r Remote) RepoOwner() string {
 	return r.Repo.RepoOwner()
 }
 
-// RepoHost is the GitHub hostname that the remote points to
+// RepoHost is the GitLab hostname that the remote points to
 func (r Remote) RepoHost() string {
 	return r.Repo.RepoHost()
 }

@@ -9,8 +9,8 @@ import (
 
 	"github.com/profclems/glab/internal/config"
 	"github.com/profclems/glab/internal/git"
-	gLab "github.com/profclems/glab/internal/gitlab"
 	"github.com/profclems/glab/internal/glrepo"
+	"github.com/profclems/glab/pkg/api"
 	"github.com/xanzy/go-gitlab"
 )
 
@@ -43,9 +43,9 @@ func httpClientFunc(cfg config.Config, repo glrepo.Interface) (*gitlab.Client, e
 	skipTlsVerify, _ := strconv.ParseBool(tlsVerify)
 	caCert, _ := cfg.Get(repo.RepoHost(), "ca_cert")
 	if caCert != "" {
-		return gLab.InitWithCustomCA(repo.RepoHost(), token, caCert)
+		return api.InitWithCustomCA(repo.RepoHost(), token, caCert)
 	}
-	return gLab.Init(repo.RepoHost(), token, skipTlsVerify)
+	return api.Init(repo.RepoHost(), token, skipTlsVerify)
 }
 
 func New(cachedConfig config.Config, configError error) *Factory {

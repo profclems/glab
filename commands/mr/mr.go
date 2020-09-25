@@ -1,78 +1,57 @@
 package mr
 
 import (
-	"fmt"
-	"github.com/profclems/glab/internal/git"
-	"log"
+	"github.com/profclems/glab/commands/cmdutils"
+	mrApproveCmd "github.com/profclems/glab/commands/mr/approve"
+	mrApproversCmd "github.com/profclems/glab/commands/mr/approvers"
+	mrCheckoutCmd "github.com/profclems/glab/commands/mr/checkout"
+	mrCloseCmd "github.com/profclems/glab/commands/mr/close"
+	mrCreateCmd "github.com/profclems/glab/commands/mr/create"
+	mrDeleteCmd "github.com/profclems/glab/commands/mr/delete"
+	mrForCmd "github.com/profclems/glab/commands/mr/for"
+	mrIssuesCmd "github.com/profclems/glab/commands/mr/issues"
+	mrListCmd "github.com/profclems/glab/commands/mr/list"
+	mrMergeCmd "github.com/profclems/glab/commands/mr/merge"
+	mrNoteCmd "github.com/profclems/glab/commands/mr/note"
+	//mrRebaseCmd "github.com/profclems/glab/commands/mr/rebase"
+	//mrReopenCmd "github.com/profclems/glab/commands/mr/reopen"
+	//mrRevokeCmd "github.com/profclems/glab/commands/mr/revoke"
+	//mrSubscribeCmd "github.com/profclems/glab/commands/mr/subscribe"
+	//mrUnsubscribeCmd "github.com/profclems/glab/commands/mr/unsubscribe"
+	//mrTodoCmd "github.com/profclems/glab/commands/mr/todo"
+	//mrUpdateCmd "github.com/profclems/glab/commands/mr/update"
+	//mrViewCmd "github.com/profclems/glab/commands/mr/view"
 
-	"github.com/profclems/glab/internal/utils"
-
-	"github.com/gookit/color"
 	"github.com/spf13/cobra"
-	"github.com/xanzy/go-gitlab"
 )
 
-func displayMergeRequest(hm *gitlab.MergeRequest) {
-	duration := utils.TimeToPrettyTimeAgo(*hm.CreatedAt)
-	if hm.State == "opened" {
-		color.Printf("<green>#%d</> %s <magenta>(%s)</> %s\n", hm.IID, hm.Title, hm.SourceBranch, duration)
-	} else {
-		color.Printf("<red>#%d</> %s <magenta>(%s)</> %s\n", hm.IID, hm.Title, hm.SourceBranch, duration)
+func NewCmdMR(f *cmdutils.Factory) *cobra.Command {
+	var mrCmd = &cobra.Command{
+		Use:   "mr <command> [flags]",
+		Short: `Create, view and manage merge requests`,
+		Long:  ``,
 	}
-	fmt.Println(hm.WebURL)
-}
 
-func displayAllMergeRequests(m []*gitlab.MergeRequest, repo ...string) {
-	var (
-		projectID string
-		err       error
-	)
-	if len(repo) > 0 {
-		projectID = repo[0]
-	} else {
-		projectID, err = git.GetRepo()
-		if err != nil {
-			log.Fatal(err)
-		}
-	}
-	DisplayList(ListInfo{
-		Name:    "Merge Requests",
-		Columns: []string{"ID", "Title", "Branch"},
-		Total:   len(m),
-		GetCellValue: func(ri int, ci int) interface{} {
-			mr := m[ri]
-			switch ci {
-			case 0:
-				if mr.State == "opened" {
-					return color.Sprintf("<green>#%d</>", mr.IID)
-				} else {
-					return color.Sprintf("<red>#%d</>", mr.IID)
-				}
-			case 1:
-				return mr.Title
-			case 2:
-				return color.Sprintf("<cyan>(%s) ← (%s)</>", mr.TargetBranch, mr.SourceBranch)
-			default:
-				return ""
-			}
-		},
-	}, projectID)
-}
-
-// mrCmd is merge request command
-var mrCmd = &cobra.Command{
-	Use:   "mr <command> [flags]",
-	Short: `Create, view and manage merge requests`,
-	Long:  ``,
-	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) == 0 || len(args) > 2 {
-			_ = cmd.Help()
-			return
-		}
-	},
-}
-
-func init() {
 	mrCmd.PersistentFlags().StringP("repo", "R", "", "Select another repository using the OWNER/REPO format or the project ID. Supports group namespaces")
-	RootCmd.AddCommand(mrCmd)
+	mrCmd.AddCommand(mrApproveCmd.NewCmdApprove(f))
+	mrCmd.AddCommand(mrApproversCmd.NewCmdApprovers(f))
+	mrCmd.AddCommand(mrCheckoutCmd.NewCmdCheckout(f))
+	mrCmd.AddCommand(mrCloseCmd.NewCmdClose(f))
+	mrCmd.AddCommand(mrCreateCmd.NewCmdCreate(f))
+	mrCmd.AddCommand(mrDeleteCmd.NewCmdDelete(f))
+	mrCmd.AddCommand(mrForCmd.NewCmdFor(f))
+	mrCmd.AddCommand(mrIssuesCmd.NewCmdIssues(f))
+	mrCmd.AddCommand(mrListCmd.NewCmdList(f))
+	mrCmd.AddCommand(mrMergeCmd.NewCmdMerge(f))
+	mrCmd.AddCommand(mrNoteCmd.NewCmdNote(f))
+	//mrCmd.AddCommand(mrRebaseCmd.NewCmdRebase(f))
+	//mrCmd.AddCommand(mrReopenCmd.NewCmdReopen(f))
+	//mrCmd.AddCommand(mrRevokeCmd.NewCmdRevoke(f))
+	//mrCmd.AddCommand(mrSubscribeCmd.NewCmdSubscribe(f))
+	//mrCmd.AddCommand(mrUnsubscribeCmd.NewCmdUnsubscribe(f))
+	//mrCmd.AddCommand(mrTodoCmd.NewCmdTodo(f))
+	//mrCmd.AddCommand(mrUpdateCmd.NewCmdUpdate(f))
+	//mrCmd.AddCommand(mrViewCmd.NewCmdView(f))
+
+	return mrCmd
 }

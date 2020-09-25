@@ -107,6 +107,10 @@ func GreenCheck() string {
 	return Green("✓")
 }
 
+func RedCheck() string {
+	return Red("✔")
+}
+
 func ColorableOut(cmd *cobra.Command) io.Writer {
 	out := cmd.OutOrStdout()
 	if outFile, isFile := out.(*os.File); isFile {

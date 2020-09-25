@@ -2,13 +2,65 @@ package list
 
 import (
 	"bytes"
+	"errors"
+	"github.com/acarl005/stripansi"
+	"github.com/profclems/glab/pkg/api"
+	"github.com/xanzy/go-gitlab"
+	"testing"
+	"time"
+
 	"github.com/profclems/glab/test"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"testing"
 )
 
+type author struct {
+	ID        int    `json:"id"`
+	Name      string `json:"name"`
+	Username  string `json:"username"`
+	State     string `json:"state"`
+	AvatarURL string `json:"avatar_url"`
+	WebURL    string `json:"web_url"`
+}
+
 func TestNewCmdReleaseList(t *testing.T) {
+
+	oldGetRelease := api.GetRelease
+	timer, _ := time.Parse(time.RFC3339, "2014-11-12T11:45:26.371Z")
+	api.GetRelease = func(client *gitlab.Client, projectID interface{}, tag string) (*gitlab.Release, error) {
+		if projectID == "" || projectID == "WRONG_REPO" {
+
+		}
+		return &gitlab.Release{
+			TagName: tag,
+			Name: tag,
+			Description: "Dummy description for " + tag,
+			Author: author{
+				ID: 1,
+				Name: "John Dev Wick",
+				Username: "jdwick",
+			},
+			CreatedAt: &timer,
+		}, nil
+	}
+
+	oldListReleases := api.ListReleases
+	api.ListReleases = func(client *gitlab.Client, projectID interface{}, opts *gitlab.ListReleasesOptions) ([]*gitlab.Release, error) {
+		if projectID == "" || projectID == "WRONG_REPO" {
+			return nil, errors.New("fatal: wrong Repository")
+		}
+		return append([]*gitlab.Release{}, &gitlab.Release{
+			TagName: "0.1.0",
+			Name: "Initial Release",
+			Description: "Dummy description for 0.1.0",
+			Author: author{
+				ID: 1,
+				Name: "John Dev Wick",
+				Username: "jdwick",
+			},
+			CreatedAt: &timer,
+		}), nil
+	}
 
 	tests := []struct {
 		name       string
@@ -22,8 +74,7 @@ func TestNewCmdReleaseList(t *testing.T) {
 			name:    "releases list on test repo",
 			wantErr: false,
 			stdOutFunc: func(t *testing.T, out string) {
-				assert.Contains(t, out, "Showing releases")
-				assert.Contains(t, out, "on glab-cli/test")
+				assert.Contains(t, out, "Showing releases 1 of 1 on glab-cli/test")
 			},
 		},
 		{
@@ -31,7 +82,7 @@ func TestNewCmdReleaseList(t *testing.T) {
 			wantErr: false,
 			tag:     "v0.0.1-beta",
 			stdOutFunc: func(t *testing.T, out string) {
-				assert.Contains(t, out, "5d3de07d - v0.0.1-beta")
+				assert.Contains(t, out, "Dummy description for v0.0.1-beta")
 			},
 		},
 		{
@@ -39,19 +90,18 @@ func TestNewCmdReleaseList(t *testing.T) {
 			wantErr: false,
 			repo:    "profclems/glab",
 			stdOutFunc: func(t *testing.T, out string) {
-				assert.Contains(t, out, "Showing releases")
-				assert.Contains(t, out, "on profclems/glab")
+				assert.Contains(t, out, "Showing releases 1 of 1 on profclems/glab")
 			},
 		},
 		{
 			name:    "ERR - wrong repo",
 			wantErr: true,
-			repo:    "profclems/gla",
+			repo:    "WRONG_REPO",
 		},
 		{
 			name:    "ERR - wrong repo with tag",
 			wantErr: true,
-			repo:    "profclems/gla",
+			repo:    "WRONG_REPO",
 			tag:     "v0.0.1-beta",
 		},
 	}
@@ -59,6 +109,7 @@ func TestNewCmdReleaseList(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			var stderr bytes.Buffer
 			var stdout bytes.Buffer
+
 			cmd := NewCmdReleaseList(test.StubFactory())
 			if tt.repo != "" {
 				cmd.Flags().StringP("repo", "R", "", "")
@@ -78,8 +129,14 @@ func TestNewCmdReleaseList(t *testing.T) {
 				require.NoError(t, err)
 			}
 
-			tt.stdOutFunc(t, stdout.String())
-			assert.Contains(t, stderr.String(), tt.stdErr)
+			out := stripansi.Strip(stdout.String())
+			outErr := stripansi.Strip(stderr.String())
+
+			tt.stdOutFunc(t, out)
+			assert.Contains(t, outErr, tt.stdErr)
 		})
 	}
+
+	api.GetRelease = oldGetRelease
+	api.ListReleases = oldListReleases
 }

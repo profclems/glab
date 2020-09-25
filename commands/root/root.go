@@ -7,9 +7,10 @@ import (
 	completionCmd "github.com/profclems/glab/commands/completion"
 	configCmd "github.com/profclems/glab/commands/config"
 	issueCmd "github.com/profclems/glab/commands/issue"
+	labelCmd "github.com/profclems/glab/commands/label"
+	mrCmd "github.com/profclems/glab/commands/mr"
 	"github.com/profclems/glab/internal/glrepo"
 	"github.com/spf13/pflag"
-	//labelCmd "github.com/profclems/glab/commands/label"
 	//mrCmd "github.com/profclems/glab/commands/mr"
 	//pipelineCmd "github.com/profclems/glab/commands/pipeline"
 	//projectCmd "github.com/profclems/glab/commands/project"
@@ -89,8 +90,8 @@ func NewCmdRoot(f *cmdutils.Factory, version, buildDate string) *cobra.Command {
 	rootCmd.AddCommand(completionCmd.NewCmdCompletion())
 	rootCmd.AddCommand(versionCmd.NewCmdVersion(version, buildDate))
 	rootCmd.AddCommand(issueCmd.NewCmdIssue(&repoResolvingCmdFactory))
-	//rootCmd.AddCommand(labelCmd.NewCmdLabel(f))
-	//rootCmd.AddCommand(mrCmd.NewCmdMR(f))
+	rootCmd.AddCommand(labelCmd.NewCmdLabel(f))
+	rootCmd.AddCommand(mrCmd.NewCmdMR(f))
 	//rootCmd.AddCommand(pipelineCmd.NewCmdPipeline(f))
 	//rootCmd.AddCommand(projectCmd.NewCmdProject(f))
 	rootCmd.AddCommand(releaseCmd.NewCmdRelease(f))

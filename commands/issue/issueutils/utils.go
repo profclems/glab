@@ -22,7 +22,7 @@ func DisplayAllIssues(m []*gitlab.Issue, projectID string) *uitable.Table {
 				if issue.State == "opened" {
 					return utils.Green(fmt.Sprintf("#%d", issue.IID))
 				} else {
-					return utils.Gray(fmt.Sprintf("<red>#%d</>", issue.IID))
+					return utils.Red(fmt.Sprintf("#%d", issue.IID))
 				}
 			case 1:
 				return issue.Title

@@ -1,25 +1,19 @@
 package label
 
-import "github.com/spf13/cobra"
+import (
+	"github.com/profclems/glab/commands/cmdutils"
+	labelListCmd "github.com/profclems/glab/commands/label/list"
+	"github.com/spf13/cobra"
+)
 
-// mrCmd is merge request command
-var labelCmd = &cobra.Command{
-	Use:   "label <command> [flags]",
-	Short: `Manage labels on remote`,
-	Long:  ``,
-	RunE: func(cmd *cobra.Command, args []string) error {
-		if len(args) == 0 || len(args) > 2 {
-			err := cmd.Help()
-			if err != nil {
-				return err
-			}
-			return nil
-		}
-		return nil
-	},
-}
-
-func init() {
+func NewCmdLabel(f *cmdutils.Factory) *cobra.Command {
+	var labelCmd = &cobra.Command{
+		Use:   "label <command> [flags]",
+		Short: `Manage labels on remote`,
+		Long:  ``,
+	}
 	labelCmd.PersistentFlags().StringP("repo", "R", "", "Select another repository using the OWNER/REPO format. Supports group namespaces")
-	RootCmd.AddCommand(labelCmd)
+
+	labelCmd.AddCommand(labelListCmd.NewCmdList(f))
+	return labelCmd
 }

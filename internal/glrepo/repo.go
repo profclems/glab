@@ -132,7 +132,7 @@ func normalizeHostname(h string) string {
 	return strings.ToLower(strings.TrimPrefix(h, "www."))
 }
 
-// IsSame compares two GitHub repositories
+// IsSame compares two GitLab repositories
 func IsSame(a, b Interface) bool {
 	return strings.EqualFold(a.RepoOwner(), b.RepoOwner()) &&
 		strings.EqualFold(a.RepoName(), b.RepoName()) &&

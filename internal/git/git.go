@@ -475,7 +475,6 @@ func SetRemoteResolution(name, resolution string) error {
 
 func RunCmd(args []string) (err error) {
 	gitCmd := GitCommand(args...)
-	gitCmd.Stdin = os.Stdin
 	gitCmd.Stdout = os.Stdout
 	gitCmd.Stderr = os.Stderr
 

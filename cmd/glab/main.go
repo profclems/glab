@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"github.com/profclems/glab/internal/glinstance"
 	"io"
 	"net"
 	"os"
@@ -36,7 +37,7 @@ func main() {
 	if debugMode == "" {
 		debugMode = "false"
 	}
-	debug, _ = strconv.ParseBool(debugMode)
+	debug = debugMode != "false"
 
 	cachedConfig, configError := initConfig()
 
@@ -47,6 +48,11 @@ func main() {
 	debugMode, _ = cachedConfig.Get("", "debug")
 	if debugSet, _ := strconv.ParseBool(debugMode); debugSet {
 		debug = debugSet
+	}
+
+	if glHostFromEnv := config.GetFromEnv("host"); glHostFromEnv != "" {
+		fmt.Println(glHostFromEnv)
+		glinstance.OverrideDefault(glHostFromEnv)
 	}
 
 	var expandedArgs []string

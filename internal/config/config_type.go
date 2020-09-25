@@ -294,14 +294,7 @@ func (c *fileConfig) Root() *yaml.Node {
 }
 
 func (c *fileConfig) Get(hostname, key string) (string, error) {
-	var env string
-	envEq := EnvKeyEquivalence(key)
-	for _, e := range envEq {
-		if val := os.Getenv(e); val != "" {
-			env = val
-			break
-		}
-	}
+	env := GetFromEnv(key)
 	if env != "" {
 		return env, nil
 	}
@@ -630,12 +623,26 @@ func defaultFor(key string) string {
 	}
 }
 
+// GetFromEnv is just a wrapper for os.GetEnv but checks for matching names used in previous glab versions and
+// retrieves the value of the environment if any of the matching names has been set.
+// It returns the value, which will be empty if the variable is not present.
+func GetFromEnv(key string) (value string)  {
+	envEq := EnvKeyEquivalence(key)
+	for _, e := range envEq {
+		if val := os.Getenv(e); val != "" {
+			value = val
+			break
+		}
+	}
+	return
+}
+
 // ConfigKeyEquivalence returns the equivalent key that's actually used in the config file
 func ConfigKeyEquivalence(key string) string {
 	key = strings.ToLower(key)
 	// we only have a set default for one setting right now
 	switch key {
-	case "gitlab_host", "gitlab_uri":
+	case "gitlab_host", "gitlab_uri", "gl_host":
 		return "host"
 	case "gitlab_token", "oauth_token":
 		return "token"
@@ -652,7 +659,7 @@ func EnvKeyEquivalence(key string) []string {
 	// we only have a set default for one setting right now
 	switch key {
 	case "host":
-		return []string{"GITLAB_HOST", "GITLAB_URI"}
+		return []string{"GITLAB_HOST", "GITLAB_URI", "GL_HOST"}
 	case "token":
 		return []string{"GITLAB_TOKEN", "OAUTH_TOKEN"}
 	case "remote_alias":

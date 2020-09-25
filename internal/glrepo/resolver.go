@@ -2,11 +2,13 @@ package glrepo
 
 import (
 	"errors"
+	"sort"
+
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/profclems/glab/internal/git"
-	gLab "github.com/profclems/glab/internal/gitlab"
+	"github.com/profclems/glab/pkg/api"
+
 	"github.com/xanzy/go-gitlab"
-	"sort"
 )
 
 // cap the number of git remotes looked up, since the user might have an
@@ -36,7 +38,7 @@ func ResolveRemotesToRepos(remotes Remotes, client *gitlab.Client, base string) 
 
 func resolveNetwork(result *ResolvedRemotes) error {
 	for _, r := range result.remotes {
-		networkResult, err := gLab.GetProject(result.apiClient, r)
+		networkResult, err := api.GetProject(result.apiClient, r)
 		if err == nil {
 			result.network = append(result.network, *networkResult)
 		}
@@ -98,7 +100,7 @@ func (r *ResolvedRemotes) BaseRepo(prompt bool) (Interface, error) {
 
 	for _, repo := range r.network {
 		if repo.ForkedFromProject != nil {
-			fProject, _ := gLab.GetProject(r.apiClient, repo.ForkedFromProject.PathWithNamespace)
+			fProject, _ := api.GetProject(r.apiClient, repo.ForkedFromProject.PathWithNamespace)
 			add(fProject)
 		}
 		add(&repo)
