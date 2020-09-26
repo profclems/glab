@@ -1,26 +1,29 @@
 package project
 
 import (
-	"fmt"
-	"strings"
+	"github.com/profclems/glab/commands/cmdutils"
+	repoCmdArchive "github.com/profclems/glab/commands/project/archive"
+	repoCmdClone "github.com/profclems/glab/commands/project/clone"
+	repoCmdContributors "github.com/profclems/glab/commands/project/contributors"
+	repoCmdCreate "github.com/profclems/glab/commands/project/create"
+	repoCmdSearch "github.com/profclems/glab/commands/project/search"
 
-	"github.com/dustin/go-humanize"
 	"github.com/spf13/cobra"
 )
 
-var repoCmd = &cobra.Command{
-	Use:     "repo <command> [flags]",
-	Short:   `Work with GitLab repositories and projects`,
-	Long:    ``,
-	Aliases: []string{"project"},
-	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) == 0 || len(args) > 2 {
-			_ = cmd.Help()
-			return
-		}
-	},
-}
+func NewCmdRepo(f *cmdutils.Factory) *cobra.Command {
+	var repoCmd = &cobra.Command{
+		Use:     "repo <command> [flags]",
+		Short:   `Work with GitLab repositories and projects`,
+		Long:    ``,
+		Aliases: []string{"project"},
+	}
 
-func init() {
-	RootCmd.AddCommand(repoCmd)
+	repoCmd.AddCommand(repoCmdArchive.NewCmdArchive(f))
+	repoCmd.AddCommand(repoCmdClone.NewCmdClone(f))
+	repoCmd.AddCommand(repoCmdContributors.NewCmdContributors(f))
+	repoCmd.AddCommand(repoCmdCreate.NewCmdCreate(f))
+	repoCmd.AddCommand(repoCmdSearch.NewCmdSearch(f))
+
+	return  repoCmd
 }

@@ -1,25 +1,35 @@
 package project
 
 import (
-	"github.com/stretchr/testify/assert"
-	"os/exec"
+	"bytes"
+	"io"
+	"os"
 	"testing"
+
+	"github.com/profclems/glab/commands/cmdutils"
+	"github.com/stretchr/testify/assert"
 )
 
 func Test_Repo(t *testing.T) {
-	t.Parallel()
-	repo := copyTestRepo(t)
+	old := os.Stdout // keep backup of the real stdout
+	r, w, _ := os.Pipe()
+	os.Stdout = w
 
-	cmd := exec.Command(glabBinaryPath, "repo")
-	cmd.Dir = repo
+	assert.Nil(t, NewCmdRepo(&cmdutils.Factory{}).Execute())
 
-	b, err := cmd.CombinedOutput()
-	if err != nil {
-		t.Log(string(b))
-		t.Fatal(err)
-	}
-	out := string(b)
-	t.Log(out)
+	outC := make(chan string)
+	// copy the output in a separate goroutine so printing can't block indefinitely
+	go func() {
+		var buf bytes.Buffer
+		io.Copy(&buf, r)
+		outC <- buf.String()
+	}()
 
-	assert.Contains(t, out, "Use \"glab repo [command] --help\" for more information about a command.")
+	// back to normal state
+	w.Close()
+	os.Stdout = old // restoring the real stdout
+	out := <-outC
+
+	assert.Contains(t, out, "Use \"repo [command] --help\" for more information about a command.\n")
+
 }

@@ -49,7 +49,7 @@ func NewCmdList(f *cmdutils.Factory) *cobra.Command {
 			if s, _ := cmd.Flags().GetString("description"); s != "" {
 				l.Description = gitlab.String(s)
 			}
-			label, err := api.CreateLabel(apiClient, repo, l)
+			label, err := api.CreateLabel(apiClient, repo.FullName(), l)
 			if err != nil {
 				return err
 			}

@@ -2,6 +2,7 @@ package ci
 
 import (
 	"github.com/profclems/glab/commands/cmdutils"
+	ciLintCmd "github.com/profclems/glab/commands/pipeline/ci/lint"
 	ciTraceCmd "github.com/profclems/glab/commands/pipeline/ci/trace"
 	ciViewCmd "github.com/profclems/glab/commands/pipeline/ci/view"
 
@@ -16,10 +17,10 @@ func NewCmdCI(f *cmdutils.Factory) *cobra.Command {
 		Example: heredoc.Doc(`
 	$ glab pipeline ci trace
 	`),
-		Long: ``,
 	}
 
 	pipelineCICmd.AddCommand(ciTraceCmd.NewCmdTrace(f))
 	pipelineCICmd.AddCommand(ciViewCmd.NewCmdView(f))
+	pipelineCICmd.AddCommand(ciLintCmd.NewCmdLint(f))
 	return pipelineCICmd
 }

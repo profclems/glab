@@ -13,30 +13,30 @@ import (
 )
 
 type RemoteArgs struct {
-	protocol string
-	token    string
-	url      string
-	username string
+	Protocol string
+	Token    string
+	Url      string
+	Username string
 }
 
 // RemoteURL returns correct git clone URL of a repo
 // based on the user's git_protocol preference
 func RemoteURL(project *gitlab.Project, a *RemoteArgs) (string, error) {
-	if a.protocol == "https" {
+	if a.Protocol == "https" {
 
-		if a.username == "" {
-			a.username = "oauth2"
+		if a.Username == "" {
+			a.Username = "oauth2"
 		}
 
-		a.protocol = "https://"
-		if strings.Contains(a.url, "https://") {
-			a.url = strings.TrimPrefix(a.url, "https://")
-		} else if strings.HasPrefix(a.url, "http://") {
-			a.url = strings.TrimPrefix(a.url, "http://")
-			a.protocol = "http://"
+		a.Protocol = "https://"
+		if strings.Contains(a.Url, "https://") {
+			a.Url = strings.TrimPrefix(a.Url, "https://")
+		} else if strings.HasPrefix(a.Url, "http://") {
+			a.Url = strings.TrimPrefix(a.Url, "http://")
+			a.Protocol = "http://"
 		}
 		return fmt.Sprintf("%s%s:%s@%s/%s.git",
-			a.protocol, a.username, a.token, a.url, project.PathWithNamespace), nil
+			a.Protocol, a.Username, a.Token, a.Url, project.PathWithNamespace), nil
 	}
 	return project.SSHURLToRepo, nil
 }

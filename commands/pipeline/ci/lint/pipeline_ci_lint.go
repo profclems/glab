@@ -1,8 +1,12 @@
 package lint
 
 import (
+	"bytes"
 	"fmt"
+	"github.com/profclems/glab/internal/git"
+	"io"
 	"io/ioutil"
+	"net/http"
 	"os"
 
 	"github.com/profclems/glab/commands/cmdutils"
@@ -35,22 +39,41 @@ func NewCmdLint(f *cmdutils.Factory) *cobra.Command {
 			if len(args) == 1 {
 				path = args[0]
 			}
-			fmt.Println("Getting contents in", path)
+			fmt.Fprintln(out, "Getting contents in", path)
 
-			content, err := ioutil.ReadFile(path)
+			var content []byte
+			var stdout bytes.Buffer
+
+			if git.IsValidURL(path) {
+				resp, err := http.Get(path)
+				if err != nil {
+					return err
+				}
+				_, err = io.Copy(&stdout, resp.Body)
+				if err != nil {
+					return err
+				}
+				content = stdout.Bytes()
+			} else {
+				content, err = ioutil.ReadFile(path)
+			}
+
 			if !os.IsNotExist(err) && err != nil {
 				return err
 			}
+
 			fmt.Fprintln(out, "Validating...")
+
 			lint, err := api.PipelineCILint(apiClient, string(content))
 			if err != nil {
 				return err
 			}
+
 			if lint.Status == "invalid" {
-				fmt.Println(utils.Red(path + " is invalid"))
+				fmt.Fprintln(out, utils.Red(path + " is invalid"))
 				for i, err := range lint.Errors {
 					i++
-					fmt.Println(i, err)
+					fmt.Fprintln(out, i, err)
 				}
 				return nil
 			}

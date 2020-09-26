@@ -8,7 +8,7 @@ import (
 	"github.com/xanzy/go-gitlab"
 )
 
-func RetryPipeline(client *gitlab.Client, pid int, repo string) (*gitlab.Pipeline, error) {
+var RetryPipeline = func(client *gitlab.Client, pid int, repo string) (*gitlab.Pipeline, error) {
 	if client == nil {
 		client = apiClient
 	}
@@ -19,7 +19,7 @@ func RetryPipeline(client *gitlab.Client, pid int, repo string) (*gitlab.Pipelin
 	return pipe, nil
 }
 
-func PlayPipelineJob(client *gitlab.Client, pid int, repo string) (*gitlab.Job, error) {
+var PlayPipelineJob = func(client *gitlab.Client, pid int, repo string) (*gitlab.Job, error) {
 	if client == nil {
 		client = apiClient
 	}
@@ -30,7 +30,7 @@ func PlayPipelineJob(client *gitlab.Client, pid int, repo string) (*gitlab.Job, 
 	return pipe, nil
 }
 
-func RetryPipelineJob(client *gitlab.Client, pid int, repo string) (*gitlab.Job, error) {
+var RetryPipelineJob = func(client *gitlab.Client, pid int, repo string) (*gitlab.Job, error) {
 	if client == nil {
 		client = apiClient
 	}
@@ -41,7 +41,7 @@ func RetryPipelineJob(client *gitlab.Client, pid int, repo string) (*gitlab.Job,
 	return pipe, nil
 }
 
-func CancelPipelineJob(client *gitlab.Client, repo string, jobID int) (*gitlab.Job, error) {
+var CancelPipelineJob = func(client *gitlab.Client, repo string, jobID int) (*gitlab.Job, error) {
 	if client == nil {
 		client = apiClient
 	}
@@ -52,7 +52,7 @@ func CancelPipelineJob(client *gitlab.Client, repo string, jobID int) (*gitlab.J
 	return pipe, nil
 }
 
-func PlayOrRetryJobs(client *gitlab.Client, repo string, jobID int, status string) (*gitlab.Job, error) {
+var PlayOrRetryJobs = func(client *gitlab.Client, repo string, jobID int, status string) (*gitlab.Job, error) {
 	if client == nil {
 		client = apiClient
 	}
@@ -76,7 +76,7 @@ func PlayOrRetryJobs(client *gitlab.Client, repo string, jobID int, status strin
 	}
 }
 
-func ErasePipelineJob(client *gitlab.Client, pid int, repo string) (*gitlab.Job, error) {
+var ErasePipelineJob = func(client *gitlab.Client, pid int, repo string) (*gitlab.Job, error) {
 	if client == nil {
 		client = apiClient
 	}
@@ -87,7 +87,7 @@ func ErasePipelineJob(client *gitlab.Client, pid int, repo string) (*gitlab.Job,
 	return pipe, nil
 }
 
-func GetPipelineJob(client *gitlab.Client, jid int, repo string) (*gitlab.Job, error) {
+var GetPipelineJob = func(client *gitlab.Client, jid int, repo string) (*gitlab.Job, error) {
 	if client == nil {
 		client = apiClient
 	}
@@ -95,7 +95,7 @@ func GetPipelineJob(client *gitlab.Client, jid int, repo string) (*gitlab.Job, e
 	return job, err
 }
 
-func GetJobs(client *gitlab.Client, repo string, opts *gitlab.ListJobsOptions) ([]gitlab.Job, error) {
+var GetJobs = func(client *gitlab.Client, repo string, opts *gitlab.ListJobsOptions) ([]gitlab.Job, error) {
 	if client == nil {
 		client = apiClient
 	}
@@ -110,7 +110,7 @@ func GetJobs(client *gitlab.Client, repo string, opts *gitlab.ListJobsOptions) (
 	return jobs, nil
 }
 
-func GetPipelines(client *gitlab.Client, l *gitlab.ListProjectPipelinesOptions, repo string) ([]*gitlab.PipelineInfo, error) {
+var GetPipelines = func(client *gitlab.Client, l *gitlab.ListProjectPipelinesOptions, repo string) ([]*gitlab.PipelineInfo, error) {
 	if client == nil {
 		client = apiClient
 	}
@@ -121,7 +121,7 @@ func GetPipelines(client *gitlab.Client, l *gitlab.ListProjectPipelinesOptions, 
 	return pipes, nil
 }
 
-func GetPipelineJobs(client *gitlab.Client, pid int, repo string) ([]*gitlab.Job, error) {
+var GetPipelineJobs = func(client *gitlab.Client, pid int, repo string) ([]*gitlab.Job, error) {
 	if client == nil {
 		client = apiClient
 	}
@@ -133,7 +133,7 @@ func GetPipelineJobs(client *gitlab.Client, pid int, repo string) ([]*gitlab.Job
 	return pipeJobs, nil
 }
 
-func GetPipelineJobLog(client *gitlab.Client, jobID int, repo string) (io.Reader, error) {
+var GetPipelineJobLog = func(client *gitlab.Client, jobID int, repo string) (io.Reader, error) {
 	if client == nil {
 		client = apiClient
 	}
@@ -144,7 +144,7 @@ func GetPipelineJobLog(client *gitlab.Client, jobID int, repo string) (io.Reader
 	return pipeJoblog, nil
 }
 
-func GetSinglePipeline(client *gitlab.Client, pid int, repo string) (*gitlab.Pipeline, error) {
+var GetSinglePipeline = func(client *gitlab.Client, pid int, repo string) (*gitlab.Pipeline, error) {
 	if client == nil {
 		client = apiClient
 	}
@@ -155,7 +155,7 @@ func GetSinglePipeline(client *gitlab.Client, pid int, repo string) (*gitlab.Pip
 	return pipes, nil
 }
 
-func GetCommit(client *gitlab.Client, repo string, ref string) (*gitlab.Commit, error) {
+var GetCommit = func(client *gitlab.Client, repo string, ref string) (*gitlab.Commit, error) {
 	if client == nil {
 		client = apiClient
 	}
@@ -166,7 +166,7 @@ func GetCommit(client *gitlab.Client, repo string, ref string) (*gitlab.Commit, 
 	return c, nil
 }
 
-func GetPipelineFromBranch(client *gitlab.Client, ref, repo string) ([]*gitlab.Job, error) {
+var GetPipelineFromBranch = func(client *gitlab.Client, ref, repo string) ([]*gitlab.Job, error) {
 	if client == nil {
 		client = apiClient
 	}
@@ -200,7 +200,7 @@ func GetPipelineFromBranch(client *gitlab.Client, ref, repo string) ([]*gitlab.J
 	return jobs, nil
 }
 
-func PipelineJobTraceWithSha(client *gitlab.Client, pid interface{}, sha, name string) (io.Reader, *gitlab.Job, error) {
+var PipelineJobTraceWithSha = func(client *gitlab.Client, pid interface{}, sha, name string) (io.Reader, *gitlab.Job, error) {
 	if client == nil {
 		client = apiClient
 	}
@@ -245,7 +245,7 @@ func PipelineJobTraceWithSha(client *gitlab.Client, pid interface{}, sha, name s
 
 // PipelineJobsWithSha returns a list of jobs in a pipeline for a given sha. The jobs are
 // returned sorted by their CreatedAt time
-func PipelineJobsWithSha(client *gitlab.Client, pid interface{}, sha string) ([]*gitlab.Job, error) {
+var PipelineJobsWithSha = func(client *gitlab.Client, pid interface{}, sha string) ([]*gitlab.Job, error) {
 	if client == nil {
 		client = apiClient
 	}
@@ -283,7 +283,7 @@ func PipelineJobsWithSha(client *gitlab.Client, pid interface{}, sha string) ([]
 	return list, nil
 }
 
-func PipelineCILint(client *gitlab.Client, content string) (*gitlab.LintResult, error) {
+var PipelineCILint = func(client *gitlab.Client, content string) (*gitlab.LintResult, error) {
 	if client == nil {
 		client = apiClient
 	}
@@ -292,4 +292,26 @@ func PipelineCILint(client *gitlab.Client, content string) (*gitlab.LintResult, 
 		return nil, err
 	}
 	return c, nil
+}
+
+var DeletePipeline = func(client *gitlab.Client, projectID interface{}, pipeID int) error {
+	if client == nil {
+		client = apiClient
+	}
+	_, err := client.Pipelines.DeletePipeline(projectID, pipeID)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+var ListProjectPipelines = func(client *gitlab.Client, projectID interface{}, opts *gitlab.ListProjectPipelinesOptions) ([]*gitlab.PipelineInfo, error) {
+	if client == nil {
+		client = apiClient
+	}
+	pipes, _, err := client.Pipelines.ListProjectPipelines(projectID, opts)
+	if err != nil {
+		return pipes, err
+	}
+	return pipes, nil
 }

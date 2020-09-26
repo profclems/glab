@@ -78,7 +78,7 @@ func NewCmdFor(f *cmdutils.Factory) *cobra.Command {
 				Ref:    gitlab.String(targetBranch),
 			}
 
-			_, err = api.CreateBranch(apiClient, repo, lb)
+			_, err = api.CreateBranch(apiClient, repo.FullName(), lb)
 			if err != nil {
 				for branchErr, branchCount := err, 1; branchErr != nil; branchCount++ {
 

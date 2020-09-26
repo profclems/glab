@@ -2,27 +2,32 @@ package create
 
 import (
 	"fmt"
-	"github.com/MakeNowJust/heredoc"
-	"github.com/profclems/glab/commands/project"
-	"github.com/profclems/glab/internal/run"
-	"github.com/profclems/glab/internal/utils"
+	"github.com/profclems/glab/internal/glrepo"
+	"github.com/profclems/glab/pkg/api"
 	"os"
 	"path"
 	"strings"
 
+	"github.com/MakeNowJust/heredoc"
+	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/internal/git"
+	"github.com/profclems/glab/internal/run"
+	"github.com/profclems/glab/internal/utils"
 
 	"github.com/spf13/cobra"
 	"github.com/xanzy/go-gitlab"
 )
 
-var projectCreateCmd = &cobra.Command{
-	Use:   "create [path] [flags]",
-	Short: `Create a new Gitlab project/repository`,
-	Long:  `Create a new GitHub repository.`,
-	Args:  cobra.MaximumNArgs(1),
-	RunE:  runCreateProject,
-	Example: heredoc.Doc(`
+func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
+	var projectCreateCmd = &cobra.Command{
+		Use:   "create [path] [flags]",
+		Short: `Create a new Gitlab project/repository`,
+		Long:  `Create a new GitHub repository.`,
+		Args:  cobra.MaximumNArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return runCreateProject(cmd, args, f)
+		},
+		Example: heredoc.Doc(`
 			# create a repository under your account using the current directory name
 			$ glab repo create
 
@@ -35,12 +40,22 @@ var projectCreateCmd = &cobra.Command{
 			# create a repository for a group
 			$ glab repo create glab-cli/my-project
 	  `),
+	}
+
+	projectCreateCmd.Flags().StringP("name", "n", "", "Name of the new project")
+	projectCreateCmd.Flags().StringP("group", "g", "", "Namespace/group for the new project (defaults to the current user’s namespace)")
+	projectCreateCmd.Flags().StringP("description", "d", "", "Description of the new project")
+	projectCreateCmd.Flags().String("defaultBranch", "", "Default branch of the project. If not provided, `master` by default.")
+	projectCreateCmd.Flags().StringArrayP("tag", "t", []string{}, "The list of tags for the project.")
+	projectCreateCmd.Flags().Bool("internal", false, "Make project internal: visible to any authenticated user (default)")
+	projectCreateCmd.Flags().BoolP("private", "p", false, "Make project private: visible only to project members")
+	projectCreateCmd.Flags().BoolP("public", "P", false, "Make project public: visible without any authentication")
+	projectCreateCmd.Flags().Bool("readme", false, "Initialize project with README.md")
+
+	return projectCreateCmd
 }
 
-func runCreateProject(cmd *cobra.Command, args []string) error {
-	if len(args) > 1 {
-		return cmd.Help()
-	}
+func runCreateProject(cmd *cobra.Command, args []string, f *cmdutils.Factory) error {
 
 	var (
 		projectPath string
@@ -66,6 +81,16 @@ func runCreateProject(cmd *cobra.Command, args []string) error {
 		isPath = true
 	}
 
+	out := utils.ColorableOut(cmd)
+	apiClient, err := f.HttpClient()
+	if err != nil {
+		return err
+	}
+	repo, err := f.BaseRepo()
+	if err != nil {
+		return err
+	}
+
 	group, err := cmd.Flags().GetString("group")
 	if err != nil {
 		return fmt.Errorf("could not parse group flag: %v", err)
@@ -75,7 +100,7 @@ func runCreateProject(cmd *cobra.Command, args []string) error {
 	}
 
 	if namespace != "" {
-		group, err := getGroup(namespace)
+		group, err := api.GetGroup(apiClient, namespace)
 		if err != nil {
 			return fmt.Errorf("could not find group or namespace %s: %v", namespace, err)
 		}
@@ -122,9 +147,8 @@ func runCreateProject(cmd *cobra.Command, args []string) error {
 		opts.NamespaceID = &namespaceID
 	}
 
-	project, err := createProject(opts)
+	project, err := api.CreateProject(apiClient, opts)
 
-	out := colorableOut(cmd)
 	greenCheck := utils.Green("✓")
 	isTTY := false
 	if outFile, isFile := out.(*os.File); isFile {
@@ -137,7 +161,15 @@ func runCreateProject(cmd *cobra.Command, args []string) error {
 	if err == nil {
 		fmt.Fprintf(out, "%s Created repository %s on GitLab: %s\n", greenCheck, project.NameWithNamespace, project.WebURL)
 		if isPath {
-			remote, err := gitRemoteURL(project, &remoteArgs{})
+			cfg, _ := f.Config()
+			protocol, _ := cfg.Get(repo.RepoHost(), "git_protocol")
+			token, _ := cfg.Get(repo.RepoHost(), "token")
+			remote, err := glrepo.RemoteURL(project, &glrepo.RemoteArgs{
+				Protocol: protocol,
+				Token: token,
+				Url: repo.RepoHost(),
+				Username: repo.RepoOwner(),
+			})
 			if err != nil {
 				return err
 			}
@@ -185,17 +217,4 @@ func initialiseRepo(projectPath, remoteURL string) error {
 		return err
 	}
 	return nil
-}
-
-func init() {
-	projectCreateCmd.Flags().StringP("name", "n", "", "Name of the new project")
-	projectCreateCmd.Flags().StringP("group", "g", "", "Namespace/group for the new project (defaults to the current user’s namespace)")
-	projectCreateCmd.Flags().StringP("description", "d", "", "Description of the new project")
-	projectCreateCmd.Flags().String("defaultBranch", "", "Default branch of the project. If not provided, `master` by default.")
-	projectCreateCmd.Flags().StringArrayP("tag", "t", []string{}, "The list of tags for the project.")
-	projectCreateCmd.Flags().Bool("internal", false, "Make project internal: visible to any authenticated user (default)")
-	projectCreateCmd.Flags().BoolP("private", "p", false, "Make project private: visible only to project members")
-	projectCreateCmd.Flags().BoolP("public", "P", false, "Make project public: visible without any authentication")
-	projectCreateCmd.Flags().Bool("readme", false, "Initialize project with README.md")
-	project.projectCmd.AddCommand(projectCreateCmd)
 }

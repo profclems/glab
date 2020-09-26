@@ -52,7 +52,7 @@ func NewCmdApprove(f *cmdutils.Factory) *cobra.Command {
 			if err != nil {
 				return err
 			}
-			fmt.Fprintln(out, utils.GreenCheck(), "Approved successfully")
+			fmt.Fprintln(out, utils.GreenCheck(), "Approved")
 
 			return nil
 		},
