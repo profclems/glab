@@ -6,7 +6,6 @@ import (
 
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/commands/mr/mrutils"
-	"github.com/profclems/glab/internal/manip"
 	"github.com/profclems/glab/internal/utils"
 	"github.com/profclems/glab/pkg/api"
 
@@ -48,7 +47,7 @@ func NewCmdClose(f *cmdutils.Factory) *cobra.Command {
 			arrIds := strings.Split(strings.Trim(mergeID, "[] "), ",")
 			for _, i2 := range arrIds {
 				fmt.Fprintf(out, "- Closing Merge request...")
-				mr, err := api.UpdateMR(apiClient, repo.FullName(), manip.StringToInt(i2), l)
+				mr, err := api.UpdateMR(apiClient, repo.FullName(), utils.StringToInt(i2), l)
 				if err != nil {
 					return err
 				}

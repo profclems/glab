@@ -7,8 +7,6 @@ import (
 	"github.com/profclems/glab/internal/utils"
 	"github.com/profclems/glab/pkg/api"
 
-	"github.com/profclems/glab/internal/manip"
-
 	"github.com/spf13/cobra"
 	gitlab "github.com/xanzy/go-gitlab"
 )
@@ -44,12 +42,12 @@ func NewCmdNote(f *cmdutils.Factory) *cobra.Command {
 			if err != nil {
 				return err
 			}
-			mr, _, err := gLabClient.Issues.GetIssue(repo, manip.StringToInt(mID))
+			mr, _, err := gLabClient.Issues.GetIssue(repo.FullName(), utils.StringToInt(mID))
 			if err != nil {
 				return err
 			}
 			if body == "" {
-				body = manip.Editor(manip.EditorOptions{
+				body = utils.Editor(utils.EditorOptions{
 					Label:    "Note Message:",
 					Help:     "Enter the note message. ",
 					FileName: "ISSUE_NOTE_EDITMSG",
@@ -59,7 +57,7 @@ func NewCmdNote(f *cmdutils.Factory) *cobra.Command {
 				return errors.New("aborted... Note is empty")
 			}
 
-			noteInfo, err := api.CreateIssueNote(gLabClient, repo.FullName(), manip.StringToInt(mID), &gitlab.CreateIssueNoteOptions{
+			noteInfo, err := api.CreateIssueNote(gLabClient, repo.FullName(), utils.StringToInt(mID), &gitlab.CreateIssueNoteOptions{
 				Body: &body,
 			})
 			if err != nil {

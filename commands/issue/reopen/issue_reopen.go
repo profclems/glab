@@ -6,7 +6,6 @@ import (
 
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/commands/issue/issueutils"
-	"github.com/profclems/glab/internal/manip"
 	"github.com/profclems/glab/internal/utils"
 	"github.com/profclems/glab/pkg/api"
 
@@ -45,7 +44,7 @@ func NewCmdReopen(f *cmdutils.Factory) *cobra.Command {
 			arrIds := strings.Split(strings.Trim(issueID, "[] "), ",")
 			for _, i2 := range arrIds {
 				fmt.Fprintln(out, "- Reopening Issue...")
-				issue, err := api.UpdateIssue(gLabClient, repo.FullName(), manip.StringToInt(i2), l)
+				issue, err := api.UpdateIssue(gLabClient, repo.FullName(), utils.StringToInt(i2), l)
 				if err != nil {
 					return err
 				}

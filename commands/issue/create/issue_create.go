@@ -8,7 +8,6 @@ import (
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/commands/issue/issueutils"
 	"github.com/profclems/glab/internal/config"
-	"github.com/profclems/glab/internal/manip"
 	"github.com/profclems/glab/internal/utils"
 
 	"github.com/spf13/cobra"
@@ -50,15 +49,15 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 			if title, _ := cmd.Flags().GetString("title"); title != "" {
 				issueTitle = strings.Trim(title, " ")
 			} else {
-				issueTitle = manip.AskQuestionWithInput("Title", "", true)
+				issueTitle = utils.AskQuestionWithInput("Title", "", true)
 			}
 			if description, _ := cmd.Flags().GetString("description"); description != "" {
 				issueDescription = strings.Trim(description, " ")
 			} else {
 				if editor, _ := cmd.Flags().GetBool("no-editor"); editor {
-					issueDescription = manip.AskQuestionMultiline("Description:", "")
+					issueDescription = utils.AskQuestionMultiline("Description:", "")
 				} else {
-					issueDescription = manip.Editor(manip.EditorOptions{
+					issueDescription = utils.Editor(utils.EditorOptions{
 						Label:    "Description:",
 						Help:     "Enter the issue description. ",
 						FileName: "*_ISSUE_EDITMSG.md",
@@ -71,9 +70,9 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 				labelsEntry := config.GetEnv("PROJECT_LABELS")
 				if labelsEntry != "" {
 					labels := strings.Split(labelsEntry, ",")
-					issueLabel = strings.Join(manip.AskQuestionWithMultiSelect("Label(s)", labels), ",")
+					issueLabel = strings.Join(utils.AskQuestionWithMultiSelect("Label(s)", labels), ",")
 				} else {
-					issueLabel = manip.AskQuestionWithInput("Label(s) [Comma Separated]", "", false)
+					issueLabel = utils.AskQuestionWithInput("Label(s) [Comma Separated]", "", false)
 				}
 			}
 			l.Title = gitlab.String(issueTitle)
@@ -97,7 +96,7 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 				var t2 []int
 
 				for _, i := range arrIds {
-					j := manip.StringToInt(i)
+					j := utils.StringToInt(i)
 					t2 = append(t2, j)
 				}
 				l.AssigneeIDs = t2

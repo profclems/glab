@@ -39,9 +39,9 @@ func RenderReleaseAssertLinks(assets []*gitlab.ReleaseLink) string {
 	return assetsPrint
 }
 
-func DisplayRelease(r *gitlab.Release) string {
+func DisplayRelease(r *gitlab.Release, glamourStyle string) string {
 	duration := utils.TimeToPrettyTimeAgo(*r.CreatedAt)
-	description, err := utils.RenderMarkdown(r.Description)
+	description, err := utils.RenderMarkdown(r.Description, glamourStyle)
 	if err != nil {
 		description = r.Description
 

@@ -6,7 +6,6 @@ import (
 
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/commands/issue/issueutils"
-	"github.com/profclems/glab/internal/manip"
 	"github.com/profclems/glab/internal/utils"
 	"github.com/profclems/glab/pkg/api"
 
@@ -42,7 +41,7 @@ func NewCmdUnsubscribe(f *cmdutils.Factory) *cobra.Command {
 			arrIds := strings.Split(strings.Trim(mergeID, "[] "), ",")
 			for _, i2 := range arrIds {
 				fmt.Println("Unsubscribing from Issue #" + i2)
-				issue, err := api.UnsubscribeFromIssue(apiClient, repo.FullName(), manip.StringToInt(i2), nil)
+				issue, err := api.UnsubscribeFromIssue(apiClient, repo.FullName(), utils.StringToInt(i2), nil)
 				if err != nil {
 					fmt.Fprintln(out, utils.Red("✔"), "Unsubscribed from issue #"+i2)
 					fmt.Fprintln(out, issueutils.DisplayIssue(issue))

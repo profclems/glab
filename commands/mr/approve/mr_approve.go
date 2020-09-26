@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"github.com/profclems/glab/commands/cmdutils"
-	"github.com/profclems/glab/internal/manip"
 	"github.com/profclems/glab/internal/utils"
 	"github.com/profclems/glab/pkg/api"
 
@@ -49,7 +48,7 @@ func NewCmdApprove(f *cmdutils.Factory) *cobra.Command {
 			//}
 
 			fmt.Fprintf(out, "- Approving Merge Request #%s\n", mergeID)
-			_, err = api.ApproveMR(apiClient, repo.FullName(), manip.StringToInt(mergeID), l)
+			_, err = api.ApproveMR(apiClient, repo.FullName(), utils.StringToInt(mergeID), l)
 			if err != nil {
 				return err
 			}

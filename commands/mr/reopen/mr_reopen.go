@@ -2,53 +2,62 @@ package reopen
 
 import (
 	"fmt"
-	mr2 "github.com/profclems/glab/commands/mr"
 	"strings"
 
-	"github.com/profclems/glab/internal/git"
-	"github.com/profclems/glab/internal/manip"
+	"github.com/profclems/glab/commands/cmdutils"
+	"github.com/profclems/glab/commands/mr/mrutils"
+	"github.com/profclems/glab/internal/utils"
+	"github.com/profclems/glab/pkg/api"
 
-	"github.com/gookit/color"
 	"github.com/spf13/cobra"
 	"github.com/xanzy/go-gitlab"
 )
 
-var mrReopenCmd = &cobra.Command{
-	Use:     "reopen <id>",
-	Short:   `Reopen merge requests`,
-	Long:    ``,
-	Aliases: []string{"open"},
-	Args:    cobra.ExactArgs(1),
-	Run:     reopenMergeRequestState,
-}
+func NewCmdReopen(f *cmdutils.Factory) *cobra.Command {
+	var mrReopenCmd = &cobra.Command{
+		Use:     "reopen <id>",
+		Short:   `Reopen merge requests`,
+		Long:    ``,
+		Aliases: []string{"open"},
+		Args:    cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
 
-func reopenMergeRequestState(cmd *cobra.Command, args []string) {
-	if len(args) > 0 {
-		mergeID := strings.Trim(args[0], " ")
-		gitlabClient, repo := git.InitGitlabClient()
-		if r, _ := cmd.Flags().GetString("repo"); r != "" {
-			repo, _ = fixRepoNamespace(r)
-		}
-		l := &gitlab.UpdateMergeRequestOptions{}
-		l.StateEvent = gitlab.String("reopen")
-		arrIds := strings.Split(strings.Trim(mergeID, "[] "), ",")
-		for _, i2 := range arrIds {
-			fmt.Printf("Updating Merge request #%s...\n", i2)
-			mr, resp, _ := gitlabClient.MergeRequests.UpdateMergeRequest(repo, manip.StringToInt(i2), l)
-			if resp.StatusCode == 200 {
-				fmt.Println(color.Green.Sprint("You have reopened merge request #" + i2))
-				mr2.displayMergeRequest(mr)
-			} else if resp.StatusCode == 404 {
-				er("MergeRequest does not exist")
-			} else {
-				er("Could not complete request: " + resp.Status)
+			var err error
+			out := utils.ColorableOut(cmd)
+			if r, _ := cmd.Flags().GetString("repo"); r != "" {
+				f, err = f.NewClient(r)
+				if err != nil {
+					return err
+				}
 			}
-		}
-	} else {
-		cmdErr(cmd, args)
-	}
-}
+			apiClient, err := f.HttpClient()
+			if err != nil {
+				return err
+			}
+			repo, err := f.BaseRepo()
+			if err != nil {
+				return err
+			}
 
-func init() {
-	mr2.mrCmd.AddCommand(mrReopenCmd)
+			mergeID := strings.TrimSpace(args[0])
+
+			l := &gitlab.UpdateMergeRequestOptions{}
+			l.StateEvent = gitlab.String("reopen")
+			arrIds := strings.Split(strings.Trim(mergeID, "[] "), ",")
+
+			for _, i2 := range arrIds {
+				fmt.Fprintf(out, "- Reopening Merge request #%s...\n", i2)
+				mr, err := api.UpdateMR(apiClient, repo.FullName(), utils.StringToInt(i2), l)
+				if err != nil {
+					return err
+				}
+				fmt.Fprintf(out, "%s Merge request #%s reopened\n", utils.GreenCheck(), i2)
+				fmt.Fprintf(out, mrutils.DisplayMR(mr))
+			}
+
+			return nil
+		},
+	}
+
+	return mrReopenCmd
 }

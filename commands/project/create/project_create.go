@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/MakeNowJust/heredoc"
 	"github.com/profclems/glab/commands/project"
-	"github.com/profclems/glab/internal/manip"
 	"github.com/profclems/glab/internal/run"
 	"github.com/profclems/glab/internal/utils"
 	"os"
@@ -149,7 +148,7 @@ func runCreateProject(cmd *cobra.Command, args []string) error {
 			fmt.Fprintf(out, "%s Added remote %s\n", greenCheck, remote)
 
 		} else if isTTY {
-			doSetup, err := manip.Confirm(fmt.Sprintf("Create a local project directory for %s?", project.NameWithNamespace))
+			doSetup, err := utils.Confirm(fmt.Sprintf("Create a local project directory for %s?", project.NameWithNamespace))
 			if err != nil {
 				return err
 			}

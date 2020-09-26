@@ -1,4 +1,4 @@
-package pipeline
+package trace
 
 import (
 	"os/exec"

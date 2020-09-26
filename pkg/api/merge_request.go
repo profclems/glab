@@ -124,3 +124,81 @@ var CreateMRNote = func(client *gitlab.Client, projectID interface{}, mrID int, 
 
 	return note, nil
 }
+
+var ListMRNotes = func(client *gitlab.Client, projectID interface{}, mrID int, opts *gitlab.ListMergeRequestNotesOptions) ([]*gitlab.Note, error) {
+	if client == nil {
+		client = apiClient
+	}
+
+	notes, _, err := client.Notes.ListMergeRequestNotes(projectID, mrID, opts)
+	if err != nil {
+		return notes, err
+	}
+
+	return notes, nil
+}
+
+var RebaseMR = func(client *gitlab.Client, projectID interface{}, mrID int) error {
+	if client == nil {
+		client = apiClient
+	}
+
+	_, err := client.MergeRequests.RebaseMergeRequest(projectID, mrID)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+var UnapproveMR = func(client *gitlab.Client, projectID interface{}, mrID int) error {
+	if client == nil {
+		client = apiClient
+	}
+
+	_, err := client.MergeRequestApprovals.UnapproveMergeRequest(projectID, mrID)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+var SubscribeToMR = func(client *gitlab.Client, projectID interface{}, mrID int, opts gitlab.RequestOptionFunc) (*gitlab.MergeRequest, error) {
+	if client == nil {
+		client = apiClient
+	}
+
+	mr, _, err := client.MergeRequests.SubscribeToMergeRequest(projectID, mrID, opts)
+	if err != nil {
+		return nil, err
+	}
+
+	return mr, nil
+}
+
+var UnsubscribeFromMR = func(client *gitlab.Client, projectID interface{}, mrID int, opts gitlab.RequestOptionFunc) (*gitlab.MergeRequest, error) {
+	if client == nil {
+		client = apiClient
+	}
+
+	mr, _, err := client.MergeRequests.UnsubscribeFromMergeRequest(projectID, mrID, opts)
+	if err != nil {
+		return nil, err
+	}
+
+	return mr, nil
+}
+
+var MRTodo = func(client *gitlab.Client, projectID interface{}, mrID int, opts gitlab.RequestOptionFunc) (*gitlab.Todo, error) {
+	if client == nil {
+		client = apiClient
+	}
+
+	mr, _, err := client.MergeRequests.CreateTodo(projectID, mrID, opts)
+	if err != nil {
+		return nil, err
+	}
+
+	return mr, nil
+}

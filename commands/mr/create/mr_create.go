@@ -6,7 +6,6 @@ import (
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/commands/mr/mrutils"
 	"github.com/profclems/glab/internal/git"
-	"github.com/profclems/glab/internal/manip"
 	"github.com/profclems/glab/internal/utils"
 	"github.com/profclems/glab/pkg/api"
 
@@ -69,7 +68,7 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 				sourceBranch = strings.Trim(source, "[] ")
 			} else {
 				if c, _ := cmd.Flags().GetBool("create-source-branch"); c && sourceBranch == "" {
-					sourceBranch = manip.ReplaceNonAlphaNumericChars(mergeTitle, "-")
+					sourceBranch = utils.ReplaceNonAlphaNumericChars(mergeTitle, "-")
 				} else {
 					b, err := git.CurrentBranch()
 					if err != nil {
@@ -82,15 +81,15 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 				if title, _ := cmd.Flags().GetString("title"); title != "" {
 					mergeTitle = strings.Trim(title, " ")
 				} else {
-					mergeTitle = manip.AskQuestionWithInput("Title:", "", true)
+					mergeTitle = utils.AskQuestionWithInput("Title:", "", true)
 				}
 				if desc, _ := cmd.Flags().GetString("description"); desc != "" {
 					mergeDescription = desc
 				} else {
 					if editor, _ := cmd.Flags().GetBool("no-editor"); editor {
-						mergeDescription = manip.AskQuestionMultiline("Description:", "")
+						mergeDescription = utils.AskQuestionMultiline("Description:", "")
 					} else {
-						mergeDescription = manip.Editor(manip.EditorOptions{
+						mergeDescription = utils.Editor(utils.EditorOptions{
 							Label:    "Description:",
 							Help:     "Enter the MR description. ",
 							FileName: "*_MR_EDITMSG.md",
@@ -154,7 +153,7 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 				var t2 []int
 
 				for _, i := range arrIds {
-					j := manip.StringToInt(i)
+					j := utils.StringToInt(i)
 					t2 = append(t2, j)
 				}
 				l.AssigneeIDs = t2
@@ -166,7 +165,7 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 					Ref:    gitlab.String(targetBranch),
 				}
 				fmt.Fprintln(out, "Creating related branch...")
-				branch, err := api.CreateBranch(apiClient, repo, lb)
+				branch, err := api.CreateBranch(apiClient, repo.FullName(), lb)
 				if err == nil {
 					fmt.Fprintln(out, "Branch created: ", branch.WebURL)
 				} else {
@@ -174,7 +173,7 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 				}
 			}
 
-			mr, err := api.CreateMR(apiClient, repo, l)
+			mr, err := api.CreateMR(apiClient, repo.FullName(), l)
 			if err != nil {
 				return err
 			}

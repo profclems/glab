@@ -22,7 +22,10 @@ func NewCmdReleaseList(f *cmdutils.Factory) *cobra.Command {
 		Long:    ``,
 		Aliases: []string{"ls"},
 		Args:    cobra.MaximumNArgs(3),
-		RunE:    listReleases,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			factory = f
+			return listReleases(cmd, args)
+		},
 	}
 	releaseListCmd.Flags().StringP("tag", "t", "", "Filter releases by tag <name>")
 	return releaseListCmd
@@ -57,7 +60,10 @@ func listReleases(cmd *cobra.Command, args []string) error {
 		if err != nil {
 			return err
 		}
-		fmt.Fprintln(utils.ColorableOut(cmd), releaseutils.DisplayRelease(release))
+
+		cfg, _ := factory.Config()
+		glamourStyle, _ := cfg.Get(repo.RepoHost(), "glamour_style")
+		fmt.Fprintln(utils.ColorableOut(cmd), releaseutils.DisplayRelease(release, glamourStyle))
 	} else {
 		releases, err := api.ListReleases(apiClient, repo.FullName(), l)
 		if err != nil {

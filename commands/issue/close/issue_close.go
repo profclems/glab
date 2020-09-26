@@ -8,7 +8,6 @@ import (
 
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/commands/issue/issueutils"
-	"github.com/profclems/glab/internal/manip"
 	"github.com/spf13/cobra"
 	"github.com/xanzy/go-gitlab"
 )
@@ -43,7 +42,7 @@ func NewCmdClose(f *cmdutils.Factory) *cobra.Command {
 			arrIds := strings.Split(strings.Trim(issueID, "[] "), ",")
 			for _, i2 := range arrIds {
 				fmt.Fprintln(utils.ColorableOut(cmd), "- Closing Issue...")
-				issue, err := api.UpdateIssue(apiClient, repo.FullName(), manip.StringToInt(i2), l)
+				issue, err := api.UpdateIssue(apiClient, repo.FullName(), utils.StringToInt(i2), l)
 				if err != nil {
 					return err
 				}

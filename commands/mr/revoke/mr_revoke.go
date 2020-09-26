@@ -2,53 +2,54 @@ package revoke
 
 import (
 	"fmt"
-	"github.com/gookit/color"
-	"github.com/profclems/glab/commands/mr"
 	"strings"
 
-	"github.com/profclems/glab/internal/git"
-	"github.com/profclems/glab/internal/manip"
+	"github.com/profclems/glab/commands/cmdutils"
+	"github.com/profclems/glab/internal/utils"
+	"github.com/profclems/glab/pkg/api"
 
 	"github.com/spf13/cobra"
 )
 
-var mrRevokeCmd = &cobra.Command{
-	Use:     "revoke <id>",
-	Short:   `Revoke approval on a merge request <id>`,
-	Long:    ``,
-	Aliases: []string{"unapprove"},
-	Args:    cobra.ExactArgs(1),
-	Run:     revokeMergeRequest,
-}
-
-func revokeMergeRequest(cmd *cobra.Command, args []string) {
-	if len(args) > 0 {
-		mergeID := strings.Trim(args[0], " ")
-
-		fmt.Println(color.Yellow.Sprint("Revoking approval for Merge Request #" + mergeID + "..."))
-		gitlabClient, repo := git.InitGitlabClient()
-		if r, _ := cmd.Flags().GetString("repo"); r != "" {
-			repo, _ = fixRepoNamespace(r)
-		}
-		resp, _ := gitlabClient.MergeRequestApprovals.UnapproveMergeRequest(repo, manip.StringToInt(mergeID))
-		if resp != nil {
-			if resp.StatusCode == 201 {
-				fmt.Println(color.Green.Sprint("Merge Request approval revoked successfully"))
-			} else if resp.StatusCode == 405 {
-				er("Merge request cannot be unapproved")
-			} else if resp.StatusCode == 401 {
-				er("Merge request already unapproved or you don't have enough permission to unapprove this merge request")
-			} else {
-				er(resp.Status)
+func NewCmdRevoke(f *cmdutils.Factory) *cobra.Command {
+	var mrRevokeCmd = &cobra.Command{
+		Use:     "revoke <id>",
+		Short:   `Revoke approval on a merge request <id>`,
+		Long:    ``,
+		Aliases: []string{"unapprove"},
+		Args:    cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			var err error
+			out := utils.ColorableOut(cmd)
+			if r, _ := cmd.Flags().GetString("repo"); r != "" {
+				f, err = f.NewClient(r)
+				if err != nil {
+					return err
+				}
 			}
-		} else {
-			er(resp)
-		}
-	} else {
-		cmdErr(cmd, args)
-	}
-}
+			apiClient, err := f.HttpClient()
+			if err != nil {
+				return err
+			}
+			repo, err := f.BaseRepo()
+			if err != nil {
+				return err
+			}
 
-func init() {
-	mr.mrCmd.AddCommand(mrRevokeCmd)
+			mergeID := strings.TrimSpace(args[0])
+
+			fmt.Fprintln(out,"- Revoking approval for Merge Request #" + mergeID + "...")
+
+			err = api.UnapproveMR(apiClient, repo.FullName(), utils.StringToInt(mergeID))
+			if err != nil {
+				return err
+			}
+
+			fmt.Fprintln(out, utils.GreenCheck(), "Merge Request approval revoked")
+
+			return nil
+		},
+	}
+
+	return mrRevokeCmd
 }

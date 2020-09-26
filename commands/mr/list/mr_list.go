@@ -73,7 +73,7 @@ func NewCmdList(f *cmdutils.Factory) *cobra.Command {
 				l.Scope = gitlab.String("assigned_to_me")
 			}
 
-			mergeRequests, err := api.ListMRs(apiClient, repo, l)
+			mergeRequests, err := api.ListMRs(apiClient, repo.FullName(), l)
 			if err != nil {
 				return err
 			}

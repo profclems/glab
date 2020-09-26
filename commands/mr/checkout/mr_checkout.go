@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/internal/git"
-	"github.com/profclems/glab/internal/manip"
+	"github.com/profclems/glab/internal/utils"
 	"github.com/profclems/glab/pkg/api"
 	"github.com/tcnksm/go-gitconfig"
 
@@ -47,7 +47,7 @@ func NewCmdCheckout(f *cmdutils.Factory) *cobra.Command {
 				return err
 			}
 
-			mrID := manip.StringToInt(args[0])
+			mrID := utils.StringToInt(args[0])
 
 			mr, err := api.GetMR(apiClient, repo.FullName(), mrID, &gitlab.GetMergeRequestsOptions{})
 

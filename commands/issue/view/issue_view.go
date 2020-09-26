@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/profclems/glab/commands/cmdutils"
-	"github.com/profclems/glab/internal/manip"
 	"github.com/profclems/glab/internal/utils"
 	"github.com/profclems/glab/pkg/api"
 
@@ -24,7 +23,7 @@ func NewCmdView(f *cmdutils.Factory) *cobra.Command {
 		Aliases: []string{"show"},
 		Args:    cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			pid := manip.StringToInt(args[0])
+			pid := utils.StringToInt(args[0])
 
 			var err error
 			out := utils.ColorableOut(cmd)
@@ -49,7 +48,9 @@ func NewCmdView(f *cmdutils.Factory) *cobra.Command {
 			}
 			if lb, _ := cmd.Flags().GetBool("web"); lb { //open in browser if --web flag is specified
 				fmt.Fprintf(out, "Opening %s in your browser.\n", utils.DisplayURL(issue.WebURL))
-				return utils.OpenInBrowser(issue.WebURL)
+				cfg, _ := f.Config()
+				browser, _ := cfg.Get(repo.RepoHost(), "browser")
+				return utils.OpenInBrowser(issue.WebURL, browser)
 			}
 			var issueState string
 			if issue.State == "opened" {
@@ -70,7 +71,9 @@ func NewCmdView(f *cmdutils.Factory) *cobra.Command {
 				utils.PrettyTimeAgo(ago),
 			))
 			if issue.Description != "" {
-				issue.Description, _ = utils.RenderMarkdown(issue.Description)
+				cfg, _ := f.Config()
+				glamourStyle, _ := cfg.Get(repo.RepoHost(), "glamour_style")
+				issue.Description, _ = utils.RenderMarkdown(issue.Description, glamourStyle)
 				issuePrintDetails += issue.Description
 			}
 			issuePrintDetails += utils.Gray(fmt.Sprintf("\n%d upvotes • %d downvotes • %d comments\n\n",

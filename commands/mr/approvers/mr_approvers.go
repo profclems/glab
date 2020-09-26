@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"github.com/profclems/glab/commands/cmdutils"
-	"github.com/profclems/glab/internal/manip"
 	"github.com/profclems/glab/internal/utils"
 
 	"github.com/gosuri/uitable"
@@ -45,7 +44,7 @@ func NewCmdApprovers(f *cmdutils.Factory) *cobra.Command {
 
 			fmt.Fprintf(out, "\nListing Merge Request #%v eligible approvers\n", mergeID)
 
-			mrApprovals, err := api.GetMRApprovalState(apiClient, repo.FullName(), manip.StringToInt(mergeID))
+			mrApprovals, err := api.GetMRApprovalState(apiClient, repo.FullName(), utils.StringToInt(mergeID))
 			if err != nil {
 				return err
 			}

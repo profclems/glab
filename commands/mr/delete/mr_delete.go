@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"github.com/profclems/glab/commands/cmdutils"
-	"github.com/profclems/glab/internal/manip"
 	"github.com/profclems/glab/internal/utils"
 	"github.com/profclems/glab/pkg/api"
 
@@ -46,7 +45,7 @@ func NewCmdDelete(f *cmdutils.Factory) *cobra.Command {
 			arrIds := strings.Split(strings.Trim(mergeID, "[] "), ",")
 			for _, i2 := range arrIds {
 				fmt.Fprintln(out, "- Deleting Merge Request #"+i2)
-				err := api.DeleteMR(apiClient, repo, manip.StringToInt(i2))
+				err := api.DeleteMR(apiClient, repo.FullName(), utils.StringToInt(i2))
 				if err != nil {
 					return err
 				}

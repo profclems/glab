@@ -1,7 +1,9 @@
-package pipeline
+package status
 
 import (
 	"fmt"
+	"github.com/profclems/glab/commands/pipeline"
+	"github.com/profclems/glab/commands/pipeline/ci"
 	"github.com/profclems/glab/internal/utils"
 	"time"
 
@@ -75,7 +77,7 @@ var pipelineStatusCmd = &cobra.Command{
 					return err
 				}
 				for _, job := range jobs {
-					duration := fmtDuration(job.Duration)
+					duration := pipeline.fmtDuration(job.Duration)
 					var status string
 					switch s := job.Status; s {
 					case "failed":
@@ -129,7 +131,7 @@ var pipelineStatusCmd = &cobra.Command{
 				time.Sleep(time.Millisecond * 0)
 				if retry == "View Logs" {
 					//args = []string{strconv.FormatInt(int64(runningPipeline.ID), 10)}
-					pipelineCITrace(cmd, args)
+					ci.pipelineCITrace(cmd, args)
 					fmt.Println("logs")
 				}
 			}

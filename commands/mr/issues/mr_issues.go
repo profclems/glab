@@ -9,8 +9,6 @@ import (
 	"github.com/spf13/cobra"
 	"strings"
 
-	"github.com/profclems/glab/internal/manip"
-
 	"github.com/xanzy/go-gitlab"
 )
 
@@ -46,7 +44,7 @@ func NewCmdIssues(f *cmdutils.Factory) *cobra.Command {
 			mergeID := strings.TrimSpace(args[0])
 			l := &gitlab.GetIssuesClosedOnMergeOptions{}
 
-			mrIssues, err := api.GetMRLinkedIssues(apiClient, repo.FullName(), manip.StringToInt(mergeID), l)
+			mrIssues, err := api.GetMRLinkedIssues(apiClient, repo.FullName(), utils.StringToInt(mergeID), l)
 			if err != nil {
 				return err
 			}

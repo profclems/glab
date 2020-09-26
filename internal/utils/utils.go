@@ -2,36 +2,35 @@ package utils
 
 import (
 	"fmt"
-	"github.com/spf13/cobra"
 	"io"
 	"net/url"
 	"os"
 	"strings"
 	"time"
 
-	"github.com/profclems/glab/internal/config"
-
 	"github.com/charmbracelet/glamour"
 	"github.com/profclems/glab/internal/browser"
 	"github.com/profclems/glab/internal/run"
+
+	"github.com/spf13/cobra"
 )
 
 // OpenInBrowser opens the url in a web browser based on OS and $BROWSER environment variable
-func OpenInBrowser(url string) error {
-	browseCmd, err := browser.Command(url)
+func OpenInBrowser(url, browserType string) error {
+	browseCmd, err := browser.Command(url, browserType)
 	if err != nil {
 		return err
 	}
 	return run.PrepareCmd(browseCmd).Run()
 }
 
-func RenderMarkdown(text string) (string, error) {
+func RenderMarkdown(text, glamourStyle string) (string, error) {
 	// Glamour rendering preserves carriage return characters in code blocks, but
 	// we need to ensure that no such characters are present in the output.
 	text = strings.ReplaceAll(text, "\r\n", "\n")
 
 	renderStyle := glamour.WithStandardStyle("dark")
-	if config.GetEnv("GLAMOUR_STYLE") != "" {
+	if glamourStyle != "" {
 		renderStyle = glamour.WithEnvironmentConfig()
 	}
 

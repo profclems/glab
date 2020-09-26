@@ -1,4 +1,4 @@
-package pipeline
+package list
 
 import (
 	"github.com/profclems/glab/internal/git"

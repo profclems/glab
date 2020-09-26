@@ -9,17 +9,16 @@ import (
 	issueCmd "github.com/profclems/glab/commands/issue"
 	labelCmd "github.com/profclems/glab/commands/label"
 	mrCmd "github.com/profclems/glab/commands/mr"
-	"github.com/profclems/glab/internal/glrepo"
-	"github.com/spf13/pflag"
-	//mrCmd "github.com/profclems/glab/commands/mr"
-	//pipelineCmd "github.com/profclems/glab/commands/pipeline"
+	pipelineCmd "github.com/profclems/glab/commands/pipeline"
 	//projectCmd "github.com/profclems/glab/commands/project"
 	releaseCmd "github.com/profclems/glab/commands/release"
 	updateCmd "github.com/profclems/glab/commands/update"
 	versionCmd "github.com/profclems/glab/commands/version"
+	"github.com/profclems/glab/internal/glrepo"
 
 	"github.com/MakeNowJust/heredoc"
 	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 )
 
 // RootCmd is the main root/parent command
@@ -92,7 +91,7 @@ func NewCmdRoot(f *cmdutils.Factory, version, buildDate string) *cobra.Command {
 	rootCmd.AddCommand(issueCmd.NewCmdIssue(&repoResolvingCmdFactory))
 	rootCmd.AddCommand(labelCmd.NewCmdLabel(f))
 	rootCmd.AddCommand(mrCmd.NewCmdMR(f))
-	//rootCmd.AddCommand(pipelineCmd.NewCmdPipeline(f))
+	rootCmd.AddCommand(pipelineCmd.NewCmdPipeline(f))
 	//rootCmd.AddCommand(projectCmd.NewCmdProject(f))
 	rootCmd.AddCommand(releaseCmd.NewCmdRelease(f))
 	rootCmd.Flags().BoolP("version", "v", false, "show glab version information")

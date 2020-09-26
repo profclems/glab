@@ -1,15 +1,14 @@
-package pipeline
+package delete
 
 import (
 	"fmt"
+	"github.com/profclems/glab/internal/utils"
 	"strconv"
 	"strings"
 
-	"github.com/profclems/glab/internal/git"
-	"github.com/profclems/glab/internal/manip"
-
 	"github.com/MakeNowJust/heredoc"
 	"github.com/gookit/color"
+	"github.com/profclems/glab/internal/git"
 	"github.com/spf13/cobra"
 	"github.com/xanzy/go-gitlab"
 )
@@ -55,7 +54,7 @@ func deletePipeline(cmd *cobra.Command, args []string) {
 			arrIds := strings.Split(strings.Trim(pipelineID, "[] "), ",")
 			for _, i2 := range arrIds {
 				fmt.Println("Deleting Pipeline #" + i2)
-				pipeline, _ := gitlabClient.Pipelines.DeletePipeline(repo, manip.StringToInt(i2))
+				pipeline, _ := gitlabClient.Pipelines.DeletePipeline(repo, utils.StringToInt(i2))
 				if pipeline.StatusCode == 204 {
 					color.Green.Println("Pipeline Deleted Successfully")
 				} else if pipeline.StatusCode == 404 {

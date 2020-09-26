@@ -7,8 +7,6 @@ import (
 	"github.com/profclems/glab/pkg/api"
 	"strings"
 
-	"github.com/profclems/glab/internal/manip"
-
 	"github.com/spf13/cobra"
 )
 
@@ -43,7 +41,7 @@ func NewCmdDelete(f *cmdutils.Factory) *cobra.Command {
 			arrIds := strings.Split(strings.Trim(issueID, "[] "), ",")
 			for _, i2 := range arrIds {
 				fmt.Println("- Deleting Issue #" + i2)
-				err := api.DeleteIssue(apiClient, repo.FullName(), manip.StringToInt(i2))
+				err := api.DeleteIssue(apiClient, repo.FullName(), utils.StringToInt(i2))
 				if err != nil {
 					return err
 				}

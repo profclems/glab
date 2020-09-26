@@ -3,7 +3,6 @@ package note
 import (
 	"fmt"
 	"github.com/profclems/glab/commands/cmdutils"
-	"github.com/profclems/glab/internal/manip"
 	"github.com/profclems/glab/internal/utils"
 	"github.com/profclems/glab/pkg/api"
 
@@ -45,12 +44,12 @@ func NewCmdNote(f *cmdutils.Factory) *cobra.Command {
 			if err != nil {
 				return err
 			}
-			mr, err := api.GetMR(apiClient, repo, manip.StringToInt(mID), &gitlab.GetMergeRequestsOptions{})
+			mr, err := api.GetMR(apiClient, repo.FullName(), utils.StringToInt(mID), &gitlab.GetMergeRequestsOptions{})
 			if err != nil {
 				return err
 			}
 			if body == "" {
-				body = manip.Editor(manip.EditorOptions{
+				body = utils.Editor(utils.EditorOptions{
 					Label:    "Note Message:",
 					Help:     "Enter the note message for the merge request. ",
 					FileName: "*_MR_NOTE_EDITMSG.md",
@@ -60,7 +59,7 @@ func NewCmdNote(f *cmdutils.Factory) *cobra.Command {
 				return fmt.Errorf("aborted... Note has an empty message")
 			}
 
-			noteInfo, err := api.CreateMRNote(apiClient, repo, manip.StringToInt(mID), &gitlab.CreateMergeRequestNoteOptions{
+			noteInfo, err := api.CreateMRNote(apiClient, repo.FullName(), utils.StringToInt(mID), &gitlab.CreateMergeRequestNoteOptions{
 				Body: &body,
 			})
 			if err != nil {

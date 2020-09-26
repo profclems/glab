@@ -6,7 +6,6 @@ import (
 
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/commands/issue/issueutils"
-	"github.com/profclems/glab/internal/manip"
 	"github.com/profclems/glab/internal/utils"
 	"github.com/profclems/glab/pkg/api"
 
@@ -42,7 +41,7 @@ func NewCmdSubscribe(f *cmdutils.Factory) *cobra.Command {
 			arrIds := strings.Split(strings.Trim(mergeID, "[] "), ",")
 			for _, i2 := range arrIds {
 				fmt.Fprintln(out, "- Subscribing to Issue #"+i2)
-				issue, err := api.SubscribeToIssue(apiClient, repo.FullName(), manip.StringToInt(i2), nil)
+				issue, err := api.SubscribeToIssue(apiClient, repo.FullName(), utils.StringToInt(i2), nil)
 				if err != nil {
 					fmt.Fprintln(out, utils.GreenCheck(), "Subscribed to issue #"+i2)
 					fmt.Fprintln(out, issueutils.DisplayIssue(issue))

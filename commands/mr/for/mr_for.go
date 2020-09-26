@@ -7,7 +7,6 @@ import (
 
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/commands/mr/mrutils"
-	"github.com/profclems/glab/internal/manip"
 	"github.com/profclems/glab/internal/utils"
 	"github.com/profclems/glab/pkg/api"
 
@@ -50,7 +49,7 @@ func NewCmdFor(f *cmdutils.Factory) *cobra.Command {
 				return err
 			}
 
-			issueID := manip.StringToInt(args[0])
+			issueID := utils.StringToInt(args[0])
 			issue, err := api.GetIssue(apiClient, repo.FullName(), issueID)
 			if err != nil {
 				return err
@@ -72,7 +71,7 @@ func NewCmdFor(f *cmdutils.Factory) *cobra.Command {
 				targetBranch, _ = git.GetDefaultBranch(repoRemote.Name)
 			}
 
-			sourceBranch := fmt.Sprintf("%d-%s", issue.IID, manip.ReplaceNonAlphaNumericChars(strings.ToLower(issue.Title), "-"))
+			sourceBranch := fmt.Sprintf("%d-%s", issue.IID, utils.ReplaceNonAlphaNumericChars(strings.ToLower(issue.Title), "-"))
 
 			lb := &gitlab.CreateBranchOptions{
 				Branch: gitlab.String(sourceBranch),
@@ -131,7 +130,7 @@ func NewCmdFor(f *cmdutils.Factory) *cobra.Command {
 				var t2 []int
 
 				for _, i := range arrIds {
-					j := manip.StringToInt(i)
+					j := utils.StringToInt(i)
 					t2 = append(t2, j)
 				}
 				l.AssigneeIDs = t2

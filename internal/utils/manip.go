@@ -1,11 +1,12 @@
-package manip
+package utils
 
 import (
-	"github.com/AlecAivazis/survey/v2"
 	"log"
 	"regexp"
 	"strconv"
 	"strings"
+	
+	"github.com/AlecAivazis/survey/v2"
 )
 
 func AskQuestionWithInput(question, defaultVal string, isRequired bool) string {

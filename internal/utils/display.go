@@ -2,9 +2,10 @@ package utils
 
 import (
 	"fmt"
-	"github.com/gosuri/uitable"
 	"regexp"
 	"strings"
+
+	"github.com/gosuri/uitable"
 )
 
 // ListInfo represents the parameters required to display a list result.

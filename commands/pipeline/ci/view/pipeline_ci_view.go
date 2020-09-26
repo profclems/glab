@@ -1,9 +1,12 @@
-package pipeline
+package view
 
 import (
 	"bufio"
 	"context"
 	"fmt"
+	"github.com/profclems/glab/commands/cmdutils"
+	"github.com/profclems/glab/commands/pipeline/pipelineutils"
+	"github.com/profclems/glab/pkg/api"
 	"io"
 	"log"
 	"os"
@@ -27,15 +30,19 @@ import (
 var (
 	projectID string
 	refName   string
-	commitSHA string
+	CommitSHA string
+	apiClient *gitlab.Client
+	cOut io.Writer
 )
 
-// ciViewCmd represents the ci command
-var pipelineCIView = &cobra.Command{
-	Use:   "view [branch/tag]",
-	Short: "View, run, trace/logs, and cancel CI jobs current pipeline",
-	Long: heredoc.Doc(`Supports viewing, running, tracing, and canceling jobs.
+func NewCmdView(f *cmdutils.Factory) *cobra.Command {
+	var pipelineCIView = &cobra.Command{
+		Use:   "view [branch/tag]",
+		Short: "View, run, trace/logs, and cancel CI jobs current pipeline",
+		Long: heredoc.Doc(`Supports viewing, running, tracing, and canceling jobs.
+
 		Use arrow keys to navigate jobs and logs.
+
 		'Enter' to toggle a job's logs or trace.
 		'Ctrl+R', 'Ctrl+P' to run/retry/play a job -- Use Tab / Arrow keys to navigate modal and Enter to confirm.
 		'Ctrl+C' to cancel job -- (Quits CI view if selected job isn't running or pending).
@@ -43,74 +50,86 @@ var pipelineCIView = &cobra.Command{
 		'Ctrl+Space' suspend application and view logs (similar to glab pipeline ci trace)
 		Supports vi style (hjkl,Gg) bindings and arrow keys for navigating jobs and logs.
 	`),
-	Example: heredoc.Doc(`
+		Example: heredoc.Doc(`
 	$ glab pipeline ci view   # Uses current branch
 	$ glab pipeline ci view master  # Get latest pipeline on master branch
 	$ glab pipeline ci view -b master  # just like the second example
 	$ glab pipeline ci view -b master -R profclems/glab  # Get latest pipeline on master branch of profclems/glab repo
 	`),
-	Args: cobra.MaximumNArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
-		a := tview.NewApplication()
-		defer recoverPanic(a)
-		var (
-			err error
-		)
+		Args: cobra.MaximumNArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			a := tview.NewApplication()
+			defer recoverPanic(a)
+			var err error
 
-		projectID, _ = cmd.Flags().GetString("repo")
-		if projectID == "" {
-			projectID, err = git.GetRepo()
-			if err != nil {
-				log.Fatal(err)
-			}
-		}
-		projectID, _ = fixRepoNamespace(projectID)
-
-		refName, _ = cmd.Flags().GetString("branch")
-		if refName == "" {
-			if len(args) == 1 {
-				refName = args[0]
-			} else {
-				refName, err = git.CurrentBranch()
+			cOut = utils.ColorableOut(cmd)
+			if r, _ := cmd.Flags().GetString("repo"); r != "" {
+				f, err = f.NewClient(r)
 				if err != nil {
-					er(err)
+					return err
 				}
 			}
-		}
-
-		commit, err := getCommit(projectID, refName)
-		if err != nil {
-			log.Fatal(err)
-		}
-		commitSHA = commit.ID
-		root := tview.NewPages()
-		root.SetBorderPadding(1, 1, 2, 2).SetBorder(true).SetTitle(fmt.Sprintf(" Pipeline #%d triggered %s by %s ", commit.LastPipeline.ID, utils.TimeToPrettyTimeAgo(*commit.AuthoredDate), commit.AuthorName))
-
-		boxes = make(map[string]*tview.TextView)
-		jobsCh := make(chan []*gitlab.Job)
-		inputCh := make(chan struct{})
-
-		screen, err := tcell.NewScreen()
-		if err != nil {
-			log.Fatal(err)
-		}
-		_ = screen.Init()
-
-		var navi navigator
-		a.SetInputCapture(inputCapture(a, root, navi, inputCh))
-		go updateJobs(a, jobsCh)
-		go func() {
-			defer recoverPanic(a)
-			for {
-				a.SetFocus(root)
-				jobsView(a, jobsCh, inputCh, root)
-				a.Draw()
+			apiClient, err = f.HttpClient()
+			if err != nil {
+				return err
 			}
-		}()
-		if err := a.SetScreen(screen).SetRoot(root, true).SetAfterDrawFunc(linkJobsView(a)).Run(); err != nil {
-			log.Fatal(err)
-		}
-	},
+			repo, err := f.BaseRepo()
+			if err != nil {
+				return err
+			}
+
+			projectID = repo.FullName()
+
+			refName, _ = cmd.Flags().GetString("branch")
+			if refName == "" {
+				if len(args) == 1 {
+					refName = args[0]
+				} else {
+					refName, err = git.CurrentBranch()
+					if err != nil {
+						return err
+					}
+				}
+			}
+
+			commit, err := api.GetCommit(apiClient, projectID, refName)
+			if err != nil {
+				return err
+			}
+			CommitSHA = commit.ID
+			root := tview.NewPages()
+			root.SetBorderPadding(1, 1, 2, 2).SetBorder(true).SetTitle(fmt.Sprintf(" Pipeline #%d triggered %s by %s ", commit.LastPipeline.ID, utils.TimeToPrettyTimeAgo(*commit.AuthoredDate), commit.AuthorName))
+
+			boxes = make(map[string]*tview.TextView)
+			jobsCh := make(chan []*gitlab.Job)
+			inputCh := make(chan struct{})
+
+			screen, err := tcell.NewScreen()
+			if err != nil {
+				return err
+			}
+			_ = screen.Init()
+
+			var navi navigator
+			a.SetInputCapture(inputCapture(a, root, navi, inputCh))
+			go updateJobs(a, jobsCh)
+			go func() {
+				defer recoverPanic(a)
+				for {
+					a.SetFocus(root)
+					jobsView(a, jobsCh, inputCh, root)
+					a.Draw()
+				}
+			}()
+			if err := a.SetScreen(screen).SetRoot(root, true).SetAfterDrawFunc(linkJobsView(a)).Run(); err != nil {
+				return err
+			}
+			return nil
+		},
+	}
+
+	pipelineCIView.Flags().StringP("branch", "b", "", "Check pipeline status for a branch/tag. (Default is the current branch)")
+	return pipelineCIView
 }
 
 func inputCapture(a *tview.Application, root *tview.Pages, navi navigator, inputCh chan struct{}) func(event *tcell.EventKey) *tcell.EventKey {
@@ -161,7 +180,7 @@ func inputCapture(a *tview.Application, root *tview.Pages, navi navigator, input
 						}
 						root.RemovePage("logs-" + curJob.Name)
 						a.ForceDraw()
-						job, err := cancelPipelineJob(projectID, curJob.ID)
+						job, err := api.CancelPipelineJob(apiClient, projectID, curJob.ID)
 						if err != nil {
 							a.Stop()
 							log.Fatal(err)
@@ -194,7 +213,7 @@ func inputCapture(a *tview.Application, root *tview.Pages, navi navigator, input
 					root.RemovePage("logs-" + curJob.Name)
 					a.ForceDraw()
 
-					job, err := playOrRetryJobs(projectID, curJob.ID, curJob.Status)
+					job, err := api.PlayOrRetryJobs(apiClient, projectID, curJob.ID, curJob.Status)
 					if err != nil {
 						a.Stop()
 						log.Fatal(err)
@@ -222,7 +241,7 @@ func inputCapture(a *tview.Application, root *tview.Pages, navi navigator, input
 			a.Suspend(func() {
 				ctx, cancel := context.WithCancel(context.Background())
 				go func() {
-					err := runTrace(ctx, os.Stdout, projectID, commitSHA, curJob.Name)
+					err := pipelineutils.RunTrace(apiClient, ctx, cOut, projectID, CommitSHA, curJob.Name)
 					if err != nil {
 						a.Stop()
 						log.Fatal(err)
@@ -385,7 +404,7 @@ func jobsView(app *tview.Application, jobsCh chan []*gitlab.Job, inputCh chan st
 			tv.SetBorderPadding(0, 0, 1, 1).SetBorder(true)
 
 			go func() {
-				err := runTrace(context.Background(), vtclean.NewWriter(tview.ANSIWriter(tv), true), projectID, commitSHA, curJob.Name)
+				err := pipelineutils.RunTrace(apiClient, context.Background(), vtclean.NewWriter(tview.ANSIWriter(tv), true), projectID, CommitSHA, curJob.Name)
 				if err != nil {
 					app.Stop()
 					log.Fatal(err)
@@ -532,7 +551,7 @@ func updateJobs(app *tview.Application, jobsCh chan []*gitlab.Job) {
 			time.Sleep(time.Second * 1)
 			continue
 		}
-		jobs, err := pipelineJobsWithSha(projectID, commitSHA)
+		jobs, err := api.PipelineJobsWithSha(apiClient, projectID, CommitSHA)
 		if len(jobs) == 0 || err != nil {
 			app.Stop()
 			log.Fatal(errors.Wrap(err, "failed to find ci jobs"))
@@ -676,9 +695,4 @@ func latestJobs(jobs []*gitlab.Job) []*gitlab.Job {
 	}
 
 	return outJobs
-}
-
-func init() {
-	pipelineCIView.Flags().StringP("branch", "b", "", "Check pipeline status for a branch/tag. (Default is the current branch)")
-	pipelineCICmd.AddCommand(pipelineCIView)
 }

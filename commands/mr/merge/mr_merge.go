@@ -8,8 +8,6 @@ import (
 	"strings"
 
 	"github.com/profclems/glab/commands/cmdutils"
-	"github.com/profclems/glab/internal/manip"
-
 	"github.com/spf13/cobra"
 	"github.com/xanzy/go-gitlab"
 )
@@ -65,7 +63,7 @@ func NewCmdMerge(f *cmdutils.Factory) *cobra.Command {
 
 			fmt.Fprintf(out, "- Merging merge request #%s\n", mergeID)
 
-			mr, err := api.MergeMR(apiClient, repo, manip.StringToInt(mergeID), l)
+			mr, err := api.MergeMR(apiClient, repo.FullName(), utils.StringToInt(mergeID), l)
 
 			if err != nil {
 				return err

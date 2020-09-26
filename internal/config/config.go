@@ -4,13 +4,12 @@ import (
 	"errors"
 	"fmt"
 	"github.com/mitchellh/go-homedir"
+	"github.com/profclems/glab/internal/utils"
 	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
 	"strings"
-
-	"github.com/profclems/glab/internal/manip"
 )
 
 var (
@@ -287,6 +286,6 @@ func DeleteAlias(name string) error {
 
 // PromptAndSetEnv : prompts user for value and writes to config
 func Prompt(question, defaultVal string) (envVal string, err error) {
-	envVal = manip.AskQuestionWithInput(question, defaultVal, false)
+	envVal = utils.AskQuestionWithInput(question, defaultVal, false)
 	return
 }

@@ -1,4 +1,4 @@
-package pipeline
+package lint
 
 import (
 	"os/exec"
