@@ -41,7 +41,7 @@ func NewCmdTodo(f *cmdutils.Factory) *cobra.Command {
 			if err != nil {
 				return err
 			}
-			fmt.Fprintln(out,  utils.GreenCheck(), "Done!!")
+			fmt.Fprintln(out, utils.GreenCheck(), "Done!!")
 			return nil
 		},
 	}

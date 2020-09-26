@@ -64,7 +64,7 @@ func NewCmdView(f *cmdutils.Factory) *cobra.Command {
 				mrState = utils.Green(mr.State)
 			} else if mr.State == "merged" {
 				mrState = utils.Blue(mr.State)
-			}else {
+			} else {
 				mrState = utils.Red(mr.State)
 			}
 			now := time.Now()
@@ -72,7 +72,7 @@ func NewCmdView(f *cmdutils.Factory) *cobra.Command {
 
 			mrPrintDetails := "\n" + mr.Title
 			mrPrintDetails += fmt.Sprintf("#%d", mr.IID)
-			mrPrintDetails += fmt.Sprintf("(%s)",  mrState)
+			mrPrintDetails += fmt.Sprintf("(%s)", mrState)
 			mrPrintDetails += utils.Gray(fmt.Sprintf(" • opened by %s (%s) %s\n", mr.Author.Username,
 				mr.Author.Name,
 				utils.PrettyTimeAgo(ago)))

@@ -5,7 +5,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-	
+
 	"github.com/AlecAivazis/survey/v2"
 )
 

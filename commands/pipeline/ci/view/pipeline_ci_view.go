@@ -32,7 +32,7 @@ var (
 	refName   string
 	CommitSHA string
 	apiClient *gitlab.Client
-	cOut io.Writer
+	cOut      io.Writer
 )
 
 func NewCmdView(f *cmdutils.Factory) *cobra.Command {

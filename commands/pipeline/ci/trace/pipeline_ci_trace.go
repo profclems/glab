@@ -76,7 +76,7 @@ func NewCmdTrace(f *cmdutils.Factory) *cobra.Command {
 					return err
 				}
 				if len(pipes) == 0 {
-					fmt.Fprintln(out, "No pipeline running or available on " + branch + "branch")
+					fmt.Fprintln(out, "No pipeline running or available on "+branch+"branch")
 					return nil
 				}
 				pipeline := pipes[0]

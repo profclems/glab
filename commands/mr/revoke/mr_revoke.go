@@ -38,7 +38,7 @@ func NewCmdRevoke(f *cmdutils.Factory) *cobra.Command {
 
 			mergeID := strings.TrimSpace(args[0])
 
-			fmt.Fprintln(out,"- Revoking approval for Merge Request #" + mergeID + "...")
+			fmt.Fprintln(out, "- Revoking approval for Merge Request #"+mergeID+"...")
 
 			err = api.UnapproveMR(apiClient, repo.FullName(), utils.StringToInt(mergeID))
 			if err != nil {

@@ -38,7 +38,7 @@ func DisplayMultiplePipelines(p []*gitlab.PipelineInfo, projectID string) string
 				pipeState = utils.Gray(fmt.Sprintf("(%s) • #%d", pipeline.Status, pipeline.ID))
 			}
 
-			pipelinePrint += fmt.Sprintf("%s\t%s\t%s\n", pipeState, pipeline.Ref, utils.Magenta("(" + duration + ")"))
+			pipelinePrint += fmt.Sprintf("%s\t%s\t%s\n", pipeState, pipeline.Ref, utils.Magenta("("+duration+")"))
 		}
 	}
 
