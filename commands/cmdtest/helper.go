@@ -30,12 +30,12 @@ type fatalLogger interface {
 	Fatal(...interface{})
 }
 
-func InitTest(m *testing.M) {
+func InitTest(m *testing.M, suffix string) {
 	rand.Seed(time.Now().UnixNano())
 	// Build a glab binary with test symbols. If the parent test binary was run
 	// with coverage enabled, enable coverage on the child binary, too.
 	var err error
-	GlabBinaryPath, err = filepath.Abs(os.ExpandEnv("$GOPATH/src/github.com/profclems/glab/test/testdata/glab"))
+	GlabBinaryPath, err = filepath.Abs(os.ExpandEnv("$GOPATH/src/github.com/profclems/glab/test/testdata/glab.test"))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -51,8 +51,10 @@ func InitTest(m *testing.M) {
 	if err != nil {
 		log.Fatal(err)
 	}
+	var repo string
 	// Make a copy of the testdata Git test project and chdir to it.
-	repo := CopyTestRepo(log.New(os.Stderr, "", log.LstdFlags))
+	repo = CopyTestRepo(log.New(os.Stderr, "", log.LstdFlags), suffix)
+
 	if err := os.Chdir(repo); err != nil {
 		log.Fatalf("Error chdir to test/testdata: %s", err)
 	}
@@ -61,9 +63,8 @@ func InitTest(m *testing.M) {
 	if err := os.Chdir(originalWd); err != nil {
 		log.Fatalf("Error chdir to original working dir: %s", err)
 	}
-	_ = os.Remove(GlabBinaryPath)
 
-	testdirs, err := filepath.Glob(os.ExpandEnv("$GOPATH/src/github.com/profclems/glab/test/testdata-*"))
+	testdirs, err := filepath.Glob(os.ExpandEnv(repo))
 	if err != nil {
 		log.Printf("Error listing glob test/testdata-*: %s", err)
 	}
@@ -98,9 +99,12 @@ func RunCommand(cmd *cobra.Command, cli string) (*test.CmdOut, error) {
 	}, err
 }
 
-func CopyTestRepo(log fatalLogger) string {
-	rand.Seed(time.Now().UnixNano())
-	dest, err := filepath.Abs(os.ExpandEnv("$GOPATH/src/github.com/profclems/glab/test/testdata-" + strconv.Itoa(int(rand.Uint64()))))
+func CopyTestRepo(log fatalLogger, name string) string {
+	if name == "" {
+		rand.Seed(time.Now().UnixNano())
+		name = strconv.Itoa(int(rand.Uint64()))
+	}
+	dest, err := filepath.Abs(os.ExpandEnv("$GOPATH/src/github.com/profclems/glab/test/testdata-" + name))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -112,12 +116,16 @@ func CopyTestRepo(log fatalLogger) string {
 		log.Fatal(err)
 	}
 	// Move the test.git dir into the expected path at .git
-	if err := os.Rename(dest+"/test.git", dest+"/.git"); err != nil {
-		log.Fatal(err)
+	if  !config.CheckPathExists(dest+"/.git") {
+		if err := os.Rename(dest+"/test.git", dest+"/.git"); err != nil {
+			log.Fatal(err)
+		}
 	}
 	// Move the test.glab-cli dir into the expected path at .glab-cli
-	if err := os.Rename(dest+"/test.glab-cli", dest+"/.glab-cli"); err != nil {
-		log.Fatal(err)
+	if  !config.CheckPathExists(dest+"/.glab-cli") {
+		if err := os.Rename(dest+"/test.glab-cli", dest+"/.glab-cli"); err != nil {
+			log.Fatal(err)
+		}
 	}
 	return dest
 }

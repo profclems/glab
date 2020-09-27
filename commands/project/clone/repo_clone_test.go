@@ -9,11 +9,11 @@ import (
 )
 
 func TestMain(m *testing.M) {
-	cmdtest.InitTest(m)
+	cmdtest.InitTest(m, "repo_clone_test")
 }
 
 func Test_repoClone(t *testing.T) {
-	repo := cmdtest.CopyTestRepo(t)
+	repo := cmdtest.CopyTestRepo(t, "repo_clone_test")
 	// profclems/test is a forked repo from glab-cli/test
 	cmd := exec.Command(cmdtest.GlabBinaryPath, "repo", "clone", "test")
 	cmd.Dir = repo

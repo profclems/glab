@@ -9,12 +9,12 @@ import (
 
 // TODO: test by mocking the appropriate api function
 func TestMain(m *testing.M) {
-	cmdtest.InitTest(m)
+	cmdtest.InitTest(m, "mr_delete_test")
 }
 
 func Test_deleteMergeRequest(t *testing.T) {
 	t.Parallel()
-	repo := cmdtest.CopyTestRepo(t)
+	repo := cmdtest.CopyTestRepo(t, "mr_delete_test")
 	var cmd *exec.Cmd
 	tests := []struct {
 		name       string

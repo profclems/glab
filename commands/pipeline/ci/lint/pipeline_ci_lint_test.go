@@ -8,12 +8,12 @@ import (
 )
 
 func TestMain(m *testing.M) {
-	cmdtest.InitTest(m)
+	cmdtest.InitTest(m, "pipeline_ci_lint_test")
 }
 
 func Test_pipelineCILint(t *testing.T) {
 	t.Parallel()
-	repo := cmdtest.CopyTestRepo(t)
+	repo := cmdtest.CopyTestRepo(t, "pipeline_ci_lint_test")
 	cmd := exec.Command(cmdtest.GlabBinaryPath, "pipeline", "ci", "lint")
 	cmd.Dir = repo
 

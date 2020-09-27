@@ -12,11 +12,11 @@ import (
 
 // TODO: test by mocking the appropriate api function
 func TestMain(m *testing.M) {
-	cmdtest.InitTest(m)
+	cmdtest.InitTest(m, "mr_view_test")
 }
 
 func TestMRView_web_numberArg(t *testing.T) {
-	repo := cmdtest.CopyTestRepo(t)
+	repo := cmdtest.CopyTestRepo(t, "mr_view_test")
 	var seenCmd *exec.Cmd
 	restoreCmd := run.SetPrepareCmd(func(cmd *exec.Cmd) run.Runnable {
 		seenCmd = cmd

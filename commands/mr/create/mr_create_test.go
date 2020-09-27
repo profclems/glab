@@ -14,7 +14,7 @@ import (
 )
 
 func TestMain(m *testing.M) {
-	cmdtest.InitTest(m)
+	cmdtest.InitTest(m, "")
 }
 
 func TestMrCmd(t *testing.T) {

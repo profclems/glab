@@ -9,12 +9,12 @@ import (
 )
 
 func TestMain(m *testing.M) {
-	cmdtest.InitTest(m)
+	cmdtest.InitTest(m, "pipeline_ci_trace_test")
 }
 
 func Test_ciTrace(t *testing.T) {
 	t.Parallel()
-	repo := cmdtest.CopyTestRepo(t)
+	repo := cmdtest.CopyTestRepo(t, "pipeline_ci_trace_test")
 	cmd := exec.Command("git", "fetch", "origin")
 	cmd.Dir = repo
 	if b, err := cmd.CombinedOutput(); err != nil {

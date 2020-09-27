@@ -10,11 +10,11 @@ import (
 
 // TODO: test by mocking the appropriate api function
 func TestMain(m *testing.M) {
-	cmdtest.InitTest(m)
+	cmdtest.InitTest(m, "mr_note_create_test")
 }
 
 func Test_mrNoteCreate(t *testing.T) {
-	repo := cmdtest.CopyTestRepo(t)
+	repo := cmdtest.CopyTestRepo(t, "mr_note_create_test")
 	var cmd *exec.Cmd
 
 	tests := []struct {

@@ -8,11 +8,11 @@ import (
 )
 
 func TestMain(m *testing.M) {
-	cmdtest.InitTest(m)
+	cmdtest.InitTest(m, "repo_archive_test")
 }
 
 func Test_repoArchive(t *testing.T) {
-	repo := cmdtest.CopyTestRepo(t)
+	repo := cmdtest.CopyTestRepo(t, "repo_archive_test")
 
 	type argFlags struct {
 		format string
