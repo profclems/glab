@@ -116,13 +116,13 @@ func CopyTestRepo(log fatalLogger, name string) string {
 		log.Fatal(err)
 	}
 	// Move the test.git dir into the expected path at .git
-	if  !config.CheckPathExists(dest+"/.git") {
+	if !config.CheckPathExists(dest + "/.git") {
 		if err := os.Rename(dest+"/test.git", dest+"/.git"); err != nil {
 			log.Fatal(err)
 		}
 	}
 	// Move the test.glab-cli dir into the expected path at .glab-cli
-	if  !config.CheckPathExists(dest+"/.glab-cli") {
+	if !config.CheckPathExists(dest + "/.glab-cli") {
 		if err := os.Rename(dest+"/test.glab-cli", dest+"/.glab-cli"); err != nil {
 			log.Fatal(err)
 		}
