@@ -55,7 +55,7 @@ func NewCmdCheckout(f *cmdutils.Factory) *cobra.Command {
 				return err
 			}
 			if mr == nil {
-				return fmt.Errorf("merge Request #%d not found\n", mrID)
+				return fmt.Errorf("merge Request !%d not found\n", mrID)
 			}
 			if mrCheckoutCfg.branch == "" {
 				mrCheckoutCfg.branch = mr.SourceBranch

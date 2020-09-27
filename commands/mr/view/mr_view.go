@@ -70,7 +70,7 @@ func NewCmdView(f *cmdutils.Factory) *cobra.Command {
 			ago := now.Sub(*mr.CreatedAt)
 
 			mrPrintDetails := "\n" + mr.Title
-			mrPrintDetails += fmt.Sprintf("#%d", mr.IID)
+			mrPrintDetails += fmt.Sprintf("!%d", mr.IID)
 			mrPrintDetails += fmt.Sprintf("(%s)", mrState)
 			mrPrintDetails += utils.Gray(fmt.Sprintf(" • opened by %s (%s) %s\n", mr.Author.Username,
 				mr.Author.Name,

@@ -42,7 +42,7 @@ func NewCmdApprovers(f *cmdutils.Factory) *cobra.Command {
 
 			mergeID := strings.Trim(args[0], " ")
 
-			fmt.Fprintf(out, "\nListing Merge Request #%v eligible approvers\n", mergeID)
+			fmt.Fprintf(out, "\nListing Merge Request !%v eligible approvers\n", mergeID)
 
 			mrApprovals, err := api.GetMRApprovalState(apiClient, repo.FullName(), utils.StringToInt(mergeID))
 			if err != nil {

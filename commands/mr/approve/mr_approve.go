@@ -47,7 +47,7 @@ func NewCmdApprove(f *cmdutils.Factory) *cobra.Command {
 			// ToDo:
 			//}
 
-			fmt.Fprintf(out, "- Approving Merge Request #%s\n", mergeID)
+			fmt.Fprintf(out, "- Approving Merge Request !%s\n", mergeID)
 			_, err = api.ApproveMR(apiClient, repo.FullName(), utils.StringToInt(mergeID), l)
 			if err != nil {
 				return err

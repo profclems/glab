@@ -73,7 +73,7 @@ hosts:
 	out := stripansi.Strip(output.String())
 	outErr := stripansi.Strip(output.Stderr())
 
-	assert.Contains(t, cmdtest.FirstLine([]byte(out)), `#1 myMRtitle`)
+	assert.Contains(t, cmdtest.FirstLine([]byte(out)), `!1 myMRtitle`)
 	cmdtest.Eq(t, outErr, "")
 	assert.Contains(t, out, "https://gitlab.com/glab-cli/test/-/merge_requests/1")
 

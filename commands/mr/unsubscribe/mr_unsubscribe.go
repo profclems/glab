@@ -40,13 +40,13 @@ func NewCmdUnsubscribe(f *cmdutils.Factory) *cobra.Command {
 
 			arrIds := strings.Split(strings.Trim(mergeID, "[] "), ",")
 			for _, i2 := range arrIds {
-				fmt.Fprintln(out, "Unsubscribing Merge Request #"+i2)
+				fmt.Fprintln(out, "Unsubscribing Merge Request !"+i2)
 				mr, err := api.UnsubscribeFromMR(apiClient, repo.FullName(), utils.StringToInt(i2), nil)
 				if err != nil {
 					return err
 				}
 
-				fmt.Fprintln(out, utils.GreenCheck(), "You have successfully unsubscribed from merge request #"+i2)
+				fmt.Fprintln(out, utils.GreenCheck(), "You have successfully unsubscribed from merge request !"+i2)
 				fmt.Fprintln(out, mrutils.DisplayMR(mr))
 			}
 

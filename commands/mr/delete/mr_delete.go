@@ -44,13 +44,13 @@ func NewCmdDelete(f *cmdutils.Factory) *cobra.Command {
 
 			arrIds := strings.Split(strings.Trim(mergeID, "[] "), ",")
 			for _, i2 := range arrIds {
-				fmt.Fprintln(out, "- Deleting Merge Request #"+i2)
+				fmt.Fprintln(out, "- Deleting Merge Request !"+i2)
 				err := api.DeleteMR(apiClient, repo.FullName(), utils.StringToInt(i2))
 				if err != nil {
 					return err
 				}
 
-				fmt.Fprintf(out, "%s Merge request %s deleted\n", utils.RedCheck(), i2)
+				fmt.Fprintf(out, "%s Merge request !%s deleted\n", utils.RedCheck(), i2)
 			}
 			return nil
 		},

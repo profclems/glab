@@ -51,7 +51,7 @@ func NewCmdClose(f *cmdutils.Factory) *cobra.Command {
 				if err != nil {
 					return err
 				}
-				fmt.Fprintf(out, "%s Merge request #%s\n", utils.RedCheck(), i2)
+				fmt.Fprintf(out, "%s Merge request !%s\n", utils.RedCheck(), i2)
 				fmt.Fprintln(out, mrutils.DisplayMR(mr))
 			}
 

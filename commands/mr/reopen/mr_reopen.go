@@ -46,12 +46,12 @@ func NewCmdReopen(f *cmdutils.Factory) *cobra.Command {
 			arrIds := strings.Split(strings.Trim(mergeID, "[] "), ",")
 
 			for _, i2 := range arrIds {
-				fmt.Fprintf(out, "- Reopening Merge request #%s...\n", i2)
+				fmt.Fprintf(out, "- Reopening Merge request !%s...\n", i2)
 				mr, err := api.UpdateMR(apiClient, repo.FullName(), utils.StringToInt(i2), l)
 				if err != nil {
 					return err
 				}
-				fmt.Fprintf(out, "%s Merge request #%s reopened\n", utils.GreenCheck(), i2)
+				fmt.Fprintf(out, "%s Merge request !%s reopened\n", utils.GreenCheck(), i2)
 				fmt.Fprintln(out, mrutils.DisplayMR(mr))
 			}
 

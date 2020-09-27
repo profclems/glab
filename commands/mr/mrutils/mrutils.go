@@ -11,9 +11,9 @@ func DisplayMR(mr *gitlab.MergeRequest) string {
 	var mrID string
 
 	if mr.State == "opened" {
-		mrID = utils.Green(fmt.Sprintf("#%d", mr.IID))
+		mrID = utils.Green(fmt.Sprintf("!%d", mr.IID))
 	} else {
-		mrID = utils.Red(fmt.Sprintf("#%d", mr.IID))
+		mrID = utils.Red(fmt.Sprintf("!%d", mr.IID))
 	}
 
 	return fmt.Sprintf("%s %s (%s)\n %s\n",
@@ -30,9 +30,9 @@ func DisplayAllMRs(m []*gitlab.MergeRequest, projectID string) *uitable.Table {
 			switch ci {
 			case 0:
 				if mr.State == "opened" {
-					return utils.Green(fmt.Sprintf("#%d", mr.IID))
+					return utils.Green(fmt.Sprintf("!%d", mr.IID))
 				} else {
-					return utils.Red(fmt.Sprintf("#%d", mr.IID))
+					return utils.Red(fmt.Sprintf("!%d", mr.IID))
 				}
 			case 1:
 				return mr.Title

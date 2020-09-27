@@ -61,7 +61,7 @@ func NewCmdMerge(f *cmdutils.Factory) *cobra.Command {
 				l.SHA = gitlab.String(m)
 			}
 
-			fmt.Fprintf(out, "- Merging merge request #%s\n", mergeID)
+			fmt.Fprintf(out, "- Merging merge request !%s\n", mergeID)
 
 			mr, err := api.MergeMR(apiClient, repo.FullName(), utils.StringToInt(mergeID), l)
 

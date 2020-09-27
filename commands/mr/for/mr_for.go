@@ -111,7 +111,7 @@ func NewCmdFor(f *cmdutils.Factory) *cobra.Command {
 
 			l := &gitlab.CreateMergeRequestOptions{}
 			l.Title = gitlab.String(mergeTitle)
-			l.Description = gitlab.String(fmt.Sprintf("Closes #%d", issue.IID))
+			l.Description = gitlab.String(fmt.Sprintf("Closes !%d", issue.IID))
 			l.Labels = gitlab.Labels{mergeLabel}
 			l.SourceBranch = gitlab.String(sourceBranch)
 			l.TargetBranch = gitlab.String(targetBranch)
