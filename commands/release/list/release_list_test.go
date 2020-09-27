@@ -1,17 +1,17 @@
 package list
 
 import (
-	"bytes"
 	"errors"
-	"github.com/acarl005/stripansi"
-	"github.com/profclems/glab/pkg/api"
-	"github.com/xanzy/go-gitlab"
 	"testing"
 	"time"
 
-	"github.com/profclems/glab/test"
+	cmdTestUtils "github.com/profclems/glab/commands/cmdtest"
+	"github.com/profclems/glab/pkg/api"
+
+	"github.com/acarl005/stripansi"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/xanzy/go-gitlab"
 )
 
 type author struct {
@@ -107,10 +107,7 @@ func TestNewCmdReleaseList(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			var stderr bytes.Buffer
-			var stdout bytes.Buffer
-
-			cmd := NewCmdReleaseList(test.StubFactory())
+			cmd := NewCmdReleaseList(cmdTestUtils.StubFactory())
 			if tt.repo != "" {
 				cmd.Flags().StringP("repo", "R", "", "")
 				assert.Nil(t, cmd.Flags().Set("repo", tt.repo))
@@ -118,19 +115,16 @@ func TestNewCmdReleaseList(t *testing.T) {
 			if tt.tag != "" {
 				assert.Nil(t, cmd.Flags().Set("tag", tt.tag))
 			}
-			cmd.SetOut(&stdout)
-			cmd.SetErr(&stderr)
-
-			_, err := cmd.ExecuteC()
+			output, err := cmdTestUtils.RunCommand(cmd, ``)
 			if tt.wantErr {
 				require.Error(t, err)
 				return
 			} else {
-				require.NoError(t, err)
+				require.Nil(t, err)
 			}
 
-			out := stripansi.Strip(stdout.String())
-			outErr := stripansi.Strip(stderr.String())
+			out := stripansi.Strip(output.String())
+			outErr := stripansi.Strip(output.Stderr())
 
 			tt.stdOutFunc(t, out)
 			assert.Contains(t, outErr, tt.stdErr)

@@ -1,14 +1,20 @@
 package lint
 
 import (
+	"github.com/profclems/glab/commands/cmdtest"
+	"github.com/stretchr/testify/require"
+	"os/exec"
 	"testing"
 )
 
+func TestMain(m *testing.M)  {
+	cmdtest.InitTest(m)
+}
+
 func Test_pipelineCILint(t *testing.T) {
-	/*
 	t.Parallel()
-	repo := copyTestRepo(t)
-	cmd := exec.Command(glabBinaryPath, "pipeline", "ci", "lint")
+	repo := cmdtest.CopyTestRepo(t)
+	cmd := exec.Command(cmdtest.GlabBinaryPath, "pipeline", "ci", "lint")
 	cmd.Dir = repo
 
 	b, err := cmd.CombinedOutput()
@@ -17,5 +23,4 @@ func Test_pipelineCILint(t *testing.T) {
 		t.Fatal(err)
 	}
 	require.Contains(t, string(b), "CI yml is Valid!")
-	 */
 }

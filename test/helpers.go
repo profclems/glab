@@ -3,26 +3,13 @@ package test
 import (
 	"bytes"
 	"fmt"
-	"github.com/profclems/glab/commands/cmdutils"
-	"github.com/profclems/glab/internal/config"
-	"math/rand"
-	"os"
 	"os/exec"
-	"path/filepath"
-	"reflect"
 	"regexp"
-	"strconv"
-	"strings"
-	"testing"
-	"time"
 
 	"github.com/profclems/glab/internal/run"
 
-	"github.com/otiai10/copy"
 	"github.com/pkg/errors"
 )
-
-var CachedTestFactory *cmdutils.Factory
 
 // TODO copypasta from command package
 type CmdOut struct {
@@ -114,57 +101,4 @@ func ExpectLines(t T, output string, lines ...string) {
 			return
 		}
 	}
-}
-
-type fatalLogger interface {
-	Fatal(...interface{})
-}
-
-func CopyTestRepo(log fatalLogger) string {
-	rand.Seed(time.Now().UnixNano())
-	dest, err := filepath.Abs(os.ExpandEnv("$GOPATH/src/github.com/profclems/glab/test/testdata-" + strconv.Itoa(int(rand.Uint64()))))
-	if err != nil {
-		log.Fatal(err)
-	}
-	src, err := filepath.Abs(os.ExpandEnv("$GOPATH/src/github.com/profclems/glab/test/testdata"))
-	if err != nil {
-		log.Fatal(err)
-	}
-	if err := copy.Copy(src, dest); err != nil {
-		log.Fatal(err)
-	}
-	// Move the test.git dir into the expected path at .git
-	if err := os.Rename(dest+"/test.git", dest+"/.git"); err != nil {
-		log.Fatal(err)
-	}
-	// Move the test.glab-cli dir into the expected path at .glab-cli
-	if err := os.Rename(dest+"/test.glab-cli", dest+"/.glab-cli"); err != nil {
-		log.Fatal(err)
-	}
-	return dest
-}
-
-func FirstLine(output []byte) string {
-	if i := bytes.IndexAny(output, "\n"); i >= 0 {
-		return strings.ReplaceAll(string(output)[0:i], "PASS", "")
-	}
-	return string(output)
-}
-
-func Eq(t *testing.T, got interface{}, expected interface{}) {
-	t.Helper()
-	if !reflect.DeepEqual(got, expected) {
-		t.Errorf("expected: %v, got: %v", expected, got)
-	}
-}
-
-func StubFactory() *cmdutils.Factory {
-	if CachedTestFactory != nil {
-		return CachedTestFactory
-	}
-	conf := config.NewBlankConfig()
-	CachedTestFactory = cmdutils.New(conf, nil)
-	CachedTestFactory, _ = CachedTestFactory.NewClient("https://gitlab.com/glab-cli/test")
-
-	return CachedTestFactory
 }

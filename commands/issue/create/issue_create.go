@@ -7,7 +7,6 @@ import (
 
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/commands/issue/issueutils"
-	"github.com/profclems/glab/internal/config"
 	"github.com/profclems/glab/internal/utils"
 
 	"github.com/spf13/cobra"
@@ -46,13 +45,16 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 				return err
 			}
 
+			cfg, _ := f.Config()
+			cachedLabels, _ := cfg.Get(repo.RepoHost(), "project_labels")
+
 			if title, _ := cmd.Flags().GetString("title"); title != "" {
-				issueTitle = strings.Trim(title, " ")
+				issueTitle = title
 			} else {
 				issueTitle = utils.AskQuestionWithInput("Title", "", true)
 			}
 			if description, _ := cmd.Flags().GetString("description"); description != "" {
-				issueDescription = strings.Trim(description, " ")
+				issueDescription = description
 			} else {
 				if editor, _ := cmd.Flags().GetBool("no-editor"); editor {
 					issueDescription = utils.AskQuestionMultiline("Description:", "")
@@ -67,7 +69,7 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 			if label, _ := cmd.Flags().GetString("label"); label != "" {
 				issueLabel = strings.Trim(label, "[] ")
 			} else {
-				labelsEntry := config.GetEnv("PROJECT_LABELS")
+				labelsEntry := cachedLabels
 				if labelsEntry != "" {
 					labels := strings.Split(labelsEntry, ",")
 					issueLabel = strings.Join(utils.AskQuestionWithMultiSelect("Label(s)", labels), ",")

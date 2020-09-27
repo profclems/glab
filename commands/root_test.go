@@ -1,8 +1,7 @@
-package root
+package commands
 
 import (
 	"bytes"
-	"github.com/profclems/glab/commands/cmdutils"
 	"io"
 	"log"
 	"math/rand"
@@ -12,12 +11,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/profclems/glab/test"
+	"github.com/profclems/glab/commands/cmdtest"
+	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/stretchr/testify/assert"
-)
-
-var (
-	glabBinaryPath = "../../bin/glab"
 )
 
 func TestMain(m *testing.M) {
@@ -25,11 +21,11 @@ func TestMain(m *testing.M) {
 	// Build a glab binary with test symbols. If the parent test binary was run
 	// with coverage enabled, enable coverage on the child binary, too.
 	var err error
-	glabBinaryPath, err = filepath.Abs(os.ExpandEnv("$GOPATH/src/github.com/profclems/glab/test/testdata/glab"))
+	cmdtest.GlabBinaryPath, err = filepath.Abs(os.ExpandEnv("$GOPATH/src/github.com/profclems/glab/test/testdata/glab"))
 	if err != nil {
 		log.Fatal(err)
 	}
-	testCmd := []string{"test", "-c", "-o", glabBinaryPath, "github.com/profclems/glab/cmd/glab"}
+	testCmd := []string{"test", "-c", "-o", cmdtest.GlabBinaryPath, "github.com/profclems/glab/cmd/glab"}
 	if coverMode := testing.CoverMode(); coverMode != "" {
 		testCmd = append(testCmd, "-covermode", coverMode, "-coverpkg", "./...")
 	}
@@ -42,7 +38,7 @@ func TestMain(m *testing.M) {
 		log.Fatal(err)
 	}
 	// Make a copy of the testdata Git test project and chdir to it.
-	repo := test.CopyTestRepo(log.New(os.Stderr, "", log.LstdFlags))
+	repo := cmdtest.CopyTestRepo(log.New(os.Stderr, "", log.LstdFlags))
 	if err := os.Chdir(repo); err != nil {
 		log.Fatalf("Error chdir to test/testdata: %s", err)
 	}
@@ -51,7 +47,7 @@ func TestMain(m *testing.M) {
 	if err := os.Chdir(originalWd); err != nil {
 		log.Fatalf("Error chdir to original working dir: %s", err)
 	}
-	os.Remove(glabBinaryPath)
+	os.Remove(cmdtest.GlabBinaryPath)
 	testdirs, err := filepath.Glob(os.ExpandEnv("$GOPATH/src/github.com/profclems/glab/test/testdata-*"))
 	if err != nil {
 		log.Printf("Error listing glob test/testdata-*: %s", err)
@@ -91,7 +87,7 @@ func TestRootVersion(t *testing.T) {
 }
 
 func TestRootNoArg(t *testing.T) {
-	cmd := exec.Command(glabBinaryPath)
+	cmd := exec.Command(cmdtest.GlabBinaryPath)
 	b, _ := cmd.CombinedOutput()
 	assert.Contains(t, string(b), `GLab is an open source Gitlab Cli tool bringing GitLab to your command line`)
 	assert.Contains(t, string(b), `USAGE

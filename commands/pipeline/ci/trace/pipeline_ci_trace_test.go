@@ -1,13 +1,20 @@
 package trace
 
 import (
+	"os/exec"
 	"testing"
+
+	"github.com/profclems/glab/commands/cmdtest"
+	"github.com/stretchr/testify/assert"
 )
 
+func TestMain(m *testing.M)  {
+	cmdtest.InitTest(m)
+}
+
 func Test_ciTrace(t *testing.T) {
-	/*
 	t.Parallel()
-	repo := copyTestRepo(t)
+	repo := cmdtest.CopyTestRepo(t)
 	cmd := exec.Command("git", "fetch", "origin")
 	cmd.Dir = repo
 	if b, err := cmd.CombinedOutput(); err != nil {
@@ -64,11 +71,10 @@ func Test_ciTrace(t *testing.T) {
 		},
 	}
 
-	for _, test := range tests {
-		test := test
-		t.Run(test.desc, func(t *testing.T) {
+	for _, tt := range tests {
+		t.Run(tt.desc, func(t *testing.T) {
 			t.Parallel()
-			cmd = exec.Command(glabBinaryPath, append([]string{"pipe", "ci", "trace"}, test.args...)...)
+			cmd = exec.Command(cmdtest.GlabBinaryPath, append([]string{"pipe", "ci", "trace"}, tt.args...)...)
 			cmd.Dir = repo
 
 			b, err := cmd.CombinedOutput()
@@ -77,10 +83,8 @@ func Test_ciTrace(t *testing.T) {
 				t.Fatal(err)
 			}
 			out := string(b)
-			test.assertContains(t, out)
+			tt.assertContains(t, out)
 		})
 	}
-
-	 */
 
 }

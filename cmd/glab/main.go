@@ -3,19 +3,21 @@ package main
 import (
 	"errors"
 	"fmt"
-	"github.com/profclems/glab/internal/glinstance"
 	"io"
+	"log"
 	"net"
 	"os"
 	"os/exec"
 	"strconv"
 	"strings"
 
+	"github.com/profclems/glab/commands"
 	"github.com/profclems/glab/commands/alias/expand"
 	"github.com/profclems/glab/commands/cmdutils"
-	"github.com/profclems/glab/commands/root"
+	"github.com/profclems/glab/commands/help"
 	"github.com/profclems/glab/commands/update"
 	"github.com/profclems/glab/internal/config"
+	"github.com/profclems/glab/internal/glinstance"
 	"github.com/profclems/glab/internal/run"
 
 	"github.com/spf13/cobra"
@@ -34,16 +36,16 @@ var debugMode string
 var debug bool // parsed boolean of debugMode
 
 func main() {
-	if debugMode == "" {
-		debugMode = "false"
-	}
-	debug = debugMode != "false"
+	debug = debugMode == "true"
 
 	cachedConfig, configError := initConfig()
+	if configError != nil {
+		log.Fatalf("error loading config: %q", configError)
+	}
 
 	cmdFactory := cmdutils.New(cachedConfig, configError)
 
-	rootCmd := root.NewCmdRoot(cmdFactory, version, build)
+	rootCmd := commands.NewCmdRoot(cmdFactory, version, build)
 
 	debugMode, _ = cachedConfig.Get("", "debug")
 	if debugSet, _ := strconv.ParseBool(debugMode); debugSet {
@@ -51,7 +53,6 @@ func main() {
 	}
 
 	if glHostFromEnv := config.GetFromEnv("host"); glHostFromEnv != "" {
-		fmt.Println(glHostFromEnv)
 		glinstance.OverrideDefault(glHostFromEnv)
 	}
 
@@ -103,7 +104,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	if root.HasFailed() {
+	if help.HasFailed() {
 		os.Exit(1)
 	}
 

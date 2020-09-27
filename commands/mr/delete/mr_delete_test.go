@@ -1,13 +1,19 @@
 package delete
 
 import (
+	"github.com/profclems/glab/commands/cmdtest"
+	"github.com/stretchr/testify/assert"
+	"os/exec"
 	"testing"
 )
 
+func TestMain(m *testing.M)  {
+	cmdtest.InitTest(m)
+}
+
 func Test_deleteMergeRequest(t *testing.T) {
-	/*
 	t.Parallel()
-	repo := copyTestRepo(t)
+	repo := cmdtest.CopyTestRepo(t)
 	var cmd *exec.Cmd
 	tests := []struct {
 		name       string
@@ -33,7 +39,7 @@ func Test_deleteMergeRequest(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			cmd = exec.Command(glabBinaryPath, tt.args...)
+			cmd = exec.Command(cmdtest.GlabBinaryPath, tt.args...)
 			cmd.Dir = repo
 			b, err := cmd.CombinedOutput()
 			if err != nil && !tt.wantErr {
@@ -44,6 +50,4 @@ func Test_deleteMergeRequest(t *testing.T) {
 			t.Log(out)
 		})
 	}
-
-	 */
 }

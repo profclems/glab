@@ -1,5 +1,5 @@
 // forked from https://github.com/cli/cli/blob/929e082c13909044e2585af292ae952c9ca6f25c/pkg/text/indent.go
-package root
+package help
 
 import (
 	"bytes"
@@ -11,7 +11,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func rootUsageFunc(command *cobra.Command) error {
+func RootUsageFunc(command *cobra.Command) error {
 	command.Printf("Usage:  %s", command.UseLine())
 
 	subcommands := command.Commands()
@@ -65,14 +65,14 @@ func nestedSuggestFunc(command *cobra.Command, arg string) {
 	}
 
 	command.Print("\n")
-	_ = rootUsageFunc(command)
+	_ = RootUsageFunc(command)
 }
 
 func isRootCmd(command *cobra.Command) bool {
 	return command != nil && !command.HasParent()
 }
 
-func rootHelpFunc(command *cobra.Command, args []string) {
+func RootHelpFunc(command *cobra.Command, args []string) {
 	if isRootCmd(command.Parent()) && len(args) >= 2 && args[1] != "--help" && args[1] != "-h" {
 		nestedSuggestFunc(command, args[1])
 		hasFailed = true

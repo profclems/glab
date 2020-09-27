@@ -3,20 +3,13 @@ package main
 import (
 	"bytes"
 	"fmt"
-	"github.com/profclems/glab/commands/cmdutils"
-	"net"
-	"testing"
-
 	"github.com/pkg/errors"
+	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/internal/config"
 	"github.com/spf13/cobra"
+	"net"
+	"testing"
 )
-
-// Test started when the test binary is started
-// and calls the main function
-func TestGlab(t *testing.T) {
-	main()
-}
 
 func Test_printError(t *testing.T) {
 	cmd := &cobra.Command{}
@@ -82,4 +75,10 @@ check your internet connection or status.gitlab.com or 'Run sudo gitlab-ctl stat
 			}
 		})
 	}
+}
+
+// Test started when the test binary is started
+// and calls the main function
+func TestGlab(t *testing.T) {
+	main()
 }

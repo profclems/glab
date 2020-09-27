@@ -1,12 +1,19 @@
 package note
 
 import (
+	"os/exec"
 	"testing"
+
+	"github.com/profclems/glab/commands/cmdtest"
+	"github.com/stretchr/testify/require"
 )
 
+func TestMain(m *testing.M)  {
+	cmdtest.InitTest(m)
+}
+
 func Test_mrNoteCreate(t *testing.T) {
-	/*
-	repo := copyTestRepo(t)
+	repo := cmdtest.CopyTestRepo(t)
 	var cmd *exec.Cmd
 
 	tests := []struct {
@@ -40,7 +47,7 @@ func Test_mrNoteCreate(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			cmd = exec.Command(glabBinaryPath, append([]string{"mr", "note"}, tt.args...)...)
+			cmd = exec.Command(cmdtest.GlabBinaryPath, append([]string{"mr", "note"}, tt.args...)...)
 			cmd.Dir = repo
 
 			b, err := cmd.CombinedOutput()
@@ -50,6 +57,4 @@ func Test_mrNoteCreate(t *testing.T) {
 			}
 		})
 	}
-
-	 */
 }

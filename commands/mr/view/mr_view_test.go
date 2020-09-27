@@ -1,20 +1,29 @@
 package view
 
 import (
+	"os/exec"
 	"testing"
+
+	"github.com/profclems/glab/commands/cmdtest"
+	"github.com/profclems/glab/internal/run"
+	mainTest "github.com/profclems/glab/test"
+	"github.com/stretchr/testify/assert"
 )
 
+func TestMain(m *testing.M)  {
+	cmdtest.InitTest(m)
+}
+
 func TestMRView_web_numberArg(t *testing.T) {
-	/*
-	repo := copyTestRepo(t)
+	repo := cmdtest.CopyTestRepo(t)
 	var seenCmd *exec.Cmd
 	restoreCmd := run.SetPrepareCmd(func(cmd *exec.Cmd) run.Runnable {
 		seenCmd = cmd
-		return &test.OutputStub{}
+		return &mainTest.OutputStub{}
 	})
 	defer restoreCmd()
 
-	cmd := exec.Command(glabBinaryPath, "mr", "view", "-w", "225")
+	cmd := exec.Command(cmdtest.GlabBinaryPath, "mr", "view", "-w", "225")
 	cmd.Dir = repo
 
 	b, err := cmd.CombinedOutput()
@@ -28,6 +37,4 @@ func TestMRView_web_numberArg(t *testing.T) {
 	if seenCmd == nil {
 		t.Log("expected a command to run")
 	}
-
-	 */
 }

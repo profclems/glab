@@ -1,13 +1,25 @@
 package create
 
 import (
+	"fmt"
+	"github.com/pkg/errors"
+	"github.com/profclems/glab/commands/cmdtest"
+	"github.com/profclems/glab/pkg/api"
+	"github.com/stretchr/testify/require"
+	"os"
+	"os/exec"
+	"path/filepath"
+	"strings"
 	"testing"
 )
 
+func TestMain(m *testing.M)  {
+	cmdtest.InitTest(m)
+}
+
 func Test_projectCreateCmd(t *testing.T) {
-	/*
 	t.Parallel()
-	repo := copyTestRepo(t)
+	repo := cmdtest.CopyTestRepo(t)
 	expectedPath := fmt.Sprintf("glab-cli/%s", filepath.Base(repo))
 
 	// remove the .git/config so no remotes exist
@@ -15,12 +27,12 @@ func Test_projectCreateCmd(t *testing.T) {
 	if err != nil {
 		t.Errorf("could not remove .git/config: %v", err)
 	}
-	_, err = deleteProject(expectedPath)
+	_, err = api.DeleteProject(nil, expectedPath)
 	if err != nil {
 		t.Logf("unable to delete project %s: %v", expectedPath, err)
 	}
 	t.Run("create", func(t *testing.T) {
-		cmd := exec.Command(glabBinaryPath, "repo", "create", "-g", "glab-cli", "--public")
+		cmd := exec.Command(cmdtest.GlabBinaryPath, "repo", "create", "-g", "glab-cli", "--public")
 		cmd.Dir = repo
 
 		b, err := cmd.CombinedOutput()
@@ -41,20 +53,20 @@ func Test_projectCreateCmd(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		eq(t, string(remote), "git@gitlab.com:"+expectedPath+".git\n")
+		cmdtest.Eq(t, string(remote), "git@gitlab.com:"+expectedPath+".git\n")
 	})
-	p, err := getProject(expectedPath)
+	p, err := api.GetProject(nil, expectedPath)
 	if err != nil {
 		t.Fatal(errors.Wrap(err, "failed to find project for cleanup"))
 	}
-	_, err = deleteProject(p.ID)
+	_, err = api.DeleteProject(nil, p.ID)
 	if err != nil {
 		t.Fatal(errors.Wrap(err, "failed to delete project during cleanup"))
 	}
 }
 
 func Test_projectCreateCmdWithArgs(t *testing.T) {
-	repo := copyTestRepo(t)
+	repo := cmdtest.CopyTestRepo(t)
 	expectedPath := "glab-cli/unittest"
 
 	// remove the .git/config so no remotes exist
@@ -62,12 +74,12 @@ func Test_projectCreateCmdWithArgs(t *testing.T) {
 	if err != nil {
 		t.Errorf("could not remove .git/config: %v", err)
 	}
-	_, err = deleteProject(expectedPath)
+	_, err = api.DeleteProject(nil, expectedPath)
 	if err != nil {
 		t.Logf("unable to delete project %s: %v", expectedPath, err)
 	}
 	t.Run("create_with_args", func(t *testing.T) {
-		cmd := exec.Command(glabBinaryPath, "repo", "create", expectedPath, "--public")
+		cmd := exec.Command(cmdtest.GlabBinaryPath, "repo", "create", expectedPath, "--public")
 		cmd.Dir = repo
 
 		b, err := cmd.CombinedOutput()
@@ -83,14 +95,12 @@ func Test_projectCreateCmdWithArgs(t *testing.T) {
 			t.Fatal(err)
 		}
 	})
-	p, err := getProject(expectedPath)
+	p, err := api.GetProject(nil, expectedPath)
 	if err != nil {
 		t.Fatal(errors.Wrap(err, "failed to find project for cleanup"))
 	}
-	_, err = deleteProject(p.ID)
+	_, err = api.DeleteProject(nil, p.ID)
 	if err != nil {
 		t.Fatal(errors.Wrap(err, "failed to delete project during cleanup"))
 	}
-
-	 */
 }

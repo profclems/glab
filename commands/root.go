@@ -1,4 +1,4 @@
-package root
+package commands
 
 import (
 	"fmt"
@@ -12,6 +12,7 @@ import (
 	pipelineCmd "github.com/profclems/glab/commands/pipeline"
 	projectCmd "github.com/profclems/glab/commands/project"
 	releaseCmd "github.com/profclems/glab/commands/release"
+	"github.com/profclems/glab/commands/help"
 	updateCmd "github.com/profclems/glab/commands/update"
 	versionCmd "github.com/profclems/glab/commands/version"
 	"github.com/profclems/glab/internal/glrepo"
@@ -70,8 +71,8 @@ func NewCmdRoot(f *cmdutils.Factory, version, buildDate string) *cobra.Command {
 	}
 
 	rootCmd.PersistentFlags().Bool("help", false, "Show help for command")
-	rootCmd.SetHelpFunc(rootHelpFunc)
-	rootCmd.SetUsageFunc(rootUsageFunc)
+	rootCmd.SetHelpFunc(help.RootHelpFunc)
+	rootCmd.SetUsageFunc(help.RootUsageFunc)
 	rootCmd.SetFlagErrorFunc(func(cmd *cobra.Command, err error) error {
 		if err == pflag.ErrHelp {
 			return err

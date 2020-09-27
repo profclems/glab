@@ -8,7 +8,7 @@ import (
 	"github.com/profclems/glab/internal/git"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	
+
 	"github.com/MakeNowJust/heredoc"
 )
 
