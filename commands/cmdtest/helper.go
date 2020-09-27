@@ -51,9 +51,7 @@ func InitTest(m *testing.M, suffix string) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	var repo string
-	// Make a copy of the testdata Git test project and chdir to it.
-	repo = CopyTestRepo(log.New(os.Stderr, "", log.LstdFlags), suffix)
+	var repo string = CopyTestRepo(log.New(os.Stderr, "", log.LstdFlags), suffix)
 
 	if err := os.Chdir(repo); err != nil {
 		log.Fatalf("Error chdir to test/testdata: %s", err)
