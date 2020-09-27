@@ -171,7 +171,7 @@ func dedent(s string) string {
 	minIndent := -1
 
 	for _, l := range lines {
-		if len(l) == 0 {
+		if l == "" {
 			continue
 		}
 

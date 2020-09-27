@@ -68,7 +68,6 @@ func RunTrace(apiClient *gitlab.Client, ctx context.Context, w io.Writer, pid in
 			continue
 		case "skipped":
 			fmt.Fprintf(w, "%s has been skipped\n", job.Name)
-			break
 		}
 		once.Do(func() {
 			if name == "" {

@@ -60,7 +60,7 @@ func NewCmdList(f *cmdutils.Factory) *cobra.Command {
 				}
 				labelPrintInfo += "\n"
 			}
-			fmt.Fprintf(out, utils.Indent(labelPrintInfo, " "))
+			fmt.Fprintln(out, utils.Indent(labelPrintInfo, " "))
 
 			// Cache labels for host
 			labelNames := make([]string, 0, len(labels))

@@ -295,7 +295,7 @@ func TestGetRemoteURL(t *testing.T) {
 		{
 			name:        "isInvalid",
 			remoteAlias: "origin",
-			want:        "profclems/glab.git",
+			want:        "profclems/glab",
 		},
 	}
 	for _, tt := range tests {

@@ -63,7 +63,10 @@ func InitTest(m *testing.M) {
 	if err := os.Chdir(originalWd); err != nil {
 		log.Fatalf("Error chdir to original working dir: %s", err)
 	}
-	os.Remove(GlabBinaryPath)
+	err = os.Remove(GlabBinaryPath)
+	if err != nil {
+		log.Fatal(err)
+	}
 	testdirs, err := filepath.Glob(os.ExpandEnv("$GOPATH/src/github.com/profclems/glab/test/testdata-*"))
 	if err != nil {
 		log.Printf("Error listing glob test/testdata-*: %s", err)

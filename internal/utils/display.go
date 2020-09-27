@@ -65,7 +65,7 @@ func DisplayList(lInfo ListInfo, projectID string) *uitable.Table {
 var lineRE = regexp.MustCompile(`(?m)^`)
 
 func Indent(s, indent string) string {
-	if len(strings.TrimSpace(s)) == 0 {
+	if strings.TrimSpace(s) == "" {
 		return s
 	}
 	return lineRE.ReplaceAllLiteralString(s, indent)

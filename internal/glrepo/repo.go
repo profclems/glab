@@ -101,7 +101,7 @@ func FromFullName(nwo string) (Interface, error) {
 
 	parts := strings.SplitN(nwo, "/", 3)
 	for _, p := range parts {
-		if len(p) == 0 {
+		if p == "" {
 			return nil, fmt.Errorf(`expected the "[HOST/]OWNER/[NAMESPACE/]REPO" format, got %q`, nwo)
 		}
 	}

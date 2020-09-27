@@ -2,6 +2,7 @@ package list
 
 import (
 	"errors"
+	"fmt"
 	"testing"
 	"time"
 
@@ -29,7 +30,7 @@ func TestNewCmdReleaseList(t *testing.T) {
 	timer, _ := time.Parse(time.RFC3339, "2014-11-12T11:45:26.371Z")
 	api.GetRelease = func(client *gitlab.Client, projectID interface{}, tag string) (*gitlab.Release, error) {
 		if projectID == "" || projectID == "WRONG_REPO" {
-
+			return nil, fmt.Errorf("error expected")
 		}
 		return &gitlab.Release{
 			TagName:     tag,

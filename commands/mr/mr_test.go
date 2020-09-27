@@ -46,6 +46,7 @@ func TestMrCmd(t *testing.T) {
 }
 
 func Test_mrCmd_autofill(t *testing.T) {
+	t.Parallel()
 	repo := cmdtest.CopyTestRepo(t)
 	var mrID string
 	t.Run("create", func(t *testing.T) {

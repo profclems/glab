@@ -39,8 +39,8 @@ func TestMrCmd(t *testing.T) {
 	cmd := NewCmdCreate(cmdtest.StubFactory())
 	cmd.Flags().StringP("repo", "R", "", "")
 
-	cliStr := []string{"-t", "myissuetitle",
-		"-d", "myissuebody",
+	cliStr := []string{"-t", "myMRtitle",
+		"-d", "myMRbody",
 		"-l", "test,bug",
 		"--milestone", "1",
 		"--assignee", "testuser",
@@ -57,7 +57,7 @@ func TestMrCmd(t *testing.T) {
 	out := stripansi.Strip(output.String())
 	outErr := stripansi.Strip(output.Stderr())
 
-	cmdtest.Eq(t, cmdtest.FirstLine([]byte(out)), `#1 myissuetitle (about 5 years ago)`)
+	assert.Contains(t, cmdtest.FirstLine([]byte(out)), `#1 myMRtitle`)
 	cmdtest.Eq(t, outErr, "")
 	assert.Contains(t, out, "https://gitlab.com/glab-cli/test/-/merge_requests/1")
 

@@ -52,7 +52,7 @@ func StripHostProtocol(h string) (hostname, protocol string) {
 		protocol = "https"
 	}
 	hostname = strings.TrimPrefix(hostname, protocol)
-	hostname = strings.Trim(hostname, "://")
+	hostname = strings.Trim(hostname, ":/")
 	return
 }
 

@@ -58,7 +58,7 @@ func NewCmdContributors(f *cmdutils.Factory) *cobra.Command {
 					utils.Green(string(rune(user.Additions))))
 			}
 
-			fmt.Fprintf(out, usersPrintDetails)
+			fmt.Fprintln(out, usersPrintDetails)
 			return err
 		},
 	}
