@@ -60,7 +60,7 @@ func Test_issueClose(t *testing.T) {
 		t.Run(tc.Name, func(t *testing.T) {
 			var stderr bytes.Buffer
 			var stdout bytes.Buffer
-			cmd := NewCmdClose(cmdtest.StubFactory())
+			cmd := NewCmdClose(cmdtest.StubFactory("https://gitlab.com/glab-cli/test"))
 			cmd.SetArgs([]string{tc.Issue})
 			cmd.SetOut(&stdout)
 			cmd.SetErr(&stderr)

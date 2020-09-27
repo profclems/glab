@@ -108,7 +108,7 @@ func TestNewCmdReleaseList(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			cmd := NewCmdReleaseList(cmdTestUtils.StubFactory())
+			cmd := NewCmdReleaseList(cmdTestUtils.StubFactory("https://gitlab.com/glab-cli/test"))
 			if tt.repo != "" {
 				cmd.Flags().StringP("repo", "R", "", "")
 				assert.Nil(t, cmd.Flags().Set("repo", tt.repo))

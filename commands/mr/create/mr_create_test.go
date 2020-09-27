@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/acarl005/stripansi"
 	"github.com/profclems/glab/commands/cmdtest"
+	"github.com/profclems/glab/internal/config"
 	"github.com/profclems/glab/pkg/api"
 	"github.com/stretchr/testify/assert"
 	"github.com/xanzy/go-gitlab"
@@ -12,12 +13,27 @@ import (
 	"time"
 )
 
+func TestMain(m *testing.M) {
+	cmdtest.InitTest(m)
+}
+
 func TestMrCmd(t *testing.T) {
+	defer config.StubConfig(`---
+hosts:
+  gitlab.com:
+    username: monalisa
+    token: OTOKEN
+`, "")()
+	stubFactory, _ := cmdtest.StubFactoryWithConfig("")
 	oldCreateMR := api.CreateMR
 	timer, _ := time.Parse(time.RFC3339, "2014-11-12T11:45:26.371Z")
 	api.CreateMR = func(client *gitlab.Client, projectID interface{}, opts *gitlab.CreateMergeRequestOptions) (*gitlab.MergeRequest, error) {
 		if projectID == "" || projectID == "WRONG_REPO" || projectID == "expected_err" {
 			return nil, fmt.Errorf("error expected")
+		}
+		repo, err := stubFactory.BaseRepo()
+		if err != nil {
+			return nil, err
 		}
 		return &gitlab.MergeRequest{
 			ID:          1,
@@ -31,12 +47,12 @@ func TestMrCmd(t *testing.T) {
 				Name:     "John Dev Wick",
 				Username: "jdwick",
 			},
-			WebURL:    "https://gitlab.com/glab-cli/test/-/merge_requests/1",
+			WebURL:    "https://" + repo.RepoHost() + "/" + repo.FullName() + "/-/merge_requests/1",
 			CreatedAt: &timer,
 		}, nil
 	}
 
-	cmd := NewCmdCreate(cmdtest.StubFactory())
+	cmd := NewCmdCreate(stubFactory)
 	cmd.Flags().StringP("repo", "R", "", "")
 
 	cliStr := []string{"-t", "myMRtitle",

@@ -37,7 +37,7 @@ func Test_IssueCreate(t *testing.T) {
 		}, nil
 	}
 
-	cmd := NewCmdCreate(cmdtest.StubFactory())
+	cmd := NewCmdCreate(cmdtest.StubFactory("https://gitlab.com/glab-cli/test"))
 	cmd.Flags().StringP("repo", "R", "", "")
 
 	cliStr := []string{"-t", "myissuetitle",

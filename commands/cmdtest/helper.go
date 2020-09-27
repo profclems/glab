@@ -136,13 +136,32 @@ func Eq(t *testing.T, got interface{}, expected interface{}) {
 	}
 }
 
-func StubFactory() *cmdutils.Factory {
+func StubFactory(repo string) *cmdutils.Factory {
 	if CachedTestFactory != nil {
 		return CachedTestFactory
 	}
 	conf := config.NewBlankConfig()
 	CachedTestFactory = cmdutils.New(conf, nil)
-	CachedTestFactory, _ = CachedTestFactory.NewClient("https://gitlab.com/glab-cli/test")
+	if repo != "" {
+		CachedTestFactory, _ = CachedTestFactory.NewClient(repo)
+	}
 
 	return CachedTestFactory
 }
+
+func StubFactoryWithConfig(repo string) (*cmdutils.Factory, error) {
+	if CachedTestFactory != nil {
+		return CachedTestFactory, nil
+	}
+	conf, err := config.ParseConfig("config.yml")
+	if err != nil {
+		return nil, err
+	}
+	CachedTestFactory = cmdutils.New(conf, nil)
+	if repo != "" {
+		CachedTestFactory, _ = CachedTestFactory.NewClient(repo)
+	}
+
+	return CachedTestFactory, nil
+}
+
