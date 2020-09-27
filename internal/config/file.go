@@ -2,18 +2,14 @@ package config
 
 import (
 	"bufio"
-	"io/ioutil"
 	"log"
 	"os"
-	"strings"
 )
 
-// glab environment cache: <file: <key: value>>
-var envCache map[string]map[string]string
-
+// CheckPathExists checks if a folder exists and is a directory
 func CheckPathExists(path string) bool {
-	if _, err := os.Stat(path); err == nil || !os.IsNotExist(err) {
-		return true
+	if info, err := os.Stat(path); err == nil || !os.IsNotExist(err) {
+		return info.IsDir()
 	}
 	return false
 }
@@ -62,37 +58,7 @@ func ReadAndAppend(file, text string) {
 	}
 }
 
-func readConfig(filePath string) map[string]string {
-	var config = make(map[string]string)
-	data, _ := ioutil.ReadFile(filePath)
-	file := string(data)
-	temp := strings.Split(file, "\n")
-	for _, item := range temp {
-		//fmt.Println("[",line,"]",item)
-		env := strings.Split(item, "=")
-		if len(env) > 1 {
-			config[env[0]] = env[1]
-		}
-	}
-	return config
-}
-
-// GetKeyValueInFile : returns env variable value
-func GetKeyValueInFile(filePath, key string) string {
-	configCache, okConfig := envCache[filePath]
-	if !okConfig {
-		configCache = readConfig(filePath)
-		if envCache == nil {
-			envCache = make(map[string]map[string]string)
-		}
-		envCache[filePath] = configCache
-	}
-
-	if cachedEnv, okEnv := configCache[key]; okEnv {
-		if cachedEnv == "" {
-			cachedEnv = "OK"
-		}
-		return cachedEnv
-	}
-	return "NOTFOUND"
+// BackupConfigFile creates a backup of the provided config file
+var BackupConfigFile = func(filename string) error {
+	return os.Rename(filename, filename+".bak")
 }

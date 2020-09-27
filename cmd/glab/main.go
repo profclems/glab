@@ -119,7 +119,7 @@ func main() {
 }
 
 func initConfig() (config.Config, error) {
-	if err := config.SetGlobalPathDir(); err != nil {
+	if err := config.MigrateOldConfig(); err != nil {
 		return nil, err
 	}
 	return config.Init()

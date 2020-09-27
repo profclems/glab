@@ -187,15 +187,6 @@ func NewBlankRoot() *yaml.Node {
 						Value: "",
 					},
 					{
-						HeadComment: "Git remote alias which glab should use when fetching the remote url. This can be overridden by hostname",
-						Kind:        yaml.ScalarNode,
-						Value:       "remote_alias",
-					},
-					{
-						Kind:  yaml.ScalarNode,
-						Value: "origin",
-					},
-					{
 						HeadComment: "Set your desired markdown renderer style. Available options are [dark, light, notty] or set a custom style. Refer to https://github.com/charmbracelet/glamour#styles",
 						Kind:        yaml.ScalarNode,
 						Value:       "glamour_style",

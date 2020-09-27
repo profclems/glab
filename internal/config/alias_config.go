@@ -7,7 +7,7 @@ import (
 )
 
 func aliasesConfigFile() string {
-	return path.Join(globalPathDir, "aliases.yml")
+	return path.Join(ConfigDir(), "aliases.yml")
 }
 
 type AliasConfig struct {
