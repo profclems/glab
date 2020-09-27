@@ -20,18 +20,18 @@ func TestMrCmd(t *testing.T) {
 			return nil, fmt.Errorf("error expected")
 		}
 		return &gitlab.MergeRequest{
-			ID: 1,
-			IID:     1,
-			Title: *opts.Title,
-			Labels: opts.Labels,
+			ID:          1,
+			IID:         1,
+			Title:       *opts.Title,
+			Labels:      opts.Labels,
 			State:       "opened",
 			Description: *opts.Description,
-			Author:&gitlab.BasicUser{
+			Author: &gitlab.BasicUser{
 				ID:       1,
 				Name:     "John Dev Wick",
 				Username: "jdwick",
 			},
-			WebURL: "https://gitlab.com/glab-cli/test/-/merge_requests/1",
+			WebURL:    "https://gitlab.com/glab-cli/test/-/merge_requests/1",
 			CreatedAt: &timer,
 		}, nil
 	}

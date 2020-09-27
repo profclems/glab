@@ -56,7 +56,7 @@ func NewCmdDelete(f *cmdutils.Factory) *cobra.Command {
 						return err
 					}
 
-					fmt.Fprintln(out, utils.RedCheck(), "Pipeline #" + strconv.Itoa(item.ID) + " Deleted Successfully")
+					fmt.Fprintln(out, utils.RedCheck(), "Pipeline #"+strconv.Itoa(item.ID)+" Deleted Successfully")
 				}
 
 			} else {
@@ -64,13 +64,13 @@ func NewCmdDelete(f *cmdutils.Factory) *cobra.Command {
 
 				arrIds := strings.Split(strings.Trim(pipelineID, "[] "), ",")
 				for _, i2 := range arrIds {
-					fmt.Fprintln(out, "Deleting Pipeline #" + i2)
+					fmt.Fprintln(out, "Deleting Pipeline #"+i2)
 					err := api.DeletePipeline(apiClient, repo.FullName(), utils.StringToInt(i2))
 					if err != nil {
 						return err
 					}
 
-					fmt.Fprintln(out, utils.RedCheck(), "Pipeline #" + i2 + " Deleted Successfully")
+					fmt.Fprintln(out, utils.RedCheck(), "Pipeline #"+i2+" Deleted Successfully")
 				}
 				fmt.Println()
 			}

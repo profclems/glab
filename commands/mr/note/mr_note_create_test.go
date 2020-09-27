@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestMain(m *testing.M)  {
+func TestMain(m *testing.M) {
 	cmdtest.InitTest(m)
 }
 

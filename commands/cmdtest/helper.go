@@ -22,9 +22,9 @@ import (
 )
 
 var (
-	GlabBinaryPath = "../../bin/glab"
+	GlabBinaryPath    = "../../bin/glab"
 	CachedTestFactory *cmdutils.Factory
-	TestRepo = ""
+	TestRepo          = ""
 )
 
 type fatalLogger interface {
@@ -78,7 +78,7 @@ func InitTest(m *testing.M) {
 	os.Exit(code)
 }
 
-func RunCommand(cmd *cobra.Command, cli string) (*test.CmdOut, error)  {
+func RunCommand(cmd *cobra.Command, cli string) (*test.CmdOut, error) {
 	var stderr bytes.Buffer
 	var stdout bytes.Buffer
 

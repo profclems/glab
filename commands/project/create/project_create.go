@@ -166,8 +166,8 @@ func runCreateProject(cmd *cobra.Command, args []string, f *cmdutils.Factory) er
 			token, _ := cfg.Get(repo.RepoHost(), "token")
 			remote, err := glrepo.RemoteURL(project, &glrepo.RemoteArgs{
 				Protocol: protocol,
-				Token: token,
-				Url: repo.RepoHost(),
+				Token:    token,
+				Url:      repo.RepoHost(),
 				Username: repo.RepoOwner(),
 			})
 			if err != nil {

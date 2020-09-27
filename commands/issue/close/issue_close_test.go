@@ -19,16 +19,16 @@ func Test_issueClose(t *testing.T) {
 
 	oldUpdateIssue := api.UpdateIssue
 	timer, _ := time.Parse(time.RFC3339, "2014-11-12T11:45:26.371Z")
-	api.UpdateIssue =  func(client *gitlab.Client, projectID interface{}, issueID int, opts *gitlab.UpdateIssueOptions) (*gitlab.Issue, error) {
+	api.UpdateIssue = func(client *gitlab.Client, projectID interface{}, issueID int, opts *gitlab.UpdateIssueOptions) (*gitlab.Issue, error) {
 		if projectID == "" || projectID == "WRONG_REPO" || projectID == "expected_err" || issueID == 0 {
 			return nil, fmt.Errorf("error expected")
 		}
 		return &gitlab.Issue{
-			ID: issueID,
-			IID:     issueID,
+			ID:          issueID,
+			IID:         issueID,
 			State:       "closed",
 			Description: "Dummy description for issue " + string(rune(issueID)),
-			Author:&gitlab.IssueAuthor{
+			Author: &gitlab.IssueAuthor{
 				ID:       1,
 				Name:     "John Dev Wick",
 				Username: "jdwick",

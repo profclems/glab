@@ -25,5 +25,5 @@ func NewCmdRepo(f *cmdutils.Factory) *cobra.Command {
 	repoCmd.AddCommand(repoCmdCreate.NewCmdCreate(f))
 	repoCmd.AddCommand(repoCmdSearch.NewCmdSearch(f))
 
-	return  repoCmd
+	return repoCmd
 }

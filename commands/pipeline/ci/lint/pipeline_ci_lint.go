@@ -70,7 +70,7 @@ func NewCmdLint(f *cmdutils.Factory) *cobra.Command {
 			}
 
 			if lint.Status == "invalid" {
-				fmt.Fprintln(out, utils.Red(path + " is invalid"))
+				fmt.Fprintln(out, utils.Red(path+" is invalid"))
 				for i, err := range lint.Errors {
 					i++
 					fmt.Fprintln(out, i, err)

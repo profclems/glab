@@ -59,8 +59,8 @@ func TestRootHelpFunc(t *testing.T) {
 		args    []string
 	}
 	tests := []struct {
-		name string
-		args args
+		name    string
+		args    args
 		wantOut string
 	}{
 		{
@@ -78,11 +78,10 @@ USAGE
 			name: "test nested alias cmd",
 			args: args{
 				command: set.NewCmdSet(&cmdutils.Factory{}, nil),
-				args: []string{"set", "-h"},
+				args:    []string{"set", "-h"},
 			},
 			wantOut: "USAGE\n  alias set <alias name> '<command>' [flags]\n\nFLAGS\n  -s, --shell ",
 		},
-
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

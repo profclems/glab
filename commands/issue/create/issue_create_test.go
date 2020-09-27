@@ -20,19 +20,19 @@ func Test_IssueCreate(t *testing.T) {
 			return nil, fmt.Errorf("error expected")
 		}
 		return &gitlab.Issue{
-			ID: 1,
-			IID:     1,
-			Title: *opts.Title,
-			Labels: opts.Labels,
+			ID:          1,
+			IID:         1,
+			Title:       *opts.Title,
+			Labels:      opts.Labels,
 			State:       "opened",
 			Description: *opts.Description,
-			Weight: *opts.Weight,
-			Author:&gitlab.IssueAuthor{
+			Weight:      *opts.Weight,
+			Author: &gitlab.IssueAuthor{
 				ID:       1,
 				Name:     "John Dev Wick",
 				Username: "jdwick",
 			},
-			WebURL: "https://gitlab.com/glab-cli/test/-/issues/1",
+			WebURL:    "https://gitlab.com/glab-cli/test/-/issues/1",
 			CreatedAt: &timer,
 		}, nil
 	}

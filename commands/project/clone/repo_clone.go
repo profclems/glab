@@ -55,8 +55,8 @@ func NewCmdClone(f *cmdutils.Factory) *cobra.Command {
 
 			remoteArgs := &glrepo.RemoteArgs{
 				Protocol: protocol,
-				Token: token,
-				Url: baseRepo.RepoHost(),
+				Token:    token,
+				Url:      baseRepo.RepoHost(),
 				Username: baseRepo.RepoOwner(),
 			}
 
