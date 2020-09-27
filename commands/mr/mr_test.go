@@ -19,7 +19,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-
 func TestMain(m *testing.M) {
 	cmdtest.InitTest(m, "mr_cmd_test")
 	cmdtest.InitTest(m, "mr_cmd_autofill")
