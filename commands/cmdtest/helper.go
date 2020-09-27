@@ -164,4 +164,3 @@ func StubFactoryWithConfig(repo string) (*cmdutils.Factory, error) {
 
 	return CachedTestFactory, nil
 }
-
