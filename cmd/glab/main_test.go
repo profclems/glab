@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/pkg/errors"
 	"github.com/profclems/glab/commands/cmdutils"
-	"github.com/profclems/glab/internal/config"
 	"github.com/spf13/cobra"
 	"net"
 	"testing"
@@ -37,12 +36,12 @@ func Test_printError(t *testing.T) {
 			name: "DNS error",
 			args: args{
 				err: fmt.Errorf("DNS oopsie: %w", &net.DNSError{
-					Name: config.GetEnv("GITLAB_URI") + "/api/v4",
+					Name: "https://gitlab.com/api/v4",
 				}),
 				cmd:   nil,
 				debug: false,
 			},
-			wantOut: `error connecting to ` + config.GetEnv("GITLAB_URI") + `/api/v4
+			wantOut: `error connecting to https://gitlab.com/api/v4
 check your internet connection or status.gitlab.com or 'Run sudo gitlab-ctl status' on your server if self-hosted
 `,
 		},

@@ -12,7 +12,6 @@ import (
 
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/MakeNowJust/heredoc"
-	"github.com/gookit/color"
 	"github.com/gosuri/uilive"
 	"github.com/spf13/cobra"
 	"github.com/xanzy/go-gitlab"
@@ -88,11 +87,11 @@ func NewCmdStatus(f *cmdutils.Factory) *cobra.Command {
 						var status string
 						switch s := job.Status; s {
 						case "failed":
-							status = color.Red.Sprint(s)
+							status = utils.Red(s)
 						case "success":
-							status = color.Green.Sprint(s)
+							status = utils.Green(s)
 						default:
-							status = color.Gray.Sprint(s)
+							status = utils.Gray(s)
 						}
 						//fmt.Println(job.Tag)
 						_, _ = fmt.Fprintf(writer, "(%s) • %s\t\t%s\t\t%s\n", status, duration, job.Stage, job.Name)

@@ -12,7 +12,6 @@ require (
 	github.com/gdamore/tcell v1.4.0
 	github.com/google/renameio v0.1.0
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510
-	github.com/gookit/color v1.3.1
 	github.com/gosuri/uilive v0.0.4
 	github.com/gosuri/uitable v0.0.4
 	github.com/hashicorp/go-version v1.2.1
@@ -28,7 +27,7 @@ require (
 	github.com/rivo/tview v0.0.0-20200712113419-c65badfc3d92
 	github.com/spf13/cobra v1.0.0
 	github.com/spf13/pflag v1.0.5
-	github.com/stretchr/testify v1.6.1
+	github.com/stretchr/testify v1.4.0
 	github.com/tcnksm/go-gitconfig v0.1.2
 	github.com/xanzy/go-gitlab v0.38.1
 	gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c

@@ -7,7 +7,6 @@ import (
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/internal/utils"
 
-	"github.com/gookit/color"
 	"github.com/spf13/cobra"
 	"github.com/xanzy/go-gitlab"
 )
@@ -51,15 +50,15 @@ func NewCmdSearch(f *cmdutils.Factory) *cobra.Command {
 					p := projects[ri]
 					switch ci {
 					case 0:
-						return color.Green.Sprint(p.ID)
+						return utils.Green(string(rune(p.ID)))
 					case 1:
 						var description string
 						if p.Description != "" {
-							description = color.Sprintf("\n<cyan>%s</>", p.Description)
+							description = fmt.Sprintf("\n%s", utils.Cyan(p.Description))
 						}
 						return fmt.Sprintf("%s%s\n%s",
 							strings.ReplaceAll(p.PathWithNamespace, "/", " / "),
-							description, color.Gray.Sprint(p.WebURL))
+							description, utils.Gray(p.WebURL))
 					case 2:
 						return fmt.Sprintf("%d stars %d forks %d issues", p.StarCount, p.ForksCount, p.OpenIssuesCount)
 					case 3:

@@ -2,15 +2,14 @@ package view
 
 import (
 	"fmt"
-	"github.com/profclems/glab/commands/cmdutils"
-	"github.com/profclems/glab/pkg/api"
 	"strings"
 	"time"
 
+	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/internal/utils"
+	"github.com/profclems/glab/pkg/api"
 
 	"github.com/MakeNowJust/heredoc"
-	"github.com/gookit/color"
 	"github.com/gosuri/uitable"
 	"github.com/spf13/cobra"
 	"github.com/xanzy/go-gitlab"
@@ -150,7 +149,7 @@ func NewCmdView(f *cmdutils.Factory) *cobra.Command {
 						table.AddRow(note.Author.Username+":",
 							fmt.Sprintf("%s\n%s",
 								note.Body,
-								color.Gray.Sprint(utils.TimeToPrettyTimeAgo(*note.CreatedAt)),
+								utils.Gray(utils.TimeToPrettyTimeAgo(*note.CreatedAt)),
 							),
 						)
 						table.AddRow("")

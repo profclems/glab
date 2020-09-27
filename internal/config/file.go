@@ -77,11 +77,6 @@ func readConfig(filePath string) map[string]string {
 	return config
 }
 
-// InvalidateEnvCacheForFile : Invalidates the cached content of a file used by eg. GetKeyValueInFile
-func InvalidateEnvCacheForFile(filePath string) {
-	delete(envCache, filePath)
-}
-
 // GetKeyValueInFile : returns env variable value
 func GetKeyValueInFile(filePath, key string) string {
 	configCache, okConfig := envCache[filePath]
