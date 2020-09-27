@@ -10,6 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// TODO: test by mocking the appropriate api function
 func TestMain(m *testing.M) {
 	cmdtest.InitTest(m)
 }

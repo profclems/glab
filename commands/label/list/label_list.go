@@ -68,7 +68,7 @@ func NewCmdList(f *cmdutils.Factory) *cobra.Command {
 				labelNames = append(labelNames, label.Name)
 			}
 			labelsEntry := strings.Join(labelNames, ",")
-			if err := cfg.Set(repo.RepoHost(), "labels", labelsEntry); err != nil {
+			if err := cfg.Set(repo.RepoHost(), "project_labels", labelsEntry); err != nil {
 				_ = cfg.Write()
 			}
 

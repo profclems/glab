@@ -1,23 +1,12 @@
 package create
 
 import (
-	"fmt"
-	"github.com/pkg/errors"
-	"github.com/profclems/glab/commands/cmdtest"
-	"github.com/profclems/glab/pkg/api"
-	"github.com/stretchr/testify/require"
-	"os"
-	"os/exec"
-	"path/filepath"
-	"strings"
 	"testing"
 )
 
-func TestMain(m *testing.M) {
-	cmdtest.InitTest(m)
-}
-
+// TODO: test by mocking the appropriate api function
 func Test_projectCreateCmd(t *testing.T) {
+	/*
 	t.Parallel()
 	repo := cmdtest.CopyTestRepo(t)
 	expectedPath := fmt.Sprintf("glab-cli/%s", filepath.Base(repo))
@@ -103,4 +92,6 @@ func Test_projectCreateCmdWithArgs(t *testing.T) {
 	if err != nil {
 		t.Fatal(errors.Wrap(err, "failed to delete project during cleanup"))
 	}
+
+	 */
 }

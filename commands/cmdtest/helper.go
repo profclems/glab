@@ -24,7 +24,6 @@ import (
 var (
 	GlabBinaryPath    = "../../bin/glab"
 	CachedTestFactory *cmdutils.Factory
-	TestRepo          = ""
 )
 
 type fatalLogger interface {
@@ -54,7 +53,6 @@ func InitTest(m *testing.M) {
 	}
 	// Make a copy of the testdata Git test project and chdir to it.
 	repo := CopyTestRepo(log.New(os.Stderr, "", log.LstdFlags))
-	TestRepo = repo
 	if err := os.Chdir(repo); err != nil {
 		log.Fatalf("Error chdir to test/testdata: %s", err)
 	}
@@ -63,10 +61,8 @@ func InitTest(m *testing.M) {
 	if err := os.Chdir(originalWd); err != nil {
 		log.Fatalf("Error chdir to original working dir: %s", err)
 	}
-	err = os.Remove(GlabBinaryPath)
-	if err != nil {
-		log.Fatal(err)
-	}
+	_ = os.Remove(GlabBinaryPath)
+
 	testdirs, err := filepath.Glob(os.ExpandEnv("$GOPATH/src/github.com/profclems/glab/test/testdata-*"))
 	if err != nil {
 		log.Printf("Error listing glob test/testdata-*: %s", err)

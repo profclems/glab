@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// TODO: test by mocking the appropriate api function
 func TestMain(m *testing.M) {
 	cmdtest.InitTest(m)
 }

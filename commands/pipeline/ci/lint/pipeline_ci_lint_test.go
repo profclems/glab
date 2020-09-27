@@ -12,7 +12,6 @@ func TestMain(m *testing.M) {
 }
 
 func Test_pipelineCILint(t *testing.T) {
-	t.Parallel()
 	repo := cmdtest.CopyTestRepo(t)
 	cmd := exec.Command(cmdtest.GlabBinaryPath, "pipeline", "ci", "lint")
 	cmd.Dir = repo

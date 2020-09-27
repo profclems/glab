@@ -13,7 +13,6 @@ func TestMain(m *testing.M) {
 }
 
 func Test_ciTrace(t *testing.T) {
-	t.Parallel()
 	repo := cmdtest.CopyTestRepo(t)
 	cmd := exec.Command("git", "fetch", "origin")
 	cmd.Dir = repo

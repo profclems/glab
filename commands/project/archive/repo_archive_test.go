@@ -12,7 +12,6 @@ func TestMain(m *testing.M) {
 }
 
 func Test_repoArchive(t *testing.T) {
-	t.Parallel()
 	repo := cmdtest.CopyTestRepo(t)
 
 	type argFlags struct {

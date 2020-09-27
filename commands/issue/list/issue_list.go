@@ -1,8 +1,10 @@
 package list
 
 import (
+	"fmt"
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/commands/issue/issueutils"
+	"github.com/profclems/glab/internal/utils"
 	"github.com/profclems/glab/pkg/api"
 
 	"github.com/spf13/cobra"
@@ -79,7 +81,7 @@ func NewCmdList(f *cmdutils.Factory) *cobra.Command {
 			if err != nil {
 				return err
 			}
-			issueutils.DisplayAllIssues(issues, repo.FullName())
+			fmt.Fprintln(utils.ColorableOut(cmd), issueutils.DisplayAllIssues(issues, repo.FullName()))
 			return nil
 
 		},
