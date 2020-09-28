@@ -141,7 +141,7 @@ func migrateOldAliasFile(cfg Config) error {
 
 // migrateUserConfigs gets the config in the old config (.env) and insert into the new config file
 // Note that this uses the new config directory so it's important to run migrateGlobalConfigDir() first
-func migrateUserConfigs(filePath string, cfg Config, isGlobal bool) (error) {
+func migrateUserConfigs(filePath string, cfg Config, isGlobal bool) error {
 	oldConfigFile := filepath.Join(filePath, ".env")
 	if CheckFileExists(oldConfigFile) {
 		log.Println("- Migrating configuration")
@@ -208,7 +208,7 @@ func migrateUserConfigs(filePath string, cfg Config, isGlobal bool) (error) {
 func writeConfig(cfg Config, key, value string, isGlobal bool) (nCfg Config, err error) {
 	nCfg = cfg
 	if !isGlobal {
-		lCfg,_ := cfg.Local()
+		lCfg, _ := cfg.Local()
 		err = lCfg.Set(key, value)
 	} else {
 		err = nCfg.Set("", key, value)
