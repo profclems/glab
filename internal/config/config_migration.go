@@ -141,7 +141,7 @@ func migrateOldAliasFile(cfg Config) error {
 
 // migrateUserConfigs gets the config in the old config (.env) and insert into the new config file
 // Note that this uses the new config directory so it's important to run migrateGlobalConfigDir() first
-func migrateUserConfigs(filePath string, cfg Config, isGlobal bool) (err error) {
+func migrateUserConfigs(filePath string, cfg Config, isGlobal bool) (error) {
 	oldConfigFile := filepath.Join(filePath, ".env")
 	if CheckFileExists(oldConfigFile) {
 		log.Println("- Migrating configuration")
@@ -151,6 +151,8 @@ func migrateUserConfigs(filePath string, cfg Config, isGlobal bool) (err error) 
 
 		var host string
 		var token string
+		var schema string
+		var err error
 
 		for _, item := range temp {
 			item = strings.TrimSpace(item)
@@ -160,10 +162,9 @@ func migrateUserConfigs(filePath string, cfg Config, isGlobal bool) (err error) 
 					// skip if config is hostname or token
 					if isGlobal && (env[0] == "GITLAB_URI" || env[0] == "GITLAB_TOKEN") {
 						if env[0] == "GITLAB_URI" {
-							host = env[0]
-						}
-						if env[0] == "GITLAB_TOKEN" {
-							host = env[0]
+							host = env[1]
+						} else if env[0] == "GITLAB_TOKEN" {
+							token = env[1]
 						}
 						continue
 					}
@@ -175,20 +176,33 @@ func migrateUserConfigs(filePath string, cfg Config, isGlobal bool) (err error) 
 			}
 		}
 
-		if host != "" && token != ""{
+		if host != "" {
 			h, err := url.Parse(host)
 			if err == nil {
 				host = h.Hostname()
+				schema = h.Scheme
 			}
+			err = cfg.Set(host, "api_protocol", schema)
+			if err != nil {
+				return err
+			}
+		}
+		if token != "" {
 			err = cfg.Set(host, "token", token)
+			if err != nil {
+				return err
+			}
 		}
 
 		err = cfg.Write()
+		if err != nil {
+			return err
+		}
 		// backup the old alias file
 		return BackupConfigFile(oldConfigFile)
 	}
 
-	return
+	return nil
 }
 
 func writeConfig(cfg Config, key, value string, isGlobal bool) (nCfg Config, err error) {
