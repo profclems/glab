@@ -22,12 +22,13 @@ Inspired by `gh`, [the official GitHub CLI tool](https://github.com/cli/cli).
   ```
 
 ### Core Commands
-
-- `glab mr [list, create, close, reopen, delete]`
-- `glab issue [list, create, close, reopen, delete]`
-- `glab pipeline [list, delete, ci status, ci view]`
-- `glab config`
-- `glab help`
+- `glab mr [list, create, close, reopen, delete, ...]`
+- `glab issue [list, create, close, reopen, delete, ...]`
+- `glab pipeline [list, delete, ci status, ci view, ...]`
+- `glab release`
+- `glab repo`
+- `glab label`
+- `glab alias`
 
 
 ### Examples
@@ -168,26 +169,27 @@ If a supported binary for your OS is not found at the [releases page](https://gi
 
 ## Configuration
 Get a GitLab access token at https://gitlab.com/profile/personal_access_tokens or https://gitlab.example.com/profile/personal_access_tokens if self-hosted.
+
 **To set configuration globally**
 ```sh
-glab config -g # Will be prompted for details
+glab config init -g # Will be prompted for details
 ```
 or
 ```sh
-glab config -g --token=<YOUR-GITLAB-ACCESS-TOKEN> --url=https://gitlab.com  --remote-var=origin
+glab config set -g token xxxxxx --host=gitlab.com
 ```
 **To set configuration for current directory (must be a git repository)**
 ```sh
-glab config init  # Will be prompted for details
+glab config init  # Will be prompted for basic details
 ```
 or
 ```sh
-glab config --token=<YOUR-GITLAB-ACCESS-TOKEN> --url=https://gitlab.com --remote-var=origin
+glab config set -g token xxxxxx --host=gitlab.com
 ```
 
 ### Example
 ```sh
-glab config --token=sometoken --url=https://gitlab.com --pid=someprojectid --repo=profclems/glab
+glab config 
 ```
 **NB**: Change gitlab.com to company or group's gitlab url (eg. gitlab.example.com) if self-hosted
 
@@ -195,20 +197,19 @@ glab config --token=sometoken --url=https://gitlab.com --pid=someprojectid --rep
   ```sh
   GITLAB_TOKEN: an authentication token for API requests. Setting this avoids being
   prompted to authenticate and overrides any previously stored credentials.
-  Can be set with `glab config --token=<YOUR-GITLAB-ACCESS-TOKEN>`
+  Can be set in the config with 'glab config set token xxxxxx'
 
-  GITLAB_REPO: specify the Gitlab repository in "OWNER/REPO" format for commands that
-  otherwise operate on a local repository. (Depreciated in v1.6.2) 
-  Can be set with `glab config --repo=OWNER/REPO`
+  GITLAB_URI or GITLAB_HOST: specify the url of the gitlab server if self hosted (eg: https://gitlab.example.com). Default is https://gitlab.com.
 
-  GITLAB_URI: specify the url of the gitlab server if self hosted (eg: https://gitlab.example.com). 
-  Default is https://gitlab.com.
-  Can be set with `glab config --url=https://gitlab.example.com`
-  
+  REMOTE_ALIAS or GIT_REMOTE_URL_VAR: git remote variable or alias that contains the gitlab url.
+  Can be set in the config with 'glab config set remote_alias origin'
+
   VISUAL, EDITOR (in order of precedence): the editor tool to use for authoring text.
+  Can be set in the config with 'glab config set editor vim'
 
   BROWSER: the web browser to use for opening links.
-  
+  Can be set in the config with 'glab config set browser mybrowser'
+
   GLAMOUR_STYLE: environment variable to set your desired markdown renderer style
   Available options are (dark|light|notty) or set a custom style
   https://github.com/charmbracelet/glamour#styles
