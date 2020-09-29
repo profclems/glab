@@ -79,8 +79,8 @@ func RootHelpFunc(command *cobra.Command, args []string) {
 		return
 	}
 
-	coreCommands := []string{}
-	additionalCommands := []string{}
+	var coreCommands []string
+	var additionalCommands []string
 	for _, c := range command.Commands() {
 		if c.Short == "" {
 			continue
@@ -140,8 +140,7 @@ func RootHelpFunc(command *cobra.Command, args []string) {
 		helpEntries = append(helpEntries, helpEntry{"ENVIRONMENT VARIABLES", command.Annotations["help:environment"]})
 	}
 	helpEntries = append(helpEntries, helpEntry{"LEARN MORE", `
-Use 'glab <command> <subcommand> --help' for more information about a command.
-Read the manual at https://cli.github.com/manual`})
+Use 'glab <command> <subcommand> --help' for more information about a command.`})
 	if _, ok := command.Annotations["help:feedback"]; ok {
 		helpEntries = append(helpEntries, helpEntry{"FEEDBACK", command.Annotations["help:feedback"]})
 	}

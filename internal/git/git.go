@@ -378,7 +378,7 @@ func Remotes() (RemoteSet, error) {
 	remotes := parseRemotes(list)
 
 	// this is affected by SetRemoteResolution
-	remoteCmd := exec.Command("git", "config", "--get-regexp", `^remote\..*\.gh-resolved$`)
+	remoteCmd := exec.Command("git", "config", "--get-regexp", `^remote\..*\.glab-resolved$`)
 	output, _ := run.PrepareCmd(remoteCmd).Output()
 	for _, l := range outputLines(output) {
 		parts := strings.SplitN(l, " ", 2)
@@ -469,7 +469,7 @@ func AddRemote(name, u string) (*Remote, error) {
 }
 
 func SetRemoteResolution(name, resolution string) error {
-	addCmd := exec.Command("git", "config", "--add", fmt.Sprintf("remote.%s.glab-cli-resolved", name), resolution)
+	addCmd := exec.Command("git", "config", "--add", fmt.Sprintf("remote.%s.glab-resolved", name), resolution)
 	return run.PrepareCmd(addCmd).Run()
 }
 

@@ -2,6 +2,7 @@ package commands
 
 import (
 	"fmt"
+
 	aliasCmd "github.com/profclems/glab/commands/alias"
 	"github.com/profclems/glab/commands/cmdutils"
 	completionCmd "github.com/profclems/glab/commands/completion"
@@ -44,7 +45,7 @@ func NewCmdRoot(f *cmdutils.Factory, version, buildDate string) *cobra.Command {
 
 			GITLAB_URI or GITLAB_HOST: specify the url of the gitlab server if self hosted (eg: https://gitlab.example.com). Default is https://gitlab.com.
 
-			REMOTE_ALIAS or GIT_REMOTE_URL_VAR: git remote variable or alias that contains the gitlab url. Defaults to origin
+			REMOTE_ALIAS or GIT_REMOTE_URL_VAR: git remote variable or alias that contains the gitlab url.
 			Can be set in the config with 'glab config set remote_alias origin'
 
 			VISUAL, EDITOR (in order of precedence): the editor tool to use for authoring text.

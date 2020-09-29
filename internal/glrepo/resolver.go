@@ -38,7 +38,7 @@ func ResolveRemotesToRepos(remotes Remotes, client *gitlab.Client, base string) 
 
 func resolveNetwork(result *ResolvedRemotes) error {
 	for _, r := range result.remotes {
-		networkResult, err := api.GetProject(result.apiClient, r)
+		networkResult, err := api.GetProject(result.apiClient, r.FullName())
 		if err == nil {
 			result.network = append(result.network, *networkResult)
 		}

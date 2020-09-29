@@ -90,13 +90,7 @@ func New(cachedConfig config.Config, configError error) *Factory {
 			}
 			return httpClientFunc(cfg, repo)
 		},
-		BaseRepo: func() (glrepo.Interface, error) {
-			remotes, err := remotesFunc()
-			if err != nil {
-				return nil, err
-			}
-			return glrepo.FromURL(remotes[0].FetchURL)
-		},
+		BaseRepo: baseRepoFunc,
 		Branch: func() (string, error) {
 			currentBranch, err := git.CurrentBranch()
 			if err != nil {
