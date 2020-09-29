@@ -3,20 +3,12 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"github.com/pkg/errors"
+	"github.com/profclems/glab/commands/cmdutils"
+	"github.com/spf13/cobra"
 	"net"
 	"testing"
-
-	"github.com/pkg/errors"
-	"github.com/profclems/glab/internal/config"
-	"github.com/profclems/glab/internal/utils"
-	"github.com/spf13/cobra"
 )
-
-// Test started when the test binary is started
-// and calls the main function
-func TestGlab(t *testing.T) {
-	main()
-}
 
 func Test_printError(t *testing.T) {
 	cmd := &cobra.Command{}
@@ -44,19 +36,19 @@ func Test_printError(t *testing.T) {
 			name: "DNS error",
 			args: args{
 				err: fmt.Errorf("DNS oopsie: %w", &net.DNSError{
-					Name: config.GetEnv("GITLAB_URI") + "/api/v4",
+					Name: "https://gitlab.com/api/v4",
 				}),
 				cmd:   nil,
 				debug: false,
 			},
-			wantOut: `error connecting to ` + config.GetEnv("GITLAB_URI") + `/api/v4
+			wantOut: `error connecting to https://gitlab.com/api/v4
 check your internet connection or status.gitlab.com or 'Run sudo gitlab-ctl status' on your server if self-hosted
 `,
 		},
 		{
 			name: "Cobra flag error",
 			args: args{
-				err:   &utils.FlagError{Err: errors.New("unknown flag --foo")},
+				err:   &cmdutils.FlagError{Err: errors.New("unknown flag --foo")},
 				cmd:   cmd,
 				debug: false,
 			},
@@ -82,4 +74,10 @@ check your internet connection or status.gitlab.com or 'Run sudo gitlab-ctl stat
 			}
 		})
 	}
+}
+
+// Test started when the test binary is started
+// and calls the main function
+func TestGlab(t *testing.T) {
+	main()
 }

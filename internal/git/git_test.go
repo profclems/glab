@@ -8,6 +8,8 @@ import (
 
 	"github.com/profclems/glab/internal/run"
 	"github.com/profclems/glab/test"
+
+	"github.com/stretchr/testify/require"
 )
 
 func Test_isFilesystemPath(t *testing.T) {
@@ -78,7 +80,7 @@ func Test_CurrentBranch(t *testing.T) {
 
 	result, err := CurrentBranch()
 	if err != nil {
-		t.Errorf("got unexpected error: %w", err)
+		t.Errorf("got unexpected error: %v", err)
 	}
 	if len(cs.Calls) != 1 {
 		t.Errorf("expected 1 git call, saw %d", len(cs.Calls))
@@ -185,28 +187,6 @@ func TestParseExtraCloneArgs(t *testing.T) {
 
 }
 
-func TestGetRepo(t *testing.T) {
-	tests := []struct {
-		name string
-		want string
-	}{
-		{
-			want: "profclems/glab",
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got, err := GetRepo()
-			if err != nil {
-				t.Error(err)
-			}
-			if got != tt.want {
-				t.Errorf("GetRepo() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
 func TestReadBranchConfig(t *testing.T) {
 	type args struct {
 		branch string
@@ -296,6 +276,36 @@ func TestGetDefaultBranch(t *testing.T) {
 			if got != tt.want {
 				t.Errorf("GetDefaultBranch() got = %v, want %v", got, tt.want)
 			}
+		})
+	}
+}
+
+func TestGetRemoteURL(t *testing.T) {
+	tests := []struct {
+		name        string
+		remoteAlias string
+		want        string
+		wantErr     bool
+	}{
+		{
+			name:        "isInvalid",
+			remoteAlias: "someorigin",
+			wantErr:     true,
+		},
+		{
+			name:        "isInvalid",
+			remoteAlias: "origin",
+			want:        "profclems/glab",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := GetRemoteURL(tt.remoteAlias)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("GetRemoteURL() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			require.Contains(t, got, tt.want)
 		})
 	}
 }

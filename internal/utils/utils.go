@@ -2,34 +2,35 @@ package utils
 
 import (
 	"fmt"
+	"io"
 	"net/url"
+	"os"
 	"strings"
 	"time"
 
-	"github.com/profclems/glab/internal/config"
-
 	"github.com/charmbracelet/glamour"
-	"github.com/gookit/color"
 	"github.com/profclems/glab/internal/browser"
 	"github.com/profclems/glab/internal/run"
+
+	"github.com/spf13/cobra"
 )
 
 // OpenInBrowser opens the url in a web browser based on OS and $BROWSER environment variable
-func OpenInBrowser(url string) error {
-	browseCmd, err := browser.Command(url)
+func OpenInBrowser(url, browserType string) error {
+	browseCmd, err := browser.Command(url, browserType)
 	if err != nil {
 		return err
 	}
 	return run.PrepareCmd(browseCmd).Run()
 }
 
-func RenderMarkdown(text string) (string, error) {
+func RenderMarkdown(text, glamourStyle string) (string, error) {
 	// Glamour rendering preserves carriage return characters in code blocks, but
 	// we need to ensure that no such characters are present in the output.
 	text = strings.ReplaceAll(text, "\r\n", "\n")
 
 	renderStyle := glamour.WithStandardStyle("dark")
-	if config.GetEnv("GLAMOUR_STYLE") != "" {
+	if glamourStyle != "" {
 		renderStyle = glamour.WithEnvironmentConfig()
 	}
 
@@ -93,10 +94,6 @@ func Humanize(s string) string {
 	return strings.Map(h, s)
 }
 
-func IsURL(s string) bool {
-	return strings.HasPrefix(s, "http:/") || strings.HasPrefix(s, "https:/")
-}
-
 func DisplayURL(urlStr string) string {
 	u, err := url.Parse(urlStr)
 	if err != nil {
@@ -106,5 +103,25 @@ func DisplayURL(urlStr string) string {
 }
 
 func GreenCheck() string {
-	return color.Green.Sprintf("✓")
+	return Green("✓")
+}
+
+func RedCheck() string {
+	return Red("✔")
+}
+
+func ColorableOut(cmd *cobra.Command) io.Writer {
+	out := cmd.OutOrStdout()
+	if outFile, isFile := out.(*os.File); isFile {
+		return NewColorable(outFile)
+	}
+	return out
+}
+
+func ColorableErr(cmd *cobra.Command) io.Writer {
+	err := cmd.ErrOrStderr()
+	if outFile, isFile := err.(*os.File); isFile {
+		return NewColorable(outFile)
+	}
+	return err
 }

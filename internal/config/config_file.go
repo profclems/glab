@@ -18,16 +18,16 @@ var configError error
 
 // ConfigDir returns the config directory
 func ConfigDir() string {
-	usrHome := os.Getenv("XDG_CONFIG_HOME")
-	if usrHome == "" {
-		usrHome = os.Getenv("HOME")
-		if usrHome == "" {
-			usrHome, _ = homedir.Expand("~/.config")
+	usrConfigHome := os.Getenv("XDG_CONFIG_HOME")
+	if usrConfigHome == "" {
+		usrConfigHome = os.Getenv("HOME")
+		if usrConfigHome == "" {
+			usrConfigHome, _ = homedir.Expand("~/.config")
 		} else {
-			usrHome = filepath.Join(usrHome, ".config")
+			usrConfigHome = filepath.Join(usrConfigHome, ".config")
 		}
 	}
-	return filepath.Join(usrHome, "glab-cli")
+	return filepath.Join(usrConfigHome, "glab-cli")
 }
 
 // ConfigFile returns the config file path

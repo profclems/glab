@@ -26,7 +26,7 @@ before_install:
   - ssh-add ~/.ssh/id_rsa
 
 script:
-  - make tests
+  - make test
 
 after_success:
   - |

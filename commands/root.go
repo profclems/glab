@@ -2,249 +2,125 @@ package commands
 
 import (
 	"fmt"
-	"github.com/profclems/glab/internal/config"
-	"github.com/xanzy/go-gitlab"
-	"io"
-	"log"
-	"os"
-	"strings"
 
-	"github.com/profclems/glab/internal/git"
-	"github.com/profclems/glab/internal/update"
-	"github.com/profclems/glab/internal/utils"
+	aliasCmd "github.com/profclems/glab/commands/alias"
+	"github.com/profclems/glab/commands/cmdutils"
+	completionCmd "github.com/profclems/glab/commands/completion"
+	configCmd "github.com/profclems/glab/commands/config"
+	"github.com/profclems/glab/commands/help"
+	issueCmd "github.com/profclems/glab/commands/issue"
+	labelCmd "github.com/profclems/glab/commands/label"
+	mrCmd "github.com/profclems/glab/commands/mr"
+	pipelineCmd "github.com/profclems/glab/commands/pipeline"
+	projectCmd "github.com/profclems/glab/commands/project"
+	releaseCmd "github.com/profclems/glab/commands/release"
+	updateCmd "github.com/profclems/glab/commands/update"
+	versionCmd "github.com/profclems/glab/commands/version"
+	"github.com/profclems/glab/internal/glrepo"
 
 	"github.com/MakeNowJust/heredoc"
-	"github.com/gookit/color"
-	"github.com/gosuri/uitable"
-	"github.com/hashicorp/go-version"
 	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 )
 
 // RootCmd is the main root/parent command
-var RootCmd = &cobra.Command{
-	Use:           "glab <command> <subcommand> [flags]",
-	Short:         "A GitLab CLI Tool",
-	Long:          `GLab is an open source Gitlab Cli tool bringing GitLab to your command line`,
-	SilenceErrors: true,
-	SilenceUsage:  true,
-	Example: heredoc.Doc(`
+func NewCmdRoot(f *cmdutils.Factory, version, buildDate string) *cobra.Command {
+	var rootCmd = &cobra.Command{
+		Use:           "glab <command> <subcommand> [flags]",
+		Short:         "A GitLab CLI Tool",
+		Long:          `GLab is an open source Gitlab Cli tool bringing GitLab to your command line`,
+		SilenceErrors: true,
+		SilenceUsage:  true,
+		Example: heredoc.Doc(`
 	$ glab issue create
-	$ glab mr list --merged
-	$ glab pipeline list
+	$ glab mr list --all
+	$ glab mr checkout 123
+	$ glab pipeline ci view
 	`),
-	Annotations: map[string]string{
-		"help:environment": heredoc.Doc(`
+		Annotations: map[string]string{
+			"help:environment": heredoc.Doc(`
 			GITLAB_TOKEN: an authentication token for API requests. Setting this avoids being
 			prompted to authenticate and overrides any previously stored credentials.
-			Can be set with glab config --token=<YOUR-GITLAB-ACCESS-TOKEN>
+			Can be set in the config with 'glab config set token xxxxxx'
 
-			GITLAB_REPO: specify the Gitlab repository in "OWNER/REPO" format for commands that
-			otherwise operate on a local repository. (Depreciated in v1.6.2) 
-			Can be set with glab config --repo=OWNER/REPO
+			GITLAB_URI or GITLAB_HOST: specify the url of the gitlab server if self hosted (eg: https://gitlab.example.com). Default is https://gitlab.com.
 
-			GITLAB_URI: specify the url of the gitlab server if self hosted (eg: https://gitlab.example.com). Default is https://gitlab.com.
-			Can be set with glab config --url=gitlab.example.com
+			REMOTE_ALIAS or GIT_REMOTE_URL_VAR: git remote variable or alias that contains the gitlab url.
+			Can be set in the config with 'glab config set remote_alias origin'
 
-			GIT_REMOTE_URL_VAR: git remote variable that contains the gitlab url. Defaults is origin
-			Can be set with glab config --remote-var=VARIABLE
+			VISUAL, EDITOR (in order of precedence): the editor tool to use for authoring text.
+			Can be set in the config with 'glab config set editor vim'
+
+			BROWSER: the web browser to use for opening links.
+			Can be set in the config with 'glab config set browser mybrowser'
+
+			GLAMOUR_STYLE: environment variable to set your desired markdown renderer style
+			Available options are (dark|light|notty) or set a custom style
+			https://github.com/charmbracelet/glamour#styles
 		`),
-	},
-	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) > 0 {
-			fmt.Printf("Unknown command: %s\n", args[0])
-			_ = cmd.Usage()
-			return
-		} else if ok, _ := cmd.Flags().GetBool("version"); ok {
-			versionCmd.Run(cmd, args)
-			return
+		},
+		RunE: func(cmd *cobra.Command, args []string) error {
+			if len(args) > 0 {
+				fmt.Printf("Unknown command: %s\n", args[0])
+				return cmd.Usage()
+			} else if ok, _ := cmd.Flags().GetBool("version"); ok {
+				return versionCmd.NewCmdVersion(version, buildDate).RunE(cmd, args)
+			}
+
+			return cmd.Help()
+		},
+	}
+
+	rootCmd.PersistentFlags().Bool("help", false, "Show help for command")
+	rootCmd.SetHelpFunc(help.RootHelpFunc)
+	rootCmd.SetUsageFunc(help.RootUsageFunc)
+	rootCmd.SetFlagErrorFunc(func(cmd *cobra.Command, err error) error {
+		if err == pflag.ErrHelp {
+			return err
 		}
+		return &cmdutils.FlagError{Err: err}
+	})
 
-		_ = cmd.Help()
-	},
+	// below here at the commands that require the "intelligent" BaseRepo resolver
+	repoResolvingCmdFactory := *f
+	repoResolvingCmdFactory.BaseRepo = resolvedBaseRepo(f)
+
+	// Child commands
+	rootCmd.AddCommand(aliasCmd.NewCmdAlias(f))
+	rootCmd.AddCommand(configCmd.NewCmdConfig(f))
+	rootCmd.AddCommand(completionCmd.NewCmdCompletion())
+	rootCmd.AddCommand(versionCmd.NewCmdVersion(version, buildDate))
+	rootCmd.AddCommand(issueCmd.NewCmdIssue(&repoResolvingCmdFactory))
+	rootCmd.AddCommand(labelCmd.NewCmdLabel(f))
+	rootCmd.AddCommand(mrCmd.NewCmdMR(f))
+	rootCmd.AddCommand(pipelineCmd.NewCmdPipeline(f))
+	rootCmd.AddCommand(projectCmd.NewCmdRepo(f))
+	rootCmd.AddCommand(releaseCmd.NewCmdRelease(f))
+	rootCmd.Flags().BoolP("version", "v", false, "show glab version information")
+	rootCmd.AddCommand(updateCmd.NewCheckUpdateCmd(version, buildDate))
+	return rootCmd
 }
 
-// versionCmd represents the version command
-var updateCmd = &cobra.Command{
-	Use:     "check-update",
-	Short:   "Check for latest glab releases",
-	Long:    ``,
-	Aliases: []string{"update", ""},
-	Run:     checkForUpdate,
-}
-
-func init() {
-	RootCmd.Flags().BoolP("version", "v", false, "show glab version information")
-	RootCmd.AddCommand(updateCmd)
-}
-
-func er(msg interface{}) {
-	color.Error.Println("Error:", msg)
-	os.Exit(1)
-}
-func cmdErr(cmd *cobra.Command, args []string) {
-	color.Error.Println("Error: Unknown command:")
-	_ = cmd.Usage()
-}
-
-func isSuccessful(code int) bool {
-	if code >= 200 && code < 300 {
-		return true
-	}
-	return false
-}
-
-func checkForUpdate(*cobra.Command, []string) {
-
-	releaseInfo, err := update.CheckForUpdate()
-	if err != nil {
-		er("Could not check for update! Make sure you have a stable internet connection")
-		return
-	}
-	latestVersion := strings.TrimSpace(releaseInfo.Name)
-	Version = strings.TrimSpace(Version)
-	if isLatestVersion(latestVersion, Version) {
-		color.Green.Println("You are already using the latest version of glab")
-	} else {
-		color.Printf("<yellow>A new version of glab has been released:</> <red>%s</> → <green>%s</>\n%s\n",
-			Version, latestVersion, releaseInfo.HTMLUrl)
-	}
-}
-
-func isLatestVersion(latestVersion, appVersion string) bool {
-	latestVersion = strings.TrimSpace(latestVersion)
-	appVersion = strings.TrimSpace(appVersion)
-	vo, v1e := version.NewVersion(appVersion)
-	vn, v2e := version.NewVersion(latestVersion)
-	return v1e == nil && v2e == nil && vo.LessThan(vn)
-}
-
-// ListInfo represents the parameters required to display a list result.
-type ListInfo struct {
-	// Name of the List to be used in constructing Description and EmptyMessage if not provided.
-	Name string
-	// List of columns to display
-	Columns []string
-	// Total number of record. Ideally size of the List.
-	Total int
-	// Function to pick a cell value from cell index
-	GetCellValue func(int, int) interface{}
-	// Optional. Description of the List. If not provided, default one constructed from list Name.
-	Description string
-	// Optional. EmptyMessage to display when List is empty. If not provided, default one constructed from list Name.
-	EmptyMessage string
-	// TableWrap wraps the contents when the column length exceeds the maximum width
-	TableWrap bool
-}
-
-// Prints the list data on console
-func DisplayList(lInfo ListInfo, repo ...string) {
-	var (
-		projectID string
-		err       error
-	)
-	if len(repo) > 0 {
-		projectID = repo[0]
-	} else {
-		projectID, err = git.GetRepo()
+//
+func resolvedBaseRepo(f *cmdutils.Factory) func() (glrepo.Interface, error) {
+	return func() (glrepo.Interface, error) {
+		httpClient, err := f.HttpClient()
 		if err != nil {
-			log.Fatal(err)
+			return nil, err
 		}
+		remotes, err := f.Remotes()
+		if err != nil {
+			return nil, err
+		}
+		repoContext, err := glrepo.ResolveRemotesToRepos(remotes, httpClient, "")
+		if err != nil {
+			return nil, err
+		}
+		baseRepo, err := repoContext.BaseRepo(true)
+		if err != nil {
+			return nil, err
+		}
+
+		return baseRepo, nil
 	}
-	table := uitable.New()
-	table.MaxColWidth = 70
-	table.Wrap = lInfo.TableWrap
-	fmt.Println()
-
-	if lInfo.Total > 0 {
-		description := lInfo.Description
-		if description == "" {
-			description = fmt.Sprintf("Showing %s %d of %d on %s\n\n", lInfo.Name, lInfo.Total, lInfo.Total, projectID)
-		}
-		fmt.Println(description)
-		header := make([]interface{}, len(lInfo.Columns))
-		for ci, c := range lInfo.Columns {
-			header[ci] = c
-		}
-		table.AddRow(header...)
-
-		for ri := 0; ri < lInfo.Total; ri++ {
-			row := make([]interface{}, len(lInfo.Columns))
-			for ci := range lInfo.Columns {
-				row[ci] = lInfo.GetCellValue(ri, ci)
-			}
-			table.AddRow(row...)
-		}
-
-		fmt.Println(table)
-	} else {
-		emptyMessage := lInfo.EmptyMessage
-		if emptyMessage == "" {
-			emptyMessage = fmt.Sprintf("No %s available on %s", lInfo.Name, projectID)
-		}
-		fmt.Println(emptyMessage)
-	}
-
-}
-
-type remoteArgs struct {
-	protocol string
-	token    string
-	url      string
-	username string
-}
-
-// gitRemoteURL returns correct git clone URL of a repo
-// based on the user's git_protocol preference
-// args should be arranged as protocol, token, url, username
-
-func gitRemoteURL(project *gitlab.Project, args *remoteArgs) (string, error) {
-	var err error
-
-	if args.protocol == "" {
-		args.protocol = config.GetEnv("GIT_PROTOCOL")
-	}
-	if args.protocol == "https" {
-		if args.token == "" {
-			args.token = config.GetEnv("GITLAB_TOKEN")
-		}
-		if args.url == "" {
-			args.url = config.GetEnv("GITLAB_URI")
-		}
-		if args.username == "" {
-			args.username, err = currentUser()
-			if err != nil {
-				return "", err
-			}
-			if args.username == "" {
-				args.username = "oauth2"
-			}
-		}
-
-		args.protocol = "https://"
-		if strings.Contains(args.url, "https://") {
-			args.url = strings.TrimPrefix(args.url, "https://")
-		} else if strings.HasPrefix(args.url, "http://") {
-			args.url = strings.TrimPrefix(args.url, "http://")
-			args.protocol = "http://"
-		}
-		return fmt.Sprintf("%s%s:%s@%s/%s.git",
-			args.protocol, args.username, args.token, args.url, project.PathWithNamespace), nil
-	}
-	return project.SSHURLToRepo, nil
-}
-
-func colorableOut(cmd *cobra.Command) io.Writer {
-	out := cmd.OutOrStdout()
-	if outFile, isFile := out.(*os.File); isFile {
-		return utils.NewColorable(outFile)
-	}
-	return out
-}
-
-func colorableErr(cmd *cobra.Command) io.Writer {
-	err := cmd.ErrOrStderr()
-	if outFile, isFile := err.(*os.File); isFile {
-		return utils.NewColorable(outFile)
-	}
-	return err
 }

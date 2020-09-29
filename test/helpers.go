@@ -6,8 +6,9 @@ import (
 	"os/exec"
 	"regexp"
 
-	"github.com/pkg/errors"
 	"github.com/profclems/glab/internal/run"
+
+	"github.com/pkg/errors"
 )
 
 // TODO copypasta from command package

@@ -3,6 +3,7 @@ package config
 import (
 	"bytes"
 	"fmt"
+	"github.com/profclems/glab/internal/glinstance"
 	"os"
 	"sort"
 	"strings"
@@ -15,6 +16,7 @@ const (
 	defaultGitProtocol  = "ssh"
 	defaultGlamourStyle = "dark"
 	defaultHostname     = "gitlab.com"
+	defaultApiProtocol  = "https"
 )
 
 // This interface describes interacting with some persistent configuration for glab.
@@ -46,26 +48,6 @@ type HostConfig struct {
 // comments that were present when the yaml was parsed.
 type ConfigMap struct {
 	Root *yaml.Node
-}
-
-// Default returns the host name of the default GitLab instance
-func Default() string {
-	return defaultHostname
-}
-
-// IsSelfHosted reports whether a non-normalized host name looks like a Self-hosted GitLab instance
-func IsSelfHosted(h string) bool {
-	return NormalizeHostname(h) != defaultHostname
-}
-
-// NormalizeHostname returns the canonical host name of a GitLab instance
-// Taking cover in case GitLab allows subdomains on gitlab.com https://gitlab.com/gitlab-org/gitlab/-/issues/26703
-func NormalizeHostname(h string) string {
-	hostname := strings.ToLower(h)
-	if strings.HasSuffix(hostname, "."+defaultHostname) {
-		return defaultHostname
-	}
-	return hostname
 }
 
 func (cm *ConfigMap) Empty() bool {
@@ -205,15 +187,6 @@ func NewBlankRoot() *yaml.Node {
 						Value: "",
 					},
 					{
-						HeadComment: "Git remote alias which glab should use when fetching the remote url. This can be overridden by hostname",
-						Kind:        yaml.ScalarNode,
-						Value:       "remote_alias",
-					},
-					{
-						Kind:  yaml.ScalarNode,
-						Value: "origin",
-					},
-					{
 						HeadComment: "Set your desired markdown renderer style. Available options are [dark, light, notty] or set a custom style. Refer to https://github.com/charmbracelet/glamour#styles",
 						Kind:        yaml.ScalarNode,
 						Value:       "glamour_style",
@@ -249,7 +222,7 @@ func NewBlankRoot() *yaml.Node {
 									{
 										HeadComment: "What protocol to use to access the api endpoint. Supported values: http, https",
 										Kind:        yaml.ScalarNode,
-										Value:       "protocol",
+										Value:       "api_protocol",
 									},
 									{
 										Kind:  yaml.ScalarNode,
@@ -312,14 +285,7 @@ func (c *fileConfig) Root() *yaml.Node {
 }
 
 func (c *fileConfig) Get(hostname, key string) (string, error) {
-	var env string
-	envEq := EnvKeyEquivalence(key)
-	for _, e := range envEq {
-		if val := os.Getenv(e); val != "" {
-			env = val
-			break
-		}
-	}
+	env := GetFromEnv(key)
 	if env != "" {
 		return env, nil
 	}
@@ -578,7 +544,7 @@ func (c *fileConfig) Hosts() ([]string, error) {
 		hostnames = append(hostnames, entry.Host)
 	}
 
-	sort.SliceStable(hostnames, func(i, j int) bool { return hostnames[i] == Default() })
+	sort.SliceStable(hostnames, func(i, j int) bool { return hostnames[i] == glinstance.Default() })
 
 	return hostnames, nil
 }
@@ -641,9 +607,25 @@ func defaultFor(key string) string {
 		return defaultHostname
 	case "git_protocol":
 		return defaultGitProtocol
+	case "api_protocol":
+		return defaultApiProtocol
 	default:
 		return ""
 	}
+}
+
+// GetFromEnv is just a wrapper for os.GetEnv but checks for matching names used in previous glab versions and
+// retrieves the value of the environment if any of the matching names has been set.
+// It returns the value, which will be empty if the variable is not present.
+func GetFromEnv(key string) (value string) {
+	envEq := EnvKeyEquivalence(key)
+	for _, e := range envEq {
+		if val := os.Getenv(e); val != "" {
+			value = val
+			break
+		}
+	}
+	return
 }
 
 // ConfigKeyEquivalence returns the equivalent key that's actually used in the config file
@@ -651,7 +633,7 @@ func ConfigKeyEquivalence(key string) string {
 	key = strings.ToLower(key)
 	// we only have a set default for one setting right now
 	switch key {
-	case "gitlab_host", "gitlab_uri":
+	case "gitlab_host", "gitlab_uri", "gl_host":
 		return "host"
 	case "gitlab_token", "oauth_token":
 		return "token"
@@ -668,7 +650,7 @@ func EnvKeyEquivalence(key string) []string {
 	// we only have a set default for one setting right now
 	switch key {
 	case "host":
-		return []string{"GITLAB_HOST", "GITLAB_URI"}
+		return []string{"GITLAB_HOST", "GITLAB_URI", "GL_HOST"}
 	case "token":
 		return []string{"GITLAB_TOKEN", "OAUTH_TOKEN"}
 	case "remote_alias":

@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"log"
 	"net/url"
 	"os"
 	"os/exec"
@@ -12,107 +11,16 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/profclems/glab/internal/config"
 	"github.com/profclems/glab/internal/run"
-	"github.com/tcnksm/go-gitconfig"
-	"github.com/xanzy/go-gitlab"
 )
 
-// GetRepo returns the repo name of the git directory with the namespace like profclems/glab
-func GetRepo() (string, error) {
-	gitRemoteVar, err := GetRemoteURL()
-	if err != nil {
-		return "", err
-	}
-	repo, err := getRepoNameWithNamespace(gitRemoteVar)
-	if err != nil {
-		return "", err
-	}
-	return repo, nil
+func GetRemoteURL(remoteAlias string) (string, error) {
+	return Config("remote." + remoteAlias + ".url")
 }
 
-func GetRemoteURL() (string, error) {
-	remoteNickname := strings.TrimSpace(config.GetEnv("GIT_REMOTE_URL_VAR"))
-	if remoteNickname == "" {
-		remoteNickname = "origin"
-	}
-
-	gitRemoteURL, err := gitconfig.Local("remote." + remoteNickname + ".url")
-	if err != nil {
-		return "", errors.New(`could not find remote url for gitlab in remote.` + remoteNickname + `.url`)
-	}
-	return gitRemoteURL, nil
-}
-
-// getRepoNameWithNamespace returns the the repo with its namespace (like profclems/glab). Respects group and subgroups names
-func getRepoNameWithNamespace(remoteURL string) (string, error) {
-	parts := strings.Split(remoteURL, "//")
-
-	if len(parts) == 1 {
-		// scp-like short syntax (e.g. git@gitlab.com...)
-		part := parts[0]
-		parts = strings.Split(part, ":")
-	} else if len(parts) == 2 {
-		// other protocols (e.g. ssh://, http://, git://)
-		part := parts[1]
-		parts = strings.SplitN(part, "/", 2)
-	} else {
-		return "", errors.New("cannot parse remote: " + config.GetEnv("GIT_REMOTE_URL_VAR") + " url: " + remoteURL)
-	}
-
-	if len(parts) != 2 {
-		return "", errors.New("cannot parse remote: " + config.GetEnv("GIT_REMOTE_URL_VAR") + " url: " + remoteURL)
-	}
-	repo := parts[1]
-	repo = strings.TrimSuffix(repo, ".git")
-	return repo, nil
-}
-
-/*
-// HasGit is true if git binary is installed
-var HasGit bool
-
-func init() {
-	_, err := exec.LookPath("git")
-	if err == nil {
-		HasGit = true
-	}
-}
-*/
-
-// TODO: GetDefaultBranch looks really messy and should be fixed properly
-
-// GetDefaultBranch finds the repo's default branch
-// Expects a maximum of two params with the first as remote and second as username
-func GetDefaultBranch(remote ...string) (string, error) {
-	var org string
-	var currentUser string
-	if len(remote) > 0 {
-		org = remote[0]
-		if len(remote) > 1 {
-			currentUser = remote[1]
-		}
-	} else {
-		org = config.GetEnv("GIT_REMOTE_URL_VAR")
-	}
-	if currentUser == "" {
-		currentUser = "oauth2"
-	}
-	if strings.Contains(org, "/") {
-		t := config.GetEnv("GITLAB_TOKEN")
-		u := config.GetEnv("GITLAB_URI")
-		p := "https://"
-		if strings.HasPrefix(u, "https://") {
-			u = strings.TrimPrefix(u, "https://")
-		} else if strings.HasPrefix(u, "http://") {
-			u = strings.TrimPrefix(u, "http://")
-			p = "http://"
-		}
-		org = fmt.Sprintf("%s%s:%s@%s/%s.git",
-			p, currentUser, t, u, org)
-	}
-	getDefBranch := exec.Command("git",
-		"remote", "show", org)
+// GetDefaultBranch finds and returns the remote's default branch
+func GetDefaultBranch(remote string) (string, error) {
+	getDefBranch := exec.Command("git", "remote", "show", remote)
 	output, err := run.PrepareCmd(getDefBranch).Output()
 	if err != nil {
 		return "master", err
@@ -132,33 +40,6 @@ func GetDefaultBranch(remote ...string) (string, error) {
 		}
 	}
 	return headBranch, err
-}
-
-// InitGitlabClient : creates client
-func InitGitlabClient(returnWithRepo ...bool) (*gitlab.Client, string) {
-	getRepo := true
-	if len(returnWithRepo) > 0 {
-		getRepo = returnWithRepo[0]
-	}
-	baseUrl := strings.TrimRight(config.GetEnv("GITLAB_URI"), "/")
-	if baseUrl == "" {
-		baseUrl = "https://gitlab.com"
-	}
-	git, err := gitlab.NewClient(config.GetEnv("GITLAB_TOKEN"),
-		gitlab.WithBaseURL(strings.TrimRight(config.GetEnv("GITLAB_URI"), "/")+"/api/v4"))
-	if err != nil {
-		log.Fatalf("Failed to create client: %v", err)
-	}
-	projectID := config.GetEnv("GITLAB_PROJECT_ID")
-	if projectID == "" && getRepo {
-		projectID, err = GetRepo()
-		// FIXME: error should be properly handled.
-		//  maintained due to the function being used in several places
-		if err != nil {
-			log.Fatal(err)
-		}
-	}
-	return git, projectID
 }
 
 // ErrNotOnAnyBranch indicates that the users is in detached HEAD state
@@ -479,6 +360,7 @@ func NewRemote(name string, u string) *Remote {
 // Remote is a parsed git remote
 type Remote struct {
 	Name     string
+	Resolved string
 	FetchURL *url.URL
 	PushURL  *url.URL
 }
@@ -493,7 +375,30 @@ func Remotes() (RemoteSet, error) {
 	if err != nil {
 		return nil, err
 	}
-	return parseRemotes(list), nil
+	remotes := parseRemotes(list)
+
+	// this is affected by SetRemoteResolution
+	remoteCmd := exec.Command("git", "config", "--get-regexp", `^remote\..*\.glab-resolved$`)
+	output, _ := run.PrepareCmd(remoteCmd).Output()
+	for _, l := range outputLines(output) {
+		parts := strings.SplitN(l, " ", 2)
+		if len(parts) < 2 {
+			continue
+		}
+		rp := strings.SplitN(parts[0], ".", 3)
+		if len(rp) < 2 {
+			continue
+		}
+		name := rp[1]
+		for _, r := range remotes {
+			if r.Name == name {
+				r.Resolved = parts[1]
+				break
+			}
+		}
+	}
+
+	return remotes, nil
 }
 
 func parseRemotes(gitRemotes []string) (remotes RemoteSet) {
@@ -563,9 +468,13 @@ func AddRemote(name, u string) (*Remote, error) {
 	}, nil
 }
 
+func SetRemoteResolution(name, resolution string) error {
+	addCmd := exec.Command("git", "config", "--add", fmt.Sprintf("remote.%s.glab-resolved", name), resolution)
+	return run.PrepareCmd(addCmd).Run()
+}
+
 func RunCmd(args []string) (err error) {
 	gitCmd := GitCommand(args...)
-	gitCmd.Stdin = os.Stdin
 	gitCmd.Stdout = os.Stdout
 	gitCmd.Stderr = os.Stderr
 
