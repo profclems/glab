@@ -7,7 +7,7 @@ import (
 )
 
 func NewCmdVersion(version, build string) *cobra.Command {
-	versionOutput := fmt.Sprintf("glab %s (%s)\n", version, build)
+	versionOutput := fmt.Sprintf("glab %s (%s)", version, build)
 	var versionCmd = &cobra.Command{
 		Use:     "version",
 		Short:   "show glab version information",
