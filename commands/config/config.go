@@ -3,12 +3,11 @@ package config
 import (
 	"fmt"
 
+	"github.com/MakeNowJust/heredoc"
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/internal/config"
 	"github.com/profclems/glab/internal/glinstance"
 	"github.com/profclems/glab/internal/utils"
-
-	"github.com/MakeNowJust/heredoc"
 	"github.com/spf13/cobra"
 )
 
@@ -149,15 +148,17 @@ Examples:
 }
 
 func configInit(cmd *cobra.Command, f *cmdutils.Factory) error {
+	var host string
 	cfg, err := f.Config()
 	if err != nil {
 		return err
 	}
 	baseRepo, err := f.BaseRepo()
 	if err != nil {
-		return err
+		host = glinstance.Default()
+	} else {
+		host = baseRepo.RepoHost()
 	}
-	host := baseRepo.RepoHost()
 	host, err = config.Prompt(fmt.Sprintf("Enter Gitlab Host (Current Value: %s): ", host), host)
 	if err != nil {
 		return err
