@@ -166,6 +166,16 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "anjali-sharma",
+      "name": "Anjali S.",
+      "avatar_url": "https://avatars3.githubusercontent.com/u/13588177?v=4",
+      "profile": "https://github.com/anjali-sharma",
+      "contributions": [
+        "code",
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,
