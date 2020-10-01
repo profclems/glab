@@ -12,6 +12,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var isGlobal bool
+
 func NewCmdConfig(f *cmdutils.Factory) *cobra.Command {
 	var configCmd = &cobra.Command{
 		Use:   "config [flags]",
@@ -22,7 +24,6 @@ func NewCmdConfig(f *cmdutils.Factory) *cobra.Command {
 
 		- token: Your gitlab access token, defaults to environment variables
 		- gitlab_uri: if unset, defaults to https://gitlab.com
-		- remote_alias, if unset, defaults to origin
 		- browser: if unset, defaults to environment variables
 		- editor: if unset, defaults to environment variables.
 		- visual: alternative for editor. if unset, defaults to environment variables.
@@ -32,9 +33,13 @@ https://github.com/charmbracelet/glamour#styles
 		Aliases: []string{"conf"},
 	}
 
+
+	configCmd.Flags().BoolVarP(&isGlobal, "global", "g", false, "use global config file")
+
 	configCmd.AddCommand(NewCmdConfigGet(f))
 	configCmd.AddCommand(NewCmdConfigSet(f))
 	configCmd.AddCommand(NewCmdConfigInit(f))
+
 	return configCmd
 }
 
@@ -46,10 +51,10 @@ func NewCmdConfigGet(f *cmdutils.Factory) *cobra.Command {
 		Short: "Prints the value of a given configuration key",
 		Long:  `Get the value for a given configuration key.`,
 		Example: `
-  $ glab config get gitlab_uri
-  https://gitlab.com
-  $ glab config get git_remote_url_var
-  origin
+  $ glab config get editor
+  vim
+  $ glab config get glamour_style
+  notty
 `,
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -88,7 +93,7 @@ Specifying the --hostname flag also saves in the global config file
 `,
 		Example: `
   $ glab config set editor vim
-  $ glab config set git_remote_url_var origin
+  $ glab config set token xxxxx -h gitlab.com
 `,
 		Args: cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -98,8 +103,6 @@ Specifying the --hostname flag also saves in the global config file
 			}
 
 			localCfg, _ := cfg.Local()
-
-			isGlobal, _ := cmd.Flags().GetBool("global")
 
 			key, value := args[0], args[1]
 			if isGlobal || hostname != "" {
@@ -126,7 +129,7 @@ Specifying the --hostname flag also saves in the global config file
 	}
 
 	cmd.Flags().StringVarP(&hostname, "host", "h", "", "Set per-host setting")
-	cmd.Flags().BoolP("global", "g", false, "write to global ~/.config/glab-cli/config.yml file rather than the repository .glab-cli/config/config")
+	cmd.Flags().BoolVarP(&isGlobal, "global", "g", false, "write to global ~/.config/glab-cli/config.yml file rather than the repository .glab-cli/config/config")
 	return cmd
 }
 
@@ -139,7 +142,6 @@ Examples:
   $ glab config init
   ? Enter default Gitlab Host (Current Value: https://gitlab.com): |
 `,
-		Args: cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return configInit(cmd, f)
 		},
@@ -173,16 +175,6 @@ func configInit(cmd *cobra.Command, f *cmdutils.Factory) error {
 		return err
 	}
 	err = cfg.Set(host, "token", token)
-	if err != nil {
-		return nil
-	}
-
-	remoteAlias, _ := cfg.Get(host, "remote_alias")
-	remoteAlias, err = config.Prompt(fmt.Sprintf("Enter Git remote alias (Current Value: %s): ", remoteAlias), remoteAlias)
-	if err != nil {
-		return err
-	}
-	err = cfg.Set(host, "token", remoteAlias)
 	if err != nil {
 		return nil
 	}
