@@ -81,21 +81,21 @@ func NewCmdRoot(f *cmdutils.Factory, version, buildDate string) *cobra.Command {
 		return &cmdutils.FlagError{Err: err}
 	})
 
-	// below here at the commands that require the "intelligent" BaseRepo resolver
-	repoResolvingCmdFactory := *f
-	repoResolvingCmdFactory.BaseRepo = resolvedBaseRepo(f)
-
 	// Child commands
 	rootCmd.AddCommand(aliasCmd.NewCmdAlias(f))
 	rootCmd.AddCommand(configCmd.NewCmdConfig(f))
 	rootCmd.AddCommand(completionCmd.NewCmdCompletion())
 	rootCmd.AddCommand(versionCmd.NewCmdVersion(version, buildDate))
+
+	// below here at the commands that require the "intelligent" BaseRepo resolver
+	repoResolvingCmdFactory := *f
+	repoResolvingCmdFactory.BaseRepo = resolvedBaseRepo(f)
 	rootCmd.AddCommand(issueCmd.NewCmdIssue(&repoResolvingCmdFactory))
-	rootCmd.AddCommand(labelCmd.NewCmdLabel(f))
-	rootCmd.AddCommand(mrCmd.NewCmdMR(f))
-	rootCmd.AddCommand(pipelineCmd.NewCmdPipeline(f))
-	rootCmd.AddCommand(projectCmd.NewCmdRepo(f))
-	rootCmd.AddCommand(releaseCmd.NewCmdRelease(f))
+	rootCmd.AddCommand(labelCmd.NewCmdLabel(&repoResolvingCmdFactory))
+	rootCmd.AddCommand(mrCmd.NewCmdMR(&repoResolvingCmdFactory))
+	rootCmd.AddCommand(pipelineCmd.NewCmdPipeline(&repoResolvingCmdFactory))
+	rootCmd.AddCommand(projectCmd.NewCmdRepo(&repoResolvingCmdFactory))
+	rootCmd.AddCommand(releaseCmd.NewCmdRelease(&repoResolvingCmdFactory))
 	rootCmd.Flags().BoolP("version", "v", false, "show glab version information")
 	rootCmd.AddCommand(updateCmd.NewCheckUpdateCmd(version, buildDate))
 	return rootCmd
