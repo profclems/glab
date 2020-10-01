@@ -33,7 +33,6 @@ https://github.com/charmbracelet/glamour#styles
 		Aliases: []string{"conf"},
 	}
 
-
 	configCmd.Flags().BoolVarP(&isGlobal, "global", "g", false, "use global config file")
 
 	configCmd.AddCommand(NewCmdConfigGet(f))
