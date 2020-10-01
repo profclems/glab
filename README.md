@@ -1,6 +1,6 @@
 ![GLab](https://user-images.githubusercontent.com/9063085/90530075-d7a58580-e14a-11ea-9727-4f592f7dcf2e.png)
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-17-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-18-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/profclems/glab)](https://goreportcard.com/report/github.com/profclems/glab)
@@ -254,6 +254,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     <td align="center"><a href="https://qa.debian.org/developer.php?login=ah&comaint=yes"><img src="https://avatars1.githubusercontent.com/u/3367571?v=4" width="100px;" alt=""/><br /><sub><b>andhe</b></sub></a><br /><a href="https://github.com/profclems/glab/commits?author=andhe" title="Code">💻</a> <a href="#security-andhe" title="Security">🛡️</a></td>
     <td align="center"><a href="https://zacharyspringer.com/"><img src="https://avatars3.githubusercontent.com/u/22923676?v=4" width="100px;" alt=""/><br /><sub><b>Zachary Springer</b></sub></a><br /><a href="#financial-Zachcodes" title="Financial">💵</a></td>
     <td align="center"><a href="https://github.com/zemzale"><img src="https://avatars3.githubusercontent.com/u/14844365?v=4" width="100px;" alt=""/><br /><sub><b>zemzale</b></sub></a><br /><a href="https://github.com/profclems/glab/commits?author=zemzale" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/anjali-sharma"><img src="https://avatars3.githubusercontent.com/u/13588177?v=4" width="100px;" alt=""/><br /><sub><b>Anjali S.</b></sub></a><br /><a href="https://github.com/profclems/glab/commits?author=anjali-sharma" title="Code">💻</a> <a href="https://github.com/profclems/glab/issues?q=author%3Aanjali-sharma" title="Bug reports">🐛</a></td>
   </tr>
 </table>
 
