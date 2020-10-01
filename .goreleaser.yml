@@ -1,5 +1,8 @@
 project_name: glab
 
+release:
+  prerelease: auto
+  
 before:
   hooks:
     - go mod download
@@ -89,6 +92,7 @@ brews:
     install: bin.install "bin/glab"
     test: |
       system "#{bin}/glab version"
+      
 nfpms:
   -
     id: foo
@@ -128,3 +132,4 @@ changelog:
       - '^test:'
       - '^Merge pull request'
       - '^chore'
+      - '^Update README.md'
