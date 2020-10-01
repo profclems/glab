@@ -14,10 +14,10 @@ glab config get <key> [flags]
 
 ```
 
-  $ glab config get gitlab_uri
-  https://gitlab.com
-  $ glab config get git_remote_url_var
-  origin
+  $ glab config get editor
+  vim
+  $ glab config get glamour_style
+  notty
 
 ```
 

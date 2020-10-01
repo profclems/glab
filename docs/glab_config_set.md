@@ -18,7 +18,7 @@ glab config set <key> <value> [flags]
 ```
 
   $ glab config set editor vim
-  $ glab config set git_remote_url_var origin
+  $ glab config set token xxxxx -h gitlab.com
 
 ```
 

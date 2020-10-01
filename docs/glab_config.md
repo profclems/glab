@@ -10,13 +10,18 @@ Get and set key/value strings.
 
 		- token: Your gitlab access token, defaults to environment variables
 		- gitlab_uri: if unset, defaults to https://gitlab.com
-		- remote_alias, if unset, defaults to origin
 		- browser: if unset, defaults to environment variables
 		- editor: if unset, defaults to environment variables.
 		- visual: alternative for editor. if unset, defaults to environment variables.
 		- glamour_style: Your desired markdown renderer style. Options are dark, light, notty. Custom styles are allowed set a custom style
 https://github.com/charmbracelet/glamour#styles
 	
+
+### Options
+
+```
+  -g, --global   use global config file
+```
 
 ### Options inherited from parent commands
 
