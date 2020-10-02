@@ -31,7 +31,7 @@ func Test_deleteMergeRequest(t *testing.T) {
 		name       string
 		args       []string
 		wantErr    bool
-		errMsg	   string
+		errMsg     string
 		assertFunc func(t *testing.T, out string)
 	}{
 		{
