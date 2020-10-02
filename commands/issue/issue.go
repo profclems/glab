@@ -11,6 +11,7 @@ import (
 	issueSubscribeCmd "github.com/profclems/glab/commands/issue/subscribe"
 	issueUnsubscribeCmd "github.com/profclems/glab/commands/issue/unsubscribe"
 	issueViewCmd "github.com/profclems/glab/commands/issue/view"
+  issueUpdateCmd "github.com/profclems/glab/commands/issue/update"
 
 	"github.com/spf13/cobra"
 )
@@ -30,6 +31,7 @@ func NewCmdIssue(f *cmdutils.Factory) *cobra.Command {
 	issueCmd.AddCommand(issueViewCmd.NewCmdView(f))
 	issueCmd.AddCommand(issueSubscribeCmd.NewCmdSubscribe(f))
 	issueCmd.AddCommand(issueUnsubscribeCmd.NewCmdUnsubscribe(f))
+	issueCmd.AddCommand(issueUpdateCmd.NewCmdUpdate(f))
 	issueCmd.PersistentFlags().StringP("repo", "R", "", "Select another repository using the OWNER/REPO format or the project ID. Supports group namespaces")
 	return issueCmd
 }
