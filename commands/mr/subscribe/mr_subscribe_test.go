@@ -41,7 +41,7 @@ hosts:
 			ID:          1,
 			IID:         1,
 			Title:       "mrtitile",
-			Labels:      gitlab.Labels{"bug","test"},
+			Labels:      gitlab.Labels{"bug", "test"},
 			State:       "opened",
 			Description: "mrbody",
 			Author: &gitlab.BasicUser{
@@ -66,8 +66,8 @@ hosts:
 			ExpectedMsg: []string{"- Subscribing to merge request !1", "✓ You have successfully subscribed to merge request !1"},
 		},
 		{
-			Name:        "Issue on another repo",
-			Issue:       "1 -R profclems/glab",
+			Name:  "Issue on another repo",
+			Issue: "1 -R profclems/glab",
 			ExpectedMsg: []string{"- Subscribing to merge request !1",
 				"✓ You have successfully subscribed to merge request !1",
 				"https://gitlab.com/profclems/glab/-/merge_requests/1\n",

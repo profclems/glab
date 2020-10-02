@@ -40,7 +40,7 @@ func NewCmdUnsubscribe(f *cmdutils.Factory) *cobra.Command {
 
 			arrIds := strings.Split(strings.Trim(mergeID, "[] "), ",")
 			for _, i2 := range arrIds {
-				fmt.Fprintln(out,"- Unsubscribing from Issue #" + i2)
+				fmt.Fprintln(out, "- Unsubscribing from Issue #"+i2)
 				issue, err := api.UnsubscribeFromIssue(apiClient, repo.FullName(), utils.StringToInt(i2), nil)
 				if err != nil {
 					return err

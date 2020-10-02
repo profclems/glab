@@ -41,7 +41,7 @@ hosts:
 			ID:          1,
 			IID:         1,
 			Title:       "mrtitile",
-			Labels:      gitlab.Labels{"bug","test"},
+			Labels:      gitlab.Labels{"bug", "test"},
 			State:       "opened",
 			Description: "mrbody",
 			Author: &gitlab.BasicUser{
