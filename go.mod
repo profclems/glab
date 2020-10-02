@@ -32,6 +32,6 @@ require (
 	github.com/tcnksm/go-gitconfig v0.1.2
 	github.com/wadey/gocovmerge v0.0.0-20160331181800-b5bfa59ec0ad // indirect
 	github.com/xanzy/go-gitlab v0.38.1
-	golang.org/x/tools v0.0.0-20200925191224-5d1fdd8fa346 // indirect
+	golang.org/x/tools v0.0.0-20201002141543-22683886a977 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c
 )

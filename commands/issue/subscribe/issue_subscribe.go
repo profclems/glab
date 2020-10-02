@@ -43,9 +43,10 @@ func NewCmdSubscribe(f *cmdutils.Factory) *cobra.Command {
 				fmt.Fprintln(out, "- Subscribing to Issue #"+i2)
 				issue, err := api.SubscribeToIssue(apiClient, repo.FullName(), utils.StringToInt(i2), nil)
 				if err != nil {
-					fmt.Fprintln(out, utils.GreenCheck(), "Subscribed to issue #"+i2)
-					fmt.Fprintln(out, issueutils.DisplayIssue(issue))
+					return err
 				}
+				fmt.Fprintln(out, utils.GreenCheck(), "Subscribed to issue #"+i2)
+				fmt.Fprintln(out, issueutils.DisplayIssue(issue))
 			}
 			return nil
 		},

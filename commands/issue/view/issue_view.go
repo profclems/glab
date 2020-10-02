@@ -117,7 +117,7 @@ func NewCmdView(f *cmdutils.Factory) *cobra.Command {
 			fmt.Fprint(out, "") // Empty Space
 
 			if c, _ := cmd.Flags().GetBool("comments"); c {
-
+				showSystemLog, _ := cmd.Flags().GetBool("system-logs")
 				var commentsPrintDetails string
 
 				opts := &gitlab.ListIssueNotesOptions{}
@@ -142,7 +142,7 @@ func NewCmdView(f *cmdutils.Factory) *cobra.Command {
 			`)
 				if len(notes) > 0 {
 					for _, note := range notes {
-						if note.System {
+						if note.System && !showSystemLog {
 							continue
 						}
 						//body, _ := utils.RenderMarkdown(note.Body)
@@ -165,6 +165,7 @@ func NewCmdView(f *cmdutils.Factory) *cobra.Command {
 	}
 
 	issueViewCmd.Flags().BoolP("comments", "c", false, "Show issue comments and activities")
+	issueViewCmd.Flags().BoolP("system-logs", "s", false, "Show system activities / logs")
 	issueViewCmd.Flags().BoolP("web", "w", false, "Open issue in a browser. Uses default browser or browser specified in BROWSER variable")
 	issueViewCmd.Flags().IntP("page", "p", 1, "Page number")
 	issueViewCmd.Flags().IntP("per-page", "P", 20, "Number of items to list per page")

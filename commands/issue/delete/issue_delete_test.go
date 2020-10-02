@@ -2,13 +2,14 @@ package delete
 
 import (
 	"fmt"
+	"strings"
+	"testing"
+
 	"github.com/acarl005/stripansi"
 	"github.com/profclems/glab/commands/cmdtest"
 	"github.com/profclems/glab/pkg/api"
 	"github.com/stretchr/testify/assert"
 	"github.com/xanzy/go-gitlab"
-	"strings"
-	"testing"
 )
 
 // TODO: test by mocking the appropriate api function
@@ -16,12 +17,12 @@ func TestMain(m *testing.M) {
 	cmdtest.InitTest(m, "mr_delete_test")
 }
 
-func Test_deleteMergeRequest(t *testing.T) {
+func TestNewCmdDelete(t *testing.T) {
 	t.Parallel()
 	oldDeleteMR := api.DeleteMR
 
-	api.DeleteMR = func(client *gitlab.Client, projectID interface{}, mrID int) error {
-		if projectID == "" || projectID == "WRONG_REPO" || projectID == "expected_err" || mrID == 0 {
+	api.DeleteIssue = func(client *gitlab.Client, projectID interface{}, issueID int) error {
+		if projectID == "" || projectID == "WRONG_REPO" || projectID == "expected_err" || issueID == 0 {
 			return fmt.Errorf("error expected")
 		}
 		return nil
@@ -48,8 +49,7 @@ func Test_deleteMergeRequest(t *testing.T) {
 			args:    []string{"1"},
 			wantErr: false,
 			assertFunc: func(t *testing.T, out string) {
-				assert.Contains(t, out, "- Deleting Merge Request !1\n")
-				assert.Contains(t, out, "✔ Merge request !1 deleted\n")
+				assert.Contains(t, out, "✓ Issue Deleted\n")
 			},
 		},
 		{
@@ -57,8 +57,7 @@ func Test_deleteMergeRequest(t *testing.T) {
 			args:    []string{"1", "-R", "profclems/glab"},
 			wantErr: false,
 			assertFunc: func(t *testing.T, out string) {
-				assert.Contains(t, out, "- Deleting Merge Request !1\n")
-				assert.Contains(t, out, "✔ Merge request !1 deleted\n")
+				assert.Contains(t, out, "✓ Issue Deleted\n")
 			},
 		},
 		{
