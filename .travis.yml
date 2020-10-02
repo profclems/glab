@@ -12,10 +12,6 @@ addons:
   ssh_known_hosts:
   - gitlab.com
 
-env:
-  global:
-    secure: "LRYxxndzqJ1BV2JwpR9HBV7gdWNXwfLzR4JaKTltK/n+uMI6rD77GxAif1kKSaTE9jQBPFkIllJ+Vy7Xz15BFQaOmlGEwi/2Dv93gz/ENLrabytdzCj316QsjWEUmmj0OEH0bOvqFRwzyF7qDOKxd5tI0WVvZhGFTkFlbQwee46hs1gBgPW+ADPPUoiPgH1gkM/Rn7qwVZnB5go/Ph2yizYpWTerVJ/OdiwKD8Y21ib7cbChOV9wa5ey8hJOO4+tAtTt7VA7QXAntsWXPopqWp9BnNpu/umTQYPTR3tBL6zUcn+XRpizWCGSaxDopvrBIY8kw6/6IGbJ3+jJcTMpWgB53rLmGNn5CDpRJio66yCdhhXITZVVxO4nY8T+W1W6ybKzQgMiID0QOqRwm8rz1yoWJx5k8/OAAZTaxQ7Zgxt2yiK4Bzao9wqsKMXIASuLz2f/YKt4CuQHtuMWM4ESBAcUgVB6TltecDYqs06/OrCRmn4vHZcnm8s+MlPzZsOcOYT1pgKAlSanYOYuJvM8et6tEvrjfU3XJD89aJkm42WXyr4uToaOVoLSCniF9PuPr3m/OasbriwRDInNE3vF8HwKhX1kBezjVBfYImnNatwFhANO903kcSge6zpKNH7ge1JgYtmqwNHikUKD++yz1K0c23v1SqMzkxQLUGd1+xA="
-
 before_install:
   - echo -e "Host *\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
   - go get -t -v ./...
