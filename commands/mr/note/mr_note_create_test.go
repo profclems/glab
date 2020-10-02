@@ -43,17 +43,17 @@ hosts:
 			return &gitlab.Note{}, nil
 		}
 		return &gitlab.Note{
-				ID:    1,
-				Body:  *opts.Body,
-				Title: *opts.Body,
-				Author: author{
-					ID:       1,
-					Username: "johnwick",
-					Name:     "John Wick",
-				},
-				System:     false,
-				CreatedAt:  &timer,
-				NoteableID: 0,
+			ID:    1,
+			Body:  *opts.Body,
+			Title: *opts.Body,
+			Author: author{
+				ID:       1,
+				Username: "johnwick",
+				Name:     "John Wick",
+			},
+			System:     false,
+			CreatedAt:  &timer,
+			NoteableID: 0,
 		}, nil
 	}
 	api.GetMR = func(client *gitlab.Client, projectID interface{}, mrID int, opts *gitlab.GetMergeRequestsOptions) (*gitlab.MergeRequest, error) {
@@ -97,14 +97,14 @@ hosts:
 			},
 		},
 		/*
-		{
-			name: "Has no flag",
-			args: "11",
-			assertionFunc: func(t *testing.T, out, outErr string) {
-				require.Contains(t, out, "aborted... Note has an empty message")
+			{
+				name: "Has no flag",
+				args: "11",
+				assertionFunc: func(t *testing.T, out, outErr string) {
+					require.Contains(t, out, "aborted... Note has an empty message")
+				},
 			},
-		},
-		 */
+		*/
 		{
 			name: "With --repo flag",
 			args: "225 -m \"Some test note\" -R profclems/test",
