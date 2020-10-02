@@ -2,6 +2,7 @@ package clone
 
 import (
 	"fmt"
+	"github.com/profclems/glab/internal/glinstance"
 	"strconv"
 	"strings"
 
@@ -36,32 +37,47 @@ func NewCmdClone(f *cmdutils.Factory) *cobra.Command {
 		Args: cobra.MinimumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var (
-				project *gitlab.Project = nil
-				err     error
+				project		*gitlab.Project = nil
+				host		string
+				err     	error
 			)
 
 			apiClient, err := f.HttpClient()
 			if err != nil {
-				return err
+				apiClient = nil  // since repo clone requires no authentication
 			}
+
 			baseRepo, err := f.BaseRepo()
 			if err != nil {
-				return err
+				host = glinstance.Default()
+			} else {
+				host = baseRepo.RepoHost()
 			}
 
 			cfg, _ := f.Config()
-			protocol, _ := cfg.Get(baseRepo.RepoHost(), "git_protocol")
-			token, _ := cfg.Get(baseRepo.RepoHost(), "token")
+			protocol, _ := cfg.Get(host, "git_protocol")
+			token, _ := cfg.Get(host, "token")
 
-			remoteArgs := &glrepo.RemoteArgs{
-				Protocol: protocol,
-				Token:    token,
-				Url:      baseRepo.RepoHost(),
-				Username: baseRepo.RepoOwner(),
+			// TODO: avoid rewriting this for factory.NewClient()
+			tlsVerify, _ := cfg.Get(host, "skip_tls_verify")
+			skipTlsVerify, _ := strconv.ParseBool(tlsVerify)
+			caCert, _ := cfg.Get(host, "ca_cert")
+			if caCert != "" {
+				apiClient, _ = api.InitWithCustomCA(host, token, caCert)
+			} else {
+				apiClient, _ = api.Init(host, token, skipTlsVerify)
 			}
 
 			repo := args[0]
 			u, _ := api.CurrentUser(apiClient)
+
+			remoteArgs := &glrepo.RemoteArgs{
+				Protocol: protocol,
+				Token:    token,
+				Url:      host,
+				Username: u.Username,
+			}
+
 			if !git.IsValidURL(repo) {
 				// Assuming that repo is a project ID if it is an integer
 				if _, err := strconv.ParseInt(repo, 10, 64); err != nil {
