@@ -107,30 +107,30 @@ func TestMRView(t *testing.T) {
 		}
 		return []*gitlab.Note{
 			{
-				ID:         1,
-				Body:       "Note Body",
-				Title:      "Note Title",
-				Author: author {
-					ID: 1,
+				ID:    1,
+				Body:  "Note Body",
+				Title: "Note Title",
+				Author: author{
+					ID:       1,
 					Username: "johnwick",
-					Name: "John Wick",
+					Name:     "John Wick",
 				},
-				System:       false,
-				CreatedAt:    &timer,
-				NoteableID:   0,
+				System:     false,
+				CreatedAt:  &timer,
+				NoteableID: 0,
 			},
 			{
-				ID:         1,
-				Body:       "Marked PR as ready",
-				Title:      "",
-				Author: author {
-					ID: 1,
+				ID:    1,
+				Body:  "Marked PR as ready",
+				Title: "",
+				Author: author{
+					ID:       1,
 					Username: "johnwick",
-					Name: "John Wick",
+					Name:     "John Wick",
 				},
-				System:       true,
-				CreatedAt:    &timer,
-				NoteableID:   0,
+				System:     true,
+				CreatedAt:  &timer,
+				NoteableID: 0,
 			},
 		}, nil
 	}

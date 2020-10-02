@@ -18,7 +18,7 @@ import (
 
 var (
 	stubFactory *cmdutils.Factory
-	cmd *cobra.Command
+	cmd         *cobra.Command
 )
 
 func TestMain(m *testing.M) {
