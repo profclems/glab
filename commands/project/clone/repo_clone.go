@@ -37,15 +37,11 @@ func NewCmdClone(f *cmdutils.Factory) *cobra.Command {
 		Args: cobra.MinimumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var (
-				project *gitlab.Project = nil
-				host    string
-				err     error
+				project 	*gitlab.Project = nil
+				host    	string
+				err     	error
+				apiClient	*gitlab.Client
 			)
-
-			apiClient, err := f.HttpClient()
-			if err != nil {
-				apiClient = nil // since repo clone requires no authentication
-			}
 
 			baseRepo, err := f.BaseRepo()
 			if err != nil {
