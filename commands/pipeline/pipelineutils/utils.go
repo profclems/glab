@@ -40,6 +40,8 @@ func DisplayMultiplePipelines(p []*gitlab.PipelineInfo, projectID string) string
 
 			pipelinePrint += fmt.Sprintf("%s\t%s\t%s\n", pipeState, pipeline.Ref, utils.Magenta("("+duration+")"))
 		}
+
+		return pipelinePrint
 	}
 
 	return "No Pipelines available on " + projectID
