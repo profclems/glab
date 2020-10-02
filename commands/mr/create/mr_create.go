@@ -62,7 +62,7 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 			if t, _ := cmd.Flags().GetString("target-branch"); t != "" {
 				targetBranch = t
 			} else {
-				targetBranch, _ = git.GetDefaultBranch(repoRemote.Name)
+				targetBranch, _ = git.GetDefaultBranch(repoRemote.PushURL.String())
 			}
 			if source, _ := cmd.Flags().GetString("source-branch"); source != "" {
 				sourceBranch = strings.Trim(source, "[] ")
