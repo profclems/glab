@@ -69,9 +69,9 @@ func NewCmdUpdate(f *cmdutils.Factory) *cobra.Command {
 		},
 	}
 
-	issueUpdateCmd.Flags().StringP("title", "t", "", "Title of merge request")
-	issueUpdateCmd.Flags().BoolP("lock-discussion", "", false, "Lock discussion on merge request")
-	issueUpdateCmd.Flags().StringP("description", "d", "", "merge request description")
+	issueUpdateCmd.Flags().StringP("title", "t", "", "Title of issue")
+	issueUpdateCmd.Flags().BoolP("lock-discussion", "", false, "Lock discussion on issue")
+	issueUpdateCmd.Flags().StringP("description", "d", "", "Issue description")
 	issueUpdateCmd.Flags().StringArrayP("label", "l", []string{}, "add labels")
 	issueUpdateCmd.Flags().StringArrayP("unlabel", "u", []string{}, "remove labels")
 
