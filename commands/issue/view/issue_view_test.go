@@ -3,19 +3,18 @@ package view
 import (
 	"fmt"
 	"github.com/acarl005/stripansi"
+	"github.com/profclems/glab/commands/cmdtest"
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/internal/config"
+	"github.com/profclems/glab/internal/run"
 	"github.com/profclems/glab/pkg/api"
+	mainTest "github.com/profclems/glab/test"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/xanzy/go-gitlab"
 	"os/exec"
 	"testing"
 	"time"
-
-	"github.com/profclems/glab/commands/cmdtest"
-	"github.com/profclems/glab/internal/run"
-	mainTest "github.com/profclems/glab/test"
-	"github.com/stretchr/testify/assert"
 )
 
 var (
@@ -43,7 +42,7 @@ hosts:
 	stubFactory, _ = cmdtest.StubFactoryWithConfig("")
 
 	timer, _ := time.Parse(time.RFC3339, "2014-11-12T11:45:26.371Z")
-	api.GetMR = func(client *gitlab.Client, projectID interface{}, mrID int, opts *gitlab.GetMergeRequestsOptions) (*gitlab.MergeRequest, error) {
+	api.GetIssue = func(client *gitlab.Client, projectID interface{}, issueID int) (*gitlab.Issue, error) {
 		if projectID == "" || projectID == "WRONG_REPO" || projectID == "expected_err" {
 			return nil, fmt.Errorf("error expected")
 		}
@@ -51,26 +50,29 @@ hosts:
 		if err != nil {
 			return nil, err
 		}
-		return &gitlab.MergeRequest{
-			ID:          mrID,
-			IID:         mrID,
-			Title:       "mrTitle",
+		return &gitlab.Issue{
+			ID:          issueID,
+			IID:         issueID,
+			Title:       "issueTitle",
 			Labels:      gitlab.Labels{"test", "bug"},
 			State:       "opened",
-			Description: "mrBody",
-			Author: &gitlab.BasicUser{
-				ID:       mrID,
+			Description: "issueBody",
+			References: &gitlab.IssueReferences{
+				Full: fmt.Sprintf("%s#%d", repo.FullName(), issueID),
+			},
+			Author: &gitlab.IssueAuthor{
+				ID:       issueID,
 				Name:     "John Dev Wick",
 				Username: "jdwick",
 			},
-			WebURL:    fmt.Sprintf("https://%s/%s/-/merge_requests/%d", repo.RepoHost(), repo.FullName(), mrID),
+			WebURL:    fmt.Sprintf("https://%s/%s/-/issues/%d", repo.RepoHost(), repo.FullName(), issueID),
 			CreatedAt: &timer,
 		}, nil
 	}
 	cmdtest.InitTest(m, "mr_view_test")
 }
 
-func TestMRView_web_numberArg(t *testing.T) {
+func TestNewCmdView_web_numberArg(t *testing.T) {
 	cmd := NewCmdView(stubFactory)
 	cmd.Flags().StringP("repo", "R", "", "")
 
@@ -90,18 +92,18 @@ func TestMRView_web_numberArg(t *testing.T) {
 	out := stripansi.Strip(output.String())
 	outErr := stripansi.Strip(output.Stderr())
 
-	assert.Contains(t, outErr, "Opening gitlab.com/glab-cli/test/-/merge_requests/225 in your browser.")
-	assert.Equal(t, out, "")
+	assert.Contains(t, out, "Opening gitlab.com/glab-cli/test/-/issues/225 in your browser.")
+	assert.Equal(t, "", outErr)
 
 	if seenCmd == nil {
 		t.Log("expected a command to run")
 	}
 }
 
-func TestMRView(t *testing.T) {
-	oldListMrNotes := api.ListMRNotes
+func TestNewCmdView(t *testing.T) {
+	oldListIssueNotes := api.ListIssueNotes
 	timer, _ := time.Parse(time.RFC3339, "2014-11-12T11:45:26.371Z")
-	api.ListMRNotes = func(client *gitlab.Client, projectID interface{}, mrID int, opts *gitlab.ListMergeRequestNotesOptions) ([]*gitlab.Note, error) {
+	api.ListIssueNotes = func(client *gitlab.Client, projectID interface{}, issueID int, opts *gitlab.ListIssueNotesOptions) ([]*gitlab.Note, error) {
 		if projectID == "PROJECT_MR_WITH_EMPTY_NOTE" {
 			return []*gitlab.Note{}, nil
 		}
@@ -121,7 +123,7 @@ func TestMRView(t *testing.T) {
 			},
 			{
 				ID:         1,
-				Body:       "Marked PR as ready",
+				Body:       "Marked issue as stale",
 				Title:      "",
 				Author: author {
 					ID: 1,
@@ -147,10 +149,11 @@ func TestMRView(t *testing.T) {
 		out := stripansi.Strip(output.String())
 		outErr := stripansi.Strip(output.Stderr())
 
-		require.Contains(t, out, "mrTitle!13")
+		require.Contains(t, out, "issueTitle #13")
+		require.Contains(t, out, "issueBody")
 		require.Equal(t, outErr, "")
-		assert.Contains(t, out, "https://gitlab.com/glab-cli/test/-/merge_requests/13")
-		assert.Contains(t, out, "johnwick:\tMarked PR as ready")
+		assert.Contains(t, out, "https://gitlab.com/glab-cli/test/-/issues/13")
+		assert.Contains(t, out, "johnwick:\tMarked issue as stale")
 	})
-	api.ListMRNotes = oldListMrNotes
+	api.ListIssueNotes = oldListIssueNotes
 }
