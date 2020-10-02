@@ -27,7 +27,6 @@ git_protocol: https
 hosts:
   gitlab.com:
     username: monalisa
-    token: OTOKEN
 `, "")()
 
 	stubFactory, _ = cmdtest.StubFactoryWithConfig("")
