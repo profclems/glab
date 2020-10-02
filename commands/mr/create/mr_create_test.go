@@ -23,6 +23,7 @@ var (
 
 func TestMain(m *testing.M) {
 	defer config.StubConfig(`---
+git_protocol: https
 hosts:
   gitlab.com:
     username: monalisa
@@ -90,18 +91,15 @@ func TestMrCmd(t *testing.T) {
 }
 
 func TestNewCmdCreate_autofill(t *testing.T) {
-	repo := cmdtest.CopyTestRepo(t, "mr_cmd_autofill")
-
 	t.Run("create_autofill", func(t *testing.T) {
 		git := exec.Command("git", "checkout", "test-cli")
-		git.Dir = repo
 		b, err := git.CombinedOutput()
 		if err != nil {
 			t.Log(string(b))
 			t.Fatal(err)
 		}
 
-		output, err := cmdtest.RunCommand(cmd, "-f")
+		output, err := cmdtest.RunCommand(cmd, "-f -b master")
 		if err != nil {
 			t.Error(err)
 			return
