@@ -16,6 +16,7 @@ glab issue view <id> [flags]
   -c, --comments       Show issue comments and activities
   -p, --page int       Page number (default 1)
   -P, --per-page int   Number of items to list per page (default 20)
+  -s, --system-logs    Show system activities / logs
   -w, --web            Open issue in a browser. Uses default browser or browser specified in BROWSER variable
 ```
 
