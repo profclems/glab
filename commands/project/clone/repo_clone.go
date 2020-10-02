@@ -37,10 +37,10 @@ func NewCmdClone(f *cmdutils.Factory) *cobra.Command {
 		Args: cobra.MinimumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var (
-				project 	*gitlab.Project = nil
-				host    	string
-				err     	error
-				apiClient	*gitlab.Client
+				project   *gitlab.Project = nil
+				host      string
+				err       error
+				apiClient *gitlab.Client
 			)
 
 			baseRepo, err := f.BaseRepo()
