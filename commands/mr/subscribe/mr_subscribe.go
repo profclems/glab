@@ -41,7 +41,7 @@ func NewCmdSubscribe(f *cmdutils.Factory) *cobra.Command {
 
 			arrIds := strings.Split(strings.Trim(mergeID, "[] "), ",")
 			for _, i2 := range arrIds {
-				fmt.Fprintln(out, "- Subscribing to merge Request !"+i2)
+				fmt.Fprintln(out, "- Subscribing to merge request !"+i2)
 				mr, err := api.SubscribeToMR(apiClient, repo.FullName(), utils.StringToInt(i2), nil)
 				if err != nil {
 					return err
