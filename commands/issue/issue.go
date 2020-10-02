@@ -11,7 +11,7 @@ import (
 	issueSubscribeCmd "github.com/profclems/glab/commands/issue/subscribe"
 	issueUnsubscribeCmd "github.com/profclems/glab/commands/issue/unsubscribe"
 	issueViewCmd "github.com/profclems/glab/commands/issue/view"
-  issueUpdateCmd "github.com/profclems/glab/commands/issue/update"
+	issueUpdateCmd "github.com/profclems/glab/commands/issue/update"
 
 	"github.com/spf13/cobra"
 )
