@@ -315,3 +315,11 @@ var ListProjectPipelines = func(client *gitlab.Client, projectID interface{}, op
 	}
 	return pipes, nil
 }
+
+var CreatePipeline = func(client *gitlab.Client, projectID interface{}, opts *gitlab.CreatePipelineOptions) (*gitlab.Pipeline, error) {
+	if client == nil {
+		client = apiClient
+	}
+	pipe, _, err := client.Pipelines.CreatePipeline(projectID, opts)
+	return pipe, err
+}
