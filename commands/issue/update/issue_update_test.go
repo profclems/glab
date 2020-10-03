@@ -21,11 +21,11 @@ func TestNewCmdUpdate(t *testing.T) {
 	oldUpdateIssue := api.UpdateIssue
 	timer, _ := time.Parse(time.RFC3339, "2014-11-12T11:45:26.371Z")
 	testIssue := &gitlab.Issue{
-		ID:          1,
-		IID:         1,
-		State:       "closed",
-		Labels: 	 gitlab.Labels{"bug, test, removeable-label"},
-		Description: "Dummy description for issue 1",
+		ID:               1,
+		IID:              1,
+		State:            "closed",
+		Labels:           gitlab.Labels{"bug, test, removeable-label"},
+		Description:      "Dummy description for issue 1",
 		DiscussionLocked: false,
 		Author: &gitlab.IssueAuthor{
 			ID:       1,
