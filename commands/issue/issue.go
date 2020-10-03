@@ -10,8 +10,8 @@ import (
 	issueReopenCmd "github.com/profclems/glab/commands/issue/reopen"
 	issueSubscribeCmd "github.com/profclems/glab/commands/issue/subscribe"
 	issueUnsubscribeCmd "github.com/profclems/glab/commands/issue/unsubscribe"
-	issueViewCmd "github.com/profclems/glab/commands/issue/view"
 	issueUpdateCmd "github.com/profclems/glab/commands/issue/update"
+	issueViewCmd "github.com/profclems/glab/commands/issue/view"
 
 	"github.com/spf13/cobra"
 )
