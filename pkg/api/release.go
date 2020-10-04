@@ -19,7 +19,7 @@ var ListReleases = func(client *gitlab.Client, projectID interface{}, opts *gitl
 		client = apiClient
 	}
 
-	releases, _, err := apiClient.Releases.ListReleases(projectID, opts)
+	releases, _, err := client.Releases.ListReleases(projectID, opts)
 	if err != nil {
 		return nil, err
 	}

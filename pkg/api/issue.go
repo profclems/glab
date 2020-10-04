@@ -20,7 +20,7 @@ var UpdateIssue = func(client *gitlab.Client, projectID interface{}, issueID int
 	if client == nil {
 		client = apiClient
 	}
-	issue, _, err := apiClient.Issues.UpdateIssue(projectID, issueID, opts)
+	issue, _, err := client.Issues.UpdateIssue(projectID, issueID, opts)
 	if err != nil {
 		return nil, err
 	}
@@ -32,7 +32,7 @@ var GetIssue = func(client *gitlab.Client, projectID interface{}, issueID int) (
 	if client == nil {
 		client = apiClient
 	}
-	issue, _, err := apiClient.Issues.GetIssue(projectID, issueID)
+	issue, _, err := client.Issues.GetIssue(projectID, issueID)
 	if err != nil {
 		return nil, err
 	}
@@ -41,7 +41,7 @@ var GetIssue = func(client *gitlab.Client, projectID interface{}, issueID int) (
 }
 
 var ListIssues = func(client *gitlab.Client, projectID interface{}, opts *gitlab.ListProjectIssuesOptions) ([]*gitlab.Issue, error) {
-	issues, _, err := apiClient.Issues.ListProjectIssues(projectID, opts)
+	issues, _, err := client.Issues.ListProjectIssues(projectID, opts)
 	if err != nil {
 		return nil, err
 	}
@@ -53,7 +53,7 @@ var CreateIssue = func(client *gitlab.Client, projectID interface{}, opts *gitla
 	if client == nil {
 		client = apiClient
 	}
-	issue, _, err := apiClient.Issues.CreateIssue(projectID, opts)
+	issue, _, err := client.Issues.CreateIssue(projectID, opts)
 	if err != nil {
 		return nil, err
 	}
@@ -66,7 +66,7 @@ var DeleteIssue = func(client *gitlab.Client, projectID interface{}, issueID int
 		client = apiClient
 	}
 
-	_, err := apiClient.Issues.DeleteIssue(projectID, issueID)
+	_, err := client.Issues.DeleteIssue(projectID, issueID)
 	if err != nil {
 		return err
 	}

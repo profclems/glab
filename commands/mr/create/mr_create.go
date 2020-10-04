@@ -65,18 +65,19 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 				targetBranch, _ = git.GetDefaultBranch(repoRemote.PushURL.String())
 			}
 			if source, _ := cmd.Flags().GetString("source-branch"); source != "" {
-				sourceBranch = strings.Trim(source, "[] ")
-			} else {
-				if c, _ := cmd.Flags().GetBool("create-source-branch"); c && sourceBranch == "" {
-					sourceBranch = utils.ReplaceNonAlphaNumericChars(mergeTitle, "-")
-				} else {
-					b, err := git.CurrentBranch()
-					if err != nil {
-						return err
-					}
-					sourceBranch = b
-				}
+				sourceBranch = source
 			}
+
+			if c, _ := cmd.Flags().GetBool("create-source-branch"); c && sourceBranch == "" {
+				sourceBranch = utils.ReplaceNonAlphaNumericChars(mergeTitle, "-")
+			} else {
+				b, err := git.CurrentBranch()
+				if err != nil {
+					return err
+				}
+				sourceBranch = b
+			}
+
 			if fill, _ := cmd.Flags().GetBool("fill"); !fill {
 				if title, _ := cmd.Flags().GetString("title"); title != "" {
 					mergeTitle = strings.Trim(title, " ")
