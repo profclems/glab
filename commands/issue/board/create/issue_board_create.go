@@ -14,11 +14,11 @@ var boardName string
 
 func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 	var issueCmd = &cobra.Command{
-		Use:   "create [flags]",
-		Short: `Create a project issue board.`,
-		Long:  ``,
+		Use:     "create [flags]",
+		Short:   `Create a project issue board.`,
+		Long:    ``,
 		Aliases: []string{"new"},
-		Args: cobra.MaximumNArgs(1),
+		Args:    cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if len(args) == 1 {
 				boardName = args[0]

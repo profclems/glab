@@ -26,24 +26,24 @@ func TestNewCmdCreate(t *testing.T) {
 		}, nil
 	}
 	tests := []struct {
-		name 	string
-		arg 	string
-		want 	string
+		name    string
+		arg     string
+		want    string
 		wantErr bool
 	}{
 		{
 			name: "Name passed as arg",
-			arg: `"Test"`,
+			arg:  `"Test"`,
 			want: `✓ Board created: "Test"`,
 		},
 		{
 			name: "Name passed in name flag",
-			arg: `--name "Test"`,
+			arg:  `--name "Test"`,
 			want: `✓ Board created: "Test"`,
 		},
 		{
-			name: "WRONG_REPO",
-			arg: `"Test" -R NS/WRONG_REPO`,
+			name:    "WRONG_REPO",
+			arg:     `"Test" -R NS/WRONG_REPO`,
 			wantErr: true,
 		},
 	}
