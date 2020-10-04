@@ -2,6 +2,7 @@ package issue
 
 import (
 	"github.com/profclems/glab/commands/cmdutils"
+	issueBoardCmd "github.com/profclems/glab/commands/issue/board"
 	issueCloseCmd "github.com/profclems/glab/commands/issue/close"
 	issueCreateCmd "github.com/profclems/glab/commands/issue/create"
 	issueDeleteCmd "github.com/profclems/glab/commands/issue/delete"
@@ -23,6 +24,7 @@ func NewCmdIssue(f *cmdutils.Factory) *cobra.Command {
 		Long:  ``,
 	}
 	issueCmd.AddCommand(issueCloseCmd.NewCmdClose(f))
+	issueCmd.AddCommand(issueBoardCmd.NewCmdBoard(f))
 	issueCmd.AddCommand(issueCreateCmd.NewCmdCreate(f))
 	issueCmd.AddCommand(issueDeleteCmd.NewCmdDelete(f))
 	issueCmd.AddCommand(issueListCmd.NewCmdList(f))
