@@ -1,4 +1,5 @@
 ![GLab](https://user-images.githubusercontent.com/9063085/90530075-d7a58580-e14a-11ea-9727-4f592f7dcf2e.png)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fprofclems%2Fglab.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fprofclems%2Fglab?ref=badge_shield)
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
 [![All Contributors](https://img.shields.io/badge/all_contributors-19-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
@@ -263,3 +264,6 @@ This project follows the [all-contributors](https://github.com/all-contributors/
 Copyright © [Clement Sam](https://clementsam.tech)
 
 `glab` is open-sourced software licensed under the [MIT](LICENSE) license.
+
+
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fprofclems%2Fglab.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fprofclems%2Fglab?ref=badge_large)
