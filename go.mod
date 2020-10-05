@@ -18,7 +18,7 @@ require (
 	github.com/hashicorp/go-version v1.2.1
 	github.com/juju/ansiterm v0.0.0-20180109212912-720a0952cc2a
 	github.com/lunixbochs/vtclean v1.0.0
-	github.com/mattn/go-colorable v0.1.7
+	github.com/mattn/go-colorable v0.1.8
 	github.com/mattn/go-isatty v0.0.12
 	github.com/mgutz/ansi v0.0.0-20200706080929-d51e80ef957d
 	github.com/mitchellh/go-homedir v1.1.0
