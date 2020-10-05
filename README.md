@@ -169,22 +169,16 @@ If a supported binary for your OS is not found at the [releases page](https://gi
 
 ## Configuration
 Get a GitLab access token at https://gitlab.com/profile/personal_access_tokens or https://gitlab.example.com/profile/personal_access_tokens if self-hosted.
-
-**To set configuration globally**
 ```sh
-glab config init -g # Will be prompted for details
+glab config init # Will be prompted for details and stored in the global directory
 ```
-or
+**To set configuration globally**
 ```sh
 glab config set -g token xxxxxx --host=gitlab.com
 ```
 **To set configuration for current directory (must be a git repository)**
 ```sh
-glab config init  # Will be prompted for basic details
-```
-or
-```sh
-glab config set -g token xxxxxx --host=gitlab.com
+glab config set token xxxxxx --host=gitlab.com
 ```
 
 ### Example
