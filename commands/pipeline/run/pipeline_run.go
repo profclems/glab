@@ -38,6 +38,7 @@ func NewCmdRun(f *cmdutils.Factory) *cobra.Command {
 	var pipelineRunCmd = &cobra.Command{
 		Use:   "run [flags]",
 		Short: `Create a new pipeline run`,
+		Aliases: []string{"create"},
 		Example: heredoc.Doc(`
 	$ glab pipeline run
 	$ glab pipeline run -b trunk
