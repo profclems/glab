@@ -9,7 +9,7 @@ import (
 	"sync"
 	"time"
 
-        "github.com/profclems/glab/internal/utils"
+	"github.com/profclems/glab/internal/utils"
 	"github.com/profclems/glab/pkg/api"
 
 	"github.com/juju/ansiterm/tabwriter"

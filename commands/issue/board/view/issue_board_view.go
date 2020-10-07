@@ -2,6 +2,9 @@ package view
 
 import (
 	"fmt"
+	"log"
+	"runtime/debug"
+
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/gdamore/tcell"
 	"github.com/profclems/glab/commands/cmdutils"
@@ -10,8 +13,6 @@ import (
 	"github.com/rivo/tview"
 	"github.com/spf13/cobra"
 	"github.com/xanzy/go-gitlab"
-	"log"
-	"runtime/debug"
 )
 
 var (
