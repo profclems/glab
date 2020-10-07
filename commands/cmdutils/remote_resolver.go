@@ -71,7 +71,7 @@ func (rr *remoteResolver) Resolver() func() (glrepo.Remotes, error) {
 		}
 
 		if len(cachedRemotes) == 0 {
-			remotesError = errors.New("none of the git remotes configured for this repository point to a known GitLab host. To tell glab about a new GitLab host, please use `glab auth login`")
+			remotesError = errors.New("none of the git remotes configured for this repository points to a known GitLab host. Please use `glab config init` to configure a new host for glab")
 			return nil, remotesError
 		}
 		return cachedRemotes, nil
