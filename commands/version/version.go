@@ -2,6 +2,7 @@ package version
 
 import (
 	"fmt"
+
 	"github.com/profclems/glab/internal/utils"
 	"github.com/spf13/cobra"
 )

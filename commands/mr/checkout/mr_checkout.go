@@ -2,6 +2,7 @@ package checkout
 
 import (
 	"fmt"
+
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/internal/git"
 	"github.com/profclems/glab/internal/utils"

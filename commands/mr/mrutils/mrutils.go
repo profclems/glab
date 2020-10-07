@@ -2,6 +2,7 @@ package mrutils
 
 import (
 	"fmt"
+
 	"github.com/gosuri/uitable"
 	"github.com/profclems/glab/internal/utils"
 	"github.com/xanzy/go-gitlab"

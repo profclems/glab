@@ -2,12 +2,13 @@ package issues
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/commands/issue/issueutils"
 	"github.com/profclems/glab/internal/utils"
 	"github.com/profclems/glab/pkg/api"
 	"github.com/spf13/cobra"
-	"strings"
 
 	"github.com/xanzy/go-gitlab"
 )

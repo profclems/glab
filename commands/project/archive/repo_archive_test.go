@@ -1,10 +1,11 @@
 package archive
 
 import (
-	"github.com/profclems/glab/commands/cmdtest"
-	"github.com/stretchr/testify/assert"
 	"os/exec"
 	"testing"
+
+	"github.com/profclems/glab/commands/cmdtest"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestMain(m *testing.M) {

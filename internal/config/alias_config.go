@@ -2,8 +2,9 @@ package config
 
 import (
 	"fmt"
-	"gopkg.in/yaml.v3"
 	"path"
+
+	"gopkg.in/yaml.v3"
 )
 
 func aliasesConfigFile() string {

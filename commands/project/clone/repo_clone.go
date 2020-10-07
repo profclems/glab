@@ -2,9 +2,10 @@ package clone
 
 import (
 	"fmt"
-	"github.com/profclems/glab/internal/glinstance"
 	"strconv"
 	"strings"
+
+	"github.com/profclems/glab/internal/glinstance"
 
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/internal/git"

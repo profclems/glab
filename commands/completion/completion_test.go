@@ -2,9 +2,10 @@ package completion
 
 import (
 	"bytes"
-	"github.com/spf13/cobra"
 	"strings"
 	"testing"
+
+	"github.com/spf13/cobra"
 
 	"github.com/google/shlex"
 )

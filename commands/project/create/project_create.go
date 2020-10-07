@@ -2,11 +2,12 @@ package create
 
 import (
 	"fmt"
-	"github.com/profclems/glab/internal/glrepo"
-	"github.com/profclems/glab/pkg/api"
 	"os"
 	"path"
 	"strings"
+
+	"github.com/profclems/glab/internal/glrepo"
+	"github.com/profclems/glab/pkg/api"
 
 	"github.com/MakeNowJust/heredoc"
 	"github.com/profclems/glab/commands/cmdutils"

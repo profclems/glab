@@ -1,10 +1,11 @@
 package lint
 
 import (
-	"github.com/profclems/glab/commands/cmdtest"
-	"github.com/stretchr/testify/require"
 	"os/exec"
 	"testing"
+
+	"github.com/profclems/glab/commands/cmdtest"
+	"github.com/stretchr/testify/require"
 )
 
 func TestMain(m *testing.M) {

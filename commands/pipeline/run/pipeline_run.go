@@ -13,7 +13,7 @@ import (
 	"github.com/xanzy/go-gitlab"
 )
 
-func getDefaultBranch(f *cmdutils.Factory) (string) {
+func getDefaultBranch(f *cmdutils.Factory) string {
 	repo, err := f.BaseRepo()
 	if err != nil {
 		return "master"
@@ -36,8 +36,8 @@ func getDefaultBranch(f *cmdutils.Factory) (string) {
 
 func NewCmdRun(f *cmdutils.Factory) *cobra.Command {
 	var pipelineRunCmd = &cobra.Command{
-		Use:   "run [flags]",
-		Short: `Create a new pipeline run`,
+		Use:     "run [flags]",
+		Short:   `Create a new pipeline run`,
 		Aliases: []string{"create"},
 		Example: heredoc.Doc(`
 	$ glab pipeline run
@@ -65,10 +65,10 @@ func NewCmdRun(f *cmdutils.Factory) *cobra.Command {
 			}
 
 			// TODO: support setting pipeline variables via cli.
-			v := []*gitlab.PipelineVariable {
+			v := []*gitlab.PipelineVariable{
 				{
-					Key: "GLAB_CLI_KEY",
-					Value: "GLAB_CLI_VAL",
+					Key:          "GLAB_CLI_KEY",
+					Value:        "GLAB_CLI_VAL",
 					VariableType: "env_var",
 				},
 			}
@@ -88,7 +88,7 @@ func NewCmdRun(f *cmdutils.Factory) *cobra.Command {
 				return err
 			}
 
-			fmt.Fprintln(out, "Created pipeline (id:", pipe.ID, "), status:", pipe.Status,", ref:", pipe.Ref, ", weburl: ", pipe.WebURL, ")")
+			fmt.Fprintln(out, "Created pipeline (id:", pipe.ID, "), status:", pipe.Status, ", ref:", pipe.Ref, ", weburl: ", pipe.WebURL, ")")
 			return nil
 		},
 	}

@@ -2,11 +2,12 @@ package set
 
 import (
 	"bytes"
+	"io/ioutil"
+	"testing"
+
 	"github.com/MakeNowJust/heredoc"
 	"github.com/google/shlex"
 	"github.com/profclems/glab/commands/cmdutils"
-	"io/ioutil"
-	"testing"
 
 	"github.com/profclems/glab/internal/config"
 	"github.com/profclems/glab/test"

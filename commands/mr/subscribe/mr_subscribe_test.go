@@ -2,6 +2,9 @@ package subscribe
 
 import (
 	"fmt"
+	"testing"
+	"time"
+
 	"github.com/acarl005/stripansi"
 	"github.com/profclems/glab/commands/cmdtest"
 	"github.com/profclems/glab/internal/config"
@@ -9,8 +12,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/xanzy/go-gitlab"
-	"testing"
-	"time"
 )
 
 func TestMain(m *testing.M) {

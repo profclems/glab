@@ -3,11 +3,12 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"net"
+	"testing"
+
 	"github.com/pkg/errors"
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/spf13/cobra"
-	"net"
-	"testing"
 )
 
 func Test_printError(t *testing.T) {

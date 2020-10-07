@@ -2,14 +2,15 @@ package help
 
 import (
 	"bytes"
+	"io"
+	"os"
+	"testing"
+
 	"github.com/profclems/glab/commands/alias"
 	"github.com/profclems/glab/commands/alias/set"
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
-	"io"
-	"os"
-	"testing"
 )
 
 func TestDedent(t *testing.T) {

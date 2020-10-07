@@ -2,12 +2,13 @@ package cmdutils
 
 import (
 	"errors"
+	"net/url"
+	"sort"
+
 	"github.com/profclems/glab/internal/config"
 	"github.com/profclems/glab/internal/git"
 	"github.com/profclems/glab/internal/glinstance"
 	"github.com/profclems/glab/internal/glrepo"
-	"net/url"
-	"sort"
 )
 
 type remoteResolver struct {

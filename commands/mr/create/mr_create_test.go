@@ -2,6 +2,11 @@ package create
 
 import (
 	"fmt"
+	"os/exec"
+	"strings"
+	"testing"
+	"time"
+
 	"github.com/acarl005/stripansi"
 	"github.com/profclems/glab/commands/cmdtest"
 	"github.com/profclems/glab/commands/cmdutils"
@@ -10,10 +15,6 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
 	"github.com/xanzy/go-gitlab"
-	"os/exec"
-	"strings"
-	"testing"
-	"time"
 )
 
 var (

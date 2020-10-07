@@ -5,8 +5,8 @@ import (
 	ciCmd "github.com/profclems/glab/commands/pipeline/ci"
 	pipeDeleteCmd "github.com/profclems/glab/commands/pipeline/delete"
 	pipeListCmd "github.com/profclems/glab/commands/pipeline/list"
-	pipeStatusCmd "github.com/profclems/glab/commands/pipeline/status"
 	pipeRunCmd "github.com/profclems/glab/commands/pipeline/run"
+	pipeStatusCmd "github.com/profclems/glab/commands/pipeline/status"
 
 	"github.com/spf13/cobra"
 )

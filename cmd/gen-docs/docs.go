@@ -1,8 +1,9 @@
 package main
 
 import (
-	"github.com/profclems/glab/commands"
 	"log"
+
+	"github.com/profclems/glab/commands"
 
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/spf13/cobra/doc"

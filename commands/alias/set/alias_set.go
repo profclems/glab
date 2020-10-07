@@ -2,8 +2,9 @@ package set
 
 import (
 	"fmt"
-	"github.com/profclems/glab/commands/cmdutils"
 	"strings"
+
+	"github.com/profclems/glab/commands/cmdutils"
 
 	"github.com/profclems/glab/internal/config"
 	"github.com/profclems/glab/internal/utils"

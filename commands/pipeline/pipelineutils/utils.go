@@ -3,13 +3,14 @@ package pipelineutils
 import (
 	"context"
 	"fmt"
-	"github.com/pkg/errors"
-	"github.com/profclems/glab/pkg/api"
 	"io"
 	"io/ioutil"
 	"os"
 	"sync"
 	"time"
+
+	"github.com/pkg/errors"
+	"github.com/profclems/glab/pkg/api"
 
 	"github.com/juju/ansiterm/tabwriter"
 	"github.com/profclems/glab/internal/utils"

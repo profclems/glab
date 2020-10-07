@@ -246,39 +246,39 @@ func Test_LinkJobs(t *testing.T) {
 		"                 ",
 	}
 	jobs := []*gitlab.Job{
-		&gitlab.Job{
+		{
 			Name:  "stage1-job1",
 			Stage: "stage1",
 		},
-		&gitlab.Job{
+		{
 			Name:  "stage1-job2",
 			Stage: "stage1",
 		},
-		&gitlab.Job{
+		{
 			Name:  "stage1-job3",
 			Stage: "stage1",
 		},
-		&gitlab.Job{
+		{
 			Name:  "stage1-job4",
 			Stage: "stage1",
 		},
-		&gitlab.Job{
+		{
 			Name:  "stage2-job1",
 			Stage: "stage2",
 		},
-		&gitlab.Job{
+		{
 			Name:  "stage2-job2",
 			Stage: "stage2",
 		},
-		&gitlab.Job{
+		{
 			Name:  "stage2-job3",
 			Stage: "stage2",
 		},
-		&gitlab.Job{
+		{
 			Name:  "stage3-job1",
 			Stage: "stage3",
 		},
-		&gitlab.Job{
+		{
 			Name:  "stage3-job2",
 			Stage: "stage3",
 		},
@@ -327,7 +327,7 @@ func Test_LinkJobsNegative(t *testing.T) {
 		{
 			"determinePadding -- first job missing",
 			[]*gitlab.Job{
-				&gitlab.Job{
+				{
 					Name:  "stage1-job1",
 					Stage: "stage1",
 				},
@@ -340,15 +340,15 @@ func Test_LinkJobsNegative(t *testing.T) {
 		{
 			"determinePadding -- second job missing",
 			[]*gitlab.Job{
-				&gitlab.Job{
+				{
 					Name:  "stage1-job1",
 					Stage: "stage1",
 				},
-				&gitlab.Job{
+				{
 					Name:  "stage2-job1",
 					Stage: "stage2",
 				},
-				&gitlab.Job{
+				{
 					Name:  "stage2-job2",
 					Stage: "stage2",
 				},
@@ -361,15 +361,15 @@ func Test_LinkJobsNegative(t *testing.T) {
 		{
 			"Link -- third job missing",
 			[]*gitlab.Job{
-				&gitlab.Job{
+				{
 					Name:  "stage1-job1",
 					Stage: "stage1",
 				},
-				&gitlab.Job{
+				{
 					Name:  "stage2-job1",
 					Stage: "stage2",
 				},
-				&gitlab.Job{
+				{
 					Name:  "stage2-job2",
 					Stage: "stage2",
 				},
@@ -382,15 +382,15 @@ func Test_LinkJobsNegative(t *testing.T) {
 		{
 			"Link -- third job missing",
 			[]*gitlab.Job{
-				&gitlab.Job{
+				{
 					Name:  "stage1-job1",
 					Stage: "stage1",
 				},
-				&gitlab.Job{
+				{
 					Name:  "stage2-job1",
 					Stage: "stage2",
 				},
-				&gitlab.Job{
+				{
 					Name:  "stage2-job2",
 					Stage: "stage2",
 				},
@@ -448,49 +448,49 @@ func Test_jobsView(t *testing.T) {
 	now := time.Now()
 	past := now.Add(time.Second * -61)
 	jobs := []*gitlab.Job{
-		&gitlab.Job{
+		{
 			Name:       "stage1-job1-really-long",
 			Stage:      "stage1",
 			Status:     "success",
 			StartedAt:  &past, // relies on test running in <1s we'll see how it goes
 			FinishedAt: &now,
 		},
-		&gitlab.Job{
+		{
 			Name:   "stage1-job2",
 			Stage:  "stage1",
 			Status: "success",
 		},
-		&gitlab.Job{
+		{
 			Name:   "stage1-job3",
 			Stage:  "stage1",
 			Status: "success",
 		},
-		&gitlab.Job{
+		{
 			Name:   "stage1-job4",
 			Stage:  "stage1",
 			Status: "failed",
 		},
-		&gitlab.Job{
+		{
 			Name:   "stage2-job1",
 			Stage:  "stage2",
 			Status: "running",
 		},
-		&gitlab.Job{
+		{
 			Name:   "stage2-job2",
 			Stage:  "stage2",
 			Status: "running",
 		},
-		&gitlab.Job{
+		{
 			Name:   "stage2-job3",
 			Stage:  "stage2",
 			Status: "pending",
 		},
-		&gitlab.Job{
+		{
 			Name:   "stage3-job1",
 			Stage:  "stage3",
 			Status: "manual",
 		},
-		&gitlab.Job{
+		{
 			Name:   "stage3-job2",
 			Stage:  "stage3",
 			Status: "manual",
@@ -534,34 +534,34 @@ func Test_latestJobs(t *testing.T) {
 		{
 			desc: "no newer jobs",
 			jobs: []*gitlab.Job{
-				&gitlab.Job{
+				{
 					ID:    1,
 					Name:  "stage1-job1",
 					Stage: "stage1",
 				},
-				&gitlab.Job{
+				{
 					ID:    2,
 					Name:  "stage1-job2",
 					Stage: "stage1",
 				},
-				&gitlab.Job{
+				{
 					ID:    3,
 					Name:  "stage1-job3",
 					Stage: "stage1",
 				},
 			},
 			expected: []*gitlab.Job{
-				&gitlab.Job{
+				{
 					ID:    1,
 					Name:  "stage1-job1",
 					Stage: "stage1",
 				},
-				&gitlab.Job{
+				{
 					ID:    2,
 					Name:  "stage1-job2",
 					Stage: "stage1",
 				},
-				&gitlab.Job{
+				{
 					ID:    3,
 					Name:  "stage1-job3",
 					Stage: "stage1",
@@ -571,39 +571,39 @@ func Test_latestJobs(t *testing.T) {
 		{
 			desc: "1 newer",
 			jobs: []*gitlab.Job{
-				&gitlab.Job{
+				{
 					ID:    1,
 					Name:  "stage1-job1",
 					Stage: "stage1",
 				},
-				&gitlab.Job{
+				{
 					ID:    2,
 					Name:  "stage1-job2",
 					Stage: "stage1",
 				},
-				&gitlab.Job{
+				{
 					ID:    3,
 					Name:  "stage1-job3",
 					Stage: "stage1",
 				},
-				&gitlab.Job{
+				{
 					ID:    4,
 					Name:  "stage1-job1",
 					Stage: "stage1",
 				},
 			},
 			expected: []*gitlab.Job{
-				&gitlab.Job{
+				{
 					ID:    4,
 					Name:  "stage1-job1",
 					Stage: "stage1",
 				},
-				&gitlab.Job{
+				{
 					ID:    2,
 					Name:  "stage1-job2",
 					Stage: "stage1",
 				},
-				&gitlab.Job{
+				{
 					ID:    3,
 					Name:  "stage1-job3",
 					Stage: "stage1",
@@ -613,44 +613,44 @@ func Test_latestJobs(t *testing.T) {
 		{
 			desc: "2 newer",
 			jobs: []*gitlab.Job{
-				&gitlab.Job{
+				{
 					ID:    1,
 					Name:  "stage1-job1",
 					Stage: "stage1",
 				},
-				&gitlab.Job{
+				{
 					ID:    2,
 					Name:  "stage1-job2",
 					Stage: "stage1",
 				},
-				&gitlab.Job{
+				{
 					ID:    3,
 					Name:  "stage1-job3",
 					Stage: "stage1",
 				},
-				&gitlab.Job{
+				{
 					ID:    4,
 					Name:  "stage1-job3",
 					Stage: "stage1",
 				},
-				&gitlab.Job{
+				{
 					ID:    5,
 					Name:  "stage1-job1",
 					Stage: "stage1",
 				},
 			},
 			expected: []*gitlab.Job{
-				&gitlab.Job{
+				{
 					ID:    5,
 					Name:  "stage1-job1",
 					Stage: "stage1",
 				},
-				&gitlab.Job{
+				{
 					ID:    2,
 					Name:  "stage1-job2",
 					Stage: "stage1",
 				},
-				&gitlab.Job{
+				{
 					ID:    4,
 					Name:  "stage1-job3",
 					Stage: "stage1",
@@ -686,16 +686,16 @@ func Test_adjacentStages(t *testing.T) {
 			"first stage",
 			"1",
 			[]*gitlab.Job{
-				&gitlab.Job{
+				{
 					Stage: "1",
 				},
-				&gitlab.Job{
+				{
 					Stage: "1",
 				},
-				&gitlab.Job{
+				{
 					Stage: "1",
 				},
-				&gitlab.Job{
+				{
 					Stage: "2",
 				},
 			},
@@ -705,22 +705,22 @@ func Test_adjacentStages(t *testing.T) {
 			"mid stage",
 			"2",
 			[]*gitlab.Job{
-				&gitlab.Job{
+				{
 					Stage: "1",
 				},
-				&gitlab.Job{
+				{
 					Stage: "1",
 				},
-				&gitlab.Job{
+				{
 					Stage: "1",
 				},
-				&gitlab.Job{
+				{
 					Stage: "2",
 				},
-				&gitlab.Job{
+				{
 					Stage: "2",
 				},
-				&gitlab.Job{
+				{
 					Stage: "3",
 				},
 			},
@@ -730,22 +730,22 @@ func Test_adjacentStages(t *testing.T) {
 			"last stage",
 			"3",
 			[]*gitlab.Job{
-				&gitlab.Job{
+				{
 					Stage: "1",
 				},
-				&gitlab.Job{
+				{
 					Stage: "1",
 				},
-				&gitlab.Job{
+				{
 					Stage: "1",
 				},
-				&gitlab.Job{
+				{
 					Stage: "2",
 				},
-				&gitlab.Job{
+				{
 					Stage: "2",
 				},
-				&gitlab.Job{
+				{
 					Stage: "3",
 				},
 			},
@@ -781,16 +781,16 @@ func Test_stageBounds(t *testing.T) {
 			"first stage",
 			"1",
 			[]*gitlab.Job{
-				&gitlab.Job{
+				{
 					Stage: "1",
 				},
-				&gitlab.Job{
+				{
 					Stage: "1",
 				},
-				&gitlab.Job{
+				{
 					Stage: "1",
 				},
-				&gitlab.Job{
+				{
 					Stage: "2",
 				},
 			},
@@ -800,22 +800,22 @@ func Test_stageBounds(t *testing.T) {
 			"mid stage",
 			"2",
 			[]*gitlab.Job{
-				&gitlab.Job{
+				{
 					Stage: "1",
 				},
-				&gitlab.Job{
+				{
 					Stage: "1",
 				},
-				&gitlab.Job{
+				{
 					Stage: "1",
 				},
-				&gitlab.Job{
+				{
 					Stage: "2",
 				},
-				&gitlab.Job{
+				{
 					Stage: "2",
 				},
-				&gitlab.Job{
+				{
 					Stage: "3",
 				},
 			},
@@ -825,22 +825,22 @@ func Test_stageBounds(t *testing.T) {
 			"last stage",
 			"3",
 			[]*gitlab.Job{
-				&gitlab.Job{
+				{
 					Stage: "1",
 				},
-				&gitlab.Job{
+				{
 					Stage: "1",
 				},
-				&gitlab.Job{
+				{
 					Stage: "1",
 				},
-				&gitlab.Job{
+				{
 					Stage: "2",
 				},
-				&gitlab.Job{
+				{
 					Stage: "2",
 				},
-				&gitlab.Job{
+				{
 					Stage: "3",
 				},
 			},
@@ -861,47 +861,47 @@ func Test_stageBounds(t *testing.T) {
 
 func Test_handleNavigation(t *testing.T) {
 	jobs := []*gitlab.Job{
-		&gitlab.Job{
+		{
 			Name:   "stage1-job1-really-long",
 			Stage:  "stage1",
 			Status: "success",
 		},
-		&gitlab.Job{
+		{
 			Name:   "stage1-job2",
 			Stage:  "stage1",
 			Status: "success",
 		},
-		&gitlab.Job{
+		{
 			Name:   "stage1-job3",
 			Stage:  "stage1",
 			Status: "success",
 		},
-		&gitlab.Job{
+		{
 			Name:   "stage1-job4",
 			Stage:  "stage1",
 			Status: "failed",
 		},
-		&gitlab.Job{
+		{
 			Name:   "stage2-job1",
 			Stage:  "stage2",
 			Status: "running",
 		},
-		&gitlab.Job{
+		{
 			Name:   "stage2-job2",
 			Stage:  "stage2",
 			Status: "running",
 		},
-		&gitlab.Job{
+		{
 			Name:   "stage2-job3",
 			Stage:  "stage2",
 			Status: "pending",
 		},
-		&gitlab.Job{
+		{
 			Name:   "stage3-job1",
 			Stage:  "stage3",
 			Status: "manual",
 		},
-		&gitlab.Job{
+		{
 			Name:   "stage3-job2",
 			Stage:  "stage3",
 			Status: "manual",

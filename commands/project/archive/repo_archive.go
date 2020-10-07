@@ -4,11 +4,12 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"github.com/profclems/glab/commands/cmdutils"
-	"github.com/profclems/glab/internal/utils"
 	"io"
 	"os"
 	"strings"
+
+	"github.com/profclems/glab/commands/cmdutils"
+	"github.com/profclems/glab/internal/utils"
 
 	"github.com/MakeNowJust/heredoc"
 	"github.com/dustin/go-humanize"

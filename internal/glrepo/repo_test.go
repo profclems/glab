@@ -2,9 +2,10 @@ package glrepo
 
 import (
 	"errors"
-	"github.com/xanzy/go-gitlab"
 	"net/url"
 	"testing"
+
+	"github.com/xanzy/go-gitlab"
 )
 
 func Test_RemoteURL(t *testing.T) {

@@ -2,11 +2,12 @@ package delete
 
 import (
 	"fmt"
+	"strconv"
+	"strings"
+
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/internal/utils"
 	"github.com/profclems/glab/pkg/api"
-	"strconv"
-	"strings"
 
 	"github.com/MakeNowJust/heredoc"
 	"github.com/spf13/cobra"

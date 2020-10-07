@@ -2,8 +2,9 @@ package create
 
 import (
 	"fmt"
-	"github.com/profclems/glab/pkg/api"
 	"strings"
+
+	"github.com/profclems/glab/pkg/api"
 
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/commands/issue/issueutils"
