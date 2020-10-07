@@ -2,11 +2,12 @@ package alias
 
 import (
 	"bytes"
-	"github.com/profclems/glab/commands/cmdutils"
-	"github.com/stretchr/testify/assert"
 	"io"
 	"os"
 	"testing"
+
+	"github.com/profclems/glab/commands/cmdutils"
+	"github.com/stretchr/testify/assert"
 )
 
 func Test_Alias(t *testing.T) {

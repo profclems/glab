@@ -2,10 +2,11 @@ package list
 
 import (
 	"bytes"
-	"github.com/profclems/glab/commands/cmdutils"
-	"github.com/profclems/glab/internal/config"
 	"io/ioutil"
 	"testing"
+
+	"github.com/profclems/glab/commands/cmdutils"
+	"github.com/profclems/glab/internal/config"
 
 	"github.com/MakeNowJust/heredoc"
 	"github.com/stretchr/testify/assert"

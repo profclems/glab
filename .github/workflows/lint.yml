@@ -10,11 +10,10 @@ on:
       - "**.go"
       - go.mod
       - go.sum
-
 jobs:
-  lint:
+  golangci:
+    name: lint
     runs-on: ubuntu-latest
-
     steps:
       - name: Set up Go 1.15
         uses: actions/setup-go@v2
@@ -23,32 +22,15 @@ jobs:
 
       - name: Check out code
         uses: actions/checkout@v2
+        
+      - name: Run Checks
+        uses: golangci/golangci-lint-action@v2
+        with:
+          # Required: the version of golangci-lint is required and must be specified without patch version: we always use the latest patch version.
+          version: v1.29
 
-      - name: Verify dependencies
-        run: |
-          go mod verify
-          go mod download
-          LINT_VERSION=1.29.0
-          curl -fsSL https://github.com/golangci/golangci-lint/releases/download/v${LINT_VERSION}/golangci-lint-${LINT_VERSION}-linux-amd64.tar.gz | \
-            tar xz --strip-components 1 --wildcards \*/golangci-lint
-          mkdir -p bin && mv golangci-lint bin/
-      - name: Run checks
-        run: |
-          STATUS=0
-          assert-nothing-changed() {
-            local diff
-            "$@" >/dev/null || return 1
-            if ! diff="$(git diff -U1 --color --exit-code)"; then
-              printf '\e[31mError: running `\e[1m%s\e[22m` results in modifications that you must check into version control:\e[0m\n%s\n\n' "$*" "$diff" >&2
-              git checkout -- .
-              STATUS=1
-            fi
-          }
-          assert-nothing-changed go fmt ./...
-          assert-nothing-changed go mod tidy
-          while read -r file linter msg; do
-            IFS=: read -ra f <<<"$file"
-            printf '::error file=%s,line=%s,col=%s::%s\n' "${f[0]}" "${f[1]}" "${f[2]}" "[$linter] $msg"
-            STATUS=1
-          done < <(bin/golangci-lint run --out-format tab)
-          exit $STATUS
+          # Optional: golangci-lint command line arguments.
+          args: --issues-exit-code=1
+
+          # Optional: show only new issues if it's a pull request. The default value is `false`.
+          # only-new-issues: true

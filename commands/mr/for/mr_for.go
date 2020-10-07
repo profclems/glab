@@ -2,8 +2,9 @@ package _for
 
 import (
 	"fmt"
-	"github.com/profclems/glab/internal/git"
 	"strings"
+
+	"github.com/profclems/glab/internal/git"
 
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/commands/mr/mrutils"

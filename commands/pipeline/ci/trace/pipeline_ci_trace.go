@@ -3,13 +3,14 @@ package trace
 import (
 	"context"
 	"fmt"
+	"regexp"
+
 	"github.com/profclems/glab/commands/cmdutils"
 	ciViewCmd "github.com/profclems/glab/commands/pipeline/ci/view"
 	"github.com/profclems/glab/commands/pipeline/pipelineutils"
 	"github.com/profclems/glab/internal/git"
 	"github.com/profclems/glab/internal/utils"
 	"github.com/profclems/glab/pkg/api"
-	"regexp"
 
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/MakeNowJust/heredoc"

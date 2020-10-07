@@ -3,12 +3,13 @@ package close
 import (
 	"bytes"
 	"fmt"
+	"testing"
+	"time"
+
 	"github.com/acarl005/stripansi"
 	"github.com/profclems/glab/pkg/api"
 	"github.com/stretchr/testify/require"
 	"github.com/xanzy/go-gitlab"
-	"testing"
-	"time"
 
 	"github.com/profclems/glab/commands/cmdtest"
 	"github.com/stretchr/testify/assert"

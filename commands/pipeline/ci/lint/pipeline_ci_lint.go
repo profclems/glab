@@ -3,11 +3,12 @@ package lint
 import (
 	"bytes"
 	"fmt"
-	"github.com/profclems/glab/internal/git"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"os"
+
+	"github.com/profclems/glab/internal/git"
 
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/internal/utils"

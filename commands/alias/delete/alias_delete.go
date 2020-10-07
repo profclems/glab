@@ -2,6 +2,7 @@ package delete
 
 import (
 	"fmt"
+
 	"github.com/profclems/glab/commands/cmdutils"
 
 	"github.com/profclems/glab/internal/config"

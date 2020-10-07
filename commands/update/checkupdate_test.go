@@ -1,8 +1,9 @@
 package update
 
 import (
-	"github.com/spf13/cobra"
 	"testing"
+
+	"github.com/spf13/cobra"
 )
 
 func TestNewCheckUpdateCmd(t *testing.T) {

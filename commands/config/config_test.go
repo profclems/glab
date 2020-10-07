@@ -3,9 +3,10 @@ package config
 import (
 	"bytes"
 	"errors"
+	"testing"
+
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/stretchr/testify/assert"
-	"testing"
 
 	"github.com/profclems/glab/internal/config"
 	"github.com/stretchr/testify/require"

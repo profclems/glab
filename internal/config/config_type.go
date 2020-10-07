@@ -3,12 +3,14 @@ package config
 import (
 	"bytes"
 	"fmt"
-	"github.com/profclems/glab/internal/glinstance"
 	"os"
 	"sort"
 	"strings"
 
+	"github.com/profclems/glab/internal/glinstance"
+
 	"errors"
+
 	"gopkg.in/yaml.v3"
 )
 

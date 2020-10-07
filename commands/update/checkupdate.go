@@ -3,10 +3,11 @@ package update
 import (
 	"errors"
 	"fmt"
+	"strings"
+
 	"github.com/hashicorp/go-version"
 	"github.com/profclems/glab/internal/utils"
 	"github.com/spf13/cobra"
-	"strings"
 )
 
 func NewCheckUpdateCmd(version, build string) *cobra.Command {

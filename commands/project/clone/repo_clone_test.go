@@ -1,11 +1,12 @@
 package clone
 
 import (
-	"github.com/profclems/glab/commands/cmdtest"
-	"github.com/stretchr/testify/assert"
 	"os/exec"
 	"regexp"
 	"testing"
+
+	"github.com/profclems/glab/commands/cmdtest"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestMain(m *testing.M) {

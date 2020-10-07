@@ -1,3 +1,12 @@
 linters:
-  enable:
-    gofmt
+    enable:
+        - gofmt
+        - gosimple
+        - goimports
+    disable-all: true
+
+issues:
+    exclude-rules:
+        - path: _test\.go
+          linters:
+              - megacheck

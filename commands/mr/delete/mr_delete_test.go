@@ -2,13 +2,14 @@ package delete
 
 import (
 	"fmt"
+	"strings"
+	"testing"
+
 	"github.com/acarl005/stripansi"
 	"github.com/profclems/glab/commands/cmdtest"
 	"github.com/profclems/glab/pkg/api"
 	"github.com/stretchr/testify/assert"
 	"github.com/xanzy/go-gitlab"
-	"strings"
-	"testing"
 )
 
 // TODO: test by mocking the appropriate api function

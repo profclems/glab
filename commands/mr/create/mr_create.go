@@ -9,9 +9,10 @@ import (
 	"github.com/profclems/glab/internal/utils"
 	"github.com/profclems/glab/pkg/api"
 
+	"strings"
+
 	"github.com/spf13/cobra"
 	"github.com/xanzy/go-gitlab"
-	"strings"
 )
 
 func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {

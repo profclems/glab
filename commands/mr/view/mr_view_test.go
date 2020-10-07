@@ -2,15 +2,16 @@ package view
 
 import (
 	"fmt"
+	"os/exec"
+	"testing"
+	"time"
+
 	"github.com/acarl005/stripansi"
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/internal/config"
 	"github.com/profclems/glab/pkg/api"
 	"github.com/stretchr/testify/require"
 	"github.com/xanzy/go-gitlab"
-	"os/exec"
-	"testing"
-	"time"
 
 	"github.com/profclems/glab/commands/cmdtest"
 	"github.com/profclems/glab/internal/run"

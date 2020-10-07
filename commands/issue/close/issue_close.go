@@ -2,9 +2,10 @@ package close
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/profclems/glab/internal/utils"
 	"github.com/profclems/glab/pkg/api"
-	"strings"
 
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/commands/issue/issueutils"

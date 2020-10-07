@@ -2,10 +2,11 @@ package list
 
 import (
 	"fmt"
+	"sort"
+
 	"github.com/gosuri/uitable"
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/internal/utils"
-	"sort"
 
 	"github.com/profclems/glab/internal/config"
 

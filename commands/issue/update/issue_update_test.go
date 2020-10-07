@@ -3,9 +3,10 @@ package update
 import (
 	"bytes"
 	"fmt"
-	"github.com/google/shlex"
 	"testing"
 	"time"
+
+	"github.com/google/shlex"
 
 	"github.com/acarl005/stripansi"
 	"github.com/profclems/glab/commands/cmdtest"

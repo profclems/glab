@@ -3,8 +3,9 @@ package config
 import (
 	"errors"
 	"fmt"
-	"gopkg.in/yaml.v3"
 	"path"
+
+	"gopkg.in/yaml.v3"
 )
 
 type LocalConfig struct {
