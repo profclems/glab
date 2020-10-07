@@ -3,6 +3,7 @@ package board
 import (
 	"github.com/profclems/glab/commands/cmdutils"
 	boardCreateCmd "github.com/profclems/glab/commands/issue/board/create"
+	boardViewCmd "github.com/profclems/glab/commands/issue/board/view"
 	"github.com/spf13/cobra"
 )
 
@@ -14,6 +15,7 @@ func NewCmdBoard(f *cmdutils.Factory) *cobra.Command {
 	}
 
 	issueCmd.AddCommand(boardCreateCmd.NewCmdCreate(f))
+	issueCmd.AddCommand(boardViewCmd.NewCmdView(f))
 	issueCmd.PersistentFlags().StringP("repo", "R", "", "Select another repository using the OWNER/REPO format or the project ID. Supports group namespaces")
 
 	return issueCmd

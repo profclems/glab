@@ -9,12 +9,17 @@ import (
 	"sync"
 	"time"
 
-	"github.com/pkg/errors"
+	"github.com/profclems/glab/internal/utils"
 	"github.com/profclems/glab/pkg/api"
 
 	"github.com/juju/ansiterm/tabwriter"
-	"github.com/profclems/glab/internal/utils"
+	"github.com/pkg/errors"
 	"github.com/xanzy/go-gitlab"
+)
+
+var (
+	once   sync.Once
+	offset int64
 )
 
 func DisplayMultiplePipelines(p []*gitlab.PipelineInfo, projectID string) string {
@@ -49,10 +54,6 @@ func DisplayMultiplePipelines(p []*gitlab.PipelineInfo, projectID string) string
 }
 
 func RunTrace(apiClient *gitlab.Client, ctx context.Context, w io.Writer, pid interface{}, sha, name string) error {
-	var (
-		once   sync.Once
-		offset int64
-	)
 	fmt.Fprintln(w, "Getting job trace...")
 	for range time.NewTicker(time.Second * 3).C {
 		if ctx.Err() == context.Canceled {
@@ -83,7 +84,7 @@ func RunTrace(apiClient *gitlab.Client, ctx context.Context, w io.Writer, pid in
 		if err != nil {
 			return err
 		}
-		offset += int64(lenT)
+		offset += lenT
 
 		if job.Status == "success" ||
 			job.Status == "failed" ||

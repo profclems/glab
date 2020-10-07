@@ -13,19 +13,17 @@ import (
 
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/commands/pipeline/pipelineutils"
-	"github.com/profclems/glab/pkg/api"
-
 	"github.com/profclems/glab/internal/git"
 	"github.com/profclems/glab/internal/utils"
+	"github.com/profclems/glab/pkg/api"
 
 	"github.com/MakeNowJust/heredoc"
 	"github.com/gdamore/tcell"
+	"github.com/lunixbochs/vtclean"
 	"github.com/pkg/errors"
 	"github.com/rivo/tview"
 	"github.com/spf13/cobra"
-
-	"github.com/lunixbochs/vtclean"
-	gitlab "github.com/xanzy/go-gitlab"
+	"github.com/xanzy/go-gitlab"
 )
 
 var (
