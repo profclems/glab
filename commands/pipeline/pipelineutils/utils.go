@@ -9,13 +9,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/pkg/errors"
+        "github.com/profclems/glab/internal/utils"
 	"github.com/profclems/glab/pkg/api"
 
 	"github.com/juju/ansiterm/tabwriter"
 	"github.com/pkg/errors"
-	"github.com/profclems/glab/internal/utils"
-	"github.com/profclems/glab/pkg/api"
 	"github.com/xanzy/go-gitlab"
 )
 
