@@ -6,6 +6,7 @@ import (
 	pipeDeleteCmd "github.com/profclems/glab/commands/pipeline/delete"
 	pipeListCmd "github.com/profclems/glab/commands/pipeline/list"
 	pipeStatusCmd "github.com/profclems/glab/commands/pipeline/status"
+	pipeRunCmd "github.com/profclems/glab/commands/pipeline/run"
 
 	"github.com/spf13/cobra"
 )
@@ -23,5 +24,6 @@ func NewCmdPipeline(f *cmdutils.Factory) *cobra.Command {
 	pipelineCmd.AddCommand(pipeDeleteCmd.NewCmdDelete(f))
 	pipelineCmd.AddCommand(pipeListCmd.NewCmdList(f))
 	pipelineCmd.AddCommand(pipeStatusCmd.NewCmdStatus(f))
+	pipelineCmd.AddCommand(pipeRunCmd.NewCmdRun(f))
 	return pipelineCmd
 }
