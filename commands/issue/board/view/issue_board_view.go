@@ -15,10 +15,10 @@ import (
 )
 
 var (
-	command   *cobra.Command
-	apiClient *gitlab.Client
-	project   *gitlab.Project
-	repo      glrepo.Interface
+	command       *cobra.Command
+	apiClient     *gitlab.Client
+	project       *gitlab.Project
+	repo          glrepo.Interface
 	selectedBoard string
 )
 
@@ -89,7 +89,7 @@ func NewCmdView(f *cmdutils.Factory) *cobra.Command {
 					AddItem(tview.NewBox().SetBorder(true).SetTitle("Middle (3 x height of Top)"), 0, 3, false).
 					AddItem(tview.NewBox().SetBorder(true).SetTitle("Bottom (5 rows)"), 5, 1, false), 0, 2, false).
 				AddItem(tview.NewBox().SetBorder(true).SetTitle("Right (20 cols)"), 20, 1, false)
-			 */
+			*/
 			var issues []*gitlab.Issue
 			// TODO: add `open` and `closed` board list. Both are not returned in the List API response payload
 			for _, list := range boadLists {
@@ -109,7 +109,7 @@ func NewCmdView(f *cmdutils.Factory) *cobra.Command {
 					totalLables := len(issue.Labels)
 					if totalLables > 0 {
 						for i, l := range issue.Labels {
-							if i == (totalLables-1) {
+							if i == (totalLables - 1) {
 								labelPrint += l
 							} else {
 								labelPrint += l + ", "
