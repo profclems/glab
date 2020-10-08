@@ -31,3 +31,16 @@ var UserByName = func(client *gitlab.Client, name string) (*gitlab.User, error) 
 
 	return users[0], nil
 }
+
+var UsersByNames = func(client *gitlab.Client, names []string) ([]*gitlab.User, error) {
+	users := make([]*gitlab.User, 0)
+	for _, name := range names {
+		user, err := UserByName(client, name)
+		if err != nil {
+			return nil, err
+		}
+
+		users = append(users, user)
+	}
+	return users, nil
+}
