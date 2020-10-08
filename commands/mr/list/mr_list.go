@@ -74,6 +74,26 @@ func NewCmdList(f *cmdutils.Factory) *cobra.Command {
 				l.Scope = gitlab.String("assigned_to_me")
 			}
 
+			assigneeIds := make([]int, 0)
+			if assigneeNames, _ := cmd.Flags().GetStringSlice("assignee"); assigneeNames != nil {
+				users, err := api.UsersByNames(apiClient, assigneeNames)
+				if err != nil {
+					return err
+				}
+				for _, user := range users {
+					assigneeIds = append(assigneeIds, user.ID)
+				}
+			}
+
+			if assigneeIds != nil {
+				mergeRequests, err := api.ListMRsWithAssignees(apiClient, repo.FullName(), l, assigneeIds)
+				if err != nil {
+					return err
+				}
+				fmt.Fprintln(out, mrutils.DisplayAllMRs(mergeRequests, repo.FullName()))
+				return nil
+			}
+
 			mergeRequests, err := api.ListMRs(apiClient, repo.FullName(), l)
 			if err != nil {
 				return err
@@ -93,6 +113,7 @@ func NewCmdList(f *cmdutils.Factory) *cobra.Command {
 	mrListCmd.Flags().IntP("page", "p", 1, "Page number")
 	mrListCmd.Flags().IntP("per-page", "P", 20, "Number of items to list per page")
 	mrListCmd.Flags().BoolP("mine", "", false, "Get only merge requests assigned to me")
+	mrListCmd.Flags().StringSliceP("assignee", "", []string{}, "Get only merge requests assigned to users")
 
 	return mrListCmd
 }
