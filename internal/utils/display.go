@@ -24,6 +24,8 @@ type ListInfo struct {
 	EmptyMessage string
 	// TableWrap wraps the contents when the column length exceeds the maximum width
 	TableWrap bool
+	// PrintHeader prints the headers using the Columns provided
+	PrintHeader bool
 }
 
 // Prints the list data on console
@@ -38,11 +40,13 @@ func DisplayList(lInfo ListInfo, projectID string) *uitable.Table {
 			description = fmt.Sprintf("Showing %s %d of %d on %s\n", lInfo.Name, lInfo.Total, lInfo.Total, projectID)
 		}
 		table.AddRow(description)
-		header := make([]interface{}, len(lInfo.Columns))
-		for ci, c := range lInfo.Columns {
-			header[ci] = c
+		if lInfo.PrintHeader {
+			header := make([]interface{}, len(lInfo.Columns))
+			for ci, c := range lInfo.Columns {
+				header[ci] = c
+			}
+			table.AddRow(header...)
 		}
-		table.AddRow(header...)
 
 		for ri := 0; ri < lInfo.Total; ri++ {
 			row := make([]interface{}, len(lInfo.Columns))

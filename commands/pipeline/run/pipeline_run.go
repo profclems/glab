@@ -49,16 +49,12 @@ func NewCmdRun(f *cmdutils.Factory) *cobra.Command {
 			var err error
 
 			out := utils.ColorableOut(cmd)
-			if r, _ := cmd.Flags().GetString("repo"); r != "" {
-				f, err = f.NewClient(r)
-				if err != nil {
-					return err
-				}
-			}
+
 			apiClient, err := f.HttpClient()
 			if err != nil {
 				return err
 			}
+
 			repo, err := f.BaseRepo()
 			if err != nil {
 				return err

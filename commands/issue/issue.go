@@ -23,6 +23,9 @@ func NewCmdIssue(f *cmdutils.Factory) *cobra.Command {
 		Short: `Work with GitLab issues`,
 		Long:  ``,
 	}
+
+	cmdutils.EnableRepoOverride(issueCmd, f)
+
 	issueCmd.AddCommand(issueCloseCmd.NewCmdClose(f))
 	issueCmd.AddCommand(issueBoardCmd.NewCmdBoard(f))
 	issueCmd.AddCommand(issueCreateCmd.NewCmdCreate(f))
@@ -34,6 +37,5 @@ func NewCmdIssue(f *cmdutils.Factory) *cobra.Command {
 	issueCmd.AddCommand(issueSubscribeCmd.NewCmdSubscribe(f))
 	issueCmd.AddCommand(issueUnsubscribeCmd.NewCmdUnsubscribe(f))
 	issueCmd.AddCommand(issueUpdateCmd.NewCmdUpdate(f))
-	issueCmd.PersistentFlags().StringP("repo", "R", "", "Select another repository using the OWNER/REPO format or the project ID. Supports group namespaces")
 	return issueCmd
 }

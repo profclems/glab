@@ -23,21 +23,18 @@ func NewCmdList(f *cmdutils.Factory) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var err error
 			out := utils.ColorableOut(cmd)
-			if r, _ := cmd.Flags().GetString("repo"); r != "" {
-				f, err = f.NewClient(r)
-				if err != nil {
-					return err
-				}
-			}
+
 			apiClient, err := f.HttpClient()
-			cfg, _ := f.Config()
 			if err != nil {
 				return err
 			}
+
 			repo, err := f.BaseRepo()
 			if err != nil {
 				return err
 			}
+
+			cfg, _ := f.Config()
 
 			l := &gitlab.ListLabelsOptions{}
 			if p, _ := cmd.Flags().GetInt("page"); p != 0 {
