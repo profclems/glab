@@ -5,52 +5,44 @@
 
 Hi! Thanks for your interest in contributing to this project!
 
-To encourage active collaboration, pull requests are strongly encouraged, not just bug reports. "Bug reports" may also be sent in the form of a pull request containing a failing test.
+To encourage active collaboration, pull requests are strongly encouraged, not just bug reports. "Bug reports" may also be sent in the form of a pull request containing a failing test. I'd also love to hear about ideas for new features as issues.
 
 Please do:
 
-* open an issue if things aren't working as expected
-* open an issue to propose a significant change
+* Check existing issues to verify that the bug or feature request has not already been submitted.
+* Open an issue if things aren't working as expected.
+* Open an issue to propose a significant change.
 * open an issue to propose a feature
-* open a pull request to fix a bug
-* open a pull request to fix documentation about a command
-* open a pull request if your issue is marked as relevant by a community member after having discussed the issue
+* Open a pull request to fix a bug.
+* Open a pull request to fix documentation about a command.
+* Open a pull request for an issue with the help-wanted label and leave a comment claiming it.
+
+Please avoid:
+
+* Opening pull requests for issues marked `needs-design`, `needs-investigation`, `needs-user-input`, or `blocked`.
+* Opening pull requests for documentation for a new command specifically. Manual pages are auto-generated from source after every release
 
 ## Building the project
 
 Prerequisites:
-- Go 1.13
+- Go 1.13+
 
-Build with: `make build` or `go build -o bin/glab ./cmd/main.go`
+Build with: `make` or `go build -o bin/glab ./cmd/main.go`
 
 Run the new binary as: `./bin/glab`
+
+Run tests with: make test or go test ./...
 
 ## Submitting a pull request
 
 1. Create a new branch: `git checkout -b my-branch-name`
-1. Make your change
+1. Make your change, add tests, and ensure tests pass
 1. Submit a pull request
 
-## Branch Naming
-Branches created should be named using the following format:
-
-`
-{story type}-{2-5 word summary}
-`
-`Issue or story type prefixes:` Indicates the context of the branch and should be one of:
-- ft == Feature
-- ch == Chore
-- bg == Bug
-- rf == Refractor
-
-`Story Summary` -  Short 2-5 words summary about what the branch contains
-
-### Example
-`ft-gitlab-auth`
-
-`bg-gitlab-auth-fails`
-
 ## Commits Message
+
+#### TLDR: Your commit message should be semantic
+
 A commit message consists of a header, a body and a footer, separated by a blank line.
 
 Any line of the commit message cannot be longer than 100 characters! This allows the message to be easier to read on GitHub as well as in various git tools.
@@ -121,6 +113,9 @@ Fixes #025
 
 
 Contributions to this project are made available to public under the [project's open source license][license].
+Please note that this project adheres to a [Contributor Code of Conduct](https://github.com/profclems/glab/tree/trunk/.github/CODE_OF_CONDUCT.md). By participating in this project you agree to abide by its terms.
+
+Manual pages are auto-generated from source on every release. You do not need to submit pull requests for documentation specifically; manual pages for commands will automatically get updated after your pull requests gets accepted.
 
 ## Resources
 
