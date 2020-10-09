@@ -81,7 +81,7 @@ func TestNewCmdReleaseList(t *testing.T) {
 		{
 			name:    "get release by tag on test repo",
 			wantErr: false,
-			args:     "--tag v0.0.1-beta",
+			args:    "--tag v0.0.1-beta",
 			stdOutFunc: func(t *testing.T, out string) {
 				assert.Contains(t, out, "Dummy description for v0.0.1-beta")
 			},

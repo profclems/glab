@@ -2,8 +2,9 @@ package create
 
 import (
 	"fmt"
-	"github.com/profclems/glab/commands/cmdutils"
 	"testing"
+
+	"github.com/profclems/glab/commands/cmdutils"
 
 	"github.com/acarl005/stripansi"
 	"github.com/profclems/glab/commands/cmdtest"
