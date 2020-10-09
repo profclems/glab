@@ -52,6 +52,22 @@ var ListMRs = func(client *gitlab.Client, projectID interface{}, opts *gitlab.Li
 	return mrs, nil
 }
 
+var ListMRsWithAssignees = func(client *gitlab.Client, projectID interface{}, opts *gitlab.ListProjectMergeRequestsOptions, assigneeIds []int) ([]*gitlab.MergeRequest, error) {
+	if client == nil {
+		client = apiClient
+	}
+	mrs := make([]*gitlab.MergeRequest, 0)
+	for _, id := range assigneeIds {
+		opts.AssigneeID = gitlab.Int(id)
+		assingeMrs, err := ListMRs(client, projectID, opts)
+		if err != nil {
+			return nil, err
+		}
+		mrs = append(mrs, assingeMrs...)
+	}
+	return mrs, nil
+}
+
 var UpdateMR = func(client *gitlab.Client, projectID interface{}, mrID int, opts *gitlab.UpdateMergeRequestOptions) (*gitlab.MergeRequest, error) {
 	if client == nil {
 		client = apiClient
