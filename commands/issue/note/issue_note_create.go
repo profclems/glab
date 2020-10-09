@@ -34,15 +34,17 @@ func NewCmdNote(f *cmdutils.Factory) *cobra.Command {
 			}
 
 			mID := args[0]
-			body, err := cmd.Flags().GetString("message")
 
+			body, err := cmd.Flags().GetString("message")
 			if err != nil {
 				return err
 			}
-			mr, _, err := apiClient.Issues.GetIssue(repo.FullName(), utils.StringToInt(mID))
+
+			mr, err := api.GetIssue(apiClient, repo.FullName(), utils.StringToInt(mID))
 			if err != nil {
 				return err
 			}
+
 			if body == "" {
 				body = utils.Editor(utils.EditorOptions{
 					Label:    "Note Message:",
@@ -50,6 +52,7 @@ func NewCmdNote(f *cmdutils.Factory) *cobra.Command {
 					FileName: "ISSUE_NOTE_EDITMSG",
 				})
 			}
+
 			if body == "" {
 				return errors.New("aborted... Note is empty")
 			}
@@ -60,6 +63,7 @@ func NewCmdNote(f *cmdutils.Factory) *cobra.Command {
 			if err != nil {
 				return err
 			}
+
 			fmt.Fprintf(out, "%s#note_%d\n", mr.WebURL, noteInfo.ID)
 			return nil
 		},

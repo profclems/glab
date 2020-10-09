@@ -7,6 +7,7 @@ import (
 
 	"github.com/acarl005/stripansi"
 	"github.com/profclems/glab/commands/cmdtest"
+	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/internal/config"
 	"github.com/profclems/glab/pkg/api"
 	"github.com/stretchr/testify/assert"
@@ -83,12 +84,12 @@ hosts:
 	}
 
 	cmd := NewCmdSubscribe(stubFactory)
-	cmd.Flags().StringP("repo", "R", "", "")
+	cmdutils.EnableRepoOverride(cmd, stubFactory)
 
 	for _, tc := range testCases {
 		t.Run(tc.Name, func(t *testing.T) {
-
 			output, err := cmdtest.RunCommand(cmd, tc.Issue)
+
 			if tc.wantErr {
 				require.Error(t, err)
 				return

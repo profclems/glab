@@ -73,7 +73,7 @@ hosts:
 
 func TestMRView_web_numberArg(t *testing.T) {
 	cmd := NewCmdView(stubFactory)
-	cmd.Flags().StringP("repo", "R", "", "")
+	cmdutils.EnableRepoOverride(cmd, stubFactory)
 
 	var seenCmd *exec.Cmd
 	restoreCmd := run.SetPrepareCmd(func(cmd *exec.Cmd) run.Runnable {
@@ -136,7 +136,7 @@ func TestMRView(t *testing.T) {
 		}, nil
 	}
 	cmd := NewCmdView(stubFactory)
-	cmd.Flags().StringP("repo", "R", "", "")
+	cmdutils.EnableRepoOverride(cmd, stubFactory)
 
 	t.Run("show", func(t *testing.T) {
 		output, err := cmdtest.RunCommand(cmd, "13 -c -s -R glab-cli/test")
