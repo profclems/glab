@@ -207,6 +207,8 @@ glab config
   GLAMOUR_STYLE: environment variable to set your desired markdown renderer style
   Available options are (dark|light|notty) or set a custom style
   https://github.com/charmbracelet/glamour#styles
+  
+  NO_COLOR: set to any value to avoid printing ANSI escape sequences for color output. 
   ```
   
 ## ToDo
