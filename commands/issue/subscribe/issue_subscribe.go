@@ -27,7 +27,7 @@ func NewCmdSubscribe(f *cmdutils.Factory) *cobra.Command {
 			if err != nil {
 				return err
 			}
-			
+
 			repo, err := f.BaseRepo()
 			if err != nil {
 				return err

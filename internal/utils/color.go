@@ -10,10 +10,10 @@ import (
 )
 
 var (
-	_isColorEnabled = true
+	_isColorEnabled   = true
 	_isStdoutTerminal = false
-	checkedTerminal = false
-	checkedNoColor = false
+	checkedTerminal   = false
+	checkedNoColor    = false
 
 	// Magenta outputs ANSI color if stdout is a tty
 	Magenta = makeColorFunc("magenta")
