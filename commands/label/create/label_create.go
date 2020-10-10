@@ -12,7 +12,7 @@ import (
 	"github.com/xanzy/go-gitlab"
 )
 
-func NewCmdList(f *cmdutils.Factory) *cobra.Command {
+func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 	var labelCreateCmd = &cobra.Command{
 		Use:     "create [flags]",
 		Short:   `Create labels for repository/project`,

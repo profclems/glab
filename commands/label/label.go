@@ -3,6 +3,7 @@ package label
 import (
 	"github.com/profclems/glab/commands/cmdutils"
 	labelListCmd "github.com/profclems/glab/commands/label/list"
+	labelCreateCmd "github.com/profclems/glab/commands/label/create"
 	"github.com/spf13/cobra"
 )
 
@@ -15,5 +16,6 @@ func NewCmdLabel(f *cmdutils.Factory) *cobra.Command {
 	labelCmd.PersistentFlags().StringP("repo", "R", "", "Select another repository using the OWNER/REPO format. Supports group namespaces")
 
 	labelCmd.AddCommand(labelListCmd.NewCmdList(f))
+	labelCmd.AddCommand(labelCreateCmd.NewCmdCreate(f))
 	return labelCmd
 }
