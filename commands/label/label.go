@@ -2,6 +2,7 @@ package label
 
 import (
 	"github.com/profclems/glab/commands/cmdutils"
+	labelCreateCmd "github.com/profclems/glab/commands/label/create"
 	labelListCmd "github.com/profclems/glab/commands/label/list"
 	"github.com/spf13/cobra"
 )
@@ -16,5 +17,6 @@ func NewCmdLabel(f *cmdutils.Factory) *cobra.Command {
 	cmdutils.EnableRepoOverride(labelCmd, f)
 
 	labelCmd.AddCommand(labelListCmd.NewCmdList(f))
+	labelCmd.AddCommand(labelCreateCmd.NewCmdCreate(f))
 	return labelCmd
 }
