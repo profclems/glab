@@ -13,8 +13,9 @@ func NewCmdRelease(f *cmdutils.Factory) *cobra.Command {
 		Short: `Manage GitLab releases`,
 		Long:  ``,
 	}
-	releaseCmd.PersistentFlags().StringP("repo", "R", "", "Select another repository using the OWNER/REPO format or the project ID. Supports group namespaces")
 
+	cmdutils.EnableRepoOverride(releaseCmd, f)
 	releaseCmd.AddCommand(releaseListCmd.NewCmdReleaseList(f))
+
 	return releaseCmd
 }

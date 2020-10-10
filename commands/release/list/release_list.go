@@ -41,16 +41,12 @@ func listReleases(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	if r, _ := cmd.Flags().GetString("repo"); r != "" {
-		factory, err = factory.NewClient(r)
-		if err != nil {
-			return err
-		}
-	}
+
 	apiClient, err := factory.HttpClient()
 	if err != nil {
 		return err
 	}
+
 	repo, err := factory.BaseRepo()
 	if err != nil {
 		return err

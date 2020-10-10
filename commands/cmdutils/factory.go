@@ -22,19 +22,20 @@ type Factory struct {
 	Branch     func() (string, error)
 }
 
-func (f *Factory) NewClient(repo string) (*Factory, error) {
+func (f *Factory) RepoOverride(repo string) error {
 	f.BaseRepo = func() (glrepo.Interface, error) {
 		return glrepo.FromFullName(repo)
 	}
 	newRepo, err := f.BaseRepo()
 	if err != nil {
-		return nil, err
+		return err
 	}
+	// Initialise new http client for new repo host
 	cfg, _ := f.Config()
 	f.HttpClient = func() (*gitlab.Client, error) {
 		return httpClientFunc(cfg, newRepo)
 	}
-	return f, nil
+	return nil
 }
 
 func httpClientFunc(cfg config.Config, repo glrepo.Interface) (*gitlab.Client, error) {

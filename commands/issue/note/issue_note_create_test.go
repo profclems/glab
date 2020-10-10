@@ -28,7 +28,7 @@ type author struct {
 	WebURL    string `json:"web_url"`
 }
 
-func Test_mrNoteCreate(t *testing.T) {
+func TestNewCmdNote(t *testing.T) {
 	defer config.StubConfig(`---
 hosts:
   gitlab.com:
@@ -38,7 +38,7 @@ hosts:
 
 	stubFactory, _ := cmdtest.StubFactoryWithConfig("")
 	timer, _ := time.Parse(time.RFC3339, "2014-11-12T11:45:26.371Z")
-	api.CreateMRNote = func(client *gitlab.Client, projectID interface{}, mrID int, opts *gitlab.CreateMergeRequestNoteOptions) (*gitlab.Note, error) {
+	api.CreateIssueNote = func(client *gitlab.Client, projectID interface{}, mrID int, opts *gitlab.CreateIssueNoteOptions) (*gitlab.Note, error) {
 		if projectID == "PROJECT_MR_WITH_EMPTY_NOTE" {
 			return &gitlab.Note{}, nil
 		}
@@ -56,7 +56,8 @@ hosts:
 			NoteableID: 0,
 		}, nil
 	}
-	api.GetMR = func(client *gitlab.Client, projectID interface{}, mrID int, opts *gitlab.GetMergeRequestsOptions) (*gitlab.MergeRequest, error) {
+
+	api.GetIssue = func(client *gitlab.Client, projectID interface{}, issueID int) (*gitlab.Issue, error) {
 		if projectID == "" || projectID == "WRONG_REPO" || projectID == "expected_err" {
 			return nil, fmt.Errorf("error expected")
 		}
@@ -64,22 +65,26 @@ hosts:
 		if err != nil {
 			return nil, err
 		}
-		return &gitlab.MergeRequest{
-			ID:          mrID,
-			IID:         mrID,
-			Title:       "mrTitle",
+		return &gitlab.Issue{
+			ID:          issueID,
+			IID:         issueID,
+			Title:       "issueTitle",
 			Labels:      gitlab.Labels{"test", "bug"},
 			State:       "opened",
-			Description: "mrBody",
-			Author: &gitlab.BasicUser{
-				ID:       mrID,
+			Description: "issueBody",
+			References: &gitlab.IssueReferences{
+				Full: fmt.Sprintf("%s#%d", repo.FullName(), issueID),
+			},
+			Author: &gitlab.IssueAuthor{
+				ID:       issueID,
 				Name:     "John Dev Wick",
 				Username: "jdwick",
 			},
-			WebURL:    fmt.Sprintf("https://%s/%s/-/merge_requests/%d", repo.RepoHost(), repo.FullName(), mrID),
+			WebURL:    fmt.Sprintf("https://%s/%s/-/issues/%d", repo.RepoHost(), repo.FullName(), issueID),
 			CreatedAt: &timer,
 		}, nil
 	}
+
 	cmd := NewCmdNote(stubFactory)
 	cmdutils.EnableRepoOverride(cmd, stubFactory)
 
@@ -93,7 +98,7 @@ hosts:
 			name: "Has -m flag",
 			args: "223 -m \"Some test note\"",
 			assertionFunc: func(t *testing.T, out, outErr string) {
-				require.Contains(t, out, "https://gitlab.com/glab-cli/test/-/merge_requests/223#note_1")
+				require.Contains(t, out, "https://gitlab.com/glab-cli/test/-/issues/223#note_1")
 			},
 		},
 		/*
@@ -109,7 +114,7 @@ hosts:
 			name: "With --repo flag",
 			args: "225 -m \"Some test note\" -R profclems/test",
 			assertionFunc: func(t *testing.T, out, outErr string) {
-				require.Contains(t, out, "https://gitlab.com/profclems/test/-/merge_requests/225#note_1")
+				require.Contains(t, out, "https://gitlab.com/profclems/test/-/issues/225#note_1")
 			},
 		},
 	}

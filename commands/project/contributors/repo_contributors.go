@@ -31,16 +31,12 @@ func NewCmdContributors(f *cmdutils.Factory) *cobra.Command {
 
 			var err error
 			out := utils.ColorableOut(cmd)
-			if r, _ := cmd.Flags().GetString("repo"); r != "" {
-				f, err = f.NewClient(r)
-				if err != nil {
-					return err
-				}
-			}
+
 			apiClient, err := f.HttpClient()
 			if err != nil {
 				return err
 			}
+
 			repo, err := f.BaseRepo()
 			if err != nil {
 				return err
@@ -63,7 +59,8 @@ func NewCmdContributors(f *cmdutils.Factory) *cobra.Command {
 		},
 	}
 
-	repoContributorsCmd.PersistentFlags().StringP("repo", "R", "", "Select another repository using the OWNER/REPO format or the project ID. Supports group namespaces")
+	cmdutils.EnableRepoOverride(repoContributorsCmd, f)
+
 	repoContributorsCmd.Flags().StringP("order", "f", "zip", "Return contributors ordered by name, email, or commits (orders by commit date) fields. Default is commits")
 	repoContributorsCmd.Flags().StringP("sort", "s", "", "Return contributors sorted in asc or desc order. Default is asc")
 

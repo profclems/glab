@@ -23,17 +23,11 @@ func NewCmdDelete(f *cmdutils.Factory) *cobra.Command {
 			issueID := strings.TrimSpace(args[0])
 			var err error
 
-			if r, _ := cmd.Flags().GetString("repo"); r != "" {
-				f, err = f.NewClient(r)
-				if err != nil {
-					return err
-				}
-			}
-
 			apiClient, err := f.HttpClient()
 			if err != nil {
 				return err
 			}
+
 			repo, err := f.BaseRepo()
 			if err != nil {
 				return err

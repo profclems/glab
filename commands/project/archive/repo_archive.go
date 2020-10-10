@@ -41,7 +41,7 @@ func NewCmdArchive(f *cmdutils.Factory) *cobra.Command {
 			colorableOut := utils.ColorableOut(cmd)
 
 			if len(args) != 0 {
-				f, err = f.NewClient(args[0])
+				err = f.RepoOverride(args[0])
 				if err != nil {
 					return err
 				}
@@ -54,6 +54,7 @@ func NewCmdArchive(f *cmdutils.Factory) *cobra.Command {
 			if err != nil {
 				return err
 			}
+
 			repo, err := f.BaseRepo()
 			if err != nil {
 				return err

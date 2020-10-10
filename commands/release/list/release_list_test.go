@@ -7,6 +7,7 @@ import (
 	"time"
 
 	cmdTestUtils "github.com/profclems/glab/commands/cmdtest"
+	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/pkg/api"
 
 	"github.com/acarl005/stripansi"
@@ -65,8 +66,7 @@ func TestNewCmdReleaseList(t *testing.T) {
 
 	tests := []struct {
 		name       string
-		repo       string
-		tag        string
+		args       string
 		stdOutFunc func(t *testing.T, out string)
 		stdErr     string
 		wantErr    bool
@@ -81,7 +81,7 @@ func TestNewCmdReleaseList(t *testing.T) {
 		{
 			name:    "get release by tag on test repo",
 			wantErr: false,
-			tag:     "v0.0.1-beta",
+			args:    "--tag v0.0.1-beta",
 			stdOutFunc: func(t *testing.T, out string) {
 				assert.Contains(t, out, "Dummy description for v0.0.1-beta")
 			},
@@ -89,7 +89,7 @@ func TestNewCmdReleaseList(t *testing.T) {
 		{
 			name:    "releases list on custom repo",
 			wantErr: false,
-			repo:    "profclems/glab",
+			args:    "-R profclems/glab",
 			stdOutFunc: func(t *testing.T, out string) {
 				assert.Contains(t, out, "Showing releases 1 of 1 on profclems/glab")
 			},
@@ -97,26 +97,24 @@ func TestNewCmdReleaseList(t *testing.T) {
 		{
 			name:    "ERR - wrong repo",
 			wantErr: true,
-			repo:    "WRONG_REPO",
+			args:    "-R WRONG_REPO",
 		},
 		{
 			name:    "ERR - wrong repo with tag",
 			wantErr: true,
-			repo:    "WRONG_REPO",
-			tag:     "v0.0.1-beta",
+			args:    "-R WRONG_REPO --tag v0.0.1-beta",
 		},
 	}
+
+	f := cmdTestUtils.StubFactory("https://gitlab.com/glab-cli/test")
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			cmd := NewCmdReleaseList(cmdTestUtils.StubFactory("https://gitlab.com/glab-cli/test"))
-			if tt.repo != "" {
-				cmd.Flags().StringP("repo", "R", "", "")
-				assert.Nil(t, cmd.Flags().Set("repo", tt.repo))
-			}
-			if tt.tag != "" {
-				assert.Nil(t, cmd.Flags().Set("tag", tt.tag))
-			}
-			output, err := cmdTestUtils.RunCommand(cmd, ``)
+
+			cmd := NewCmdReleaseList(f)
+			cmdutils.EnableRepoOverride(cmd, f)
+
+			output, err := cmdTestUtils.RunCommand(cmd, tt.args)
 			if tt.wantErr {
 				require.Error(t, err)
 				return

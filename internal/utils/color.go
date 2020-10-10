@@ -9,10 +9,36 @@ import (
 	"github.com/mgutz/ansi"
 )
 
-var _isColorEnabled = true
-var _isStdoutTerminal = false
-var checkedTerminal = false
-var checkedNoColor = false
+var (
+	_isColorEnabled   = true
+	_isStdoutTerminal = false
+	checkedTerminal   = false
+	checkedNoColor    = false
+
+	// Magenta outputs ANSI color if stdout is a tty
+	Magenta = makeColorFunc("magenta")
+
+	// Cyan outputs ANSI color if stdout is a tty
+	Cyan = makeColorFunc("cyan")
+
+	// Red outputs ANSI color if stdout is a tty
+	Red = makeColorFunc("red")
+
+	// Yellow outputs ANSI color if stdout is a tty
+	Yellow = makeColorFunc("yellow")
+
+	// Blue outputs ANSI color if stdout is a tty
+	Blue = makeColorFunc("blue")
+
+	// Green outputs ANSI color if stdout is a tty
+	Green = makeColorFunc("green")
+
+	// Gray outputs ANSI color if stdout is a tty
+	Gray = makeColorFunc("black+h")
+
+	// Bold outputs ANSI color if stdout is a tty
+	Bold = makeColorFunc("default+b")
+)
 
 func isStdoutTerminal() bool {
 	if !checkedTerminal {
@@ -44,32 +70,10 @@ func makeColorFunc(color string) func(string) string {
 
 func isColorEnabled() bool {
 	if !checkedNoColor {
-		_isColorEnabled = os.Getenv("NO_COLOR") == ""
+		_isColorEnabled = os.Getenv("NO_COLOR") == "" ||
+			os.Getenv("COLOR_ENABLED") == "1" ||
+			os.Getenv("COLOR_ENABLED") == "true"
 		checkedNoColor = true
 	}
 	return _isColorEnabled
 }
-
-// Magenta outputs ANSI color if stdout is a tty
-var Magenta = makeColorFunc("magenta")
-
-// Cyan outputs ANSI color if stdout is a tty
-var Cyan = makeColorFunc("cyan")
-
-// Red outputs ANSI color if stdout is a tty
-var Red = makeColorFunc("red")
-
-// Yellow outputs ANSI color if stdout is a tty
-var Yellow = makeColorFunc("yellow")
-
-// Blue outputs ANSI color if stdout is a tty
-var Blue = makeColorFunc("blue")
-
-// Green outputs ANSI color if stdout is a tty
-var Green = makeColorFunc("green")
-
-// Gray outputs ANSI color if stdout is a tty
-var Gray = makeColorFunc("black+h")
-
-// Bold outputs ANSI color if stdout is a tty
-var Bold = makeColorFunc("default+b")

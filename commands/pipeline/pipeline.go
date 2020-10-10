@@ -19,7 +19,8 @@ func NewCmdPipeline(f *cmdutils.Factory) *cobra.Command {
 		Aliases: []string{"pipe"},
 	}
 
-	pipelineCmd.PersistentFlags().StringP("repo", "R", "", "Select another repository using the OWNER/REPO format or the project ID. Supports group namespaces")
+	cmdutils.EnableRepoOverride(pipelineCmd, f)
+
 	pipelineCmd.AddCommand(ciCmd.NewCmdCI(f))
 	pipelineCmd.AddCommand(pipeDeleteCmd.NewCmdDelete(f))
 	pipelineCmd.AddCommand(pipeListCmd.NewCmdList(f))

@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/profclems/glab/commands/cmdutils"
+
 	"github.com/acarl005/stripansi"
 	"github.com/profclems/glab/commands/cmdtest"
 	"github.com/profclems/glab/pkg/api"
@@ -49,8 +51,9 @@ func TestNewCmdCreate(t *testing.T) {
 		},
 	}
 
-	cmd := NewCmdCreate(cmdtest.StubFactory("https://gitlab.com/glab-cli/test"))
-	cmd.Flags().StringP("repo", "R", "", "")
+	f := cmdtest.StubFactory("https://gitlab.com/glab-cli/test")
+	cmd := NewCmdCreate(f)
+	cmdutils.EnableRepoOverride(cmd, f)
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {

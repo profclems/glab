@@ -40,16 +40,12 @@ func TraceCmdFunc(cmd *cobra.Command, args []string, f *cmdutils.Factory) error 
 	var err error
 
 	out := utils.ColorableOut(cmd)
-	if r, _ := cmd.Flags().GetString("repo"); r != "" {
-		f, err = f.NewClient(r)
-		if err != nil {
-			return err
-		}
-	}
+
 	apiClient, err := f.HttpClient()
 	if err != nil {
 		return err
 	}
+
 	repo, err := f.BaseRepo()
 	if err != nil {
 		return err
@@ -71,33 +67,44 @@ func TraceCmdFunc(cmd *cobra.Command, args []string, f *cmdutils.Factory) error 
 			OrderBy: gitlab.String("updated_at"),
 			Sort:    gitlab.String("desc"),
 		}
+
 		l.Page = 1
 		l.PerPage = 1
+
 		fmt.Fprintf(out, "Searching for latest pipeline on %s...\n", branch)
+
 		pipes, err := api.GetPipelines(apiClient, l, repo.FullName())
 		if err != nil {
 			return err
 		}
+
 		if len(pipes) == 0 {
 			fmt.Fprintln(out, "No pipeline running or available on "+branch+"branch")
 			return nil
 		}
+
 		pipeline := pipes[0]
 		fmt.Fprintf(out, "Getting jobs for pipeline %d...\n", pipeline.ID)
+
 		jobs, err := api.GetPipelineJobs(apiClient, pipeline.ID, repo.FullName())
 		if err != nil {
 			return err
 		}
+
 		var jobOptions []string
 		var selectedJob string
+
 		for _, job := range jobs {
 			jobOptions = append(jobOptions, fmt.Sprintf("%s (%d) - %s", job.Name, job.ID, job.Status))
 		}
+
 		prompt := &survey.Select{
 			Message: "Select pipeline job to trace:",
 			Options: jobOptions,
 		}
+
 		_ = survey.AskOne(prompt, &selectedJob)
+
 		if selectedJob != "" {
 			re := regexp.MustCompile(`(?s)\((.*)\)`)
 			m := re.FindAllStringSubmatch(selectedJob, -1)
@@ -111,14 +118,18 @@ func TraceCmdFunc(cmd *cobra.Command, args []string, f *cmdutils.Factory) error 
 	if err != nil {
 		return err
 	}
+
 	ciViewCmd.CommitSHA = commit.ID
+
 	job, err := api.GetPipelineJob(apiClient, jobID, repo.FullName())
 	if err != nil {
 		return err
 	}
+
 	err = pipelineutils.RunTrace(apiClient, context.Background(), out, repo.FullName(), job.Pipeline.Sha, job.Name)
 	if err != nil {
 		return err
 	}
+
 	return nil
 }

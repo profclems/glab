@@ -34,13 +34,6 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 			out := utils.ColorableOut(cmd)
 			l := &gitlab.CreateMergeRequestOptions{}
 
-			if r, _ := cmd.Flags().GetString("repo"); r != "" {
-				f, err = f.NewClient(r)
-				if err != nil {
-					return err
-				}
-			}
-
 			apiClient, err := f.HttpClient()
 			if err != nil {
 				return err

@@ -32,7 +32,8 @@ func NewCmdMR(f *cmdutils.Factory) *cobra.Command {
 		Long:  ``,
 	}
 
-	mrCmd.PersistentFlags().StringP("repo", "R", "", "Select another repository using the OWNER/REPO format or the project ID. Supports group namespaces")
+	cmdutils.EnableRepoOverride(mrCmd, f)
+
 	mrCmd.AddCommand(mrApproveCmd.NewCmdApprove(f))
 	mrCmd.AddCommand(mrApproversCmd.NewCmdApprovers(f))
 	mrCmd.AddCommand(mrCheckoutCmd.NewCmdCheckout(f))

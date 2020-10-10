@@ -149,7 +149,7 @@ func StubFactory(repo string) *cmdutils.Factory {
 	conf := config.NewBlankConfig()
 	CachedTestFactory = cmdutils.New(conf, nil)
 	if repo != "" {
-		CachedTestFactory, _ = CachedTestFactory.NewClient(repo)
+		_ = CachedTestFactory.RepoOverride(repo)
 	}
 
 	return CachedTestFactory
@@ -165,7 +165,7 @@ func StubFactoryWithConfig(repo string) (*cmdutils.Factory, error) {
 	}
 	CachedTestFactory = cmdutils.New(conf, nil)
 	if repo != "" {
-		CachedTestFactory, _ = CachedTestFactory.NewClient(repo)
+		_ = CachedTestFactory.RepoOverride(repo)
 	}
 
 	return CachedTestFactory, nil

@@ -21,12 +21,6 @@ func NewCmdApprove(f *cmdutils.Factory) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var err error
 			out := utils.ColorableOut(cmd)
-			if r, _ := cmd.Flags().GetString("repo"); r != "" {
-				f, err = f.NewClient(r)
-				if err != nil {
-					return err
-				}
-			}
 
 			apiClient, err := f.HttpClient()
 			if err != nil {

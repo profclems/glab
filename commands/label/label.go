@@ -13,7 +13,8 @@ func NewCmdLabel(f *cmdutils.Factory) *cobra.Command {
 		Short: `Manage labels on remote`,
 		Long:  ``,
 	}
-	labelCmd.PersistentFlags().StringP("repo", "R", "", "Select another repository using the OWNER/REPO format. Supports group namespaces")
+
+	cmdutils.EnableRepoOverride(labelCmd, f)
 
 	labelCmd.AddCommand(labelListCmd.NewCmdList(f))
 	labelCmd.AddCommand(labelCreateCmd.NewCmdCreate(f))
