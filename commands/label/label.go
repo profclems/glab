@@ -2,8 +2,8 @@ package label
 
 import (
 	"github.com/profclems/glab/commands/cmdutils"
-	labelListCmd "github.com/profclems/glab/commands/label/list"
 	labelCreateCmd "github.com/profclems/glab/commands/label/create"
+	labelListCmd "github.com/profclems/glab/commands/label/list"
 	"github.com/spf13/cobra"
 )
 
