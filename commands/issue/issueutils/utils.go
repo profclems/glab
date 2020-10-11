@@ -5,50 +5,48 @@ import (
 	"strings"
 
 	"github.com/profclems/glab/internal/utils"
+	"github.com/profclems/glab/pkg/tableprinter"
 
-	"github.com/gosuri/uitable"
 	"github.com/xanzy/go-gitlab"
 )
 
-func DisplayAllIssues(m []*gitlab.Issue, projectID string) *uitable.Table {
-	return utils.DisplayList(utils.ListInfo{
-		Name:    "issues",
-		Columns: []string{"IssueID", "Title", "Labels", "CreatedAt"},
-		Total:   len(m),
-		GetCellValue: func(ri int, ci int) interface{} {
-			issue := m[ri]
-			switch ci {
-			case 0:
-				if issue.State == "opened" {
-					return utils.Green(fmt.Sprintf("#%d", issue.IID))
-				} else {
-					return utils.Red(fmt.Sprintf("#%d", issue.IID))
-				}
-			case 1:
-				return issue.Title
-			case 2:
-				if len(issue.Labels) > 0 {
-					return fmt.Sprintf("(%s)", utils.Cyan(strings.Trim(strings.Join(issue.Labels, ", "), ",")))
-				}
-				return ""
-			case 3:
-				return utils.Gray(utils.TimeToPrettyTimeAgo(*issue.CreatedAt))
-			default:
-				return ""
-			}
-		},
-	}, projectID)
+func DisplayAllIssues(issues []*gitlab.Issue, projectID string) string {
+	title := utils.NewListTitle("issues")
+	title.RepoName = projectID
+	title.CurrentPageTotal = len(issues)
+
+	table := tableprinter.NewTablePrinter()
+	for _, issue := range issues {
+		table.AddCell(IssueState(issue))
+		table.AddCell(issue.Title)
+
+		if len(issue.Labels) > 0 {
+			table.AddCellf("(%s)", utils.Cyan(strings.Trim(strings.Join(issue.Labels, ", "), ",")))
+		} else {
+			table.AddCell("")
+		}
+
+		table.AddCell(utils.Gray(utils.TimeToPrettyTimeAgo(*issue.CreatedAt)))
+		table.EndRow()
+	}
+
+	return fmt.Sprintf("%s\n%s", title.Describe(), table.Render())
 }
 
 func DisplayIssue(i *gitlab.Issue) string {
 	duration := utils.TimeToPrettyTimeAgo(*i.CreatedAt)
-	var issueID string
+	issueID := IssueState(i)
+
+	return fmt.Sprintf("%s %s (%s)\n %s\n",
+		issueID, i.Title, duration, i.WebURL)
+}
+
+func IssueState(i *gitlab.Issue) (issueID string)  {
 	if i.State == "opened" {
 		issueID = utils.Green(fmt.Sprintf("#%d", i.IID))
 	} else {
 		issueID = utils.Red(fmt.Sprintf("#%d", i.IID))
 	}
-
-	return fmt.Sprintf("%s %s (%s)\n %s\n",
-		issueID, i.Title, duration, i.WebURL)
+	return
 }
+

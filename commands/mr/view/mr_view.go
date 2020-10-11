@@ -18,7 +18,7 @@ import (
 func NewCmdView(f *cmdutils.Factory) *cobra.Command {
 	var mrViewCmd = &cobra.Command{
 		Use:     "view <id>",
-		Short:   `Display the title, body, and other information about a merge request.`,
+		Short:   `Render the title, body, and other information about a merge request.`,
 		Long:    ``,
 		Aliases: []string{"show"},
 		Args:    cobra.ExactArgs(1),
