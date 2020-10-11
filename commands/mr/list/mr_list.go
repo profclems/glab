@@ -68,7 +68,7 @@ func NewCmdList(f *cmdutils.Factory) *cobra.Command {
 			}
 
 			assigneeIds := make([]int, 0)
-			if assigneeNames, _ := cmd.Flags().GetStringSlice("assignee"); assigneeNames != nil {
+			if assigneeNames, _ := cmd.Flags().GetStringSlice("assignee"); len(assigneeNames) > 0 {
 				users, err := api.UsersByNames(apiClient, assigneeNames)
 				if err != nil {
 					return err
@@ -78,7 +78,7 @@ func NewCmdList(f *cmdutils.Factory) *cobra.Command {
 				}
 			}
 
-			if assigneeIds != nil {
+			if len(assigneeIds) > 0 {
 				mergeRequests, err := api.ListMRsWithAssignees(apiClient, repo.FullName(), l, assigneeIds)
 				if err != nil {
 					return err
