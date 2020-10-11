@@ -41,7 +41,7 @@ func DisplayIssue(i *gitlab.Issue) string {
 		issueID, i.Title, duration, i.WebURL)
 }
 
-func IssueState(i *gitlab.Issue) (issueID string)  {
+func IssueState(i *gitlab.Issue) (issueID string) {
 	if i.State == "opened" {
 		issueID = utils.Green(fmt.Sprintf("#%d", i.IID))
 	} else {
@@ -49,4 +49,3 @@ func IssueState(i *gitlab.Issue) (issueID string)  {
 	}
 	return
 }
-

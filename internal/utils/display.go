@@ -33,9 +33,9 @@ type ListTitleOptions struct {
 	EmptyMessage string
 }
 
-func NewListTitle(listName string) ListTitleOptions  {
+func NewListTitle(listName string) ListTitleOptions {
 	return ListTitleOptions{
-		Name: listName,
+		Name:           listName,
 		ListActionType: "list",
 	}
 }

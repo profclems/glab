@@ -2,8 +2,9 @@ package search
 
 import (
 	"fmt"
-	"github.com/profclems/glab/pkg/tableprinter"
 	"strings"
+
+	"github.com/profclems/glab/pkg/tableprinter"
 
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/internal/utils"
@@ -60,7 +61,7 @@ func NewCmdSearch(f *cmdutils.Factory) *cobra.Command {
 				table.EndRow()
 			}
 
-			fmt.Fprintf(out,"%s\n%s\n", title, table.Render())
+			fmt.Fprintf(out, "%s\n%s\n", title, table.Render())
 			return nil
 		},
 	}

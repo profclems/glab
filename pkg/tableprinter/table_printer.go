@@ -7,7 +7,7 @@ import (
 )
 
 var (
-	DefaultSeparator = "\t"
+	DefaultSeparator        = "\t"
 	DefaultMaxColWidth uint = 70
 )
 
@@ -39,7 +39,7 @@ func NewTablePrinter() TablePrinter {
 	}
 }
 
-func (t *TablePrinter) AddCell(s interface{})  {
+func (t *TablePrinter) AddCell(s interface{}) {
 	if t.Rows == nil {
 		t.Rows = make([][]*TableCell, 1)
 	}
@@ -50,7 +50,7 @@ func (t *TablePrinter) AddCell(s interface{})  {
 	t.Rows[rowI] = append(t.Rows[rowI], &field)
 }
 
-func (t *TablePrinter) appendCellToIndex(s interface{}, index int)  {
+func (t *TablePrinter) appendCellToIndex(s interface{}, index int) {
 	if t.Rows == nil {
 		t.Rows = make([][]*TableCell, 1)
 	}
@@ -72,11 +72,11 @@ func (t *TablePrinter) appendCellToIndex(s interface{}, index int)  {
 }
 
 // AddCellf formats according to a format specifier and adds cell to row
-func (t *TablePrinter) AddCellf(s string, f ...interface{})  {
+func (t *TablePrinter) AddCellf(s string, f ...interface{}) {
 	t.AddCell(fmt.Sprintf(s, f...))
 }
 
-func (t *TablePrinter) AddRow(str ...interface{})  {
+func (t *TablePrinter) AddRow(str ...interface{}) {
 	for _, s := range str {
 		t.AddCell(s)
 	}
@@ -84,7 +84,7 @@ func (t *TablePrinter) AddRow(str ...interface{})  {
 }
 
 // AddCellI appends a cell to the given index
-func (t *TablePrinter) AddCellI(index int, str interface{})  {
+func (t *TablePrinter) AddCellI(index int, str interface{}) {
 	t.appendCellToIndex(str, index)
 }
 
@@ -114,7 +114,7 @@ func (t *TablePrinter) String() string {
 }
 
 // purgeRow removes empty rows
-func (t *TablePrinter) purgeRow()  {
+func (t *TablePrinter) purgeRow() {
 	newSlice := make([][]*TableCell, 0, len(t.Rows))
 	for _, item := range t.Rows {
 		if len(item) > 0 {
