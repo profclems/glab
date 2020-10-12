@@ -10,11 +10,7 @@ import (
 	"github.com/xanzy/go-gitlab"
 )
 
-func DisplayAllIssues(issues []*gitlab.Issue, projectID string) string {
-	title := utils.NewListTitle("issues")
-	title.RepoName = projectID
-	title.CurrentPageTotal = len(issues)
-
+func DisplayIssueList(issues []*gitlab.Issue, projectID string) string {
 	table := tableprinter.NewTablePrinter()
 	for _, issue := range issues {
 		table.AddCell(IssueState(issue))
@@ -30,7 +26,7 @@ func DisplayAllIssues(issues []*gitlab.Issue, projectID string) string {
 		table.EndRow()
 	}
 
-	return fmt.Sprintf("%s\n%s", title.Describe(), table.Render())
+	return table.Render()
 }
 
 func DisplayIssue(i *gitlab.Issue) string {

@@ -35,23 +35,39 @@ type ListTitleOptions struct {
 
 func NewListTitle(listName string) ListTitleOptions {
 	return ListTitleOptions{
-		Name:           listName,
+		Name:           strings.TrimSpace(listName),
 		ListActionType: "list",
+		Page: 			1,
 	}
 }
 
 func (opts *ListTitleOptions) Describe() string {
+	var pageNumInfo string
+	var pageInfo string
+
+	if opts.Total != 0 {
+		opts.Name = pluralizeName(opts.Total, opts.Name)
+		pageNumInfo = fmt.Sprintf("%d of %d", opts.CurrentPageTotal, opts.Total)
+	} else {
+		opts.Name = pluralizeName(opts.CurrentPageTotal, opts.Name)
+		pageNumInfo = fmt.Sprintf("%d", opts.CurrentPageTotal)
+	}
+
+	if opts.Page != 0 {
+		pageInfo = fmt.Sprintf("(Page %d)", opts.Page)
+	}
+
 	if opts.ListActionType == "search" {
 		if opts.CurrentPageTotal > 0 {
-			return fmt.Sprintf("Showing %d of %d %s in %s that match your search", opts.CurrentPageTotal,
-				opts.Total, opts.Name, opts.RepoName)
+			return fmt.Sprintf("Showing %s %s in %s that match your search %s\n", pageNumInfo, opts.Name,
+				opts.RepoName, pageInfo)
 		}
 
 		return fmt.Sprintf("No %s match your search in %s", opts.Name, opts.RepoName)
 	}
 
 	if opts.CurrentPageTotal > 0 {
-		return fmt.Sprintf("Showing %s %d of %d on %s\n", opts.Name, opts.CurrentPageTotal, opts.Total, opts.RepoName)
+		return fmt.Sprintf("Showing %s %s on %s %s\n", pageNumInfo, opts.Name, opts.RepoName, pageInfo)
 	}
 
 	emptyMessage := opts.EmptyMessage
@@ -60,4 +76,8 @@ func (opts *ListTitleOptions) Describe() string {
 	}
 
 	return emptyMessage
+}
+
+func pluralizeName(num int, thing string) string {
+	return strings.TrimPrefix(Pluralize(num, thing), fmt.Sprintf("%d ", num))
 }

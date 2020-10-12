@@ -25,6 +25,7 @@ func NewCmdList(f *cmdutils.Factory) *cobra.Command {
 		Args: cobra.ExactArgs(0),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var err error
+			var titleQualifier string
 
 			out := utils.ColorableOut(cmd)
 
@@ -39,8 +40,11 @@ func NewCmdList(f *cmdutils.Factory) *cobra.Command {
 			}
 
 			l := &gitlab.ListProjectPipelinesOptions{}
+			l.Page = 1
+
 			if m, _ := cmd.Flags().GetString("status"); m != "" {
 				l.Status = gitlab.BuildState(gitlab.BuildStateValue(m))
+				titleQualifier = m
 			}
 			if m, _ := cmd.Flags().GetString("orderBy"); m != "" {
 				l.OrderBy = gitlab.String(m)
@@ -60,7 +64,12 @@ func NewCmdList(f *cmdutils.Factory) *cobra.Command {
 				return err
 			}
 
-			fmt.Fprintln(out, pipelineutils.DisplayMultiplePipelines(pipes, repo.FullName()))
+			title := utils.NewListTitle(fmt.Sprintf("%s pipeline", titleQualifier))
+			title.RepoName = repo.FullName()
+			title.Page = l.Page
+			title.CurrentPageTotal = len(pipes)
+
+			fmt.Fprintf(out, "%s\n%s\n", title.Describe(), pipelineutils.DisplayMultiplePipelines(pipes, repo.FullName()))
 			return nil
 		},
 	}

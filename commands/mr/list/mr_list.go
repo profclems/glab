@@ -22,6 +22,9 @@ func NewCmdList(f *cmdutils.Factory) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var state string
 			var err error
+			var listType string
+			var titleQualifier string
+
 			out := utils.ColorableOut(cmd)
 
 			apiClient, err := f.HttpClient()
@@ -38,23 +41,30 @@ func NewCmdList(f *cmdutils.Factory) *cobra.Command {
 				state = "all"
 			} else if lb, _ := cmd.Flags().GetBool("closed"); lb {
 				state = "closed"
+				titleQualifier = state
 			} else if lb, _ := cmd.Flags().GetBool("merged"); lb {
 				state = "merged"
+				titleQualifier = state
 			} else {
 				state = "opened"
+				titleQualifier = "open"
 			}
 
 			l := &gitlab.ListProjectMergeRequestsOptions{
 				State: gitlab.String(state),
 			}
+			l.Page = 1
+
 			if lb, _ := cmd.Flags().GetString("label"); lb != "" {
 				label := gitlab.Labels{
 					lb,
 				}
 				l.Labels = label
+				listType = "search"
 			}
 			if lb, _ := cmd.Flags().GetString("milestone"); lb != "" {
 				l.Milestone = gitlab.String(lb)
+				listType = "search"
 			}
 			if p, _ := cmd.Flags().GetInt("page"); p != 0 {
 				l.Page = p
@@ -65,6 +75,7 @@ func NewCmdList(f *cmdutils.Factory) *cobra.Command {
 
 			if mine, _ := cmd.Flags().GetBool("mine"); mine {
 				l.Scope = gitlab.String("assigned_to_me")
+				listType = "search"
 			}
 
 			assigneeIds := make([]int, 0)
@@ -92,7 +103,14 @@ func NewCmdList(f *cmdutils.Factory) *cobra.Command {
 				return err
 			}
 
-			fmt.Fprintln(out, mrutils.DisplayAllMRs(mergeRequests, repo.FullName()))
+
+			title := utils.NewListTitle(titleQualifier + " merge request")
+			title.RepoName = repo.FullName()
+			title.Page = l.Page
+			title.ListActionType = listType
+			title.CurrentPageTotal = len(mergeRequests)
+
+			fmt.Fprintf(out,"%s\n%s\n", title.Describe(), mrutils.DisplayAllMRs(mergeRequests, repo.FullName()))
 			return nil
 		},
 	}
@@ -101,7 +119,7 @@ func NewCmdList(f *cmdutils.Factory) *cobra.Command {
 	mrListCmd.Flags().StringP("milestone", "", "", "Filter merge request by milestone <id>")
 	mrListCmd.Flags().BoolP("all", "a", false, "Get all merge requests")
 	mrListCmd.Flags().BoolP("closed", "c", false, "Get only closed merge requests")
-	mrListCmd.Flags().BoolP("opened", "o", false, "Get only opened merge requests")
+	mrListCmd.Flags().BoolP("opened", "o", false, "Get only open merge requests")
 	mrListCmd.Flags().BoolP("merged", "m", false, "Get only merged merge requests")
 	mrListCmd.Flags().IntP("page", "p", 1, "Page number")
 	mrListCmd.Flags().IntP("per-page", "P", 20, "Number of items to list per page")

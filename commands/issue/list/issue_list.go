@@ -23,6 +23,8 @@ func NewCmdList(f *cmdutils.Factory) *cobra.Command {
 			var (
 				state string
 				err   error
+				listType string
+				titleQualifier string
 			)
 
 			apiClient, err := f.HttpClient()
@@ -39,13 +41,17 @@ func NewCmdList(f *cmdutils.Factory) *cobra.Command {
 				state = "all"
 			} else if lb, _ := cmd.Flags().GetBool("closed"); lb {
 				state = "closed"
+				titleQualifier = "closed"
 			} else {
 				state = "opened"
+				titleQualifier = "open"
 			}
 
 			opts := &gitlab.ListProjectIssuesOptions{
 				State: gitlab.String(state),
 			}
+			opts.Page = 1
+
 			if lb, _ := cmd.Flags().GetString("assignee"); lb != "" {
 				opts.AssigneeUsername = gitlab.String(lb)
 			}
@@ -54,29 +60,43 @@ func NewCmdList(f *cmdutils.Factory) *cobra.Command {
 					lb,
 				}
 				opts.Labels = label
+				listType = "search"
 			}
 			if lb, _ := cmd.Flags().GetString("milestone"); lb != "" {
 				opts.Milestone = gitlab.String(lb)
+				listType = "search"
 			}
 			if lb, _ := cmd.Flags().GetBool("confidential"); lb {
 				opts.Confidential = gitlab.Bool(lb)
+				listType = "search"
 			}
 			if p, _ := cmd.Flags().GetInt("page"); p != 0 {
 				opts.Page = p
+				listType = "search"
 			}
 			if p, _ := cmd.Flags().GetInt("per-page"); p != 0 {
 				opts.PerPage = p
+				listType = "search"
 			}
 
 			if lb, _ := cmd.Flags().GetBool("mine"); lb {
 				u, _ := api.CurrentUser(nil)
 				opts.AssigneeUsername = gitlab.String(u.Username)
+				listType = "search"
 			}
 			issues, err := api.ListIssues(apiClient, repo.FullName(), opts)
 			if err != nil {
 				return err
 			}
-			fmt.Fprintln(utils.ColorableOut(cmd), issueutils.DisplayAllIssues(issues, repo.FullName()))
+
+			title := utils.NewListTitle(titleQualifier + " issue")
+			title.RepoName = repo.FullName()
+			title.Page = opts.Page
+			title.ListActionType = listType
+			title.CurrentPageTotal = len(issues)
+
+			fmt.Fprintf(utils.ColorableOut(cmd), "%s\n%s\n", title.Describe(), issueutils.DisplayIssueList(issues, repo.FullName()))
+
 			return nil
 
 		},

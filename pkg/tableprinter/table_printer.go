@@ -7,7 +7,7 @@ import (
 )
 
 var (
-	DefaultSeparator        = "\t"
+	DefaultSeparator        = " "
 	DefaultMaxColWidth uint = 70
 )
 
@@ -21,7 +21,7 @@ type TablePrinter struct {
 	Wrap bool
 	// MaxColWidth is the maximum allowed width for cells in the table
 	MaxColWidth uint
-	// Separator is the seperator for columns in the table. Default is "\t
+	// Separator is the seperator for columns in the table. Default is " "
 	Separator string
 	// Rows is the collection of rows in the table
 	Rows [][]*TableCell
@@ -138,11 +138,10 @@ func (t *TablePrinter) Render() string {
 
 	t.purgeRow() // remove empty rows
 	rLen := len(t.Rows)
-	fmt.Println(rLen)
 
 	if rLen > 0 {
 		if len(t.Header) > 0 {
-			header := make([]interface{}, len(t.Header), len(t.Header))
+			header := make([]interface{}, len(t.Header))
 			for ci, c := range t.Header {
 				header[ci] = c
 			}
@@ -151,7 +150,7 @@ func (t *TablePrinter) Render() string {
 		}
 
 		for _, row := range t.Rows {
-			rowData := make([]interface{}, len(row), len(row))
+			rowData := make([]interface{}, len(row))
 			for i, r := range row {
 				if len(rowData) <= i {
 					rowData[i-1] = r.Text

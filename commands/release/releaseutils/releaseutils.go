@@ -10,16 +10,12 @@ import (
 )
 
 func DisplayAllReleases(releases []*gitlab.Release, repoName string) string {
-	title := utils.NewListTitle("releases")
-	title.RepoName = repoName
-	title.CurrentPageTotal = len(releases)
-
 	table := tableprinter.NewTablePrinter()
 	for _, r := range releases {
 		table.AddRow(r.Name, r.TagName, utils.Gray(utils.TimeToPrettyTimeAgo(*r.CreatedAt)))
 	}
 
-	return fmt.Sprintf("%s\n%s", title.Describe(), table.Render())
+	return table.Render()
 }
 
 func RenderReleaseAssertLinks(assets []*gitlab.ReleaseLink) string {

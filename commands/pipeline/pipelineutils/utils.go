@@ -5,14 +5,13 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"os"
 	"sync"
 	"time"
 
 	"github.com/profclems/glab/internal/utils"
 	"github.com/profclems/glab/pkg/api"
+	"github.com/profclems/glab/pkg/tableprinter"
 
-	"github.com/juju/ansiterm/tabwriter"
 	"github.com/pkg/errors"
 	"github.com/xanzy/go-gitlab"
 )
@@ -23,15 +22,10 @@ var (
 )
 
 func DisplayMultiplePipelines(p []*gitlab.PipelineInfo, projectID string) string {
-	// initialize tabwriter
-	w := new(tabwriter.Writer)
 
-	// minwidth, tabwidth, padding, padchar, flags
-	w.Init(os.Stdout, 8, 8, 0, '\t', 0)
+	table := tableprinter.NewTablePrinter()
 
-	defer w.Flush()
 	if len(p) > 0 {
-		pipelinePrint := fmt.Sprintf("Showing pipelines %d of %d on %s\n\n", len(p), len(p), projectID)
 
 		for _, pipeline := range p {
 			duration := utils.TimeToPrettyTimeAgo(*pipeline.CreatedAt)
@@ -44,10 +38,10 @@ func DisplayMultiplePipelines(p []*gitlab.PipelineInfo, projectID string) string
 				pipeState = utils.Gray(fmt.Sprintf("(%s) • #%d", pipeline.Status, pipeline.ID))
 			}
 
-			pipelinePrint += fmt.Sprintf("%s\t%s\t%s\n", pipeState, pipeline.Ref, utils.Magenta("("+duration+")"))
+			table.AddRow(pipeState, pipeline.Ref, utils.Magenta("("+duration+")"))
 		}
 
-		return pipelinePrint
+		return table.Render()
 	}
 
 	return "No Pipelines available on " + projectID

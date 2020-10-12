@@ -25,10 +25,6 @@ func MRState(m *gitlab.MergeRequest) string {
 }
 
 func DisplayAllMRs(mrs []*gitlab.MergeRequest, projectID string) string {
-	title := utils.NewListTitle("Merge Requests")
-	title.RepoName = projectID
-	title.CurrentPageTotal = len(mrs)
-
 	table := tableprinter.NewTablePrinter()
 	for _, m := range mrs {
 		table.AddCell(MRState(m))
@@ -37,5 +33,5 @@ func DisplayAllMRs(mrs []*gitlab.MergeRequest, projectID string) string {
 		table.EndRow()
 	}
 
-	return fmt.Sprintf("%s\n%s", title.Describe(), table.Render())
+	return table.Render()
 }

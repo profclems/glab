@@ -66,7 +66,13 @@ func listReleases(cmd *cobra.Command, args []string) error {
 		if err != nil {
 			return err
 		}
-		fmt.Fprintln(utils.ColorableOut(cmd), releaseutils.DisplayAllReleases(releases, repo.FullName()))
+
+		title := utils.NewListTitle("release")
+		title.RepoName = repo.FullName()
+		title.Page = 0
+		title.CurrentPageTotal = len(releases)
+
+		fmt.Fprintf(utils.ColorableOut(cmd), "%s\n%s\n", title.Describe(), releaseutils.DisplayAllReleases(releases, repo.FullName()))
 	}
 	return nil
 }
