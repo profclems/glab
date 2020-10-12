@@ -51,6 +51,7 @@ func NewCmdList(f *cmdutils.Factory) *cobra.Command {
 				State: gitlab.String(state),
 			}
 			opts.Page = 1
+			opts.PerPage = 30
 
 			if lb, _ := cmd.Flags().GetString("assignee"); lb != "" {
 				opts.AssigneeUsername = gitlab.String(lb)
@@ -110,7 +111,7 @@ func NewCmdList(f *cmdutils.Factory) *cobra.Command {
 	issueListCmd.Flags().BoolP("opened", "o", false, "Get only opened issues")
 	issueListCmd.Flags().BoolP("confidential", "", false, "Filter by confidential issues")
 	issueListCmd.Flags().IntP("page", "p", 1, "Page number")
-	issueListCmd.Flags().IntP("per-page", "P", 20, "Number of items to list per page")
+	issueListCmd.Flags().IntP("per-page", "P", 30, "Number of items to list per page. (default 30)")
 
 	return issueListCmd
 }

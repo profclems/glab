@@ -2,8 +2,6 @@ package list
 
 import (
 	"fmt"
-	"strings"
-
 	"github.com/profclems/glab/pkg/api"
 
 	"github.com/profclems/glab/commands/cmdutils"
@@ -34,9 +32,10 @@ func NewCmdList(f *cmdutils.Factory) *cobra.Command {
 				return err
 			}
 
-			cfg, _ := f.Config()
-
 			l := &gitlab.ListLabelsOptions{}
+
+			l.WithCounts = gitlab.Bool(true)
+
 			if p, _ := cmd.Flags().GetInt("page"); p != 0 {
 				l.Page = p
 			}
@@ -61,14 +60,14 @@ func NewCmdList(f *cmdutils.Factory) *cobra.Command {
 			fmt.Fprintln(out, utils.Indent(labelPrintInfo, " "))
 
 			// Cache labels for host
-			labelNames := make([]string, 0, len(labels))
-			for _, label := range labels {
-				labelNames = append(labelNames, label.Name)
-			}
-			labelsEntry := strings.Join(labelNames, ",")
-			if err := cfg.Set(repo.RepoHost(), "project_labels", labelsEntry); err != nil {
-				_ = cfg.Write()
-			}
+			//labelNames := make([]string, 0, len(labels))
+			//for _, label := range labels {
+			//	labelNames = append(labelNames, label.Name)
+			//}
+			//labelsEntry := strings.Join(labelNames, ",")
+			//if err := cfg.Set(repo.RepoHost(), "project_labels", labelsEntry); err != nil {
+			//	_ = cfg.Write()
+			//}
 
 			return nil
 
@@ -76,7 +75,7 @@ func NewCmdList(f *cmdutils.Factory) *cobra.Command {
 	}
 
 	labelListCmd.Flags().IntP("page", "p", 1, "Page number")
-	labelListCmd.Flags().IntP("per-page", "P", 20, "Number of items to list per page")
+	labelListCmd.Flags().IntP("per-page", "P", 30, "Number of items to list per page")
 
 	return labelListCmd
 }

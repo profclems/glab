@@ -41,6 +41,7 @@ func NewCmdList(f *cmdutils.Factory) *cobra.Command {
 
 			l := &gitlab.ListProjectPipelinesOptions{}
 			l.Page = 1
+			l.PerPage = 30
 
 			if m, _ := cmd.Flags().GetString("status"); m != "" {
 				l.Status = gitlab.BuildState(gitlab.BuildStateValue(m))
@@ -77,7 +78,7 @@ func NewCmdList(f *cmdutils.Factory) *cobra.Command {
 	pipelineListCmd.Flags().StringP("orderBy", "o", "", "Order pipeline by <string>")
 	pipelineListCmd.Flags().StringP("sort", "", "desc", "Sort pipeline by {asc|desc}. (Defaults to desc)")
 	pipelineListCmd.Flags().IntP("page", "p", 1, "Page number")
-	pipelineListCmd.Flags().IntP("per-page", "P", 20, "Number of items to list per page")
+	pipelineListCmd.Flags().IntP("per-page", "P", 30, "Number of items to list per page. (default 30)")
 
 	return pipelineListCmd
 }

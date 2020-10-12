@@ -44,6 +44,10 @@ var ListMRs = func(client *gitlab.Client, projectID interface{}, opts *gitlab.Li
 	if client == nil {
 		client = apiClient
 	}
+	if opts.PerPage == 0 {
+		opts.PerPage = DefaultListLimit
+	}
+
 	mrs, _, err := client.MergeRequests.ListProjectMergeRequests(projectID, opts)
 	if err != nil {
 		return nil, err
@@ -56,6 +60,10 @@ var ListMRsWithAssignees = func(client *gitlab.Client, projectID interface{}, op
 	if client == nil {
 		client = apiClient
 	}
+	if opts.PerPage == 0 {
+		opts.PerPage = DefaultListLimit
+	}
+
 	mrs := make([]*gitlab.MergeRequest, 0)
 	for _, id := range assigneeIds {
 		opts.AssigneeID = gitlab.Int(id)
@@ -144,6 +152,10 @@ var CreateMRNote = func(client *gitlab.Client, projectID interface{}, mrID int, 
 var ListMRNotes = func(client *gitlab.Client, projectID interface{}, mrID int, opts *gitlab.ListMergeRequestNotesOptions) ([]*gitlab.Note, error) {
 	if client == nil {
 		client = apiClient
+	}
+
+	if opts.PerPage == 0 {
+		opts.PerPage = DefaultListLimit
 	}
 
 	notes, _, err := client.Notes.ListMergeRequestNotes(projectID, mrID, opts)

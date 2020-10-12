@@ -54,6 +54,7 @@ func NewCmdList(f *cmdutils.Factory) *cobra.Command {
 				State: gitlab.String(state),
 			}
 			l.Page = 1
+			l.PerPage = 30
 
 			if lb, _ := cmd.Flags().GetString("label"); lb != "" {
 				label := gitlab.Labels{
@@ -122,7 +123,7 @@ func NewCmdList(f *cmdutils.Factory) *cobra.Command {
 	mrListCmd.Flags().BoolP("opened", "o", false, "Get only open merge requests")
 	mrListCmd.Flags().BoolP("merged", "m", false, "Get only merged merge requests")
 	mrListCmd.Flags().IntP("page", "p", 1, "Page number")
-	mrListCmd.Flags().IntP("per-page", "P", 20, "Number of items to list per page")
+	mrListCmd.Flags().IntP("per-page", "P", 30, "Number of items to list per page. (default 30)")
 	mrListCmd.Flags().BoolP("mine", "", false, "Get only merge requests assigned to me")
 	mrListCmd.Flags().StringSliceP("assignee", "", []string{}, "Get only merge requests assigned to users")
 
