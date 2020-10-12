@@ -104,14 +104,13 @@ func NewCmdList(f *cmdutils.Factory) *cobra.Command {
 				return err
 			}
 
-
 			title := utils.NewListTitle(titleQualifier + " merge request")
 			title.RepoName = repo.FullName()
 			title.Page = l.Page
 			title.ListActionType = listType
 			title.CurrentPageTotal = len(mergeRequests)
 
-			fmt.Fprintf(out,"%s\n%s\n", title.Describe(), mrutils.DisplayAllMRs(mergeRequests, repo.FullName()))
+			fmt.Fprintf(out, "%s\n%s\n", title.Describe(), mrutils.DisplayAllMRs(mergeRequests, repo.FullName()))
 			return nil
 		},
 	}

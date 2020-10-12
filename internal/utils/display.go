@@ -37,7 +37,7 @@ func NewListTitle(listName string) ListTitleOptions {
 	return ListTitleOptions{
 		Name:           strings.TrimSpace(listName),
 		ListActionType: "list",
-		Page: 			1,
+		Page:           1,
 	}
 }
 

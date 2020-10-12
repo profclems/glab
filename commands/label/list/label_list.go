@@ -2,6 +2,7 @@ package list
 
 import (
 	"fmt"
+
 	"github.com/profclems/glab/pkg/api"
 
 	"github.com/profclems/glab/commands/cmdutils"

@@ -21,9 +21,9 @@ func NewCmdList(f *cmdutils.Factory) *cobra.Command {
 		Args:    cobra.ExactArgs(0),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var (
-				state string
-				err   error
-				listType string
+				state          string
+				err            error
+				listType       string
 				titleQualifier string
 			)
 

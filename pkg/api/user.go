@@ -23,7 +23,7 @@ var UserByName = func(client *gitlab.Client, name string) (*gitlab.User, error) 
 	if opts.PerPage == 0 {
 		opts.PerPage = DefaultListLimit
 	}
-	
+
 	users, _, err := apiClient.Users.ListUsers(opts)
 	if err != nil {
 		return nil, err

@@ -110,7 +110,7 @@ func NewCmdStatus(f *cmdutils.Factory) *cobra.Command {
 							Options: []string{"View Logs", "Retry", "Exit"},
 							Default: "Exit",
 						}
-							_ = survey.AskOne(prompt, &retry)
+						_ = survey.AskOne(prompt, &retry)
 						if retry != "" && retry != "Exit" {
 							if retry == "View Logs" {
 								isRunning = false
