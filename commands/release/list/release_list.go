@@ -62,11 +62,19 @@ func listReleases(cmd *cobra.Command, args []string) error {
 		glamourStyle, _ := cfg.Get(repo.RepoHost(), "glamour_style")
 		fmt.Fprintln(utils.ColorableOut(cmd), releaseutils.DisplayRelease(release, glamourStyle))
 	} else {
+		l.PerPage = 30
+
 		releases, err := api.ListReleases(apiClient, repo.FullName(), l)
 		if err != nil {
 			return err
 		}
-		fmt.Fprintln(utils.ColorableOut(cmd), releaseutils.DisplayAllReleases(releases, repo.FullName()))
+
+		title := utils.NewListTitle("release")
+		title.RepoName = repo.FullName()
+		title.Page = 0
+		title.CurrentPageTotal = len(releases)
+
+		fmt.Fprintf(utils.ColorableOut(cmd), "%s\n%s\n", title.Describe(), releaseutils.DisplayAllReleases(releases, repo.FullName()))
 	}
 	return nil
 }

@@ -42,7 +42,14 @@ func NewCmdIssues(f *cmdutils.Factory) *cobra.Command {
 			if err != nil {
 				return err
 			}
-			fmt.Fprintln(out, issueutils.DisplayAllIssues(mrIssues, repo.FullName()))
+
+			title := utils.NewListTitle("issue")
+			title.RepoName = repo.FullName()
+			title.Page = 0
+			title.ListActionType = "search"
+			title.CurrentPageTotal = len(mrIssues)
+
+			fmt.Fprintf(out, "%s\n%s\n", title.Describe(), issueutils.DisplayIssueList(mrIssues, repo.FullName()))
 			return nil
 		},
 	}

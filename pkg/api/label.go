@@ -17,6 +17,11 @@ var ListLabels = func(client *gitlab.Client, projectID interface{}, opts *gitlab
 	if client == nil {
 		client = apiClient
 	}
+
+	if opts.PerPage == 0 {
+		opts.PerPage = DefaultListLimit
+	}
+
 	label, _, err := client.Labels.ListLabels(projectID, opts)
 	if err != nil {
 		return nil, err

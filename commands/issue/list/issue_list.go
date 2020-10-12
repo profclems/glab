@@ -21,8 +21,10 @@ func NewCmdList(f *cmdutils.Factory) *cobra.Command {
 		Args:    cobra.ExactArgs(0),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var (
-				state string
-				err   error
+				state          string
+				err            error
+				listType       string
+				titleQualifier string
 			)
 
 			apiClient, err := f.HttpClient()
@@ -39,13 +41,18 @@ func NewCmdList(f *cmdutils.Factory) *cobra.Command {
 				state = "all"
 			} else if lb, _ := cmd.Flags().GetBool("closed"); lb {
 				state = "closed"
+				titleQualifier = "closed"
 			} else {
 				state = "opened"
+				titleQualifier = "open"
 			}
 
 			opts := &gitlab.ListProjectIssuesOptions{
 				State: gitlab.String(state),
 			}
+			opts.Page = 1
+			opts.PerPage = 30
+
 			if lb, _ := cmd.Flags().GetString("assignee"); lb != "" {
 				opts.AssigneeUsername = gitlab.String(lb)
 			}
@@ -54,29 +61,43 @@ func NewCmdList(f *cmdutils.Factory) *cobra.Command {
 					lb,
 				}
 				opts.Labels = label
+				listType = "search"
 			}
 			if lb, _ := cmd.Flags().GetString("milestone"); lb != "" {
 				opts.Milestone = gitlab.String(lb)
+				listType = "search"
 			}
 			if lb, _ := cmd.Flags().GetBool("confidential"); lb {
 				opts.Confidential = gitlab.Bool(lb)
+				listType = "search"
 			}
 			if p, _ := cmd.Flags().GetInt("page"); p != 0 {
 				opts.Page = p
+				listType = "search"
 			}
 			if p, _ := cmd.Flags().GetInt("per-page"); p != 0 {
 				opts.PerPage = p
+				listType = "search"
 			}
 
 			if lb, _ := cmd.Flags().GetBool("mine"); lb {
 				u, _ := api.CurrentUser(nil)
 				opts.AssigneeUsername = gitlab.String(u.Username)
+				listType = "search"
 			}
 			issues, err := api.ListIssues(apiClient, repo.FullName(), opts)
 			if err != nil {
 				return err
 			}
-			fmt.Fprintln(utils.ColorableOut(cmd), issueutils.DisplayAllIssues(issues, repo.FullName()))
+
+			title := utils.NewListTitle(titleQualifier + " issue")
+			title.RepoName = repo.FullName()
+			title.Page = opts.Page
+			title.ListActionType = listType
+			title.CurrentPageTotal = len(issues)
+
+			fmt.Fprintf(utils.ColorableOut(cmd), "%s\n%s\n", title.Describe(), issueutils.DisplayIssueList(issues, repo.FullName()))
+
 			return nil
 
 		},
@@ -90,7 +111,7 @@ func NewCmdList(f *cmdutils.Factory) *cobra.Command {
 	issueListCmd.Flags().BoolP("opened", "o", false, "Get only opened issues")
 	issueListCmd.Flags().BoolP("confidential", "", false, "Filter by confidential issues")
 	issueListCmd.Flags().IntP("page", "p", 1, "Page number")
-	issueListCmd.Flags().IntP("per-page", "P", 20, "Number of items to list per page")
+	issueListCmd.Flags().IntP("per-page", "P", 30, "Number of items to list per page. (default 30)")
 
 	return issueListCmd
 }

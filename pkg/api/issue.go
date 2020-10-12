@@ -9,6 +9,9 @@ var ListIssueNotes = func(client *gitlab.Client, projectID interface{}, issueID 
 	if client == nil {
 		client = apiClient
 	}
+	if opts.PerPage == 0 {
+		opts.PerPage = DefaultListLimit
+	}
 	notes, _, err := client.Notes.ListIssueNotes(projectID, issueID, opts)
 	if err != nil {
 		return nil, err
@@ -41,6 +44,12 @@ var GetIssue = func(client *gitlab.Client, projectID interface{}, issueID int) (
 }
 
 var ListIssues = func(client *gitlab.Client, projectID interface{}, opts *gitlab.ListProjectIssuesOptions) ([]*gitlab.Issue, error) {
+	if client == nil {
+		client = apiClient
+	}
+	if opts.PerPage == 0 {
+		opts.PerPage = DefaultListLimit
+	}
 	issues, _, err := client.Issues.ListProjectIssues(projectID, opts)
 	if err != nil {
 		return nil, err

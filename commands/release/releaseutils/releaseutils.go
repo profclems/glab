@@ -3,30 +3,19 @@ package releaseutils
 import (
 	"fmt"
 
-	"github.com/gosuri/uitable"
 	"github.com/profclems/glab/internal/utils"
+	"github.com/profclems/glab/pkg/tableprinter"
+
 	"github.com/xanzy/go-gitlab"
 )
 
-func DisplayAllReleases(rs []*gitlab.Release, repo string) *uitable.Table {
-	return utils.DisplayList(utils.ListInfo{
-		Name:    "releases",
-		Columns: []string{"Name", "Tag", "CreatedAt"},
-		Total:   len(rs),
-		GetCellValue: func(ri int, ci int) interface{} {
-			row := rs[ri]
-			switch ci {
-			case 0:
-				return row.Name
-			case 1:
-				return row.TagName
-			case 2:
-				return utils.Gray(utils.TimeToPrettyTimeAgo(*row.CreatedAt))
-			default:
-				return ""
-			}
-		},
-	}, repo)
+func DisplayAllReleases(releases []*gitlab.Release, repoName string) string {
+	table := tableprinter.NewTablePrinter()
+	for _, r := range releases {
+		table.AddRow(r.Name, r.TagName, utils.Gray(utils.TimeToPrettyTimeAgo(*r.CreatedAt)))
+	}
+
+	return table.Render()
 }
 
 func RenderReleaseAssertLinks(assets []*gitlab.ReleaseLink) string {

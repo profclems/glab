@@ -110,10 +110,14 @@ var GetJobs = func(client *gitlab.Client, repo string, opts *gitlab.ListJobsOpti
 	return jobs, nil
 }
 
-var GetPipelines = func(client *gitlab.Client, l *gitlab.ListProjectPipelinesOptions, repo string) ([]*gitlab.PipelineInfo, error) {
+var GetPipelines = func(client *gitlab.Client, l *gitlab.ListProjectPipelinesOptions, repo interface{}) ([]*gitlab.PipelineInfo, error) {
 	if client == nil {
 		client = apiClient
 	}
+	if l.PerPage == 0 {
+		l.PerPage = DefaultListLimit
+	}
+
 	pipes, _, err := client.Pipelines.ListProjectPipelines(repo, l)
 	if err != nil {
 		return nil, err
@@ -249,9 +253,9 @@ var PipelineJobsWithSha = func(client *gitlab.Client, pid interface{}, sha strin
 	if client == nil {
 		client = apiClient
 	}
-	pipelines, _, err := client.Pipelines.ListProjectPipelines(pid, &gitlab.ListProjectPipelinesOptions{
+	pipelines, err := GetPipelines(client, &gitlab.ListProjectPipelinesOptions{
 		SHA: gitlab.String(sha),
-	})
+	}, pid)
 	if len(pipelines) == 0 || err != nil {
 		return nil, err
 	}

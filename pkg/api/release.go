@@ -19,6 +19,10 @@ var ListReleases = func(client *gitlab.Client, projectID interface{}, opts *gitl
 		client = apiClient
 	}
 
+	if opts.PerPage == 0 {
+		opts.PerPage = DefaultListLimit
+	}
+
 	releases, _, err := client.Releases.ListReleases(projectID, opts)
 	if err != nil {
 		return nil, err

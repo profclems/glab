@@ -4,67 +4,7 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
-
-	"github.com/gosuri/uitable"
 )
-
-// ListInfo represents the parameters required to display a list result.
-type ListInfo struct {
-	// Name of the List to be used in constructing Description and EmptyMessage if not provided.
-	Name string
-	// List of columns to display
-	Columns []string
-	// Total number of record. Ideally size of the List.
-	Total int
-	// Function to pick a cell value from cell index
-	GetCellValue func(int, int) interface{}
-	// Optional. Description of the List. If not provided, default one constructed from list Name.
-	Description string
-	// Optional. EmptyMessage to display when List is empty. If not provided, default one constructed from list Name.
-	EmptyMessage string
-	// TableWrap wraps the contents when the column length exceeds the maximum width
-	TableWrap bool
-	// PrintHeader prints the headers using the Columns provided
-	PrintHeader bool
-}
-
-// Prints the list data on console
-func DisplayList(lInfo ListInfo, projectID string) *uitable.Table {
-	table := uitable.New()
-	table.MaxColWidth = 70
-	table.Wrap = lInfo.TableWrap
-
-	if lInfo.Total > 0 {
-		description := lInfo.Description
-		if description == "" {
-			description = fmt.Sprintf("Showing %s %d of %d on %s\n", lInfo.Name, lInfo.Total, lInfo.Total, projectID)
-		}
-		table.AddRow(description)
-		if lInfo.PrintHeader {
-			header := make([]interface{}, len(lInfo.Columns))
-			for ci, c := range lInfo.Columns {
-				header[ci] = c
-			}
-			table.AddRow(header...)
-		}
-
-		for ri := 0; ri < lInfo.Total; ri++ {
-			row := make([]interface{}, len(lInfo.Columns))
-			for ci := range lInfo.Columns {
-				row[ci] = lInfo.GetCellValue(ri, ci)
-			}
-			table.AddRow(row...)
-		}
-	} else {
-		emptyMessage := lInfo.EmptyMessage
-		if emptyMessage == "" {
-			emptyMessage = fmt.Sprintf("No %s available on %s", lInfo.Name, projectID)
-		}
-		table.AddRow(emptyMessage)
-	}
-
-	return table
-}
 
 var lineRE = regexp.MustCompile(`(?m)^`)
 
@@ -73,4 +13,71 @@ func Indent(s, indent string) string {
 		return s
 	}
 	return lineRE.ReplaceAllLiteralString(s, indent)
+}
+
+type ListTitleOptions struct {
+	// Name of the List to be used in constructing Description and EmptyMessage if not provided.
+	Name string
+	// Page represents the page number of the current page
+	Page int
+	// CurrentPageTotal is the total number of items in current page
+	CurrentPageTotal int
+	// Total number of records. Default is the total number of rows.
+	// Can be set to be greater than the total number of rows especially, if the list is paginated
+	Total int
+	// RepoName represents the name of the project or repository
+	RepoName string
+	// ListActionType should be either "search" or "list". Default is list
+	ListActionType string
+	// Optional. EmptyMessage to display when List is empty. If not provided, default one constructed from list Name.
+	EmptyMessage string
+}
+
+func NewListTitle(listName string) ListTitleOptions {
+	return ListTitleOptions{
+		Name:           strings.TrimSpace(listName),
+		ListActionType: "list",
+		Page:           1,
+	}
+}
+
+func (opts *ListTitleOptions) Describe() string {
+	var pageNumInfo string
+	var pageInfo string
+
+	if opts.Total != 0 {
+		opts.Name = pluralizeName(opts.Total, opts.Name)
+		pageNumInfo = fmt.Sprintf("%d of %d", opts.CurrentPageTotal, opts.Total)
+	} else {
+		opts.Name = pluralizeName(opts.CurrentPageTotal, opts.Name)
+		pageNumInfo = fmt.Sprintf("%d", opts.CurrentPageTotal)
+	}
+
+	if opts.Page != 0 {
+		pageInfo = fmt.Sprintf("(Page %d)", opts.Page)
+	}
+
+	if opts.ListActionType == "search" {
+		if opts.CurrentPageTotal > 0 {
+			return fmt.Sprintf("Showing %s %s in %s that match your search %s\n", pageNumInfo, opts.Name,
+				opts.RepoName, pageInfo)
+		}
+
+		return fmt.Sprintf("No %s match your search in %s", opts.Name, opts.RepoName)
+	}
+
+	if opts.CurrentPageTotal > 0 {
+		return fmt.Sprintf("Showing %s %s on %s %s\n", pageNumInfo, opts.Name, opts.RepoName, pageInfo)
+	}
+
+	emptyMessage := opts.EmptyMessage
+	if emptyMessage == "" {
+		return fmt.Sprintf("No %s available on %s", opts.Name, opts.RepoName)
+	}
+
+	return emptyMessage
+}
+
+func pluralizeName(num int, thing string) string {
+	return strings.TrimPrefix(Pluralize(num, thing), fmt.Sprintf("%d ", num))
 }

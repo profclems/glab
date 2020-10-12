@@ -75,7 +75,7 @@ func TestNewCmdReleaseList(t *testing.T) {
 			name:    "releases list on test repo",
 			wantErr: false,
 			stdOutFunc: func(t *testing.T, out string) {
-				assert.Contains(t, out, "Showing releases 1 of 1 on glab-cli/test")
+				assert.Contains(t, out, "Showing 1 release on glab-cli/test")
 			},
 		},
 		{
@@ -91,7 +91,7 @@ func TestNewCmdReleaseList(t *testing.T) {
 			wantErr: false,
 			args:    "-R profclems/glab",
 			stdOutFunc: func(t *testing.T, out string) {
-				assert.Contains(t, out, "Showing releases 1 of 1 on profclems/glab")
+				assert.Contains(t, out, "Showing 1 release on profclems/glab")
 			},
 		},
 		{

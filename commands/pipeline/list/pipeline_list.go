@@ -25,6 +25,7 @@ func NewCmdList(f *cmdutils.Factory) *cobra.Command {
 		Args: cobra.ExactArgs(0),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var err error
+			var titleQualifier string
 
 			out := utils.ColorableOut(cmd)
 
@@ -39,8 +40,12 @@ func NewCmdList(f *cmdutils.Factory) *cobra.Command {
 			}
 
 			l := &gitlab.ListProjectPipelinesOptions{}
+			l.Page = 1
+			l.PerPage = 30
+
 			if m, _ := cmd.Flags().GetString("status"); m != "" {
 				l.Status = gitlab.BuildState(gitlab.BuildStateValue(m))
+				titleQualifier = m
 			}
 			if m, _ := cmd.Flags().GetString("orderBy"); m != "" {
 				l.OrderBy = gitlab.String(m)
@@ -60,7 +65,12 @@ func NewCmdList(f *cmdutils.Factory) *cobra.Command {
 				return err
 			}
 
-			fmt.Fprintln(out, pipelineutils.DisplayMultiplePipelines(pipes, repo.FullName()))
+			title := utils.NewListTitle(fmt.Sprintf("%s pipeline", titleQualifier))
+			title.RepoName = repo.FullName()
+			title.Page = l.Page
+			title.CurrentPageTotal = len(pipes)
+
+			fmt.Fprintf(out, "%s\n%s\n", title.Describe(), pipelineutils.DisplayMultiplePipelines(pipes, repo.FullName()))
 			return nil
 		},
 	}
@@ -68,7 +78,7 @@ func NewCmdList(f *cmdutils.Factory) *cobra.Command {
 	pipelineListCmd.Flags().StringP("orderBy", "o", "", "Order pipeline by <string>")
 	pipelineListCmd.Flags().StringP("sort", "", "desc", "Sort pipeline by {asc|desc}. (Defaults to desc)")
 	pipelineListCmd.Flags().IntP("page", "p", 1, "Page number")
-	pipelineListCmd.Flags().IntP("per-page", "P", 20, "Number of items to list per page")
+	pipelineListCmd.Flags().IntP("per-page", "P", 30, "Number of items to list per page. (default 30)")
 
 	return pipelineListCmd
 }
