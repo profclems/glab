@@ -2,13 +2,14 @@ package mrutils
 
 import (
 	"fmt"
+	"strconv"
+
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/internal/glrepo"
 	"github.com/profclems/glab/internal/utils"
 	"github.com/profclems/glab/pkg/api"
 	"github.com/profclems/glab/pkg/tableprinter"
 	"github.com/xanzy/go-gitlab"
-	"strconv"
 )
 
 type MRCheckErrOptions struct {
@@ -122,7 +123,7 @@ func MRFromArgs(f *cmdutils.Factory, args []string) (*gitlab.MergeRequest, glrep
 			return nil, nil, fmt.Errorf("invalid merge request ID provided")
 		}
 	}
-	
+
 	if mrID == 0 {
 		mr, err = GetOpenMRForBranch(apiClient, baseRepo, branch)
 		if err != nil {
@@ -139,10 +140,10 @@ func MRFromArgs(f *cmdutils.Factory, args []string) (*gitlab.MergeRequest, glrep
 	return mr, baseRepo, nil
 }
 
-func GetOpenMRForBranch(apiClient *gitlab.Client, baseRepo glrepo.Interface, currentBranch string) (*gitlab.MergeRequest, error)  {
+func GetOpenMRForBranch(apiClient *gitlab.Client, baseRepo glrepo.Interface, currentBranch string) (*gitlab.MergeRequest, error) {
 	mrs, err := api.ListMRs(apiClient, baseRepo.FullName(), &gitlab.ListProjectMergeRequestsOptions{
 		SourceBranch: gitlab.String(currentBranch),
-		State: gitlab.String("opened"),
+		State:        gitlab.String("opened"),
 	})
 
 	if err != nil {

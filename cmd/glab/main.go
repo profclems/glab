@@ -3,7 +3,6 @@ package main
 import (
 	"errors"
 	"fmt"
-	"github.com/profclems/glab/pkg/tableprinter"
 	"io"
 	"log"
 	"net"
@@ -11,6 +10,8 @@ import (
 	"os/exec"
 	"strconv"
 	"strings"
+
+	"github.com/profclems/glab/pkg/tableprinter"
 
 	"github.com/profclems/glab/commands"
 	"github.com/profclems/glab/commands/alias/expand"

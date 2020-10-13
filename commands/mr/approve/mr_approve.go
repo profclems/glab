@@ -21,7 +21,7 @@ func NewCmdApprove(f *cmdutils.Factory) *cobra.Command {
 		glab mr approve 235
 		glab mr approve    # Finds open merge request from current branch
 		`),
-		Args:  cobra.MaximumNArgs(1),
+		Args: cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var err error
 			out := utils.ColorableOut(cmd)
@@ -38,8 +38,8 @@ func NewCmdApprove(f *cmdutils.Factory) *cobra.Command {
 
 			if err = mrutils.MRCheckErrors(mr, mrutils.MRCheckErrOptions{
 				WorkInProgress: true,
-				Closed: true,
-				Merged: true,
+				Closed:         true,
+				Merged:         true,
 			}); err != nil {
 				return err
 			}

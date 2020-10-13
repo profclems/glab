@@ -2,6 +2,7 @@ package merge
 
 import (
 	"fmt"
+
 	"github.com/MakeNowJust/heredoc"
 	"github.com/profclems/glab/commands/mr/mrutils"
 	"github.com/profclems/glab/internal/utils"
@@ -22,7 +23,7 @@ func NewCmdMerge(f *cmdutils.Factory) *cobra.Command {
 		glab mr merge 235
 		glab mr merge    # Finds open merge request from current branch
 		`),
-		Args:    cobra.MaximumNArgs(1),
+		Args: cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var err error
 			out := utils.ColorableOut(cmd)
@@ -39,9 +40,9 @@ func NewCmdMerge(f *cmdutils.Factory) *cobra.Command {
 
 			if err = mrutils.MRCheckErrors(mr, mrutils.MRCheckErrOptions{
 				WorkInProgress: true,
-				Closed: true,
-				Merged: true,
-				Conflict: true,
+				Closed:         true,
+				Merged:         true,
+				Conflict:       true,
 				PipelineStatus: true,
 			}); err != nil {
 				return err

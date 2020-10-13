@@ -2,6 +2,7 @@ package approvers
 
 import (
 	"fmt"
+
 	"github.com/profclems/glab/commands/mr/mrutils"
 	"github.com/profclems/glab/pkg/api"
 	"github.com/profclems/glab/pkg/tableprinter"

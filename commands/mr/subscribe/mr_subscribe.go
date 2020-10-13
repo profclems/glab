@@ -2,6 +2,7 @@ package subscribe
 
 import (
 	"fmt"
+
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/commands/mr/mrutils"
 	"github.com/profclems/glab/internal/utils"
@@ -30,7 +31,7 @@ func NewCmdSubscribe(f *cmdutils.Factory) *cobra.Command {
 			if err != nil {
 				return err
 			}
-			
+
 			if err = mrutils.MRCheckErrors(mr, mrutils.MRCheckErrOptions{
 				Subscribed: true,
 			}); err != nil {
@@ -44,7 +45,7 @@ func NewCmdSubscribe(f *cmdutils.Factory) *cobra.Command {
 				return err
 			}
 
-			fmt.Fprintf(out,"%s You have successfully subscribed to merge request !%d\n", utils.GreenCheck(), mr.IID)
+			fmt.Fprintf(out, "%s You have successfully subscribed to merge request !%d\n", utils.GreenCheck(), mr.IID)
 			fmt.Fprintln(out, mrutils.DisplayMR(mr))
 
 			return nil

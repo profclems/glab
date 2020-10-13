@@ -2,6 +2,7 @@ package issues
 
 import (
 	"fmt"
+
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/commands/issue/issueutils"
 	"github.com/profclems/glab/commands/mr/mrutils"

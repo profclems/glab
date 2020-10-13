@@ -2,6 +2,7 @@ package unsubscribe
 
 import (
 	"fmt"
+
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/commands/mr/mrutils"
 	"github.com/profclems/glab/internal/utils"
@@ -44,7 +45,7 @@ func NewCmdUnsubscribe(f *cmdutils.Factory) *cobra.Command {
 				return err
 			}
 
-			fmt.Fprintf(out,"%s You have successfully unsubscribed from merge request !%d\n", utils.GreenCheck(), mr.IID)
+			fmt.Fprintf(out, "%s You have successfully unsubscribed from merge request !%d\n", utils.GreenCheck(), mr.IID)
 			fmt.Fprintln(out, mrutils.DisplayMR(mr))
 
 			return nil

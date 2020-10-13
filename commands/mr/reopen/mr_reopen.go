@@ -2,6 +2,7 @@ package reopen
 
 import (
 	"fmt"
+
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/commands/mr/mrutils"
 	"github.com/profclems/glab/internal/utils"

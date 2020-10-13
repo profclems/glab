@@ -2,9 +2,10 @@ package view
 
 import (
 	"fmt"
-	"github.com/profclems/glab/commands/mr/mrutils"
 	"strings"
 	"time"
+
+	"github.com/profclems/glab/commands/mr/mrutils"
 
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/internal/utils"
@@ -100,8 +101,8 @@ func NewCmdView(f *cmdutils.Factory) *cobra.Command {
 			Assignees: %v
 			Milestone: %v
 			`, prettifyNilEmptyValues(labels, "None"),
-			prettifyNilEmptyValues(assignees, "None"),
-			prettifyNilEmptyValues(mr.Milestone, "None"))
+				prettifyNilEmptyValues(assignees, "None"),
+				prettifyNilEmptyValues(mr.Milestone, "None"))
 
 			if mr.State == "closed" {
 				now := time.Now()

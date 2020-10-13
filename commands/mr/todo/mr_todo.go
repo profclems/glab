@@ -2,6 +2,7 @@ package todo
 
 import (
 	"fmt"
+
 	"github.com/profclems/glab/commands/mr/mrutils"
 
 	"github.com/profclems/glab/commands/cmdutils"

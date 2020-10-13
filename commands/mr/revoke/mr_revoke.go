@@ -2,6 +2,7 @@ package revoke
 
 import (
 	"fmt"
+
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/commands/mr/mrutils"
 	"github.com/profclems/glab/internal/utils"
@@ -33,8 +34,8 @@ func NewCmdRevoke(f *cmdutils.Factory) *cobra.Command {
 
 			if err = mrutils.MRCheckErrors(mr, mrutils.MRCheckErrOptions{
 				WorkInProgress: true,
-				Closed: true,
-				Merged: true,
+				Closed:         true,
+				Merged:         true,
 			}); err != nil {
 				return err
 			}
