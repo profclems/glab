@@ -45,6 +45,7 @@ hosts:
 			Labels:      gitlab.Labels{"bug", "test"},
 			State:       "opened",
 			Description: "mrbody",
+			Subscribed: false,
 			Author: &gitlab.BasicUser{
 				ID:       1,
 				Name:     "John Dev Wick",

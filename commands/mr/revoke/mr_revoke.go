@@ -2,9 +2,8 @@ package revoke
 
 import (
 	"fmt"
-	"strings"
-
 	"github.com/profclems/glab/commands/cmdutils"
+	"github.com/profclems/glab/commands/mr/mrutils"
 	"github.com/profclems/glab/internal/utils"
 	"github.com/profclems/glab/pkg/api"
 
@@ -17,7 +16,7 @@ func NewCmdRevoke(f *cmdutils.Factory) *cobra.Command {
 		Short:   `Revoke approval on a merge request <id>`,
 		Long:    ``,
 		Aliases: []string{"unapprove"},
-		Args:    cobra.ExactArgs(1),
+		Args:    cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var err error
 			out := utils.ColorableOut(cmd)
@@ -27,16 +26,22 @@ func NewCmdRevoke(f *cmdutils.Factory) *cobra.Command {
 				return err
 			}
 
-			repo, err := f.BaseRepo()
+			mr, repo, err := mrutils.MRFromArgs(f, args)
 			if err != nil {
 				return err
 			}
 
-			mergeID := strings.TrimSpace(args[0])
+			if err = mrutils.MRCheckErrors(mr, mrutils.MRCheckErrOptions{
+				WorkInProgress: true,
+				Closed: true,
+				Merged: true,
+			}); err != nil {
+				return err
+			}
 
-			fmt.Fprintln(out, "- Revoking approval for Merge Request #"+mergeID+"...")
+			fmt.Fprintf(out, "- Revoking approval for Merge Request #%d...\n", mr.IID)
 
-			err = api.UnapproveMR(apiClient, repo.FullName(), utils.StringToInt(mergeID))
+			err = api.UnapproveMR(apiClient, repo.FullName(), mr.IID)
 			if err != nil {
 				return err
 			}

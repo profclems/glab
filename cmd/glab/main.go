@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"github.com/profclems/glab/pkg/tableprinter"
 	"io"
 	"log"
 	"net"
@@ -95,6 +96,8 @@ func main() {
 			os.Exit(0)
 		}
 	}
+
+	tableprinter.DefaultSeparator = "  " // Change the default separator of tableprinter
 
 	rootCmd.SetArgs(expandedArgs)
 

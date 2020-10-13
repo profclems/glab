@@ -2,8 +2,7 @@ package merge
 
 import (
 	"fmt"
-	"strings"
-
+	"github.com/MakeNowJust/heredoc"
 	"github.com/profclems/glab/commands/mr/mrutils"
 	"github.com/profclems/glab/internal/utils"
 	"github.com/profclems/glab/pkg/api"
@@ -15,11 +14,15 @@ import (
 
 func NewCmdMerge(f *cmdutils.Factory) *cobra.Command {
 	var mrMergeCmd = &cobra.Command{
-		Use:     "merge <id> [flags]",
+		Use:     "merge {<id> | <branch>}",
 		Short:   `Merge/Accept merge requests`,
 		Long:    ``,
 		Aliases: []string{"accept"},
-		Args:    cobra.ExactArgs(1),
+		Example: heredoc.Doc(`
+		glab mr merge 235
+		glab mr merge    # Finds open merge request from current branch
+		`),
+		Args:    cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var err error
 			out := utils.ColorableOut(cmd)
@@ -29,35 +32,44 @@ func NewCmdMerge(f *cmdutils.Factory) *cobra.Command {
 				return err
 			}
 
-			repo, err := f.BaseRepo()
+			mr, repo, err := mrutils.MRFromArgs(f, args)
 			if err != nil {
 				return err
 			}
 
-			mergeID := strings.Trim(args[0], " ")
-			l := &gitlab.AcceptMergeRequestOptions{}
+			if err = mrutils.MRCheckErrors(mr, mrutils.MRCheckErrOptions{
+				WorkInProgress: true,
+				Closed: true,
+				Merged: true,
+				Conflict: true,
+				PipelineStatus: true,
+			}); err != nil {
+				return err
+			}
+
+			opts := &gitlab.AcceptMergeRequestOptions{}
 			if m, _ := cmd.Flags().GetString("message"); m != "" {
-				l.MergeCommitMessage = gitlab.String(m)
+				opts.MergeCommitMessage = gitlab.String(m)
 			}
 			if m, _ := cmd.Flags().GetString("squash-message"); m != "" {
-				l.SquashCommitMessage = gitlab.String(m)
+				opts.SquashCommitMessage = gitlab.String(m)
 			}
 			if m, _ := cmd.Flags().GetBool("squash"); m {
-				l.Squash = gitlab.Bool(m)
+				opts.Squash = gitlab.Bool(m)
 			}
 			if m, _ := cmd.Flags().GetBool("remove-source-branch"); m {
-				l.ShouldRemoveSourceBranch = gitlab.Bool(m)
+				opts.ShouldRemoveSourceBranch = gitlab.Bool(m)
 			}
 			if m, _ := cmd.Flags().GetBool("when-pipeline-succeeds"); m {
-				l.MergeWhenPipelineSucceeds = gitlab.Bool(m)
+				opts.MergeWhenPipelineSucceeds = gitlab.Bool(m)
 			}
 			if m, _ := cmd.Flags().GetString("sha"); m != "" {
-				l.SHA = gitlab.String(m)
+				opts.SHA = gitlab.String(m)
 			}
 
-			fmt.Fprintf(out, "- Merging merge request !%s\n", mergeID)
+			fmt.Fprintf(out, "- Merging merge request !%d\n", mr.IID)
 
-			mr, err := api.MergeMR(apiClient, repo.FullName(), utils.StringToInt(mergeID), l)
+			mr, err = api.MergeMR(apiClient, repo.FullName(), mr.IID, opts)
 
 			if err != nil {
 				return err

@@ -22,8 +22,9 @@ func NewCmdUpdate(f *cmdutils.Factory) *cobra.Command {
 		Example: heredoc.Doc(`
 	$ glab mr update 23 --ready
 	$ glab mr update 23 --draft
+	$ glab mr update --draft  # Updates MR related to current branch
 	`),
-		Args: cobra.ExactArgs(1),
+		Args: cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var err error
 			out := utils.ColorableOut(cmd)
@@ -33,12 +34,11 @@ func NewCmdUpdate(f *cmdutils.Factory) *cobra.Command {
 				return err
 			}
 
-			repo, err := f.BaseRepo()
+			mr, repo, err := mrutils.MRFromArgs(f, args)
 			if err != nil {
 				return err
 			}
 
-			mergeID := utils.StringToInt(args[0])
 			l := &gitlab.UpdateMergeRequestOptions{}
 			var mergeTitle string
 
@@ -49,7 +49,7 @@ func NewCmdUpdate(f *cmdutils.Factory) *cobra.Command {
 			}
 			if mergeTitle == "" {
 				opts := &gitlab.GetMergeRequestsOptions{}
-				mr, err := api.GetMR(apiClient, repo.FullName(), mergeID, opts)
+				mr, err := api.GetMR(apiClient, repo.FullName(), mr.IID, opts)
 				if err != nil {
 					return err
 				}
@@ -70,14 +70,17 @@ func NewCmdUpdate(f *cmdutils.Factory) *cobra.Command {
 				mergeTitle = strings.TrimPrefix(mergeTitle, "Wip:")
 				mergeTitle = strings.TrimSpace(mergeTitle)
 			}
+
 			l.Title = gitlab.String(mergeTitle)
 			if m, _ := cmd.Flags().GetBool("lock-discussion"); m {
 				l.DiscussionLocked = gitlab.Bool(m)
 			}
+
 			if m, _ := cmd.Flags().GetString("description"); m != "" {
 				l.Description = gitlab.String(m)
 			}
-			mr, err := api.UpdateMR(apiClient, repo.FullName(), mergeID, l)
+
+			mr, err = api.UpdateMR(apiClient, repo.FullName(), mr.IID, l)
 			if err != nil {
 				return err
 			}

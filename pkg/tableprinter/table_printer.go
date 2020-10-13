@@ -7,7 +7,7 @@ import (
 )
 
 var (
-	DefaultSeparator        = " "
+	DefaultSeparator        = "\t"
 	DefaultMaxColWidth uint = 70
 )
 

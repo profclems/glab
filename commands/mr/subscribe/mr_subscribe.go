@@ -2,8 +2,6 @@ package subscribe
 
 import (
 	"fmt"
-	"strings"
-
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/commands/mr/mrutils"
 	"github.com/profclems/glab/internal/utils"
@@ -18,7 +16,7 @@ func NewCmdSubscribe(f *cmdutils.Factory) *cobra.Command {
 		Short:   `Subscribe to merge requests`,
 		Long:    ``,
 		Aliases: []string{"sub"},
-		Args:    cobra.ExactArgs(1),
+		Args:    cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var err error
 			out := utils.ColorableOut(cmd)
@@ -28,23 +26,26 @@ func NewCmdSubscribe(f *cmdutils.Factory) *cobra.Command {
 				return err
 			}
 
-			repo, err := f.BaseRepo()
+			mr, repo, err := mrutils.MRFromArgs(f, args)
+			if err != nil {
+				return err
+			}
+			
+			if err = mrutils.MRCheckErrors(mr, mrutils.MRCheckErrOptions{
+				Subscribed: true,
+			}); err != nil {
+				return err
+			}
+
+			fmt.Fprintf(out, "- Subscribing to merge request !%d\n", mr.IID)
+
+			mr, err = api.SubscribeToMR(apiClient, repo.FullName(), mr.IID, nil)
 			if err != nil {
 				return err
 			}
 
-			mergeID := args[0]
-
-			arrIds := strings.Split(strings.Trim(mergeID, "[] "), ",")
-			for _, i2 := range arrIds {
-				fmt.Fprintln(out, "- Subscribing to merge request !"+i2)
-				mr, err := api.SubscribeToMR(apiClient, repo.FullName(), utils.StringToInt(i2), nil)
-				if err != nil {
-					return err
-				}
-				fmt.Fprintln(out, utils.GreenCheck(), "You have successfully subscribed to merge request !"+i2)
-				fmt.Fprintln(out, mrutils.DisplayMR(mr))
-			}
+			fmt.Fprintf(out,"%s You have successfully subscribed to merge request !%d\n", utils.GreenCheck(), mr.IID)
+			fmt.Fprintln(out, mrutils.DisplayMR(mr))
 
 			return nil
 		},

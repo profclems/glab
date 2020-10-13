@@ -2,14 +2,13 @@ package approvers
 
 import (
 	"fmt"
-	"strings"
-
+	"github.com/profclems/glab/commands/mr/mrutils"
 	"github.com/profclems/glab/pkg/api"
+	"github.com/profclems/glab/pkg/tableprinter"
 
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/internal/utils"
 
-	"github.com/gosuri/uitable"
 	"github.com/spf13/cobra"
 	"github.com/xanzy/go-gitlab"
 )
@@ -22,7 +21,6 @@ func NewCmdApprovers(f *cmdutils.Factory) *cobra.Command {
 		Aliases: []string{},
 		Args:    cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			var err error
 			out := utils.ColorableOut(cmd)
 
 			apiClient, err := f.HttpClient()
@@ -30,16 +28,14 @@ func NewCmdApprovers(f *cmdutils.Factory) *cobra.Command {
 				return err
 			}
 
-			repo, err := f.BaseRepo()
+			mr, repo, err := mrutils.MRFromArgs(f, args)
 			if err != nil {
 				return err
 			}
 
-			mergeID := strings.Trim(args[0], " ")
+			fmt.Fprintf(out, "\nListing Merge Request !%d eligible approvers\n", mr.IID)
 
-			fmt.Fprintf(out, "\nListing Merge Request !%v eligible approvers\n", mergeID)
-
-			mrApprovals, err := api.GetMRApprovalState(apiClient, repo.FullName(), utils.StringToInt(mergeID))
+			mrApprovals, err := api.GetMRApprovalState(apiClient, repo.FullName(), mr.IID)
 			if err != nil {
 				return err
 			}
@@ -47,18 +43,20 @@ func NewCmdApprovers(f *cmdutils.Factory) *cobra.Command {
 				fmt.Fprintln(out, utils.Yellow("Approval rules overwritten"))
 			}
 			for _, rule := range mrApprovals.Rules {
-				table := uitable.New()
-				table.MaxColWidth = 70
+				table := tableprinter.NewTablePrinter()
 				if rule.Approved {
 					fmt.Fprintln(out, utils.Green(fmt.Sprintf("Rule %q sufficient approvals (%d/%d required):", rule.Name, len(rule.ApprovedBy), rule.ApprovalsRequired)))
 				} else {
 					fmt.Fprintln(out, utils.Yellow(fmt.Sprintf("Rule %q insufficient approvals (%d/%d required):", rule.Name, len(rule.ApprovedBy), rule.ApprovalsRequired)))
 				}
+
 				eligibleApprovers := rule.EligibleApprovers
+
 				approvedBy := map[string]*gitlab.BasicUser{}
 				for _, by := range rule.ApprovedBy {
 					approvedBy[by.Username] = by
 				}
+
 				for _, eligibleApprover := range eligibleApprovers {
 					approved := "-"
 					source := ""
@@ -71,6 +69,7 @@ func NewCmdApprovers(f *cmdutils.Factory) *cobra.Command {
 					table.AddRow(eligibleApprover.Name, eligibleApprover.Username, approved, source)
 					delete(approvedBy, eligibleApprover.Username)
 				}
+
 				for _, approver := range approvedBy {
 					approved := "👍"
 					table.AddRow(approver.Name, approver.Username, approved, "")

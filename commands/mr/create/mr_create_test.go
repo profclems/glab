@@ -99,6 +99,13 @@ func TestNewCmdCreate_autofill(t *testing.T) {
 			t.Fatal(err)
 		}
 
+		git = exec.Command("git", "pull", "origin", "test-cli")
+		b, err = git.CombinedOutput()
+		if err != nil {
+			t.Log(string(b))
+			t.Fatal(err)
+		}
+
 		output, err := cmdtest.RunCommand(cmd, "-f -b master")
 		if err != nil {
 			t.Error(err)
@@ -108,7 +115,7 @@ func TestNewCmdCreate_autofill(t *testing.T) {
 		out := stripansi.Strip(output.String())
 		outErr := stripansi.Strip(output.Stderr())
 
-		assert.Contains(t, cmdtest.FirstLine([]byte(out)), `!1 SOme changes happened'`)
+		assert.Contains(t, cmdtest.FirstLine([]byte(out)), `!1 Update somefile.txt`)
 		cmdtest.Eq(t, outErr, "")
 		assert.Contains(t, out, "https://gitlab.com/glab-cli/test/-/merge_requests/1")
 
