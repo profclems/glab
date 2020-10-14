@@ -5,14 +5,11 @@ import (
 	"os"
 
 	"github.com/mattn/go-colorable"
-	"github.com/mattn/go-isatty"
 	"github.com/mgutz/ansi"
 )
 
 var (
 	_isColorEnabled   = true
-	_isStdoutTerminal = false
-	checkedTerminal   = false
 	checkedNoColor    = false
 
 	// Magenta outputs ANSI color if stdout is a tty
@@ -40,22 +37,12 @@ var (
 	Bold = makeColorFunc("default+b")
 )
 
-func isStdoutTerminal() bool {
-	if !checkedTerminal {
-		_isStdoutTerminal = IsTerminal(os.Stdout)
-		checkedTerminal = true
-	}
-	return _isStdoutTerminal
-}
-
-// IsTerminal reports whether the file descriptor is connected to a terminal
-func IsTerminal(f *os.File) bool {
-	return isatty.IsTerminal(f.Fd()) || isatty.IsCygwinTerminal(f.Fd())
-}
-
 // NewColorable returns an output stream that handles ANSI color sequences on Windows
-func NewColorable(f *os.File) io.Writer {
-	return colorable.NewColorable(f)
+func NewColorable(out io.Writer) io.Writer {
+	if outFile, isFile := out.(*os.File); isFile {
+		return colorable.NewColorable(outFile)
+	}
+	return out
 }
 
 func makeColorFunc(color string) func(string) string {
@@ -71,6 +58,8 @@ func makeColorFunc(color string) func(string) string {
 func isColorEnabled() bool {
 	if !checkedNoColor {
 		_isColorEnabled = os.Getenv("NO_COLOR") == "" ||
+			os.Getenv("NO_COLOR") == "0" ||
+			os.Getenv("NO_COLOR") == "false" ||
 			os.Getenv("COLOR_ENABLED") == "1" ||
 			os.Getenv("COLOR_ENABLED") == "true"
 		checkedNoColor = true

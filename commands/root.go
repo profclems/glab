@@ -2,6 +2,7 @@ package commands
 
 import (
 	"fmt"
+	updateCmd "github.com/profclems/glab/commands/update"
 
 	aliasCmd "github.com/profclems/glab/commands/alias"
 	"github.com/profclems/glab/commands/cmdutils"
@@ -14,7 +15,6 @@ import (
 	pipelineCmd "github.com/profclems/glab/commands/pipeline"
 	projectCmd "github.com/profclems/glab/commands/project"
 	releaseCmd "github.com/profclems/glab/commands/release"
-	updateCmd "github.com/profclems/glab/commands/update"
 	versionCmd "github.com/profclems/glab/commands/version"
 	"github.com/profclems/glab/internal/glrepo"
 
@@ -71,6 +71,9 @@ func NewCmdRoot(f *cmdutils.Factory, version, buildDate string) *cobra.Command {
 		},
 	}
 
+	rootCmd.SetOut(f.IO.StdOut)
+	rootCmd.SetErr(f.IO.StdErr)
+
 	rootCmd.PersistentFlags().Bool("help", false, "Show help for command")
 	rootCmd.SetHelpFunc(help.RootHelpFunc)
 	rootCmd.SetUsageFunc(help.RootUsageFunc)
@@ -86,24 +89,26 @@ func NewCmdRoot(f *cmdutils.Factory, version, buildDate string) *cobra.Command {
 	rootCmd.AddCommand(configCmd.NewCmdConfig(f))
 	rootCmd.AddCommand(completionCmd.NewCmdCompletion())
 	rootCmd.AddCommand(versionCmd.NewCmdVersion(version, buildDate))
-
-	// below here at the commands that require the "intelligent" BaseRepo resolver
-	repoResolvingCmdFactory := *f
-	repoResolvingCmdFactory.BaseRepo = resolvedBaseRepo(f)
-	rootCmd.AddCommand(issueCmd.NewCmdIssue(&repoResolvingCmdFactory))
-	rootCmd.AddCommand(labelCmd.NewCmdLabel(&repoResolvingCmdFactory))
-	rootCmd.AddCommand(mrCmd.NewCmdMR(&repoResolvingCmdFactory))
-	rootCmd.AddCommand(pipelineCmd.NewCmdPipeline(&repoResolvingCmdFactory))
-	rootCmd.AddCommand(projectCmd.NewCmdRepo(&repoResolvingCmdFactory))
-	rootCmd.AddCommand(releaseCmd.NewCmdRelease(&repoResolvingCmdFactory))
-	rootCmd.Flags().BoolP("version", "v", false, "show glab version information")
 	rootCmd.AddCommand(updateCmd.NewCheckUpdateCmd(version, buildDate))
+
+	// the commands below require apiClient and resolved repos
+	f.BaseRepo = resolvedBaseRepo(f)
+
+	rootCmd.AddCommand(issueCmd.NewCmdIssue(f))
+	rootCmd.AddCommand(labelCmd.NewCmdLabel(f))
+	rootCmd.AddCommand(mrCmd.NewCmdMR(f))
+	rootCmd.AddCommand(pipelineCmd.NewCmdPipeline(f))
+	rootCmd.AddCommand(projectCmd.NewCmdRepo(f))
+	rootCmd.AddCommand(releaseCmd.NewCmdRelease(f))
+
+	rootCmd.Flags().BoolP("version", "v", false, "show glab version information")
 	return rootCmd
 }
 
-//
 func resolvedBaseRepo(f *cmdutils.Factory) func() (glrepo.Interface, error) {
 	return func() (glrepo.Interface, error) {
+		cmdutils.HTTPClientFactory(f)
+
 		httpClient, err := f.HttpClient()
 		if err != nil {
 			return nil, err

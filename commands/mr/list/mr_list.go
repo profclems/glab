@@ -24,8 +24,7 @@ func NewCmdList(f *cmdutils.Factory) *cobra.Command {
 			var err error
 			var listType string
 			var titleQualifier string
-
-			out := utils.ColorableOut(cmd)
+			var mergeRequests []*gitlab.MergeRequest
 
 			apiClient, err := f.HttpClient()
 			if err != nil {
@@ -91,15 +90,11 @@ func NewCmdList(f *cmdutils.Factory) *cobra.Command {
 			}
 
 			if len(assigneeIds) > 0 {
-				mergeRequests, err := api.ListMRsWithAssignees(apiClient, repo.FullName(), l, assigneeIds)
-				if err != nil {
-					return err
-				}
-				fmt.Fprintln(out, mrutils.DisplayAllMRs(mergeRequests, repo.FullName()))
-				return nil
-			}
+				mergeRequests, err = api.ListMRsWithAssignees(apiClient, repo.FullName(), l, assigneeIds)
 
-			mergeRequests, err := api.ListMRs(apiClient, repo.FullName(), l)
+			} else {
+				mergeRequests, err = api.ListMRs(apiClient, repo.FullName(), l)
+			}
 			if err != nil {
 				return err
 			}
@@ -110,7 +105,12 @@ func NewCmdList(f *cmdutils.Factory) *cobra.Command {
 			title.ListActionType = listType
 			title.CurrentPageTotal = len(mergeRequests)
 
-			fmt.Fprintf(out, "%s\n%s\n", title.Describe(), mrutils.DisplayAllMRs(mergeRequests, repo.FullName()))
+			if err = f.IO.StartPager(); err != nil {
+				return err
+			}
+			defer f.IO.StopPager()
+			fmt.Fprintf(f.IO.StdOut, "%s\n%s\n", title.Describe(), mrutils.DisplayAllMRs(mergeRequests, repo.FullName()))
+
 			return nil
 		},
 	}
