@@ -17,7 +17,7 @@ func NewCmdDelete(f *cmdutils.Factory) *cobra.Command {
 		Short:   `Delete merge requests`,
 		Long:    ``,
 		Aliases: []string{"del"},
-		Args:    cobra.ExactArgs(1),
+		Args:    cobra.MaximumNArgs(1),
 		Example: "$ glab delete 123",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			out := utils.ColorableOut(cmd)

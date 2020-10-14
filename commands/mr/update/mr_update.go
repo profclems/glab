@@ -79,7 +79,7 @@ func NewCmdUpdate(f *cmdutils.Factory) *cobra.Command {
 			if m, _ := cmd.Flags().GetString("description"); m != "" {
 				l.Description = gitlab.String(m)
 			}
-      
+
 			if assignee, _ := cmd.Flags().GetString("assignee"); assignee != "" {
 				user, err := api.UserByName(apiClient, assignee)
 				if err != nil {
@@ -87,8 +87,8 @@ func NewCmdUpdate(f *cmdutils.Factory) *cobra.Command {
 				}
 				l.AssigneeID = gitlab.Int(user.ID)
 			}
-      
-			mr, err := api.UpdateMR(apiClient, repo.FullName(), mergeID, l)
+
+			mr, err = api.UpdateMR(apiClient, repo.FullName(), mr.IID, l)
 			if err != nil {
 				return err
 			}
