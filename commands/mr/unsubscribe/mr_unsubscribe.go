@@ -2,7 +2,6 @@ package unsubscribe
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/commands/mr/mrutils"
@@ -18,7 +17,7 @@ func NewCmdUnsubscribe(f *cmdutils.Factory) *cobra.Command {
 		Short:   `Unsubscribe from merge requests`,
 		Long:    ``,
 		Aliases: []string{"unsub"},
-		Args:    cobra.ExactArgs(1),
+		Args:    cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var err error
 			out := utils.ColorableOut(cmd)
@@ -28,24 +27,26 @@ func NewCmdUnsubscribe(f *cmdutils.Factory) *cobra.Command {
 				return err
 			}
 
-			repo, err := f.BaseRepo()
+			mr, repo, err := mrutils.MRFromArgs(f, args)
 			if err != nil {
 				return err
 			}
 
-			mergeID := args[0]
-
-			arrIds := strings.Split(strings.Trim(mergeID, "[] "), ",")
-			for _, i2 := range arrIds {
-				fmt.Fprintln(out, "- Unsubscribing from Merge Request !"+i2)
-				mr, err := api.UnsubscribeFromMR(apiClient, repo.FullName(), utils.StringToInt(i2), nil)
-				if err != nil {
-					return err
-				}
-
-				fmt.Fprintln(out, utils.GreenCheck(), "You have successfully unsubscribed from merge request !"+i2)
-				fmt.Fprintln(out, mrutils.DisplayMR(mr))
+			if err = mrutils.MRCheckErrors(mr, mrutils.MRCheckErrOptions{
+				Unsubscribed: true,
+			}); err != nil {
+				return err
 			}
+
+			fmt.Fprintf(out, "- Unsubscribing from Merge Request !%d\n", mr.IID)
+
+			mr, err = api.UnsubscribeFromMR(apiClient, repo.FullName(), mr.IID, nil)
+			if err != nil {
+				return err
+			}
+
+			fmt.Fprintf(out, "%s You have successfully unsubscribed from merge request !%d\n", utils.GreenCheck(), mr.IID)
+			fmt.Fprintln(out, mrutils.DisplayMR(mr))
 
 			return nil
 		},

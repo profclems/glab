@@ -5,6 +5,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/profclems/glab/commands/mr/mrutils"
+
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/internal/utils"
 	"github.com/profclems/glab/pkg/api"
@@ -17,11 +19,11 @@ import (
 
 func NewCmdView(f *cmdutils.Factory) *cobra.Command {
 	var mrViewCmd = &cobra.Command{
-		Use:     "view <id>",
+		Use:     "view {<id> | <branch>}",
 		Short:   `Display the title, body, and other information about a merge request.`,
 		Long:    ``,
 		Aliases: []string{"show"},
-		Args:    cobra.ExactArgs(1),
+		Args:    cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var err error
 			out := utils.ColorableOut(cmd)
@@ -31,32 +33,33 @@ func NewCmdView(f *cmdutils.Factory) *cobra.Command {
 				return err
 			}
 
-			repo, err := f.BaseRepo()
+			mr, repo, err := mrutils.MRFromArgs(f, args)
 			if err != nil {
 				return err
 			}
-
-			pid := utils.StringToInt(args[0])
 
 			opts := &gitlab.GetMergeRequestsOptions{}
 			opts.IncludeDivergedCommitsCount = gitlab.Bool(true)
 			opts.RenderHTML = gitlab.Bool(true)
 			opts.IncludeRebaseInProgress = gitlab.Bool(true)
 
-			mr, err := api.GetMR(apiClient, repo.FullName(), pid, opts)
+			mr, err = api.GetMR(apiClient, repo.FullName(), mr.IID, opts)
 			if err != nil {
 				return err
 			}
+
 			if lb, _ := cmd.Flags().GetBool("web"); lb { //open in browser if --web flag is specified
 				fmt.Fprintf(cmd.ErrOrStderr(), "Opening %s in your browser.\n", utils.DisplayURL(mr.WebURL))
 				cfg, _ := f.Config()
 				browser, _ := cfg.Get(repo.RepoHost(), "browser")
 				return utils.OpenInBrowser(mr.WebURL, browser)
 			}
+
 			showSystemLog, _ := cmd.Flags().GetBool("system-logs")
+
 			var mrState string
 			if mr.State == "opened" {
-				mrState = utils.Green(mr.State)
+				mrState = utils.Green("open")
 			} else if mr.State == "merged" {
 				mrState = utils.Blue(mr.State)
 			} else {
@@ -65,12 +68,11 @@ func NewCmdView(f *cmdutils.Factory) *cobra.Command {
 			now := time.Now()
 			ago := now.Sub(*mr.CreatedAt)
 
-			mrPrintDetails := "\n" + mr.Title
+			mrPrintDetails := mrState
+			mrPrintDetails += utils.Gray(fmt.Sprintf(" • opened by %s (%s) %s\n", mr.Author.Username, mr.Author.Name, utils.PrettyTimeAgo(ago)))
+			mrPrintDetails += mr.Title
 			mrPrintDetails += fmt.Sprintf("!%d", mr.IID)
-			mrPrintDetails += fmt.Sprintf("(%s)", mrState)
-			mrPrintDetails += utils.Gray(fmt.Sprintf(" • opened by %s (%s) %s\n", mr.Author.Username,
-				mr.Author.Name,
-				utils.PrettyTimeAgo(ago)))
+			mrPrintDetails += "\n"
 
 			if mr.Description != "" {
 				cfg, _ := f.Config()
@@ -82,8 +84,6 @@ func NewCmdView(f *cmdutils.Factory) *cobra.Command {
 			mrPrintDetails += utils.Gray(fmt.Sprintf("\n%d upvotes • %d downvotes • %d comments\n\n",
 				mr.Upvotes, mr.Downvotes, mr.UserNotesCount))
 
-			fmt.Fprintln(out, mrPrintDetails)
-
 			var labels string
 			for _, l := range mr.Labels {
 				labels += " " + l + ","
@@ -94,26 +94,26 @@ func NewCmdView(f *cmdutils.Factory) *cobra.Command {
 			for _, a := range mr.Assignees {
 				assignees += " " + a.Username + "(" + a.Name + "),"
 			}
+
 			assignees = strings.Trim(assignees, ", ")
-			table := uitable.New()
-			table.MaxColWidth = 70
-			table.Wrap = true
-			table.AddRow("Project ID:", mr.ProjectID)
-			table.AddRow("Labels:", prettifyNilEmptyValues(labels, "None"))
-			table.AddRow("Milestone:", prettifyNilEmptyValues(mr.Milestone, "None"))
-			table.AddRow("Assignees:", prettifyNilEmptyValues(assignees, "None"))
-			table.AddRow("Discussion Locked:", prettifyNilEmptyValues(mr.DiscussionLocked, "false"))
-			table.AddRow("Subscribed:", prettifyNilEmptyValues(mr.Subscribed, "false"))
+			mrPrintDetails += heredoc.Docf(`
+			Labels: %v
+			Assignees: %v
+			Milestone: %v
+			`, prettifyNilEmptyValues(labels, "None"),
+				prettifyNilEmptyValues(assignees, "None"),
+				prettifyNilEmptyValues(mr.Milestone, "None"))
 
 			if mr.State == "closed" {
 				now := time.Now()
 				ago := now.Sub(*mr.ClosedAt)
-				table.AddRow("Closed By:",
-					fmt.Sprintf("%s (%s) %s", mr.ClosedBy.Username, mr.ClosedBy.Name, utils.PrettyTimeAgo(ago)))
+				mrPrintDetails += fmt.Sprintf("Closed By: %s (%s) %s", mr.ClosedBy.Username, mr.ClosedBy.Name, utils.PrettyTimeAgo(ago))
 			}
-			table.AddRow("Web URL:", mr.WebURL)
-			fmt.Fprintln(out, table)
-			fmt.Fprint(out, "\n") // Empty Line
+
+			mrPrintDetails += utils.Gray(fmt.Sprintf("\nView this pull request on GitLab: %s", mr.WebURL))
+			mrPrintDetails += "\n"
+
+			fmt.Fprintln(out, mrPrintDetails)
 
 			if c, _ := cmd.Flags().GetBool("comments"); c {
 				l := &gitlab.ListMergeRequestNotesOptions{}
@@ -123,7 +123,7 @@ func NewCmdView(f *cmdutils.Factory) *cobra.Command {
 				if p, _ := cmd.Flags().GetInt("per-page"); p != 0 {
 					l.PerPage = p
 				}
-				notes, err := api.ListMRNotes(apiClient, repo.FullName(), pid, l)
+				notes, err := api.ListMRNotes(apiClient, repo.FullName(), mr.IID, l)
 				if err != nil {
 					return err
 				}
@@ -155,6 +155,7 @@ func NewCmdView(f *cmdutils.Factory) *cobra.Command {
 					fmt.Fprintln(out, "There are no comments on this mr")
 				}
 			}
+
 			return nil
 		},
 	}

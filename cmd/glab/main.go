@@ -11,6 +11,8 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/profclems/glab/pkg/tableprinter"
+
 	"github.com/profclems/glab/commands"
 	"github.com/profclems/glab/commands/alias/expand"
 	"github.com/profclems/glab/commands/cmdutils"
@@ -95,6 +97,8 @@ func main() {
 			os.Exit(0)
 		}
 	}
+
+	tableprinter.DefaultSeparator = "  " // Change the default separator of tableprinter
 
 	rootCmd.SetArgs(expandedArgs)
 

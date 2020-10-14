@@ -45,6 +45,7 @@ hosts:
 			Labels:      gitlab.Labels{"bug", "test"},
 			State:       "opened",
 			Description: "mrbody",
+			Subscribed:  false,
 			Author: &gitlab.BasicUser{
 				ID:       1,
 				Name:     "John Dev Wick",
@@ -52,6 +53,31 @@ hosts:
 			},
 			WebURL:    "https://" + repo.RepoHost() + "/" + repo.FullName() + "/-/merge_requests/1",
 			CreatedAt: &timer,
+		}, nil
+	}
+
+	api.GetMR = func(client *gitlab.Client, projectID interface{}, mrID int, opts *gitlab.GetMergeRequestsOptions) (*gitlab.MergeRequest, error) {
+		if projectID == "" || projectID == "WRONG_REPO" || projectID == "expected_err" {
+			return nil, fmt.Errorf("error expected")
+		}
+		repo, err := stubFactory.BaseRepo()
+		if err != nil {
+			return nil, err
+		}
+		return &gitlab.MergeRequest{
+			ID:          mrID,
+			IID:         mrID,
+			Title:       "mrTitle",
+			Labels:      gitlab.Labels{"test", "bug"},
+			State:       "opened",
+			Description: "mrBody",
+			Subscribed:  true,
+			Author: &gitlab.BasicUser{
+				ID:       mrID,
+				Name:     "John Dev Wick",
+				Username: "jdwick",
+			},
+			WebURL: fmt.Sprintf("https://%s/%s/-/merge_requests/%d", repo.RepoHost(), repo.FullName(), mrID),
 		}, nil
 	}
 

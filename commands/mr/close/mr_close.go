@@ -18,7 +18,7 @@ func NewCmdClose(f *cmdutils.Factory) *cobra.Command {
 		Use:   "close <id>",
 		Short: `Close merge requests`,
 		Long:  ``,
-		Args:  cobra.ExactArgs(1),
+		Args:  cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var err error
 			out := utils.ColorableOut(cmd)
@@ -28,8 +28,15 @@ func NewCmdClose(f *cmdutils.Factory) *cobra.Command {
 				return err
 			}
 
-			repo, err := f.BaseRepo()
+			mr, repo, err := mrutils.MRFromArgs(f, args)
 			if err != nil {
+				return err
+			}
+
+			if err = mrutils.MRCheckErrors(mr, mrutils.MRCheckErrOptions{
+				Closed: true,
+				Merged: true,
+			}); err != nil {
 				return err
 			}
 

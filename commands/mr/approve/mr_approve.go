@@ -2,22 +2,26 @@ package approve
 
 import (
 	"fmt"
-	"strings"
 
+	"github.com/MakeNowJust/heredoc"
 	"github.com/profclems/glab/commands/cmdutils"
+	"github.com/profclems/glab/commands/mr/mrutils"
 	"github.com/profclems/glab/internal/utils"
 	"github.com/profclems/glab/pkg/api"
-
 	"github.com/spf13/cobra"
 	"github.com/xanzy/go-gitlab"
 )
 
 func NewCmdApprove(f *cmdutils.Factory) *cobra.Command {
 	var mrApproveCmd = &cobra.Command{
-		Use:   "approve <id> [flags]",
+		Use:   "approve {<id> | <branch>}",
 		Short: `Approve merge requests`,
 		Long:  ``,
-		Args:  cobra.ExactArgs(1),
+		Example: heredoc.Doc(`
+		glab mr approve 235
+		glab mr approve    # Finds open merge request from current branch
+		`),
+		Args: cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var err error
 			out := utils.ColorableOut(cmd)
@@ -27,22 +31,26 @@ func NewCmdApprove(f *cmdutils.Factory) *cobra.Command {
 				return err
 			}
 
-			repo, err := f.BaseRepo()
+			mr, repo, err := mrutils.MRFromArgs(f, args)
 			if err != nil {
 				return err
 			}
 
-			mergeID := strings.Trim(args[0], " ")
-			l := &gitlab.ApproveMergeRequestOptions{}
-			if s, _ := cmd.Flags().GetString("sha"); s != "" {
-				l.SHA = gitlab.String(s)
+			if err = mrutils.MRCheckErrors(mr, mrutils.MRCheckErrOptions{
+				WorkInProgress: true,
+				Closed:         true,
+				Merged:         true,
+			}); err != nil {
+				return err
 			}
-			//if s, _ := cmd.Flags().GetString("password"); s  {
-			// ToDo:
-			//}
 
-			fmt.Fprintf(out, "- Approving Merge Request !%s\n", mergeID)
-			_, err = api.ApproveMR(apiClient, repo.FullName(), utils.StringToInt(mergeID), l)
+			opts := &gitlab.ApproveMergeRequestOptions{}
+			if s, _ := cmd.Flags().GetString("sha"); s != "" {
+				opts.SHA = gitlab.String(s)
+			}
+
+			fmt.Fprintf(out, "- Approving Merge Request !%d\n", mr.IID)
+			_, err = api.ApproveMR(apiClient, repo.FullName(), mr.IID, opts)
 			if err != nil {
 				return err
 			}

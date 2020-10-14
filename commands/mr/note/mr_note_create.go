@@ -3,6 +3,8 @@ package note
 import (
 	"fmt"
 
+	"github.com/profclems/glab/commands/mr/mrutils"
+
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/internal/utils"
 	"github.com/profclems/glab/pkg/api"
@@ -17,7 +19,7 @@ func NewCmdNote(f *cmdutils.Factory) *cobra.Command {
 		Aliases: []string{"comment"},
 		Short:   "Add a comment or note to merge request",
 		Long:    ``,
-		Args:    cobra.ExactArgs(1),
+		Args:    cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var err error
 			out := utils.ColorableOut(cmd)
@@ -27,18 +29,17 @@ func NewCmdNote(f *cmdutils.Factory) *cobra.Command {
 				return err
 			}
 
-			repo, err := f.BaseRepo()
+			mr, repo, err := mrutils.MRFromArgs(f, args)
 			if err != nil {
 				return err
 			}
 
-			mID := args[0]
 			body, err := cmd.Flags().GetString("message")
-
 			if err != nil {
 				return err
 			}
-			mr, err := api.GetMR(apiClient, repo.FullName(), utils.StringToInt(mID), &gitlab.GetMergeRequestsOptions{})
+
+			mr, err = api.GetMR(apiClient, repo.FullName(), mr.IID, &gitlab.GetMergeRequestsOptions{})
 			if err != nil {
 				return err
 			}
@@ -53,7 +54,7 @@ func NewCmdNote(f *cmdutils.Factory) *cobra.Command {
 				return fmt.Errorf("aborted... Note has an empty message")
 			}
 
-			noteInfo, err := api.CreateMRNote(apiClient, repo.FullName(), utils.StringToInt(mID), &gitlab.CreateMergeRequestNoteOptions{
+			noteInfo, err := api.CreateMRNote(apiClient, repo.FullName(), mr.IID, &gitlab.CreateMergeRequestNoteOptions{
 				Body: &body,
 			})
 			if err != nil {

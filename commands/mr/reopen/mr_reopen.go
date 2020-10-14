@@ -2,7 +2,6 @@ package reopen
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/commands/mr/mrutils"
@@ -19,10 +18,8 @@ func NewCmdReopen(f *cmdutils.Factory) *cobra.Command {
 		Short:   `Reopen merge requests`,
 		Long:    ``,
 		Aliases: []string{"open"},
-		Args:    cobra.ExactArgs(1),
+		Args:    cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-
-			var err error
 			out := utils.ColorableOut(cmd)
 
 			apiClient, err := f.HttpClient()
@@ -30,26 +27,30 @@ func NewCmdReopen(f *cmdutils.Factory) *cobra.Command {
 				return err
 			}
 
-			repo, err := f.BaseRepo()
+			mr, repo, err := mrutils.MRFromArgs(f, args)
 			if err != nil {
 				return err
 			}
 
-			mergeID := strings.TrimSpace(args[0])
+			if err = mrutils.MRCheckErrors(mr, mrutils.MRCheckErrOptions{
+				Opened: true,
+				Merged: true,
+			}); err != nil {
+				return err
+			}
 
 			l := &gitlab.UpdateMergeRequestOptions{}
 			l.StateEvent = gitlab.String("reopen")
-			arrIds := strings.Split(strings.Trim(mergeID, "[] "), ",")
 
-			for _, i2 := range arrIds {
-				fmt.Fprintf(out, "- Reopening Merge request !%s...\n", i2)
-				mr, err := api.UpdateMR(apiClient, repo.FullName(), utils.StringToInt(i2), l)
-				if err != nil {
-					return err
-				}
-				fmt.Fprintf(out, "%s Merge request !%s reopened\n", utils.GreenCheck(), i2)
-				fmt.Fprintln(out, mrutils.DisplayMR(mr))
+			fmt.Fprintf(out, "- Reopening Merge request !%d...\n", mr.IID)
+
+			mr, err = api.UpdateMR(apiClient, repo.FullName(), mr.IID, l)
+			if err != nil {
+				return err
 			}
+
+			fmt.Fprintf(out, "%s Merge request !%d reopened\n", utils.GreenCheck(), mr.IID)
+			fmt.Fprintln(out, mrutils.DisplayMR(mr))
 
 			return nil
 		},

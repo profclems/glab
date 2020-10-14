@@ -5,6 +5,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/profclems/glab/internal/config"
+
 	"github.com/acarl005/stripansi"
 	"github.com/profclems/glab/commands/cmdtest"
 	"github.com/profclems/glab/pkg/api"
@@ -18,7 +20,14 @@ func TestMain(m *testing.M) {
 }
 
 func Test_deleteMergeRequest(t *testing.T) {
+	defer config.StubConfig(`---
+hosts:
+  gitlab.com:
+    username: monalisa
+    token: OTOKEN
+`, "")()
 	t.Parallel()
+	stubFactory, _ := cmdtest.StubFactoryWithConfig("")
 	oldDeleteMR := api.DeleteMR
 
 	api.DeleteMR = func(client *gitlab.Client, projectID interface{}, mrID int) error {
@@ -26,6 +35,34 @@ func Test_deleteMergeRequest(t *testing.T) {
 			return fmt.Errorf("error expected")
 		}
 		return nil
+	}
+
+	api.GetMR = func(client *gitlab.Client, projectID interface{}, mrID int, opts *gitlab.GetMergeRequestsOptions) (*gitlab.MergeRequest, error) {
+		if projectID == "" || projectID == "WRONG_REPO" || projectID == "expected_err" {
+			return nil, fmt.Errorf("error expected")
+		}
+		repo, err := stubFactory.BaseRepo()
+		if err != nil {
+			return nil, err
+		}
+		return &gitlab.MergeRequest{
+			ID:          mrID,
+			IID:         mrID,
+			Title:       "mrTitle",
+			Labels:      gitlab.Labels{"test", "bug"},
+			State:       "opened",
+			Description: "mrBody",
+			Author: &gitlab.BasicUser{
+				ID:       mrID,
+				Name:     "John Dev Wick",
+				Username: "jdwick",
+			},
+			WebURL: fmt.Sprintf("https://%s/%s/-/merge_requests/%d", repo.RepoHost(), repo.FullName(), mrID),
+		}, nil
+	}
+
+	api.ListMRs = func(client *gitlab.Client, projectID interface{}, opts *gitlab.ListProjectMergeRequestsOptions) ([]*gitlab.MergeRequest, error) {
+		return []*gitlab.MergeRequest{}, nil
 	}
 
 	tests := []struct {
@@ -41,7 +78,7 @@ func Test_deleteMergeRequest(t *testing.T) {
 			wantErr: true,
 
 			assertFunc: func(t *testing.T, out string) {
-				assert.Contains(t, out, "error expected")
+				assert.Contains(t, out, "invalid merge request ID provided")
 			},
 		},
 		{
@@ -66,7 +103,7 @@ func Test_deleteMergeRequest(t *testing.T) {
 			name:    "delete no args",
 			wantErr: true,
 			assertFunc: func(t *testing.T, out string) {
-				assert.Contains(t, out, "accepts 1 arg(s), received 0")
+				assert.Contains(t, out, "no open merge request availabe for \"master\"")
 			},
 		},
 	}
