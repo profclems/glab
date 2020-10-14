@@ -77,6 +77,13 @@ func NewCmdUpdate(f *cmdutils.Factory) *cobra.Command {
 			if m, _ := cmd.Flags().GetString("description"); m != "" {
 				l.Description = gitlab.String(m)
 			}
+			if assignee, _ := cmd.Flags().GetString("assignee"); assignee != "" {
+				user, err := api.UserByName(apiClient, assignee)
+				if err != nil {
+					return err
+				}
+				l.AssigneeID = gitlab.Int(user.ID)
+			}
 			mr, err := api.UpdateMR(apiClient, repo.FullName(), mergeID, l)
 			if err != nil {
 				return err
@@ -93,6 +100,7 @@ func NewCmdUpdate(f *cmdutils.Factory) *cobra.Command {
 	mrUpdateCmd.Flags().StringP("title", "t", "", "Title of merge request")
 	mrUpdateCmd.Flags().BoolP("lock-discussion", "", false, "Lock discussion on merge request")
 	mrUpdateCmd.Flags().StringP("description", "d", "", "merge request description")
+	mrUpdateCmd.Flags().StringP("assignee", "a", "", "merge request assignee")
 
 	return mrUpdateCmd
 }
