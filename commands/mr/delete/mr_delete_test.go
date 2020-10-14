@@ -61,6 +61,10 @@ hosts:
 		}, nil
 	}
 
+	api.ListMRs = func(client *gitlab.Client, projectID interface{}, opts *gitlab.ListProjectMergeRequestsOptions) ([]*gitlab.MergeRequest, error) {
+		return []*gitlab.MergeRequest{}, nil
+	}
+
 	tests := []struct {
 		name       string
 		args       []string
