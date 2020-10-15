@@ -1,0 +1,16 @@
+
+  # After registering a name on build.snapcraft.io, commit an uncommented line:
+  name: glab
+  version: '1.11.0-pre2' # just for humans, typically '1.2+git' or '1.3.2'
+  summary: GitLab Command Line Tool
+  description: |
+    GLab is an open source Gitlab Cli tool written in Go (golang) to help work seamlessly with Gitlab from the command line.
+
+  grade: devel # must be 'stable' to release into candidate/stable channels
+  confinement: devmode # use 'strict' once you have the right plugs and slots
+
+  parts:
+    my-part:
+      # See 'snapcraft plugins'
+      plugin: nil
+  
