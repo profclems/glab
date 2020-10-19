@@ -5,6 +5,8 @@ import (
 	"io/ioutil"
 	"testing"
 
+	"github.com/profclems/glab/internal/utils"
+
 	"github.com/MakeNowJust/heredoc"
 	"github.com/google/shlex"
 	"github.com/profclems/glab/commands/cmdutils"
@@ -17,12 +19,16 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func runCommand(cfg config.Config, cli string) (*test.CmdOut, error) {
+func runCommand(cfg config.Config, isTTY bool, cli string) (*test.CmdOut, error) {
+	io, _, stdout, stderr := utils.IOTest()
+	io.IsaTTY = isTTY
+	io.IsErrTTY = isTTY
 
 	factoryConf := &cmdutils.Factory{
 		Config: func() (config.Config, error) {
 			return cfg, nil
 		},
+		IO: io,
 	}
 
 	cmd := NewCmdSet(factoryConf, nil)
@@ -43,26 +49,24 @@ func runCommand(cfg config.Config, cli string) (*test.CmdOut, error) {
 		return nil, err
 	}
 	rootCmd.SetArgs(argv)
-	var stderr bytes.Buffer
-	var stdout bytes.Buffer
 
 	rootCmd.SetIn(&bytes.Buffer{})
-	rootCmd.SetOut(&stdout)
-	rootCmd.SetErr(&stderr)
+	rootCmd.SetOut(ioutil.Discard)
+	rootCmd.SetErr(ioutil.Discard)
 
 	_, err = rootCmd.ExecuteC()
 	return &test.CmdOut{
-		OutBuf: &stdout,
-		ErrBuf: &stderr,
+		OutBuf: stdout,
+		ErrBuf: stderr,
 	}, err
 }
 
-func TestAliasSet_gh_command(t *testing.T) {
+func TestAliasSet_glab_command(t *testing.T) {
 	defer config.StubWriteConfig(ioutil.Discard, ioutil.Discard)()
 
 	cfg := config.NewFromString(``)
 
-	_, err := runCommand(cfg, "mr 'mr rebase'")
+	_, err := runCommand(cfg, true, "mr 'mr rebase'")
 
 	if assert.Error(t, err) {
 		assert.Equal(t, `could not create alias: "mr" is already a glab command`, err.Error())
@@ -78,14 +82,14 @@ func TestAliasSet_empty_aliases(t *testing.T) {
 		editor: vim
 	`))
 
-	output, err := runCommand(cfg, "co 'mr checkout'")
+	output, err := runCommand(cfg, true, "co 'mr checkout'")
 
 	if err != nil {
 		t.Fatalf("unexpected error: %s", err)
 	}
 
-	test.ExpectLines(t, output.String(), "Added alias")
-	test.ExpectLines(t, output.Stderr(), "")
+	test.ExpectLines(t, output.Stderr(), "Added alias")
+	test.ExpectLines(t, output.String(), "")
 
 	expected := `co: mr checkout
 `
@@ -101,10 +105,10 @@ func TestAliasSet_existing_alias(t *testing.T) {
 		  co: mr checkout
 	`))
 
-	output, err := runCommand(cfg, "co 'mr checkout -Rcool/repo'")
+	output, err := runCommand(cfg, true, "co 'mr checkout -Rcool/repo'")
 	require.NoError(t, err)
 
-	test.ExpectLines(t, output.String(), "Changed alias.*co.*from.*mr checkout.*to.*mr checkout -Rcool/repo")
+	test.ExpectLines(t, output.Stderr(), "Changed alias.*co.*from.*mr checkout.*to.*mr checkout -Rcool/repo")
 }
 
 func TestAliasSet_space_args(t *testing.T) {
@@ -113,10 +117,10 @@ func TestAliasSet_space_args(t *testing.T) {
 
 	cfg := config.NewFromString(``)
 
-	output, err := runCommand(cfg, `il 'issue list -l "cool story"'`)
+	output, err := runCommand(cfg, true, `il 'issue list -l "cool story"'`)
 	require.NoError(t, err)
 
-	test.ExpectLines(t, output.String(), `Adding alias for.*il.*issue list -l "cool story"`)
+	test.ExpectLines(t, output.Stderr(), `Adding alias for.*il.*issue list -l "cool story"`)
 
 	test.ExpectLines(t, mainBuf.String(), `il: issue list -l "cool story"`)
 }
@@ -147,12 +151,12 @@ func TestAliasSet_arg_processing(t *testing.T) {
 
 			cfg := config.NewFromString(``)
 
-			output, err := runCommand(cfg, c.Cmd)
+			output, err := runCommand(cfg, true, c.Cmd)
 			if err != nil {
 				t.Fatalf("got unexpected error running %s: %s", c.Cmd, err)
 			}
 
-			test.ExpectLines(t, output.String(), c.ExpectedOutputLine)
+			test.ExpectLines(t, output.Stderr(), c.ExpectedOutputLine)
 			test.ExpectLines(t, mainBuf.String(), c.ExpectedConfigLine)
 		})
 	}
@@ -166,13 +170,13 @@ func TestAliasSet_init_alias_cfg(t *testing.T) {
 		editor: vim
 	`))
 
-	output, err := runCommand(cfg, "diff 'mr diff'")
+	output, err := runCommand(cfg, true, "diff 'mr diff'")
 	require.NoError(t, err)
 
 	expected := `diff: mr diff
 `
 
-	test.ExpectLines(t, output.String(), "Adding alias for.*diff.*mr diff", "Added alias.")
+	test.ExpectLines(t, output.Stderr(), "Adding alias for.*diff.*mr diff", "Added alias.")
 	assert.Equal(t, expected, mainBuf.String())
 }
 
@@ -185,14 +189,14 @@ func TestAliasSet_existing_aliases(t *testing.T) {
 		  foo: bar
 	`))
 
-	output, err := runCommand(cfg, "view 'mr view'")
+	output, err := runCommand(cfg, true, "view 'mr view'")
 	require.NoError(t, err)
 
 	expected := `foo: bar
 view: mr view
 `
 
-	test.ExpectLines(t, output.String(), "Adding alias for.*view.*mr view", "Added alias.")
+	test.ExpectLines(t, output.Stderr(), "Adding alias for.*view.*mr view", "Added alias.")
 	assert.Equal(t, expected, mainBuf.String())
 
 }
@@ -202,7 +206,7 @@ func TestAliasSet_invalid_command(t *testing.T) {
 
 	cfg := config.NewFromString(``)
 
-	_, err := runCommand(cfg, "co 'pe checkout'")
+	_, err := runCommand(cfg, true, "co 'pe checkout'")
 	if assert.Error(t, err) {
 		assert.Equal(t, "could not create alias: pe checkout does not correspond to a glab command", err.Error())
 	}
@@ -214,12 +218,12 @@ func TestShellAlias_flag(t *testing.T) {
 
 	cfg := config.NewFromString(``)
 
-	output, err := runCommand(cfg, "--shell igrep 'glab issue list | grep'")
+	output, err := runCommand(cfg, true, "--shell igrep 'glab issue list | grep'")
 	if err != nil {
 		t.Fatalf("unexpected error: %s", err)
 	}
 
-	test.ExpectLines(t, output.String(), "Adding alias for.*igrep")
+	test.ExpectLines(t, output.Stderr(), "Adding alias for.*igrep")
 
 	expected := `igrep: '!glab issue list | grep'
 `
@@ -232,10 +236,10 @@ func TestShellAlias_bang(t *testing.T) {
 
 	cfg := config.NewFromString(``)
 
-	output, err := runCommand(cfg, "igrep '!glab issue list | grep'")
+	output, err := runCommand(cfg, true, "igrep '!glab issue list | grep'")
 	require.NoError(t, err)
 
-	test.ExpectLines(t, output.String(), "Adding alias for.*igrep")
+	test.ExpectLines(t, output.Stderr(), "Adding alias for.*igrep")
 
 	expected := `igrep: '!glab issue list | grep'
 `

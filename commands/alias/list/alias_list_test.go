@@ -5,6 +5,8 @@ import (
 	"io/ioutil"
 	"testing"
 
+	"github.com/profclems/glab/internal/utils"
+
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/internal/config"
 
@@ -17,6 +19,7 @@ func TestAliasList(t *testing.T) {
 	tests := []struct {
 		name       string
 		config     string
+		isaTTy     bool
 		wantStdout string
 		wantStderr string
 	}{
@@ -24,6 +27,7 @@ func TestAliasList(t *testing.T) {
 			name:       "empty",
 			config:     "",
 			wantStdout: "",
+			isaTTy:     true,
 			wantStderr: "no aliases configured\n",
 		},
 		{
@@ -35,6 +39,7 @@ func TestAliasList(t *testing.T) {
 			`),
 			wantStdout: "co\tmr checkout                     \ngc\t!glab mr create -f \"$@\" | pbcopy",
 			wantStderr: "",
+			isaTTy:     true,
 		},
 	}
 	for _, tt := range tests {
@@ -45,21 +50,23 @@ func TestAliasList(t *testing.T) {
 
 			cfg := config.NewFromString(tt.config)
 
-			var stderr bytes.Buffer
-			var stdout bytes.Buffer
+			io, _, stdout, stderr := utils.IOTest()
+			io.IsaTTY = tt.isaTTy
+			io.IsErrTTY = tt.isaTTy
 
 			factoryConf := &cmdutils.Factory{
 				Config: func() (config.Config, error) {
 					return cfg, nil
 				},
+				IO: io,
 			}
 
 			cmd := NewCmdList(factoryConf, nil)
 			cmd.SetArgs([]string{})
 
 			cmd.SetIn(&bytes.Buffer{})
-			cmd.SetOut(&stdout)
-			cmd.SetErr(&stderr)
+			cmd.SetOut(ioutil.Discard)
+			cmd.SetErr(ioutil.Discard)
 
 			_, err := cmd.ExecuteC()
 			require.NoError(t, err)

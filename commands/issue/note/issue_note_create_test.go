@@ -5,6 +5,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/profclems/glab/internal/utils"
+
 	"github.com/acarl005/stripansi"
 	"github.com/profclems/glab/commands/cmdtest"
 	"github.com/profclems/glab/commands/cmdutils"
@@ -37,6 +39,11 @@ hosts:
 `, "")()
 
 	stubFactory, _ := cmdtest.StubFactoryWithConfig("")
+	io, _, stdout, stderr := utils.IOTest()
+	stubFactory.IO = io
+	stubFactory.IO.IsaTTY = true
+	stubFactory.IO.IsErrTTY = true
+
 	timer, _ := time.Parse(time.RFC3339, "2014-11-12T11:45:26.371Z")
 	api.CreateIssueNote = func(client *gitlab.Client, projectID interface{}, mrID int, opts *gitlab.CreateIssueNoteOptions) (*gitlab.Note, error) {
 		if projectID == "PROJECT_MR_WITH_EMPTY_NOTE" {
@@ -120,14 +127,14 @@ hosts:
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			output, err := cmdtest.RunCommand(cmd, tt.args)
+			_, err := cmdtest.RunCommand(cmd, tt.args)
 			if err != nil {
 				t.Error(err)
 				return
 			}
 
-			out := stripansi.Strip(output.String())
-			outErr := stripansi.Strip(output.Stderr())
+			out := stripansi.Strip(stdout.String())
+			outErr := stripansi.Strip(stderr.String())
 
 			tt.assertionFunc(t, out, outErr)
 		})

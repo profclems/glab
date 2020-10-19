@@ -3,8 +3,9 @@ package cmdutils
 
 import (
 	"fmt"
-	"github.com/profclems/glab/internal/utils"
 	"strconv"
+
+	"github.com/profclems/glab/internal/utils"
 
 	"github.com/profclems/glab/internal/config"
 	"github.com/profclems/glab/internal/git"
@@ -15,7 +16,7 @@ import (
 
 var (
 	CachedConfig config.Config
-	ConfigError error
+	ConfigError  error
 )
 
 type Factory struct {
@@ -24,7 +25,7 @@ type Factory struct {
 	Remotes    func() (glrepo.Remotes, error)
 	Config     func() (config.Config, error)
 	Branch     func() (string, error)
-	IO		   *utils.IOStreams
+	IO         *utils.IOStreams
 }
 
 func (f *Factory) RepoOverride(repo string) error {
@@ -79,8 +80,8 @@ func baseRepoFunc() (glrepo.Interface, error) {
 	return glrepo.FromURL(remotes[0].FetchURL)
 }
 
-func HTTPClientFactory(f *Factory)  {
-	f.HttpClient =  func() (*gitlab.Client, error) {
+func HTTPClientFactory(f *Factory) {
+	f.HttpClient = func() (*gitlab.Client, error) {
 		cfg, err := configFunc()
 		if err != nil {
 			return nil, err

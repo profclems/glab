@@ -1,9 +1,10 @@
 package completion
 
 import (
-	"bytes"
 	"strings"
 	"testing"
+
+	"github.com/profclems/glab/internal/utils"
 
 	"github.com/spf13/cobra"
 
@@ -45,9 +46,9 @@ func TestNewCmdCompletion(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			var stderr bytes.Buffer
-			var stdout bytes.Buffer
-			completeCmd := NewCmdCompletion()
+			io, _, stdout, stderr := utils.IOTest()
+
+			completeCmd := NewCmdCompletion(io)
 			rootCmd := &cobra.Command{Use: "glab"}
 			rootCmd.AddCommand(completeCmd)
 
@@ -56,8 +57,8 @@ func TestNewCmdCompletion(t *testing.T) {
 				t.Fatalf("argument splitting error: %v", err)
 			}
 			rootCmd.SetArgs(argv)
-			rootCmd.SetOut(&stdout)
-			rootCmd.SetErr(&stderr)
+			rootCmd.SetOut(stdout)
+			rootCmd.SetErr(stderr)
 
 			_, err = rootCmd.ExecuteC()
 			if tt.wantErr != "" {

@@ -2,6 +2,7 @@ package commands
 
 import (
 	"fmt"
+
 	updateCmd "github.com/profclems/glab/commands/update"
 
 	aliasCmd "github.com/profclems/glab/commands/alias"
@@ -87,7 +88,7 @@ func NewCmdRoot(f *cmdutils.Factory, version, buildDate string) *cobra.Command {
 	// Child commands
 	rootCmd.AddCommand(aliasCmd.NewCmdAlias(f))
 	rootCmd.AddCommand(configCmd.NewCmdConfig(f))
-	rootCmd.AddCommand(completionCmd.NewCmdCompletion())
+	rootCmd.AddCommand(completionCmd.NewCmdCompletion(f.IO))
 	rootCmd.AddCommand(versionCmd.NewCmdVersion(version, buildDate))
 	rootCmd.AddCommand(updateCmd.NewCheckUpdateCmd(version, buildDate))
 

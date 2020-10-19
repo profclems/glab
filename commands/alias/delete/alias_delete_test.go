@@ -5,6 +5,8 @@ import (
 	"io/ioutil"
 	"testing"
 
+	"github.com/profclems/glab/internal/utils"
+
 	"github.com/MakeNowJust/heredoc"
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/internal/config"
@@ -52,7 +54,12 @@ func TestAliasDelete(t *testing.T) {
 
 			cfg := config.NewFromString(tt.config)
 
+			io, _, stdout, stderr := utils.IOTest()
+			io.IsaTTY = tt.isTTY
+			io.IsErrTTY = tt.isTTY
+
 			factoryConf := &cmdutils.Factory{
+				IO: io,
 				Config: func() (config.Config, error) {
 					return cfg, nil
 				},
@@ -63,12 +70,10 @@ func TestAliasDelete(t *testing.T) {
 			argv, err := shlex.Split(tt.cli)
 			require.NoError(t, err)
 			cmd.SetArgs(argv)
-			var stderr bytes.Buffer
-			var stdout bytes.Buffer
 
 			cmd.SetIn(&bytes.Buffer{})
-			cmd.SetOut(&stdout)
-			cmd.SetErr(&stderr)
+			cmd.SetOut(ioutil.Discard)
+			cmd.SetErr(ioutil.Discard)
 
 			_, err = cmd.ExecuteC()
 			if tt.wantErr != "" {

@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/profclems/glab/internal/utils"
+
 	"github.com/profclems/glab/commands/cmdutils"
 
 	"github.com/acarl005/stripansi"
@@ -50,14 +52,19 @@ func TestNewCmdCreate(t *testing.T) {
 			wantErr: true,
 		},
 	}
+	io, _, stdout, stderr := utils.IOTest()
 
 	f := cmdtest.StubFactory("https://gitlab.com/glab-cli/test")
+	f.IO = io
+	f.IO.IsaTTY = true
+	f.IO.IsErrTTY = true
+
 	cmd := NewCmdCreate(f)
 	cmdutils.EnableRepoOverride(cmd, f)
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			output, err := cmdtest.RunCommand(cmd, tc.arg)
+			_, err := cmdtest.RunCommand(cmd, tc.arg)
 			if tc.wantErr {
 				require.Error(t, err)
 				return
@@ -65,9 +72,10 @@ func TestNewCmdCreate(t *testing.T) {
 				require.NoError(t, err)
 			}
 
-			out := stripansi.Strip(output.String())
+			out := stripansi.Strip(stdout.String())
 
 			assert.Contains(t, out, tc.want)
+			assert.Contains(t, stderr.String(), "")
 
 		})
 	}

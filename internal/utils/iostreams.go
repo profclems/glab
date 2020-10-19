@@ -1,7 +1,9 @@
 package utils
 
 import (
+	"bytes"
 	"io"
+	"io/ioutil"
 	"os"
 	"os/exec"
 	"strings"
@@ -21,7 +23,7 @@ type IOStreams struct {
 	StdOut io.Writer
 	StdErr io.Writer
 
-	IsaTTY bool
+	IsaTTY   bool
 	IsErrTTY bool
 
 	pagerCommand string
@@ -44,8 +46,8 @@ func InitIOStream() *IOStreams {
 		StdOut:       NewColorable(os.Stdout),
 		StdErr:       NewColorable(os.Stderr),
 		pagerCommand: pagerCommand,
-		IsaTTY: stdoutIsTTY,
-		IsErrTTY: stderrIsTTY,
+		IsaTTY:       stdoutIsTTY,
+		IsErrTTY:     stderrIsTTY,
 	}
 	_isColorEnabled = isColorEnabled() && stdoutIsTTY
 
@@ -119,6 +121,17 @@ func IsTerminal(f *os.File) bool {
 	return isatty.IsTerminal(f.Fd()) || isatty.IsCygwinTerminal(f.Fd())
 }
 
+func IOTest() (*IOStreams, *bytes.Buffer, *bytes.Buffer, *bytes.Buffer) {
+	in := &bytes.Buffer{}
+	out := &bytes.Buffer{}
+	errOut := &bytes.Buffer{}
+	return &IOStreams{
+		In:     ioutil.NopCloser(in),
+		StdOut: out,
+		StdErr: errOut,
+	}, in, out, errOut
+}
+
 // TODO: remove after making sure no function uses it
 func ColorableOut(cmd *cobra.Command) io.Writer {
 	out := cmd.OutOrStdout()
@@ -127,6 +140,7 @@ func ColorableOut(cmd *cobra.Command) io.Writer {
 	}
 	return out
 }
+
 // TODO: remove
 func ColorableErr(cmd *cobra.Command) io.Writer {
 	err := cmd.ErrOrStderr()

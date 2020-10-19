@@ -21,7 +21,7 @@ func NewCmdUnsubscribe(f *cmdutils.Factory) *cobra.Command {
 		Args:    cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var err error
-			out := utils.ColorableOut(cmd)
+			out := f.IO.StdOut
 
 			apiClient, err := f.HttpClient()
 			if err != nil {
@@ -37,11 +37,15 @@ func NewCmdUnsubscribe(f *cmdutils.Factory) *cobra.Command {
 
 			arrIds := strings.Split(strings.Trim(mergeID, "[] "), ",")
 			for _, i2 := range arrIds {
-				fmt.Fprintln(out, "- Unsubscribing from Issue #"+i2)
+				if f.IO.IsaTTY && f.IO.IsErrTTY {
+					fmt.Fprintln(out, "- Unsubscribing from Issue #"+i2)
+				}
+
 				issue, err := api.UnsubscribeFromIssue(apiClient, repo.FullName(), utils.StringToInt(i2), nil)
 				if err != nil {
 					return err
 				}
+
 				fmt.Fprintln(out, utils.Red("✔"), "Unsubscribed from issue #"+i2)
 				fmt.Fprintln(out, issueutils.DisplayIssue(issue))
 			}

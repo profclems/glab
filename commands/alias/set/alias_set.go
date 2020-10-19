@@ -20,6 +20,7 @@ type SetOptions struct {
 	Expansion string
 	IsShell   bool
 	RootCmd   *cobra.Command
+	IO        *utils.IOStreams
 }
 
 func NewCmdSet(f *cmdutils.Factory, runF func(*SetOptions) error) *cobra.Command {
@@ -64,6 +65,7 @@ func NewCmdSet(f *cmdutils.Factory, runF func(*SetOptions) error) *cobra.Command
 			opts.RootCmd = cmd.Root()
 			opts.Name = args[0]
 			opts.Expansion = args[1]
+			opts.IO = f.IO
 
 			if runF != nil {
 				return runF(opts)
@@ -86,7 +88,9 @@ func setRun(cmd *cobra.Command, opts *SetOptions) error {
 		return err
 	}
 
-	fmt.Fprintf(utils.ColorableOut(cmd), "- Adding alias for %s: %s\n", utils.Bold(opts.Name), utils.Bold(opts.Expansion))
+	if opts.IO.IsaTTY && opts.IO.IsErrTTY {
+		fmt.Fprintf(opts.IO.StdErr, "- Adding alias for %s: %s\n", utils.Bold(opts.Name), utils.Bold(opts.Expansion))
+	}
 
 	expansion := opts.Expansion
 	isShell := opts.IsShell
@@ -118,7 +122,7 @@ func setRun(cmd *cobra.Command, opts *SetOptions) error {
 		return fmt.Errorf("could not create alias: %s", err)
 	}
 
-	fmt.Fprintln(utils.ColorableOut(cmd), successMsg)
+	fmt.Fprintln(opts.IO.StdErr, successMsg)
 	return nil
 }
 

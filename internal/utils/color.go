@@ -9,8 +9,8 @@ import (
 )
 
 var (
-	_isColorEnabled   = true
-	checkedNoColor    = false
+	_isColorEnabled = true
+	checkedNoColor  = false
 
 	// Magenta outputs ANSI color if stdout is a tty
 	Magenta = makeColorFunc("magenta")

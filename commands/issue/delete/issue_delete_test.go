@@ -5,6 +5,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/profclems/glab/internal/utils"
+
 	"github.com/acarl005/stripansi"
 	"github.com/profclems/glab/commands/cmdtest"
 	"github.com/profclems/glab/pkg/api"
@@ -22,7 +24,7 @@ func TestNewCmdDelete(t *testing.T) {
 	oldDeleteMR := api.DeleteMR
 
 	api.DeleteIssue = func(client *gitlab.Client, projectID interface{}, issueID int) error {
-		if projectID == "" || projectID == "WRONG_REPO" || projectID == "expected_err" || issueID == 0 {
+		if projectID == "" || projectID == "NAMESPACE/WRONG_REPO" || projectID == "expected_err" || issueID == 0 {
 			return fmt.Errorf("error expected")
 		}
 		return nil
@@ -33,43 +35,42 @@ func TestNewCmdDelete(t *testing.T) {
 		args       []string
 		wantErr    bool
 		errMsg     string
-		assertFunc func(t *testing.T, out string)
+		assertFunc func(*testing.T, string, string)
 	}{
 		{
 			name:    "delete",
-			args:    []string{"0"},
+			args:    []string{"0", "-R", "NAMESPACE/WRONG_REPO"},
 			wantErr: true,
 
-			assertFunc: func(t *testing.T, out string) {
-				assert.Contains(t, out, "error expected")
+			assertFunc: func(t *testing.T, out string, err string) {
+				assert.Contains(t, err, "error expected")
 			},
 		},
 		{
 			name:    "id exists",
 			args:    []string{"1"},
 			wantErr: false,
-			assertFunc: func(t *testing.T, out string) {
+			assertFunc: func(t *testing.T, out string, err string) {
 				assert.Contains(t, out, "✓ Issue Deleted\n")
 			},
 		},
 		{
 			name:    "delete on different repo",
-			args:    []string{"1", "-R", "profclems/glab"},
+			args:    []string{"12", "-R", "profclems/glab"},
 			wantErr: false,
-			assertFunc: func(t *testing.T, out string) {
+			assertFunc: func(t *testing.T, out string, err string) {
 				assert.Contains(t, out, "✓ Issue Deleted\n")
-			},
-		},
-		{
-			name:    "delete no args",
-			wantErr: true,
-			assertFunc: func(t *testing.T, out string) {
-				assert.Contains(t, out, "accepts 1 arg(s), received 0")
 			},
 		},
 	}
 
-	cmd := NewCmdDelete(cmdtest.StubFactory(""))
+	io, _, stdout, stderr := utils.IOTest()
+	f := cmdtest.StubFactory("")
+	f.IO = io
+	f.IO.IsaTTY = true
+	f.IO.IsErrTTY = true
+
+	cmd := NewCmdDelete(f)
 
 	cmd.Flags().StringP("repo", "R", "", "")
 
@@ -78,18 +79,21 @@ func TestNewCmdDelete(t *testing.T) {
 
 			cli := strings.Join(tt.args, " ")
 			t.Log(cli)
-			output, err := cmdtest.RunCommand(cmd, cli)
+			_, err := cmdtest.RunCommand(cmd, cli)
 			if !tt.wantErr {
 				assert.Nil(t, err)
 			} else {
 				assert.NotNil(t, err)
+				stderr.WriteString(err.Error()) // write err to stderr
 			}
 
-			out := stripansi.Strip(output.String())
-			outErr := stripansi.Strip(output.Stderr())
+			out := stripansi.Strip(stdout.String())
+			outErr := stripansi.Strip(stderr.String())
 
-			tt.assertFunc(t, out)
+			tt.assertFunc(t, out, outErr)
 			assert.Contains(t, outErr, tt.errMsg)
+			stderr.Reset()
+			stdout.Reset()
 		})
 	}
 

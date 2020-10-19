@@ -38,13 +38,13 @@ func NewCmdClose(f *cmdutils.Factory) *cobra.Command {
 			l.StateEvent = gitlab.String("close")
 			arrIds := strings.Split(strings.Trim(issueID, "[] "), ",")
 			for _, i2 := range arrIds {
-				fmt.Fprintln(utils.ColorableOut(cmd), "- Closing Issue...")
+				fmt.Fprintln(f.IO.StdOut, "- Closing Issue...")
 				issue, err := api.UpdateIssue(apiClient, repo.FullName(), utils.StringToInt(i2), l)
 				if err != nil {
 					return err
 				}
-				fmt.Fprintln(utils.ColorableOut(cmd), utils.GreenCheck()+" Issue #"+i2+" closed\n")
-				fmt.Fprintln(utils.ColorableOut(cmd), issueutils.DisplayIssue(issue))
+				fmt.Fprintln(f.IO.StdOut, utils.GreenCheck()+" Issue #"+i2+" closed\n")
+				fmt.Fprintln(f.IO.StdOut, issueutils.DisplayIssue(issue))
 			}
 			return nil
 		},
