@@ -1,0 +1,49 @@
+name: glab
+summary: A GitLab CLI
+description: |
+  https://github.com/profclems/glab
+  **`glab` - A GitLab CLI tool**
+  `glab` is an open source Gitlab Cli tool written in Go (golang) to help work seamlessly with Gitlab from the command line. 
+  Work with issues, merge requests, watch running pipelines directly from your CLI among other features.
+  _Usage_
+  - `glab mr [list, view, checkout, create,...]`
+  - `glab issue [list, view, create,...]`
+  - `glab help`
+adopt-info: glab
+grade: stable
+confinement: strict  # classic
+base: core18
+license: MIT
+parts:
+  glab:
+    plugin: make
+    source: .
+    build-snaps:
+    - go
+    - snapd
+    build-packages:
+    - git
+    - gcc
+    stage-packages:
+    - git
+    - nano
+    - ssh
+    override-pull: |
+      snapcraftctl pull
+      snapcraftctl set-version `(git describe --tags | sed 's/^v//') 2>/dev/null || git rev-parse --short HEAD`
+    override-build: |
+      LDFLAGS='' make -j2
+      cp bin/glab $SNAPCRAFT_PART_INSTALL/
+      bin/glab completion -s bash > $SNAPCRAFT_PART_INSTALL/completion.sh
+apps:
+  glab:
+    command: glab
+    plugs:
+    - home
+    - network
+    - network-bind
+    - desktop
+    - ssh-keys
+    completer: completion.sh
+    environment:
+      GIT_EDITOR: nano

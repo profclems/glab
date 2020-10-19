@@ -4,6 +4,8 @@
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/profclems/glab)](https://goreportcard.com/report/github.com/profclems/glab)
+[![glab](https://snapcraft.io/glab/badge.svg)](https://snapcraft.io/glab)
+[![glab](https://snapcraft.io/glab/trending.svg?name=0)](https://snapcraft.io/glab)
 ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/profclems/glab/goreleaser)
 ![.github/workflows/build_docs.yml](https://github.com/profclems/glab/workflows/.github/workflows/build_docs.yml/badge.svg)
 [![Gitter](https://badges.gitter.im/glabcli/community.svg)](https://gitter.im/glabcli/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
@@ -72,15 +74,16 @@ curl -s https://raw.githubusercontent.com/profclems/glab/trunk/scripts/quick_ins
 **NOTE**: Please take care when running scripts in this fashion. Consider peaking at the install script itself and verify that it works as intended.
 
 ### Windows
-Available for download on scoop or manually as an installable executable file or a Portable archived file in tar and zip formats at the [releases page](https://github.com/profclems/glab/releases/latest).
-Download and install now at the [releases page](https://github.com/profclems/glab/releases/latest).
-
-The installable executable file sets the PATH automatically.
+Available for download on [scoop](https://scoop.sh) or manually as an installable executable file or a Portable archived file in tar and zip formats at the [releases page](https://github.com/profclems/glab/releases/latest).
 
 #### Scoop
 ```sh
 scoop bucket add profclems-bucket https://github.com/profclems/scoop-bucket.git
 scoop install glab
+```
+Updating:
+```sh
+scoop update glab
 ```
 
 ### Linux
@@ -94,19 +97,18 @@ Updating:
 ```sh
 brew upgrade glab
 ```
+#### Snapcraft
+[![Get it from the Snap Store](https://snapcraft.io/static/images/badges/en/snap-store-black.svg)](https://snapcraft.io/glab)
 
-#### Arch Linux
-`glab` is available through the [gitlab-glab-bin](https://aur.archlinux.org/packages/gitlab-glab-bin/) package on the AUR.
+Make sure you have snap installed on your Linux Distro (https://snapcraft.io/docs/installing-snapd).
+1. `sudo snap install --edge glab`
+1. `sudo snap connect glab:ssh-keys` to grant ssh access
 
-#### Manual Installation
-Download the tar ball, untar and install:
-
-1. Download the `.tar.gz` file from the [releases page](https://github.com/profclems/glab/releases/latest)
-2. `unzip glab-*-linux-amd64.tar.gz` to unzip the downloaded file 
-3. `sudo mv glab-*-linux-amd64/glab /usr/bin`
+### Arch Linux
+`glab` is available through the [gitlab-glab-bin](https://aur.archlinux.org/packages/gitlab-glab-bin/) package on the AUR or download and install an archive from the [releases page](https://github.com/profclems/glab/releases/latest). Arch Linux also supports [snap](https://snapcraft.io/docs/installing-snap-on-arch-linux).
 
 ### MacOS
-`glab` is available via Homebrew or you can manually install
+`glab` is available via Homebrew
 
 #### Homebrew
 ```sh
@@ -117,15 +119,14 @@ Updating:
 brew upgrade glab
 ```
 
-#### Installing manually
-1. Download the `.tar.gz` or `.zip` file from the [releases page](https://github.com/profclems/glab/releases/latest) and unzip or untar
-2. ls /usr/local/bin/ || sudo mkdir /usr/local/bin/; to make sure the bin folder exists
-3. `sudo mv glab-*-darwin-amd64/glab /usr/bin`
-
 ### Building From Source
 If a supported binary for your OS is not found at the [releases page](https://github.com/profclems/glab/releases/latest), you can build from source:
 
-1. Verify that you have Go 1.13.8+ installed
+#### Prerequisites for building from source are:
+- `make`
+- Go 1.13+
+
+1. Verify that you have Go 1.13+ installed
 
    ```sh
    $ go version
@@ -137,21 +138,14 @@ If a supported binary for your OS is not found at the [releases page](https://gi
 2. Clone this repository
 
    ```sh
-   $ git clone https://github.com/profclems/glab.git glab-cli
-   $ cd glab-cli
+   $ git clone https://github.com/profclems/glab.git
+   $ cd glab
    ```
-
-   or 
-
-   ```sh
-   $ git clone https://gitlab.com/profclems/glab.git
-   $ cd glab-cli
-   ```
+   If you have $GOPATH/bin or $GOBIN in your $PATH, you can just install with `make install` (install glab in $GOPATH/bin) and **skip steps 3 and 4**.
 
 3. Build the project
-
    ```
-   $ make build
+   $ make
    ```
 
 4. Move the resulting `bin/glab` executable to somewhere in your PATH
@@ -159,12 +153,8 @@ If a supported binary for your OS is not found at the [releases page](https://gi
    ```sh
    $ sudo mv ./bin/glab /usr/local/bin/
    ```
-   or
-   ```sh
-   $ sudo mv ./bin/glab /usr/bin/
-   ```
 
-4. Run `glab version` to check if it worked and `glab config -g` to set up
+4. Run `glab version` to check if it worked and `glab config init` to set up
 
 
 ## Configuration
@@ -172,6 +162,7 @@ Get a GitLab access token at https://gitlab.com/profile/personal_access_tokens o
 ```sh
 glab config init # Will be prompted for details and stored in the global directory
 ```
+
 **To set configuration globally**
 ```sh
 glab config set -g token xxxxxx --host=gitlab.com
@@ -181,10 +172,6 @@ glab config set -g token xxxxxx --host=gitlab.com
 glab config set token xxxxxx --host=gitlab.com
 ```
 
-### Example
-```sh
-glab config 
-```
 **NB**: Change gitlab.com to company or group's gitlab url (eg. gitlab.example.com) if self-hosted
 
 ## Environment Variables
