@@ -2,14 +2,15 @@ package view
 
 import (
 	"fmt"
+	"io"
+	"strings"
+
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/commands/mr/mrutils"
 	"github.com/profclems/glab/internal/config"
 	"github.com/profclems/glab/internal/glrepo"
 	"github.com/profclems/glab/internal/utils"
 	"github.com/profclems/glab/pkg/api"
-	"io"
-	"strings"
 
 	"github.com/MakeNowJust/heredoc"
 	"github.com/spf13/cobra"
@@ -22,10 +23,9 @@ var (
 	limit          int
 	pageNumber     int
 	baseRepo       glrepo.Interface
-	cfg 		   config.Config
-	apiClient	   *gitlab.Client
+	cfg            config.Config
 	glamourStyle   string
-	notes		   []*gitlab.Note
+	notes          []*gitlab.Note
 )
 
 func NewCmdView(f *cmdutils.Factory) *cobra.Command {
@@ -109,7 +109,7 @@ func NewCmdView(f *cmdutils.Factory) *cobra.Command {
 	return mrViewCmd
 }
 
-func labelsList(mr *gitlab.MergeRequest) string  {
+func labelsList(mr *gitlab.MergeRequest) string {
 	var labels string
 	for _, l := range mr.Labels {
 		labels += " " + l + ","
@@ -152,7 +152,7 @@ func printTTYMRPreview(out io.Writer, mr *gitlab.MergeRequest) error {
 		fmt.Fprintln(out, mr.Description)
 	}
 
-	fmt.Fprintln(out, utils.Gray("\n%d upvotes • %d downvotes • %d comments"), mr.Upvotes, mr.Downvotes, mr.UserNotesCount)
+	fmt.Fprintf(out, utils.Gray("\n%d upvotes • %d downvotes • %d comments\n"), mr.Upvotes, mr.Downvotes, mr.UserNotesCount)
 
 	// Meta information
 	if labels := labelsList(mr); labels != "" {
@@ -186,11 +186,11 @@ func printTTYMRPreview(out io.Writer, mr *gitlab.MergeRequest) error {
 				createdAt := utils.TimeToPrettyTimeAgo(*note.CreatedAt)
 				fmt.Fprint(out, note.Author.Username)
 				if note.System {
-					fmt.Fprintf(out," %s ", note.Body)
+					fmt.Fprintf(out, " %s ", note.Body)
 					fmt.Fprintln(out, utils.Gray(createdAt))
 				} else {
 					body, _ := utils.RenderMarkdown(note.Body, glamourStyle)
-					fmt.Fprint(out," commented ")
+					fmt.Fprint(out, " commented ")
 					fmt.Fprintf(out, utils.Gray("%s\n"), createdAt)
 					fmt.Fprintln(out, utils.Indent(body, " "))
 				}
