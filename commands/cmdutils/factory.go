@@ -14,8 +14,8 @@ import (
 )
 
 var (
-	cachedConfig config.Config
-	configError error
+	CachedConfig config.Config
+	ConfigError error
 )
 
 type Factory struct {
@@ -64,11 +64,11 @@ func remotesFunc() (glrepo.Remotes, error) {
 }
 
 func configFunc() (config.Config, error) {
-	if cachedConfig != nil || configError != nil {
-		return cachedConfig, configError
+	if CachedConfig != nil || ConfigError != nil {
+		return CachedConfig, ConfigError
 	}
-	cachedConfig, configError = initConfig()
-	return cachedConfig, configError
+	CachedConfig, ConfigError = initConfig()
+	return CachedConfig, ConfigError
 }
 
 func baseRepoFunc() (glrepo.Interface, error) {

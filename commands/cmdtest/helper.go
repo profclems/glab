@@ -146,8 +146,9 @@ func StubFactory(repo string) *cmdutils.Factory {
 	if CachedTestFactory != nil {
 		return CachedTestFactory
 	}
-	conf := config.NewBlankConfig()
-	CachedTestFactory = cmdutils.New(conf, nil)
+	cmdutils.CachedConfig = config.NewBlankConfig()
+
+	CachedTestFactory = cmdutils.NewFactory()
 	if repo != "" {
 		_ = CachedTestFactory.RepoOverride(repo)
 	}
@@ -159,11 +160,11 @@ func StubFactoryWithConfig(repo string) (*cmdutils.Factory, error) {
 	if CachedTestFactory != nil {
 		return CachedTestFactory, nil
 	}
-	conf, err := config.ParseConfig("config.yml")
-	if err != nil {
-		return nil, err
+	cmdutils.CachedConfig, cmdutils.ConfigError = config.ParseConfig("config.yml")
+	if cmdutils.ConfigError != nil {
+		return nil, cmdutils.ConfigError
 	}
-	CachedTestFactory = cmdutils.New(conf, nil)
+	CachedTestFactory = cmdutils.NewFactory()
 	if repo != "" {
 		_ = CachedTestFactory.RepoOverride(repo)
 	}

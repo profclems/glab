@@ -22,6 +22,7 @@ type IOStreams struct {
 	StdErr io.Writer
 
 	IsaTTY bool
+	IsErrTTY bool
 
 	pagerCommand string
 	pagerProcess *os.Process
@@ -29,7 +30,7 @@ type IOStreams struct {
 
 func InitIOStream() *IOStreams {
 	stdoutIsTTY := IsTerminal(os.Stdout)
-	//stderrIsTTY := IsTerminal(os.Stderr)
+	stderrIsTTY := IsTerminal(os.Stderr)
 
 	var pagerCommand string
 	if ghPager, ghPagerExists := os.LookupEnv("GH_PAGER"); ghPagerExists {
@@ -44,12 +45,10 @@ func InitIOStream() *IOStreams {
 		StdErr:       NewColorable(os.Stderr),
 		pagerCommand: pagerCommand,
 		IsaTTY: stdoutIsTTY,
+		IsErrTTY: stderrIsTTY,
 	}
 	_isColorEnabled = isColorEnabled() && stdoutIsTTY
 
-	// prevent duplicate IsTerminal queries now that we know the answer
-	//ioStream.SetStdoutTTY(stdoutIsTTY)
-	//ioStream.SetStderrTTY(stderrIsTTY)
 	return ioStream
 }
 
