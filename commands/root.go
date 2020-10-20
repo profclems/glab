@@ -16,6 +16,7 @@ import (
 	projectCmd "github.com/profclems/glab/commands/project"
 	releaseCmd "github.com/profclems/glab/commands/release"
 	updateCmd "github.com/profclems/glab/commands/update"
+	userCmd "github.com/profclems/glab/commands/user"
 	versionCmd "github.com/profclems/glab/commands/version"
 	"github.com/profclems/glab/internal/glrepo"
 
@@ -103,6 +104,7 @@ func NewCmdRoot(f *cmdutils.Factory, version, buildDate string) *cobra.Command {
 	rootCmd.AddCommand(pipelineCmd.NewCmdPipeline(f))
 	rootCmd.AddCommand(projectCmd.NewCmdRepo(f))
 	rootCmd.AddCommand(releaseCmd.NewCmdRelease(f))
+	rootCmd.AddCommand(userCmd.NewCmdUser(f))
 
 	rootCmd.Flags().BoolP("version", "v", false, "show glab version information")
 	return rootCmd
