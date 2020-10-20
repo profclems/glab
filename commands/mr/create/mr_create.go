@@ -31,7 +31,7 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 				targetBranch     string
 			)
 
-			out := utils.ColorableOut(cmd)
+			out := f.IO.StdOut
 			l := &gitlab.CreateMergeRequestOptions{}
 
 			apiClient, err := f.HttpClient()
@@ -108,7 +108,7 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 					if err != nil {
 						return err
 					}
-					fmt.Printf("warning: you have %v uncommitted changes\n", c)
+					fmt.Fprintf(out,"warning: you have %v uncommitted changes\n", c)
 				}
 
 				err = git.Push(repoRemote.PushURL.String(), sourceBranch)

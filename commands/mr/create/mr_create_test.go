@@ -1,7 +1,9 @@
 package create
 
 import (
+	"bytes"
 	"fmt"
+	"github.com/profclems/glab/internal/utils"
 	"os/exec"
 	"strings"
 	"testing"
@@ -20,6 +22,8 @@ import (
 var (
 	stubFactory *cmdutils.Factory
 	cmd         *cobra.Command
+	stdout		*bytes.Buffer
+	stderr		*bytes.Buffer
 )
 
 func TestMain(m *testing.M) {
@@ -30,7 +34,12 @@ hosts:
     username: monalisa
 `, "")()
 
-	stubFactory, _ = cmdtest.StubFactoryWithConfig("")
+	var io *utils.IOStreams
+	io, _, stdout, stderr = utils.IOTest()
+	stubFactory, _ = cmdtest.StubFactoryWithConfig("https://gitlab.com/glab-cli/test.git")
+	stubFactory.IO = io
+	stubFactory.IO.IsaTTY = true
+	stubFactory.IO.IsErrTTY = true
 
 	timer, _ := time.Parse(time.RFC3339, "2014-11-12T11:45:26.371Z")
 	api.CreateMR = func(client *gitlab.Client, projectID interface{}, opts *gitlab.CreateMergeRequestOptions) (*gitlab.MergeRequest, error) {
@@ -76,14 +85,16 @@ func TestMrCmd(t *testing.T) {
 
 	cli := strings.Join(cliStr, " ")
 	t.Log(cli)
-	output, err := cmdtest.RunCommand(cmd, cli)
+	_, err := cmdtest.RunCommand(cmd, cli)
 	if err != nil {
 		t.Error(err)
 		return
 	}
 
-	out := stripansi.Strip(output.String())
-	outErr := stripansi.Strip(output.Stderr())
+	out := stripansi.Strip(stdout.String())
+	outErr := stripansi.Strip(stderr.String())
+	stdout.Reset()
+	stderr.Reset()
 
 	assert.Contains(t, cmdtest.FirstLine([]byte(out)), `!1 myMRtitle`)
 	cmdtest.Eq(t, outErr, "")
@@ -106,16 +117,16 @@ func TestNewCmdCreate_autofill(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		output, err := cmdtest.RunCommand(cmd, "-f -b master")
+		_, err = cmdtest.RunCommand(cmd, "-f -b master")
 		if err != nil {
 			t.Error(err)
 			return
 		}
 
-		out := stripansi.Strip(output.String())
-		outErr := stripansi.Strip(output.Stderr())
+		out := stripansi.Strip(stdout.String())
+		outErr := stripansi.Strip(stderr.String())
 
-		assert.Contains(t, cmdtest.FirstLine([]byte(out)), `!1 Update somefile.txt`)
+		assert.Contains(t, out, `!1 Update somefile.txt`)
 		cmdtest.Eq(t, outErr, "")
 		assert.Contains(t, out, "https://gitlab.com/glab-cli/test/-/merge_requests/1")
 

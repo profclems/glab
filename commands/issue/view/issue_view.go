@@ -141,7 +141,7 @@ func printTTYIssuePreview(out io.Writer, issue *gitlab.Issue) error {
 	fmt.Fprint(out, issueState(issue))
 	fmt.Fprintf(out, utils.Gray(" • opened by %s %s\n"), issue.Author.Username, issueTimeAgo)
 	fmt.Fprint(out, issue.Title)
-	fmt.Fprintf(out, utils.Gray(" !%d"), issue.IID)
+	fmt.Fprintf(out, utils.Gray(" #%d"), issue.IID)
 	fmt.Fprintln(out)
 
 	// Description
@@ -210,7 +210,7 @@ func printRawIssuePreview(out io.Writer, issue *gitlab.Issue) error {
 	labels := labelsList(issue)
 
 	fmt.Fprintf(out, "title:\t%s\n", issue.Title)
-	fmt.Fprintf(out, "state:\t%s\n", issue.State)
+	fmt.Fprintf(out, "state:\t%s\n", issueState(issue))
 	fmt.Fprintf(out, "author:\t%s\n", issue.Author.Username)
 	fmt.Fprintf(out, "labels:\t%s\n", labels)
 	fmt.Fprintf(out, "comments:\t%d\n", issue.UserNotesCount)

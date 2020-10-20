@@ -1,8 +1,11 @@
 package view
 
 import (
+	"bytes"
 	"fmt"
+	"github.com/profclems/glab/internal/utils"
 	"os/exec"
+	"regexp"
 	"testing"
 	"time"
 
@@ -20,6 +23,8 @@ import (
 
 var (
 	stubFactory *cmdutils.Factory
+	stdout		*bytes.Buffer
+	stderr		*bytes.Buffer
 )
 
 type author struct {
@@ -40,7 +45,12 @@ hosts:
     token: OTOKEN
 `, "")()
 
+	var io *utils.IOStreams
+	io, _, stdout, stderr = utils.IOTest()
 	stubFactory, _ = cmdtest.StubFactoryWithConfig("")
+	stubFactory.IO = io
+	stubFactory.IO.IsaTTY = true
+	stubFactory.IO.IsErrTTY = true
 
 	timer, _ := time.Parse(time.RFC3339, "2014-11-12T11:45:26.371Z")
 	api.GetIssue = func(client *gitlab.Client, projectID interface{}, issueID int) (*gitlab.Issue, error) {
@@ -61,6 +71,17 @@ hosts:
 			References: &gitlab.IssueReferences{
 				Full: fmt.Sprintf("%s#%d", repo.FullName(), issueID),
 			},
+			Milestone: &gitlab.Milestone{
+				Title: "MilestoneTitle",
+			},
+			Assignees: []*gitlab.IssueAssignee{
+				{
+					Username: "mona",
+				},
+				{
+					Username: "lisa",
+				},
+			},
 			Author: &gitlab.IssueAuthor{
 				ID:       issueID,
 				Name:     "John Dev Wick",
@@ -68,6 +89,7 @@ hosts:
 			},
 			WebURL:    fmt.Sprintf("https://%s/%s/-/issues/%d", repo.RepoHost(), repo.FullName(), issueID),
 			CreatedAt: &timer,
+			UserNotesCount: 2,
 		}, nil
 	}
 	cmdtest.InitTest(m, "mr_view_test")
@@ -84,14 +106,16 @@ func TestNewCmdView_web_numberArg(t *testing.T) {
 	})
 	defer restoreCmd()
 
-	output, err := cmdtest.RunCommand(cmd, "225 -w -R glab-cli/test")
+	_, err := cmdtest.RunCommand(cmd, "225 -w -R glab-cli/test")
 	if err != nil {
 		t.Error(err)
 		return
 	}
 
-	out := stripansi.Strip(output.String())
-	outErr := stripansi.Strip(output.Stderr())
+	out := stripansi.Strip(stdout.String())
+	outErr := stripansi.Strip(stderr.String())
+	stdout.Reset()
+	stderr.Reset()
 
 	assert.Contains(t, out, "Opening gitlab.com/glab-cli/test/-/issues/225 in your browser.")
 	assert.Equal(t, "", outErr)
@@ -137,25 +161,67 @@ func TestNewCmdView(t *testing.T) {
 			},
 		}, nil
 	}
-	cmd := NewCmdView(stubFactory)
-	cmdutils.EnableRepoOverride(cmd, stubFactory)
 
 	t.Run("show", func(t *testing.T) {
 
-		output, err := cmdtest.RunCommand(cmd, "13 -c -s -R glab-cli/test")
+		cmd := NewCmdView(stubFactory)
+		cmdutils.EnableRepoOverride(cmd, stubFactory)
+		_, err := cmdtest.RunCommand(cmd, "13 -c -s -R glab-cli/test")
 		if err != nil {
 			t.Error(err)
 			return
 		}
 
-		out := stripansi.Strip(output.String())
-		outErr := stripansi.Strip(output.Stderr())
+		out := stripansi.Strip(stdout.String())
+		outErr := stripansi.Strip(stderr.String())
+		stdout.Reset()
+		stderr.Reset()
 
 		require.Contains(t, out, "issueTitle #13")
 		require.Contains(t, out, "issueBody")
 		require.Equal(t, outErr, "")
 		assert.Contains(t, out, "https://gitlab.com/glab-cli/test/-/issues/13")
-		assert.Contains(t, out, "johnwick:\tMarked issue as stale")
+		assert.Contains(t, out, "johnwick Marked issue as stale")
+	})
+
+	t.Run("no_tty", func(t *testing.T) {
+		stubFactory.IO.IsaTTY = false
+		stubFactory.IO.IsErrTTY = false
+
+		cmd := NewCmdView(stubFactory)
+		cmdutils.EnableRepoOverride(cmd, stubFactory)
+
+		_, err := cmdtest.RunCommand(cmd, "13 -c -s -R glab-cli/test")
+		if err != nil {
+			t.Error(err)
+			return
+		}
+
+		expectedOutputs := []string{
+			`title:\tissueTitle`,
+			`assignees:\tmona, lisa`,
+			`author:\tjdwick`,
+			`state:\topen`,
+			`comments:\t2`,
+			`labels:\ttest, bug`,
+			`milestone:\tMilestoneTitle\n`,
+			`--`,
+			`issueBody`,
+		}
+
+		out := stripansi.Strip(stdout.String())
+		outErr := stripansi.Strip(stderr.String())
+
+		cmdtest.Eq(t, outErr, "")
+		t.Helper()
+		var r *regexp.Regexp
+		for _, l := range expectedOutputs {
+			r = regexp.MustCompile(l)
+			if !r.MatchString(out) {
+				t.Errorf("output did not match regexp /%s/\n> output\n%s\n", r, out)
+				return
+			}
+		}
 	})
 	api.ListIssueNotes = oldListIssueNotes
 }

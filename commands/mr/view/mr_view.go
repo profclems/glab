@@ -216,6 +216,7 @@ func printRawMRPreview(out io.Writer, mr *gitlab.MergeRequest) error {
 	fmt.Fprintf(out, "author:\t%s\n", mr.Author.Username)
 	fmt.Fprintf(out, "labels:\t%s\n", labels)
 	fmt.Fprintf(out, "assignees:\t%s\n", assignees)
+	fmt.Fprintf(out, "comments:\t%d\n", mr.UserNotesCount)
 	if mr.Milestone != nil {
 		fmt.Fprintf(out, "milestone:\t%s\n", mr.Milestone.Title)
 	}

@@ -94,6 +94,7 @@ func NewCmdRoot(f *cmdutils.Factory, version, buildDate string) *cobra.Command {
 
 	// the commands below require apiClient and resolved repos
 	f.BaseRepo = resolvedBaseRepo(f)
+	cmdutils.HTTPClientFactory(f) // Initialize HTTP Client
 
 	rootCmd.AddCommand(issueCmd.NewCmdIssue(f))
 	rootCmd.AddCommand(labelCmd.NewCmdLabel(f))
@@ -108,8 +109,6 @@ func NewCmdRoot(f *cmdutils.Factory, version, buildDate string) *cobra.Command {
 
 func resolvedBaseRepo(f *cmdutils.Factory) func() (glrepo.Interface, error) {
 	return func() (glrepo.Interface, error) {
-		cmdutils.HTTPClientFactory(f)
-
 		httpClient, err := f.HttpClient()
 		if err != nil {
 			return nil, err
@@ -126,6 +125,8 @@ func resolvedBaseRepo(f *cmdutils.Factory) func() (glrepo.Interface, error) {
 		if err != nil {
 			return nil, err
 		}
+
+
 
 		return baseRepo, nil
 	}
