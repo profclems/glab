@@ -126,8 +126,6 @@ func resolvedBaseRepo(f *cmdutils.Factory) func() (glrepo.Interface, error) {
 			return nil, err
 		}
 
-
-
 		return baseRepo, nil
 	}
 }

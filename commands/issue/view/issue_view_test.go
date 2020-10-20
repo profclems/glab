@@ -3,11 +3,12 @@ package view
 import (
 	"bytes"
 	"fmt"
-	"github.com/profclems/glab/internal/utils"
 	"os/exec"
 	"regexp"
 	"testing"
 	"time"
+
+	"github.com/profclems/glab/internal/utils"
 
 	"github.com/acarl005/stripansi"
 	"github.com/profclems/glab/commands/cmdtest"
@@ -23,8 +24,8 @@ import (
 
 var (
 	stubFactory *cmdutils.Factory
-	stdout		*bytes.Buffer
-	stderr		*bytes.Buffer
+	stdout      *bytes.Buffer
+	stderr      *bytes.Buffer
 )
 
 type author struct {
@@ -87,8 +88,8 @@ hosts:
 				Name:     "John Dev Wick",
 				Username: "jdwick",
 			},
-			WebURL:    fmt.Sprintf("https://%s/%s/-/issues/%d", repo.RepoHost(), repo.FullName(), issueID),
-			CreatedAt: &timer,
+			WebURL:         fmt.Sprintf("https://%s/%s/-/issues/%d", repo.RepoHost(), repo.FullName(), issueID),
+			CreatedAt:      &timer,
 			UserNotesCount: 2,
 		}, nil
 	}

@@ -3,11 +3,12 @@ package create
 import (
 	"bytes"
 	"fmt"
-	"github.com/profclems/glab/internal/utils"
 	"os/exec"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/profclems/glab/internal/utils"
 
 	"github.com/acarl005/stripansi"
 	"github.com/profclems/glab/commands/cmdtest"
@@ -22,8 +23,8 @@ import (
 var (
 	stubFactory *cmdutils.Factory
 	cmd         *cobra.Command
-	stdout		*bytes.Buffer
-	stderr		*bytes.Buffer
+	stdout      *bytes.Buffer
+	stderr      *bytes.Buffer
 )
 
 func TestMain(m *testing.M) {

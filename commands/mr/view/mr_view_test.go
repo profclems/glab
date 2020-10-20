@@ -3,11 +3,12 @@ package view
 import (
 	"bytes"
 	"fmt"
-	"github.com/profclems/glab/internal/utils"
 	"os/exec"
 	"regexp"
 	"testing"
 	"time"
+
+	"github.com/profclems/glab/internal/utils"
 
 	"github.com/acarl005/stripansi"
 	"github.com/profclems/glab/commands/cmdutils"
@@ -24,8 +25,8 @@ import (
 
 var (
 	stubFactory *cmdutils.Factory
-	stdout		*bytes.Buffer
-	stderr		*bytes.Buffer
+	stdout      *bytes.Buffer
+	stderr      *bytes.Buffer
 )
 
 type author struct {
@@ -82,8 +83,8 @@ hosts:
 					Username: "lisa",
 				},
 			},
-			WebURL:    fmt.Sprintf("https://%s/%s/-/merge_requests/%d", repo.RepoHost(), repo.FullName(), mrID),
-			CreatedAt: &timer,
+			WebURL:         fmt.Sprintf("https://%s/%s/-/merge_requests/%d", repo.RepoHost(), repo.FullName(), mrID),
+			CreatedAt:      &timer,
 			UserNotesCount: 2,
 			Milestone: &gitlab.Milestone{
 				Title: "MilestoneTitle",
