@@ -25,7 +25,7 @@ func NewCmdUpdate(f *cmdutils.Factory) *cobra.Command {
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var err error
-			out := utils.ColorableOut(cmd)
+			out := f.IO.StdOut
 
 			apiClient, err := f.HttpClient()
 			if err != nil {
@@ -54,7 +54,9 @@ func NewCmdUpdate(f *cmdutils.Factory) *cobra.Command {
 			if m, _ := cmd.Flags().GetStringArray("unlabel"); len(m) != 0 {
 				l.RemoveLabels = gitlab.Labels(m)
 			}
+
 			fmt.Fprintf(out, "- Updating issue #%d", issueID)
+
 			issue, err := api.UpdateIssue(apiClient, repo.FullName(), issueID, l)
 			if err != nil {
 				return err

@@ -5,6 +5,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/profclems/glab/internal/utils"
+
 	"github.com/acarl005/stripansi"
 	"github.com/profclems/glab/commands/cmdtest"
 	"github.com/profclems/glab/pkg/api"
@@ -60,13 +62,19 @@ func TestNewCmdSubscribe(t *testing.T) {
 		},
 	}
 
-	cmd := NewCmdSubscribe(cmdtest.StubFactory("https://gitlab.com/glab-cli/test"))
+	io, _, stdout, stderr := utils.IOTest()
+	f := cmdtest.StubFactory("https://gitlab.com/glab-cli/test")
+	f.IO = io
+	f.IO.IsaTTY = true
+	f.IO.IsErrTTY = true
+
+	cmd := NewCmdSubscribe(f)
 	cmd.Flags().StringP("repo", "R", "", "")
 
 	for _, tc := range testCases {
 		t.Run(tc.Name, func(t *testing.T) {
 
-			output, err := cmdtest.RunCommand(cmd, tc.Issue)
+			_, err := cmdtest.RunCommand(cmd, tc.Issue)
 			if tc.wantErr {
 				require.Error(t, err)
 				return
@@ -74,10 +82,11 @@ func TestNewCmdSubscribe(t *testing.T) {
 				require.NoError(t, err)
 			}
 
-			out := stripansi.Strip(output.String())
+			out := stripansi.Strip(stdout.String())
 
 			for _, msg := range tc.ExpectedMsg {
 				assert.Contains(t, out, msg)
+				assert.Contains(t, stderr.String(), "")
 			}
 		})
 	}

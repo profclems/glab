@@ -1,10 +1,11 @@
 package close
 
 import (
-	"bytes"
 	"fmt"
 	"testing"
 	"time"
+
+	"github.com/profclems/glab/internal/utils"
 
 	"github.com/acarl005/stripansi"
 	"github.com/profclems/glab/pkg/api"
@@ -59,12 +60,17 @@ func Test_issueClose(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.Name, func(t *testing.T) {
-			var stderr bytes.Buffer
-			var stdout bytes.Buffer
-			cmd := NewCmdClose(cmdtest.StubFactory("https://gitlab.com/glab-cli/test"))
+
+			io, _, stdout, stderr := utils.IOTest()
+			f := cmdtest.StubFactory("https://gitlab.com/glab-cli/test")
+			f.IO = io
+			f.IO.IsaTTY = true
+			f.IO.IsErrTTY = true
+			cmd := NewCmdClose(f)
+
 			cmd.SetArgs([]string{tc.Issue})
-			cmd.SetOut(&stdout)
-			cmd.SetErr(&stderr)
+			cmd.SetOut(stdout)
+			cmd.SetErr(stderr)
 
 			_, err := cmd.ExecuteC()
 			if tc.wantErr {
