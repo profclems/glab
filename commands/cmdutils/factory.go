@@ -37,7 +37,10 @@ func (f *Factory) RepoOverride(repo string) error {
 		return err
 	}
 	// Initialise new http client for new repo host
-	cfg, _ := f.Config()
+	cfg, err := f.Config()
+	if err == nil {
+		OverrideAPIProtocol(cfg, newRepo)
+	}
 	f.HttpClient = func() (*gitlab.Client, error) {
 		return httpClientFunc(cfg, newRepo)
 	}
@@ -80,6 +83,11 @@ func baseRepoFunc() (glrepo.Interface, error) {
 	return glrepo.FromURL(remotes[0].FetchURL)
 }
 
+// OverrideAPIProtocol sets api protocol for host to initialize http client
+func OverrideAPIProtocol(cfg config.Config, repo glrepo.Interface) {
+	api.Protocol, _ = cfg.Get(repo.RepoHost(), "api_protocol")
+}
+
 func HTTPClientFactory(f *Factory) {
 	f.HttpClient = func() (*gitlab.Client, error) {
 		cfg, err := configFunc()
@@ -90,6 +98,7 @@ func HTTPClientFactory(f *Factory) {
 		if err != nil {
 			return nil, err
 		}
+		OverrideAPIProtocol(cfg, repo)
 		return httpClientFunc(cfg, repo)
 	}
 }

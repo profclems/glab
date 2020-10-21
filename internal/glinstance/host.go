@@ -57,9 +57,12 @@ func StripHostProtocol(h string) (hostname, protocol string) {
 }
 
 // APIEndpoint returns the API endpoint prefix for a GitLab instance :)
-func APIEndpoint(hostname string) string {
+func APIEndpoint(hostname, protocol string) string {
+	if protocol == "" {
+		protocol = "https"
+	}
 	if IsSelfHosted(hostname) {
-		return fmt.Sprintf("https://%s/api/v4/", hostname)
+		return fmt.Sprintf("%s://%s/api/v4/", protocol, hostname)
 	}
 	return "https://gitlab.com/api/v4/"
 }

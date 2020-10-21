@@ -107,8 +107,9 @@ func TestNormalizeHostname(t *testing.T) {
 
 func TestAPIEndpoint(t *testing.T) {
 	tests := []struct {
-		host string
-		want string
+		host     string
+		protocol string
+		want     string
 	}{
 		{
 			host: "gitlab.com",
@@ -118,10 +119,15 @@ func TestAPIEndpoint(t *testing.T) {
 			host: "ghe.io",
 			want: "https://ghe.io/api/v4/",
 		},
+		{
+			host:     "salsa.debian.com",
+			protocol: "http",
+			want:     "http://salsa.debian.com/api/v4/",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.host, func(t *testing.T) {
-			if got := APIEndpoint(tt.host); got != tt.want {
+			if got := APIEndpoint(tt.host, tt.protocol); got != tt.want {
 				t.Errorf("APIEndpoint() = %v, want %v", got, tt.want)
 			}
 		})

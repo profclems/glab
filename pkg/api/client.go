@@ -16,6 +16,7 @@ import (
 var (
 	apiClient *gitlab.Client
 	err       error
+	Protocol  = "https"
 )
 
 // Init initializes a gitlab client for use throughout glab.
@@ -39,7 +40,7 @@ func Init(host, token string, allowInsecure bool) (*gitlab.Client, error) {
 		},
 	}
 
-	apiClient, err = gitlab.NewClient(token, gitlab.WithHTTPClient(httpClient), gitlab.WithBaseURL(glinstance.APIEndpoint(host)))
+	apiClient, err = gitlab.NewClient(token, gitlab.WithHTTPClient(httpClient), gitlab.WithBaseURL(glinstance.APIEndpoint(host, Protocol)))
 	if err != nil {
 		return nil, fmt.Errorf("failed to initialize GitLab client: %v", err)
 	}
@@ -51,7 +52,7 @@ func InitWithBasicAuth(host, username, password string) (*gitlab.Client, error) 
 	apiClient, err = gitlab.NewBasicAuthClient(
 		username,
 		password,
-		gitlab.WithBaseURL(glinstance.APIEndpoint(host)),
+		gitlab.WithBaseURL(glinstance.APIEndpoint(host, Protocol)),
 	)
 	if err != nil {
 		return nil, err
@@ -90,6 +91,6 @@ func InitWithCustomCA(host, token, caFile string) (*gitlab.Client, error) {
 		},
 	}
 
-	apiClient, _ = gitlab.NewClient(token, gitlab.WithHTTPClient(httpClient), gitlab.WithBaseURL(glinstance.APIEndpoint(host)))
+	apiClient, _ = gitlab.NewClient(token, gitlab.WithHTTPClient(httpClient), gitlab.WithBaseURL(glinstance.APIEndpoint(host, Protocol)))
 	return apiClient, nil
 }
