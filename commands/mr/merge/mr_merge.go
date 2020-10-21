@@ -44,7 +44,7 @@ func NewCmdMerge(f *cmdutils.Factory) *cobra.Command {
 				Merged:         true,
 				Conflict:       true,
 				PipelineStatus: true,
-				MergePrivilege:	true,
+				MergePrivilege: true,
 			}); err != nil {
 				return err
 			}
