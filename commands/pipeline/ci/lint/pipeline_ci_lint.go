@@ -30,7 +30,8 @@ func NewCmdLint(f *cmdutils.Factory) *cobra.Command {
 	`),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var err error
-			out := utils.ColorableOut(cmd)
+			out := f.IO.StdOut
+
 			apiClient, err := f.HttpClient()
 			if err != nil {
 				return err
@@ -40,6 +41,7 @@ func NewCmdLint(f *cmdutils.Factory) *cobra.Command {
 			if len(args) == 1 {
 				path = args[0]
 			}
+
 			fmt.Fprintln(out, "Getting contents in", path)
 
 			var content []byte

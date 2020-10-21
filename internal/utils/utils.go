@@ -2,17 +2,13 @@ package utils
 
 import (
 	"fmt"
-	"io"
 	"net/url"
-	"os"
 	"strings"
 	"time"
 
 	"github.com/charmbracelet/glamour"
 	"github.com/profclems/glab/internal/browser"
 	"github.com/profclems/glab/internal/run"
-
-	"github.com/spf13/cobra"
 )
 
 // OpenInBrowser opens the url in a web browser based on OS and $BROWSER environment variable
@@ -108,20 +104,4 @@ func GreenCheck() string {
 
 func RedCheck() string {
 	return Red("✔")
-}
-
-func ColorableOut(cmd *cobra.Command) io.Writer {
-	out := cmd.OutOrStdout()
-	if outFile, isFile := out.(*os.File); isFile {
-		return NewColorable(outFile)
-	}
-	return out
-}
-
-func ColorableErr(cmd *cobra.Command) io.Writer {
-	err := cmd.ErrOrStderr()
-	if outFile, isFile := err.(*os.File); isFile {
-		return NewColorable(outFile)
-	}
-	return err
 }

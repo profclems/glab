@@ -67,7 +67,7 @@ func NewCmdConfigGet(f *cmdutils.Factory) *cobra.Command {
 			}
 
 			if val != "" {
-				fmt.Fprintf(utils.ColorableOut(cmd), "%s\n", val)
+				fmt.Fprintf(f.IO.StdOut, "%s\n", val)
 			}
 			return nil
 		},
@@ -141,13 +141,13 @@ Examples:
   ? Enter default Gitlab Host (Current Value: https://gitlab.com): |
 `,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return configInit(cmd, f)
+			return configInit(f)
 		},
 	}
 	return configInitCmd
 }
 
-func configInit(cmd *cobra.Command, f *cmdutils.Factory) error {
+func configInit(f *cmdutils.Factory) error {
 	var host string
 	cfg, err := f.Config()
 	if err != nil {
@@ -182,6 +182,6 @@ func configInit(cmd *cobra.Command, f *cmdutils.Factory) error {
 	if cfg.Write() != nil {
 		return err
 	}
-	fmt.Fprintf(utils.ColorableOut(cmd), "%s Configuration updated", utils.GreenCheck())
+	fmt.Fprintf(f.IO.StdOut, "%s Configuration updated", utils.GreenCheck())
 	return nil
 }

@@ -3,13 +3,14 @@ package completion
 import (
 	"errors"
 	"fmt"
-	"os"
+
+	"github.com/profclems/glab/commands/cmdutils"
 
 	"github.com/profclems/glab/internal/utils"
 	"github.com/spf13/cobra"
 )
 
-func NewCmdCompletion() *cobra.Command {
+func NewCmdCompletion(io *utils.IOStreams) *cobra.Command {
 	var shellType string
 
 	var completionCmd = &cobra.Command{
@@ -29,34 +30,25 @@ no additional shell configuration is necessary to gain completion support.
 For Homebrew, see <https://docs.brew.sh/Shell-Completion>
 `,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			shellType, err := cmd.Flags().GetString("shell")
-			if err != nil {
-				return err
-			}
-
 			if shellType == "" {
-				out := cmd.OutOrStdout()
-				isTTY := false
-				if outFile, isFile := out.(*os.File); isFile {
-					isTTY = utils.IsTerminal(outFile)
-				}
-
-				if isTTY {
-					return errors.New("error: the value for `--shell` is required\nsee `glab help completion` for more information")
+				if io.IsaTTY && io.IsErrTTY {
+					return &cmdutils.FlagError{Err: errors.New("error: the value for `--shell` is required")}
 				}
 				shellType = "bash"
 			}
+
+			out := io.StdOut
 			rootCmd := cmd.Parent()
 
 			switch shellType {
 			case "bash":
-				return rootCmd.GenBashCompletion(cmd.OutOrStdout())
+				return rootCmd.GenBashCompletion(out)
 			case "zsh":
-				return rootCmd.GenZshCompletion(cmd.OutOrStdout())
+				return rootCmd.GenZshCompletion(out)
 			case "powershell":
-				return rootCmd.GenPowerShellCompletion(cmd.OutOrStdout())
+				return rootCmd.GenPowerShellCompletion(out)
 			case "fish":
-				return rootCmd.GenFishCompletion(cmd.OutOrStdout(), true)
+				return rootCmd.GenFishCompletion(out, true)
 			default:
 				return fmt.Errorf("unsupported shell type %q", shellType)
 			}
@@ -64,6 +56,5 @@ For Homebrew, see <https://docs.brew.sh/Shell-Completion>
 	}
 
 	completionCmd.Flags().StringVarP(&shellType, "shell", "s", "", "Shell type: {bash|zsh|fish|powershell}")
-
 	return completionCmd
 }

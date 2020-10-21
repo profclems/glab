@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"sort"
 
-	"github.com/gosuri/uitable"
+	"github.com/profclems/glab/pkg/tableprinter"
+
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/internal/utils"
 
@@ -15,11 +16,13 @@ import (
 
 type ListOptions struct {
 	Config func() (config.Config, error)
+	IO     *utils.IOStreams
 }
 
 func NewCmdList(f *cmdutils.Factory, runF func(*ListOptions) error) *cobra.Command {
 	opts := &ListOptions{
 		Config: f.Config,
+		IO:     f.IO,
 	}
 
 	var aliasListCmd = &cobra.Command{
@@ -49,11 +52,11 @@ func listRun(cmd *cobra.Command, opts *ListOptions) error {
 
 	if aliasCfg.Empty() {
 
-		fmt.Fprintf(utils.ColorableErr(cmd), "no aliases configured\n")
+		fmt.Fprintf(opts.IO.StdErr, "no aliases configured\n")
 		return nil
 	}
 
-	table := uitable.New()
+	table := tableprinter.NewTablePrinter()
 	table.MaxColWidth = 70
 
 	aliasMap := aliasCfg.All()
@@ -66,7 +69,7 @@ func listRun(cmd *cobra.Command, opts *ListOptions) error {
 	for _, alias := range keys {
 		table.AddRow(alias, aliasMap[alias])
 	}
-	fmt.Fprintf(utils.ColorableOut(cmd), "%v", table)
+	fmt.Fprintf(opts.IO.StdOut, "%s", table.Render())
 
 	return nil
 }

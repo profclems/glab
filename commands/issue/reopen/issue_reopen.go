@@ -22,7 +22,7 @@ func NewCmdReopen(f *cmdutils.Factory) *cobra.Command {
 		Args:    cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var err error
-			out := utils.ColorableOut(cmd)
+			out := f.IO.StdOut
 
 			gLabClient, err := f.HttpClient()
 
@@ -41,11 +41,15 @@ func NewCmdReopen(f *cmdutils.Factory) *cobra.Command {
 			l.StateEvent = gitlab.String("reopen")
 			arrIds := strings.Split(strings.Trim(issueID, "[] "), ",")
 			for _, i2 := range arrIds {
-				fmt.Fprintln(out, "- Reopening Issue...")
+				if f.IO.IsaTTY && f.IO.IsErrTTY {
+					fmt.Fprintln(out, "- Reopening Issue...")
+				}
+
 				issue, err := api.UpdateIssue(gLabClient, repo.FullName(), utils.StringToInt(i2), l)
 				if err != nil {
 					return err
 				}
+
 				fmt.Fprintln(out, utils.GreenCheck(), "Issue #"+i2+" reopened")
 				fmt.Fprintln(out, issueutils.DisplayIssue(issue))
 			}

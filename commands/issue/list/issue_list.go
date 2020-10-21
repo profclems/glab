@@ -96,7 +96,12 @@ func NewCmdList(f *cmdutils.Factory) *cobra.Command {
 			title.ListActionType = listType
 			title.CurrentPageTotal = len(issues)
 
-			fmt.Fprintf(utils.ColorableOut(cmd), "%s\n%s\n", title.Describe(), issueutils.DisplayIssueList(issues, repo.FullName()))
+			if f.IO.StartPager() != nil {
+				return fmt.Errorf("failed to start pager: %q", err)
+			}
+			defer f.IO.StopPager()
+
+			fmt.Fprintf(f.IO.StdOut, "%s\n%s\n", title.Describe(), issueutils.DisplayIssueList(issues, repo.FullName()))
 
 			return nil
 

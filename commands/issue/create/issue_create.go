@@ -102,7 +102,7 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 			if err != nil {
 				return err
 			}
-			fmt.Fprintln(utils.ColorableOut(cmd), issueutils.DisplayIssue(issue))
+			fmt.Fprintln(f.IO.StdOut, issueutils.DisplayIssue(issue))
 			return nil
 		},
 	}

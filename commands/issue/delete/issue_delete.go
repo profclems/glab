@@ -35,12 +35,16 @@ func NewCmdDelete(f *cmdutils.Factory) *cobra.Command {
 
 			arrIds := strings.Split(strings.Trim(issueID, "[] "), ",")
 			for _, i2 := range arrIds {
-				fmt.Println("- Deleting Issue #" + i2)
+				if f.IO.IsErrTTY && f.IO.IsaTTY {
+					fmt.Fprintln(f.IO.StdOut, "- Deleting Issue #"+i2)
+				}
+
 				err := api.DeleteIssue(apiClient, repo.FullName(), utils.StringToInt(i2))
 				if err != nil {
 					return err
 				}
-				fmt.Fprintln(utils.ColorableOut(cmd), utils.GreenCheck(), "Issue Deleted")
+
+				fmt.Fprintln(f.IO.StdOut, utils.GreenCheck(), "Issue Deleted")
 			}
 			return nil
 		},
