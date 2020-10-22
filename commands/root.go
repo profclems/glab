@@ -3,9 +3,8 @@ package commands
 import (
 	"fmt"
 
-	updateCmd "github.com/profclems/glab/commands/update"
-
 	aliasCmd "github.com/profclems/glab/commands/alias"
+	authCmd "github.com/profclems/glab/commands/auth"
 	"github.com/profclems/glab/commands/cmdutils"
 	completionCmd "github.com/profclems/glab/commands/completion"
 	configCmd "github.com/profclems/glab/commands/config"
@@ -16,6 +15,7 @@ import (
 	pipelineCmd "github.com/profclems/glab/commands/pipeline"
 	projectCmd "github.com/profclems/glab/commands/project"
 	releaseCmd "github.com/profclems/glab/commands/release"
+	updateCmd "github.com/profclems/glab/commands/update"
 	versionCmd "github.com/profclems/glab/commands/version"
 	"github.com/profclems/glab/internal/glrepo"
 
@@ -91,6 +91,7 @@ func NewCmdRoot(f *cmdutils.Factory, version, buildDate string) *cobra.Command {
 	rootCmd.AddCommand(completionCmd.NewCmdCompletion(f.IO))
 	rootCmd.AddCommand(versionCmd.NewCmdVersion(version, buildDate))
 	rootCmd.AddCommand(updateCmd.NewCheckUpdateCmd(version, buildDate))
+	rootCmd.AddCommand(authCmd.NewCmdAuth(f))
 
 	// the commands below require apiClient and resolved repos
 	f.BaseRepo = resolvedBaseRepo(f)
