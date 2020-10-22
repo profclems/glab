@@ -23,9 +23,9 @@ type IOStreams struct {
 	StdOut io.Writer
 	StdErr io.Writer
 
-	IsaTTY        bool //stdout is a tty
-	IsErrTTY      bool //stderr is a tty
-	IsInTTY		  bool //stdin is a tty
+	IsaTTY         bool //stdout is a tty
+	IsErrTTY       bool //stderr is a tty
+	IsInTTY        bool //stdin is a tty
 	promptDisabled bool //disable prompting for input
 
 	pagerCommand string
@@ -44,18 +44,18 @@ func InitIOStream() *IOStreams {
 	}
 
 	ioStream := &IOStreams{
-		In:            os.Stdin,
-		StdOut:        NewColorable(os.Stdout),
-		StdErr:        NewColorable(os.Stderr),
-		pagerCommand:  pagerCommand,
-		IsaTTY:        stdoutIsTTY,
-		IsErrTTY:      stderrIsTTY,
+		In:           os.Stdin,
+		StdOut:       NewColorable(os.Stdout),
+		StdErr:       NewColorable(os.Stderr),
+		pagerCommand: pagerCommand,
+		IsaTTY:       stdoutIsTTY,
+		IsErrTTY:     stderrIsTTY,
 	}
 
 	if stdin, ok := ioStream.In.(*os.File); ok {
 		ioStream.IsInTTY = IsTerminal(stdin)
 	}
-	
+
 	_isColorEnabled = isColorEnabled() && stdoutIsTTY
 
 	return ioStream

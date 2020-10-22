@@ -2,9 +2,10 @@ package login
 
 import (
 	"bytes"
+	"testing"
+
 	"github.com/profclems/glab/commands/cmdtest"
 	"github.com/profclems/glab/internal/utils"
-	"testing"
 
 	"github.com/google/shlex"
 	"github.com/stretchr/testify/assert"
@@ -29,9 +30,9 @@ func Test_NewCmdLogin(t *testing.T) {
 			},
 		},
 		{
-			name:     "tty, stdin",
-			stdin:    "def456",
-			cli:      "--stdin",
+			name:  "tty, stdin",
+			stdin: "def456",
+			cli:   "--stdin",
 			wants: LoginOptions{
 				Hostname: "gitlab.com",
 				Token:    "def456",
@@ -60,9 +61,9 @@ func Test_NewCmdLogin(t *testing.T) {
 			},
 		},
 		{
-			name:     "tty, stdin, hostname",
-			stdin:    "gli789",
-			cli:      "--stdin --hostname gl.io",
+			name:  "tty, stdin, hostname",
+			stdin: "gli789",
+			cli:   "--stdin --hostname gl.io",
 			wants: LoginOptions{
 				Hostname: "gl.io",
 				Token:    "gli789",
