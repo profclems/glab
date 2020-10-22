@@ -23,8 +23,9 @@ type IOStreams struct {
 	StdOut io.Writer
 	StdErr io.Writer
 
-	IsaTTY   bool
-	IsErrTTY bool
+	IsaTTY        bool
+	IsErrTTY      bool
+	PromptEnabled bool
 
 	pagerCommand string
 	pagerProcess *os.Process
@@ -35,23 +36,32 @@ func InitIOStream() *IOStreams {
 	stderrIsTTY := IsTerminal(os.Stderr)
 
 	var pagerCommand string
-	if ghPager, ghPagerExists := os.LookupEnv("GH_PAGER"); ghPagerExists {
-		pagerCommand = ghPager
+	if glabPager, glabPagerExists := os.LookupEnv("GLAB_PAGER"); glabPagerExists {
+		pagerCommand = glabPager
 	} else {
 		pagerCommand = os.Getenv("PAGER")
 	}
 
 	ioStream := &IOStreams{
-		In:           os.Stdin,
-		StdOut:       NewColorable(os.Stdout),
-		StdErr:       NewColorable(os.Stderr),
-		pagerCommand: pagerCommand,
-		IsaTTY:       stdoutIsTTY,
-		IsErrTTY:     stderrIsTTY,
+		In:            os.Stdin,
+		StdOut:        NewColorable(os.Stdout),
+		StdErr:        NewColorable(os.Stderr),
+		pagerCommand:  pagerCommand,
+		IsaTTY:        stdoutIsTTY,
+		IsErrTTY:      stderrIsTTY,
+		PromptEnabled: true,
 	}
 	_isColorEnabled = isColorEnabled() && stdoutIsTTY
 
 	return ioStream
+}
+
+func (s *IOStreams) SetPrompt(promptDisabled string) {
+	if promptDisabled == "true" || promptDisabled == "1" {
+		s.PromptEnabled = false
+	} else if promptDisabled == "false" || promptDisabled == "0" {
+		s.PromptEnabled = true
+	}
 }
 
 func (s *IOStreams) SetPager(cmd string) {

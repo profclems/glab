@@ -62,6 +62,10 @@ func main() {
 		cmdFactory.IO.SetPager(pager)
 	}
 
+	if promptDisabled, _ := cfg.Get("", "no_prompt"); promptDisabled != "" {
+		cmdFactory.IO.SetPrompt(promptDisabled)
+	}
+
 	var expandedArgs []string
 	if len(os.Args) > 0 {
 		expandedArgs = os.Args[1:]
