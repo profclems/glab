@@ -23,9 +23,10 @@ type IOStreams struct {
 	StdOut io.Writer
 	StdErr io.Writer
 
-	IsaTTY        bool
-	IsErrTTY      bool
-	PromptEnabled bool
+	IsaTTY        bool //stdout is a tty
+	IsErrTTY      bool //stderr is a tty
+	IsInTTY		  bool //stdin is a tty
+	promptDisabled bool //disable prompting for input
 
 	pagerCommand string
 	pagerProcess *os.Process
@@ -49,18 +50,29 @@ func InitIOStream() *IOStreams {
 		pagerCommand:  pagerCommand,
 		IsaTTY:        stdoutIsTTY,
 		IsErrTTY:      stderrIsTTY,
-		PromptEnabled: true,
 	}
+
+	if stdin, ok := ioStream.In.(*os.File); ok {
+		ioStream.IsInTTY = IsTerminal(stdin)
+	}
+	
 	_isColorEnabled = isColorEnabled() && stdoutIsTTY
 
 	return ioStream
 }
 
+func (s *IOStreams) PromptEnabled() bool {
+	if s.promptDisabled {
+		return false
+	}
+	return s.IsInTTY && s.IsaTTY
+}
+
 func (s *IOStreams) SetPrompt(promptDisabled string) {
 	if promptDisabled == "true" || promptDisabled == "1" {
-		s.PromptEnabled = false
+		s.promptDisabled = true
 	} else if promptDisabled == "false" || promptDisabled == "0" {
-		s.PromptEnabled = true
+		s.promptDisabled = false
 	}
 }
 

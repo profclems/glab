@@ -23,12 +23,13 @@ type LoginOptions struct {
 	Interactive bool
 
 	Hostname string
-	Scopes   []string
 	Token    string
 }
 
+var opts *LoginOptions
+
 func NewCmdLogin(f *cmdutils.Factory) *cobra.Command {
-	opts := &LoginOptions{
+	opts = &LoginOptions{
 		IO:     f.IO,
 		Config: f.Config,
 	}
@@ -53,8 +54,8 @@ func NewCmdLogin(f *cmdutils.Factory) *cobra.Command {
 			$ glab auth login --hostname salsa.debian.org
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if !opts.IO.PromptEnabled && !tokenStdin {
-				return &cmdutils.FlagError{Err: errors.New("--stdin required when not running interactively")}
+			if !opts.IO.PromptEnabled() && !(tokenStdin || opts.Token == "") {
+				return &cmdutils.FlagError{Err: errors.New("--stdin or --token required when not running interactively")}
 			}
 
 			if opts.Token != "" && tokenStdin {
@@ -70,7 +71,7 @@ func NewCmdLogin(f *cmdutils.Factory) *cobra.Command {
 				opts.Token = strings.TrimSpace(string(token))
 			}
 
-			if opts.IO.PromptEnabled && opts.Token == "" && opts.IO.IsaTTY {
+			if opts.IO.PromptEnabled() && opts.Token == "" && opts.IO.IsaTTY {
 				opts.Interactive = true
 			}
 
@@ -86,7 +87,7 @@ func NewCmdLogin(f *cmdutils.Factory) *cobra.Command {
 				}
 			}
 
-			return loginRun(opts)
+			return loginRun()
 		},
 	}
 
@@ -97,7 +98,7 @@ func NewCmdLogin(f *cmdutils.Factory) *cobra.Command {
 	return cmd
 }
 
-func loginRun(opts *LoginOptions) error {
+func loginRun() error {
 	cfg, err := opts.Config()
 	if err != nil {
 		return err
@@ -132,10 +133,10 @@ func loginRun(opts *LoginOptions) error {
 			return fmt.Errorf("could not prompt: %w", err)
 		}
 
-		isEnterprise := hostType == 1
+		isSelfHosted := hostType == 1
 
 		hostname = glinstance.Default()
-		if isEnterprise {
+		if isSelfHosted {
 			err := survey.AskOne(&survey.Input{
 				Message: "GitLab hostname:",
 			}, &hostname, survey.WithValidator(hostnameValidator))
@@ -148,10 +149,10 @@ func loginRun(opts *LoginOptions) error {
 	fmt.Fprintf(opts.IO.StdErr, "- Logging into %s\n", hostname)
 
 	if token := config.GetFromEnv("token"); token != "" {
-		return errors.New("you have GITLAB_TOKEN or OAUTH_TOKEN environment variable set. Unset if you don't want to use it")
+		fmt.Fprintf(opts.IO.StdErr, "%s you have GITLAB_TOKEN or OAUTH_TOKEN environment variable set. Unset if you don't want to use it for glab\n", utils.Yellow("!WARNING:"))
 	}
+	existingToken, _, _ := cfg.GetWithSource(hostname, "token")
 
-	existingToken, _ := cfg.Get(hostname, "token")
 	if existingToken != "" && opts.Interactive {
 		apiClient, err := cmdutils.HttpClientFunc(hostname, cfg)
 		if err != nil {
