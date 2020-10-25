@@ -1,9 +1,10 @@
 package config
 
 import (
-	"bytes"
 	"errors"
 	"testing"
+
+	"github.com/profclems/glab/internal/utils"
 
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/stretchr/testify/assert"
@@ -70,6 +71,7 @@ func TestConfigGet(t *testing.T) {
 		args   []string
 		stdout string
 		stderr string
+		isTTY  bool
 	}{
 		{
 			name: "get key",
@@ -79,6 +81,7 @@ func TestConfigGet(t *testing.T) {
 			args:   []string{"editor"},
 			stdout: "ed\n",
 			stderr: "",
+			isTTY:  true,
 		},
 		{
 			name: "get key scoped by host",
@@ -89,23 +92,27 @@ func TestConfigGet(t *testing.T) {
 			args:   []string{"editor", "-h", "gitlab.com"},
 			stdout: "vim\n",
 			stderr: "",
+			isTTY:  true,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			var stderr bytes.Buffer
-			var stdout bytes.Buffer
+			io, _, stdout, stderr := utils.IOTest()
+			io.IsaTTY = tt.isTTY
+			io.IsErrTTY = tt.isTTY
+
 			f := &cmdutils.Factory{
 				Config: func() (config.Config, error) {
 					return tt.config, nil
 				},
+				IO: io,
 			}
 
 			cmd := NewCmdConfigGet(f)
 			cmd.Flags().BoolP("help", "x", false, "")
 			cmd.SetArgs(tt.args)
-			cmd.SetOut(&stdout)
-			cmd.SetErr(&stderr)
+			cmd.SetOut(stdout)
+			cmd.SetErr(stderr)
 
 			_, err := cmd.ExecuteC()
 			require.NoError(t, err)
@@ -125,6 +132,7 @@ func TestConfigSet(t *testing.T) {
 		expectKey string
 		stdout    string
 		stderr    string
+		isTTY     bool
 	}{
 		{
 			name:      "set key",
@@ -133,6 +141,7 @@ func TestConfigSet(t *testing.T) {
 			expectKey: "editor",
 			stdout:    "",
 			stderr:    "",
+			isTTY:     true,
 		},
 		{
 			name:      "set key scoped by host",
@@ -141,23 +150,27 @@ func TestConfigSet(t *testing.T) {
 			expectKey: "gitlab.com:editor",
 			stdout:    "",
 			stderr:    "",
+			isTTY:     true,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			var stderr bytes.Buffer
-			var stdout bytes.Buffer
+			io, _, stdout, stderr := utils.IOTest()
+			io.IsaTTY = tt.isTTY
+			io.IsErrTTY = tt.isTTY
+
 			f := &cmdutils.Factory{
 				Config: func() (config.Config, error) {
 					return tt.config, nil
 				},
+				IO: io,
 			}
 
 			cmd := NewCmdConfigSet(f)
 			cmd.Flags().BoolP("help", "x", false, "")
 			cmd.SetArgs(append(tt.args, "-g"))
-			cmd.SetOut(&stdout)
-			cmd.SetErr(&stderr)
+			cmd.SetOut(stdout)
+			cmd.SetErr(stderr)
 
 			_, err := cmd.ExecuteC()
 			require.NoError(t, err)

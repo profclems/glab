@@ -14,11 +14,13 @@ import (
 type DeleteOptions struct {
 	Config func() (config.Config, error)
 	Name   string
+	IO     *utils.IOStreams
 }
 
 func NewCmdDelete(f *cmdutils.Factory, runF func(*DeleteOptions) error) *cobra.Command {
 	opts := &DeleteOptions{
 		Config: f.Config,
+		IO:     f.IO,
 	}
 
 	var aliasDeleteCmd = &cobra.Command{
@@ -57,8 +59,7 @@ func deleteRun(cmd *cobra.Command, opts *DeleteOptions) error {
 	if err != nil {
 		return fmt.Errorf("failed to delete alias %s: %w", opts.Name, err)
 	}
-	out := utils.ColorableErr(cmd)
 	redCheck := utils.Red("✓")
-	fmt.Fprintf(out, "%s Deleted alias %s; was %s\n", redCheck, opts.Name, expansion)
+	fmt.Fprintf(opts.IO.StdErr, "%s Deleted alias %s; was %s\n", redCheck, opts.Name, expansion)
 	return nil
 }

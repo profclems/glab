@@ -2,17 +2,30 @@ package view
 
 import (
 	"fmt"
+	"io"
 	"strings"
-	"time"
+
+	"github.com/profclems/glab/internal/config"
+	"github.com/profclems/glab/internal/glrepo"
 
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/internal/utils"
 	"github.com/profclems/glab/pkg/api"
 
 	"github.com/MakeNowJust/heredoc"
-	"github.com/gosuri/uitable"
 	"github.com/spf13/cobra"
 	"github.com/xanzy/go-gitlab"
+)
+
+var (
+	showSystemLogs bool
+	showComments   bool
+	limit          int
+	pageNumber     int
+	baseRepo       glrepo.Interface
+	cfg            config.Config
+	glamourStyle   string
+	notes          []*gitlab.Note
 )
 
 func NewCmdView(f *cmdutils.Factory) *cobra.Command {
@@ -26,7 +39,7 @@ func NewCmdView(f *cmdutils.Factory) *cobra.Command {
 			pid := utils.StringToInt(args[0])
 
 			var err error
-			out := utils.ColorableOut(cmd)
+			out := f.IO.StdOut
 
 			apiClient, err := f.HttpClient()
 			if err != nil {
@@ -37,143 +50,176 @@ func NewCmdView(f *cmdutils.Factory) *cobra.Command {
 				return err
 			}
 
+			baseRepo = repo
+			cfg, _ = f.Config()
+
 			issue, err := api.GetIssue(apiClient, repo.FullName(), pid)
 			if err != nil {
 				return err
 			}
-			if lb, _ := cmd.Flags().GetBool("web"); lb { //open in browser if --web flag is specified
-				fmt.Fprintf(out, "Opening %s in your browser.\n", utils.DisplayURL(issue.WebURL))
-				cfg, _ := f.Config()
+
+			//open in browser if --web flag is specified
+			if isWeb, _ := cmd.Flags().GetBool("web"); isWeb {
+				if f.IO.IsaTTY && f.IO.IsErrTTY {
+					fmt.Fprintf(out, "Opening %s in your browser.\n", utils.DisplayURL(issue.WebURL))
+				}
+
 				browser, _ := cfg.Get(repo.RepoHost(), "browser")
 				return utils.OpenInBrowser(issue.WebURL, browser)
 			}
-			var issueState string
-			if issue.State == "opened" {
-				issueState = utils.Green("open")
-			} else {
-				issueState = utils.Red(issue.State)
-			}
-			now := time.Now()
-			ago := now.Sub(*issue.CreatedAt)
 
-			var issuePrintDetails string
+			glamourStyle, _ = cfg.Get(baseRepo.RepoHost(), "glamour_style")
 
-			issuePrintDetails += fmt.Sprintf("\n%s #%d\n", utils.Bold(issue.Title), issue.IID)
-			issuePrintDetails += fmt.Sprintf("(%s) • ", issueState)
-			issuePrintDetails += utils.Gray(fmt.Sprintf("opened by %s (%s) %s\n",
-				issue.Author.Username,
-				issue.Author.Name,
-				utils.PrettyTimeAgo(ago),
-			))
-			if issue.Description != "" {
-				cfg, _ := f.Config()
-				glamourStyle, _ := cfg.Get(repo.RepoHost(), "glamour_style")
-				issue.Description, _ = utils.RenderMarkdown(issue.Description, glamourStyle)
-				issuePrintDetails += issue.Description
-			}
-			issuePrintDetails += utils.Gray(fmt.Sprintf("\n%d upvotes • %d downvotes • %d comments\n\n",
-				issue.Upvotes, issue.Downvotes, issue.UserNotesCount))
-
-			var labels string
-			for _, l := range issue.Labels {
-				labels += " " + l + ","
-			}
-			labels = strings.Trim(labels, ", ")
-
-			var assignees string
-			for _, a := range issue.Assignees {
-				assignees += " " + a.Username + "(" + a.Name + "),"
-			}
-			assignees = strings.Trim(assignees, ", ")
-			table := uitable.New()
-			table.MaxColWidth = 70
-			table.Wrap = true
-			table.AddRow("Project ID:", issue.ProjectID)
-			table.AddRow("Labels:", prettifyNilEmptyValues(labels, "None"))
-			table.AddRow("Milestone:", prettifyNilEmptyValues(issue.Milestone, "None"))
-			table.AddRow("Assignees:", prettifyNilEmptyValues(assignees, "None"))
-			table.AddRow("Due date:", prettifyNilEmptyValues(issue.DueDate, "None"))
-			table.AddRow("Weight:", prettifyNilEmptyValues(issue.Weight, "None"))
-			table.AddRow("Confidential:", prettifyNilEmptyValues(issue.Confidential, "None"))
-			table.AddRow("Discussion Locked:", prettifyNilEmptyValues(issue.DiscussionLocked, "false"))
-			table.AddRow("Subscribed:", prettifyNilEmptyValues(issue.Subscribed, "false"))
-
-			if issue.State == "closed" {
-				now := time.Now()
-				ago := now.Sub(*issue.ClosedAt)
-				table.AddRow("Closed By:",
-					fmt.Sprintf("%s (%s) %s", issue.ClosedBy.Username, issue.ClosedBy.Name, utils.PrettyTimeAgo(ago)))
-			}
-			table.AddRow("Reference:", issue.References.Full)
-			table.AddRow("Web URL:", issue.WebURL)
-
-			fmt.Fprintln(out, issuePrintDetails)
-			fmt.Fprintln(out, table)
-			fmt.Fprint(out, "") // Empty Space
-
-			if c, _ := cmd.Flags().GetBool("comments"); c {
-				showSystemLog, _ := cmd.Flags().GetBool("system-logs")
-				var commentsPrintDetails string
-
-				opts := &gitlab.ListIssueNotesOptions{}
-				if p, _ := cmd.Flags().GetInt("page"); p != 0 {
-					opts.Page = p
+			if showComments {
+				l := &gitlab.ListIssueNotesOptions{
+					Sort: gitlab.String("asc"),
 				}
-				if p, _ := cmd.Flags().GetInt("per-page"); p != 0 {
-					opts.PerPage = p
+				if pageNumber != 0 {
+					l.Page = pageNumber
 				}
-				notes, err := api.ListIssueNotes(apiClient, repo.FullName(), pid, opts)
+				if limit != 0 {
+					l.PerPage = limit
+				}
+				notes, err = api.ListIssueNotes(apiClient, baseRepo.FullName(), issue.IID, l)
 				if err != nil {
 					return err
 				}
-
-				table := uitable.New()
-				table.MaxColWidth = 100
-				table.Wrap = true
-				commentsPrintDetails += heredoc.Doc(` 
-			--------------------------------------------
-			Comments / Notes
-			--------------------------------------------
-			`)
-				if len(notes) > 0 {
-					for _, note := range notes {
-						if note.System && !showSystemLog {
-							continue
-						}
-						//body, _ := utils.RenderMarkdown(note.Body)
-						table.AddRow(note.Author.Username+":",
-							fmt.Sprintf("%s\n%s",
-								note.Body,
-								utils.Gray(utils.TimeToPrettyTimeAgo(*note.CreatedAt)),
-							),
-						)
-						table.AddRow("")
-					}
-					fmt.Fprintln(out, commentsPrintDetails)
-					fmt.Fprintln(out, table)
-				} else {
-					fmt.Fprintln(out, commentsPrintDetails, "There are no comments on this issue")
-				}
 			}
-			return nil
+
+			err = f.IO.StartPager()
+			if err != nil {
+				return err
+			}
+			defer f.IO.StopPager()
+			if f.IO.IsErrTTY && f.IO.IsaTTY {
+				return printTTYIssuePreview(f.IO.StdOut, issue)
+			}
+			return printRawIssuePreview(f.IO.StdOut, issue)
 		},
 	}
 
-	issueViewCmd.Flags().BoolP("comments", "c", false, "Show issue comments and activities")
-	issueViewCmd.Flags().BoolP("system-logs", "s", false, "Show system activities / logs")
-	issueViewCmd.Flags().BoolP("web", "w", false, "Open issue in a browser. Uses default browser or browser specified in BROWSER variable")
-	issueViewCmd.Flags().IntP("page", "p", 1, "Page number")
-	issueViewCmd.Flags().IntP("per-page", "P", 20, "Number of items to list per page")
+	issueViewCmd.Flags().BoolVarP(&showComments, "comments", "c", false, "Show mr comments and activities")
+	issueViewCmd.Flags().BoolVarP(&showSystemLogs, "system-logs", "s", false, "Show system activities / logs")
+	issueViewCmd.Flags().BoolP("web", "w", false, "Open mr in a browser. Uses default browser or browser specified in BROWSER variable")
+	issueViewCmd.Flags().IntVarP(&pageNumber, "page", "p", 1, "Page number")
+	issueViewCmd.Flags().IntVarP(&limit, "per-page", "P", 20, "Number of items to list per page")
 
 	return issueViewCmd
 }
 
-func prettifyNilEmptyValues(value interface{}, defVal string) interface{} {
-	if value == nil || value == "" {
-		return defVal
+func labelsList(issue *gitlab.Issue) string {
+	var labels string
+	for _, l := range issue.Labels {
+		labels += " " + l + ","
 	}
-	if value == false {
-		return false
+	return strings.Trim(labels, ", ")
+}
+
+func assigneesList(issue *gitlab.Issue) string {
+	var assignees string
+	for _, a := range issue.Assignees {
+		assignees += " " + a.Username + ","
 	}
-	return value
+	return strings.Trim(assignees, ", ")
+}
+
+func issueState(issue *gitlab.Issue) (state string) {
+	if issue.State == "opened" {
+		state = utils.Green("open")
+	} else if issue.State == "locked" {
+		state = utils.Blue(issue.State)
+	} else {
+		state = utils.Red(issue.State)
+	}
+
+	return
+}
+
+func printTTYIssuePreview(out io.Writer, issue *gitlab.Issue) error {
+	issueTimeAgo := utils.TimeToPrettyTimeAgo(*issue.CreatedAt)
+	// Header
+	fmt.Fprint(out, issueState(issue))
+	fmt.Fprintf(out, utils.Gray(" • opened by %s %s\n"), issue.Author.Username, issueTimeAgo)
+	fmt.Fprint(out, issue.Title)
+	fmt.Fprintf(out, utils.Gray(" #%d"), issue.IID)
+	fmt.Fprintln(out)
+
+	// Description
+	if issue.Description != "" {
+		issue.Description, _ = utils.RenderMarkdown(issue.Description, glamourStyle)
+		fmt.Fprintln(out, issue.Description)
+	}
+
+	fmt.Fprintf(out, utils.Gray("\n%d upvotes • %d downvotes • %d comments\n"), issue.Upvotes, issue.Downvotes, issue.UserNotesCount)
+
+	// Meta information
+	if labels := labelsList(issue); labels != "" {
+		fmt.Fprint(out, utils.Bold("Labels: "))
+		fmt.Fprintln(out, labels)
+	}
+	if assignees := assigneesList(issue); assignees != "" {
+		fmt.Fprint(out, utils.Bold("Assignees: "))
+		fmt.Fprintln(out, assignees)
+	}
+	if issue.Milestone != nil {
+		fmt.Fprint(out, utils.Bold("Milestone: "))
+		fmt.Fprintln(out, issue.Milestone.Title)
+	}
+	if issue.State == "closed" {
+		fmt.Fprintf(out, "Closed By: %s %s\n", issue.ClosedBy.Username, issueTimeAgo)
+	}
+
+	// Comments
+	if showComments {
+		fmt.Fprintln(out, heredoc.Doc(` 
+			--------------------------------------------
+			Comments / Notes
+			--------------------------------------------
+			`))
+		if len(notes) > 0 {
+			for _, note := range notes {
+				if note.System && !showSystemLogs {
+					continue
+				}
+				createdAt := utils.TimeToPrettyTimeAgo(*note.CreatedAt)
+				fmt.Fprint(out, note.Author.Username)
+				if note.System {
+					fmt.Fprintf(out, " %s ", note.Body)
+					fmt.Fprintln(out, utils.Gray(createdAt))
+				} else {
+					body, _ := utils.RenderMarkdown(note.Body, glamourStyle)
+					fmt.Fprint(out, " commented ")
+					fmt.Fprintf(out, utils.Gray("%s\n"), createdAt)
+					fmt.Fprintln(out, utils.Indent(body, " "))
+				}
+				fmt.Fprintln(out)
+			}
+		} else {
+			fmt.Fprintln(out, "There are no comments on this issue")
+		}
+	}
+
+	fmt.Fprintln(out)
+	fmt.Fprintf(out, utils.Gray("View this issue on GitLab: %s\n"), issue.WebURL)
+
+	return nil
+}
+
+func printRawIssuePreview(out io.Writer, issue *gitlab.Issue) error {
+	assignees := assigneesList(issue)
+	labels := labelsList(issue)
+
+	fmt.Fprintf(out, "title:\t%s\n", issue.Title)
+	fmt.Fprintf(out, "state:\t%s\n", issueState(issue))
+	fmt.Fprintf(out, "author:\t%s\n", issue.Author.Username)
+	fmt.Fprintf(out, "labels:\t%s\n", labels)
+	fmt.Fprintf(out, "comments:\t%d\n", issue.UserNotesCount)
+	fmt.Fprintf(out, "assignees:\t%s\n", assignees)
+	if issue.Milestone != nil {
+		fmt.Fprintf(out, "milestone:\t%s\n", issue.Milestone.Title)
+	}
+
+	fmt.Fprintln(out, "--")
+	fmt.Fprintln(out, issue.Description)
+	return nil
 }

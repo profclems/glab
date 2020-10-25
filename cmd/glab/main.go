@@ -4,14 +4,11 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
 	"net"
 	"os"
 	"os/exec"
 	"strconv"
 	"strings"
-
-	"github.com/profclems/glab/pkg/tableprinter"
 
 	"github.com/profclems/glab/commands"
 	"github.com/profclems/glab/commands/alias/expand"
@@ -21,41 +18,48 @@ import (
 	"github.com/profclems/glab/internal/config"
 	"github.com/profclems/glab/internal/glinstance"
 	"github.com/profclems/glab/internal/run"
+	"github.com/profclems/glab/pkg/tableprinter"
 
 	"github.com/spf13/cobra"
 )
 
 // version is set dynamically at build
-var version string
+var version = "DEV"
 
 // build is set dynamically at build
 var build string
 
 // debug is set dynamically at build and can be overridden by
 // the configuration file or environment variable
-// sets to "true" or "false" as string
-var debugMode string
-var debug bool // parsed boolean of debugMode
+// sets to "true" or "false" or "1" or "0" as string
+var debugMode = "false"
+
+// debug is parsed boolean of debugMode
+var debug bool
 
 func main() {
-	debug = debugMode == "true"
+	debug = debugMode == "true" || debugMode == "1"
 
-	cachedConfig, configError := initConfig()
-	if configError != nil {
-		log.Fatalf("error loading config: %q", configError)
-	}
-
-	cmdFactory := cmdutils.New(cachedConfig, configError)
-
-	rootCmd := commands.NewCmdRoot(cmdFactory, version, build)
-
-	debugMode, _ = cachedConfig.Get("", "debug")
-	if debugSet, _ := strconv.ParseBool(debugMode); debugSet {
-		debug = debugSet
-	}
+	cmdFactory := cmdutils.NewFactory()
 
 	if glHostFromEnv := config.GetFromEnv("host"); glHostFromEnv != "" {
 		glinstance.OverrideDefault(glHostFromEnv)
+	}
+
+	rootCmd := commands.NewCmdRoot(cmdFactory, version, build)
+
+	cfg, err := cmdFactory.Config()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "failed to read configuration:  %s\n", err)
+		os.Exit(2)
+	}
+
+	// Set Debug mode
+	debugMode, _ = cfg.Get("", "debug")
+	debug = debugMode == "true" || debugMode == "1"
+
+	if pager, _ := cfg.Get("", "pager"); pager != "" {
+		cmdFactory.IO.SetPager(pager)
 	}
 
 	var expandedArgs []string
@@ -67,7 +71,7 @@ func main() {
 	if err != nil || cmd == rootCmd {
 		originalArgs := expandedArgs
 		isShell := false
-		expandedArgs, isShell, err = expand.ExpandAlias(cachedConfig, os.Args, nil)
+		expandedArgs, isShell, err = expand.ExpandAlias(cfg, os.Args, nil)
 		if err != nil {
 			fmt.Fprintf(os.Stdout, "Failed to process alias: %s\n", err)
 			os.Exit(2)
@@ -98,7 +102,8 @@ func main() {
 		}
 	}
 
-	tableprinter.DefaultSeparator = "  " // Change the default separator of tableprinter
+	// Override the default column separator of tableprinter
+	tableprinter.DefaultSeparator = "  "
 
 	rootCmd.SetArgs(expandedArgs)
 
@@ -112,7 +117,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	checkUpdate, _ := cachedConfig.Get("", "check_update")
+	checkUpdate, _ := cfg.Get("", "check_update")
 	if checkUpdate, err := strconv.ParseBool(checkUpdate); err == nil && checkUpdate {
 		err = update.CheckUpdate(rootCmd, version, build, true)
 		if err != nil && debug {
@@ -120,13 +125,6 @@ func main() {
 		}
 	}
 	cmd.Print("\n")
-}
-
-func initConfig() (config.Config, error) {
-	if err := config.MigrateOldConfig(); err != nil {
-		return nil, err
-	}
-	return config.Init()
 }
 
 func printError(out io.Writer, err error, cmd *cobra.Command, debug bool) {

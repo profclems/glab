@@ -1,10 +1,12 @@
 package update
 
 import (
-	"bytes"
 	"fmt"
+	"io/ioutil"
 	"testing"
 	"time"
+
+	"github.com/profclems/glab/internal/utils"
 
 	"github.com/google/shlex"
 
@@ -75,18 +77,22 @@ func TestNewCmdUpdate(t *testing.T) {
 		},
 	}
 
-	cmd := NewCmdUpdate(cmdtest.StubFactory("https://gitlab.com/glab-cli/test"))
+	io, _, stdout, stderr := utils.IOTest()
+	f := cmdtest.StubFactory("https://gitlab.com/glab-cli/test")
+	f.IO = io
+	f.IO.IsaTTY = true
+	f.IO.IsErrTTY = true
+
+	cmd := NewCmdUpdate(f)
 	cmd.Flags().StringP("repo", "R", "", "")
 
 	for _, tc := range testCases {
 		t.Run(tc.Name, func(t *testing.T) {
-			var stderr bytes.Buffer
-			var stdout bytes.Buffer
 
 			args, _ := shlex.Split(tc.Issue)
 			cmd.SetArgs(args)
-			cmd.SetOut(&stdout)
-			cmd.SetErr(&stderr)
+			cmd.SetOut(ioutil.Discard)
+			cmd.SetErr(ioutil.Discard)
 
 			_, err := cmd.ExecuteC()
 			if tc.wantErr {
@@ -97,10 +103,11 @@ func TestNewCmdUpdate(t *testing.T) {
 			}
 
 			out := stripansi.Strip(stdout.String())
-			//outErr := stripansi.Strip(stderr.String())
+			outErr := stripansi.Strip(stderr.String())
 
 			for _, msg := range tc.ExpectedMsg {
 				assert.Contains(t, out, msg)
+				assert.Contains(t, outErr, "")
 			}
 		})
 	}

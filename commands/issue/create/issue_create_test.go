@@ -6,6 +6,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/profclems/glab/internal/utils"
+
 	"github.com/acarl005/stripansi"
 	"github.com/profclems/glab/commands/cmdtest"
 	"github.com/profclems/glab/pkg/api"
@@ -38,7 +40,13 @@ func Test_IssueCreate(t *testing.T) {
 		}, nil
 	}
 
-	cmd := NewCmdCreate(cmdtest.StubFactory("https://gitlab.com/glab-cli/test"))
+	io, _, stdout, stderr := utils.IOTest()
+	f := cmdtest.StubFactory("https://gitlab.com/glab-cli/test")
+	f.IO = io
+	f.IO.IsaTTY = true
+	f.IO.IsErrTTY = true
+
+	cmd := NewCmdCreate(f)
 	cmd.Flags().StringP("repo", "R", "", "")
 
 	cliStr := []string{"-t", "myissuetitle",
@@ -54,13 +62,13 @@ func Test_IssueCreate(t *testing.T) {
 
 	cli := strings.Join(cliStr, " ")
 	t.Log(cli)
-	output, err := cmdtest.RunCommand(cmd, cli)
+	_, err := cmdtest.RunCommand(cmd, cli)
 	if err != nil {
 		t.Error(err)
 	}
 
-	out := stripansi.Strip(output.String())
-	outErr := stripansi.Strip(output.Stderr())
+	out := stripansi.Strip(stdout.String())
+	outErr := stripansi.Strip(stderr.String())
 
 	cmdtest.Eq(t, cmdtest.FirstLine([]byte(out)), `#1 myissuetitle (about 5 years ago)`)
 	cmdtest.Eq(t, outErr, "")

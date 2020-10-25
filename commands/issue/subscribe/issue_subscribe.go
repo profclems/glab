@@ -20,7 +20,7 @@ func NewCmdSubscribe(f *cmdutils.Factory) *cobra.Command {
 		Aliases: []string{"sub"},
 		Args:    cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			out := utils.ColorableOut(cmd)
+			out := f.IO.StdOut
 			var err error
 
 			apiClient, err := f.HttpClient()
@@ -37,11 +37,15 @@ func NewCmdSubscribe(f *cmdutils.Factory) *cobra.Command {
 
 			arrIds := strings.Split(strings.Trim(mergeID, "[] "), ",")
 			for _, i2 := range arrIds {
-				fmt.Fprintln(out, "- Subscribing to Issue #"+i2)
+				if f.IO.IsErrTTY && f.IO.IsaTTY {
+					fmt.Fprintln(out, "- Subscribing to Issue #"+i2)
+				}
+
 				issue, err := api.SubscribeToIssue(apiClient, repo.FullName(), utils.StringToInt(i2), nil)
 				if err != nil {
 					return err
 				}
+
 				fmt.Fprintln(out, utils.GreenCheck(), "Subscribed to issue #"+i2)
 				fmt.Fprintln(out, issueutils.DisplayIssue(issue))
 			}

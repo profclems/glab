@@ -2,10 +2,10 @@
 package cmdutils
 
 import (
-	"errors"
 	"fmt"
-	"os"
 	"strconv"
+
+	"github.com/profclems/glab/internal/utils"
 
 	"github.com/profclems/glab/internal/config"
 	"github.com/profclems/glab/internal/git"
@@ -14,12 +14,18 @@ import (
 	"github.com/xanzy/go-gitlab"
 )
 
+var (
+	CachedConfig config.Config
+	ConfigError  error
+)
+
 type Factory struct {
 	HttpClient func() (*gitlab.Client, error)
 	BaseRepo   func() (glrepo.Interface, error)
 	Remotes    func() (glrepo.Remotes, error)
 	Config     func() (config.Config, error)
 	Branch     func() (string, error)
+	IO         *utils.IOStreams
 }
 
 func (f *Factory) RepoOverride(repo string) error {
@@ -31,7 +37,10 @@ func (f *Factory) RepoOverride(repo string) error {
 		return err
 	}
 	// Initialise new http client for new repo host
-	cfg, _ := f.Config()
+	cfg, err := f.Config()
+	if err == nil {
+		OverrideAPIProtocol(cfg, newRepo)
+	}
 	f.HttpClient = func() (*gitlab.Client, error) {
 		return httpClientFunc(cfg, newRepo)
 	}
@@ -49,47 +58,61 @@ func httpClientFunc(cfg config.Config, repo glrepo.Interface) (*gitlab.Client, e
 	return api.Init(repo.RepoHost(), token, skipTlsVerify)
 }
 
-func New(cachedConfig config.Config, configError error) *Factory {
-
-	configFunc := func() (config.Config, error) {
-		if cachedConfig != nil || configError != nil {
-			return cachedConfig, configError
-		}
-		cachedConfig, configError = config.ParseDefaultConfig()
-		if errors.Is(configError, os.ErrNotExist) {
-			cachedConfig = config.NewBlankConfig()
-			configError = nil
-		}
-		return cachedConfig, configError
-	}
-
+func remotesFunc() (glrepo.Remotes, error) {
 	rr := &remoteResolver{
 		readRemotes: git.Remotes,
 		getConfig:   configFunc,
 	}
+	fn := rr.Resolver()
+	return fn()
+}
 
-	remotesFunc := rr.Resolver()
+func configFunc() (config.Config, error) {
+	if CachedConfig != nil || ConfigError != nil {
+		return CachedConfig, ConfigError
+	}
+	CachedConfig, ConfigError = initConfig()
+	return CachedConfig, ConfigError
+}
 
-	baseRepoFunc := func() (glrepo.Interface, error) {
-		remotes, err := remotesFunc()
+func baseRepoFunc() (glrepo.Interface, error) {
+	remotes, err := remotesFunc()
+	if err != nil {
+		return nil, err
+	}
+	return glrepo.FromURL(remotes[0].FetchURL)
+}
+
+// OverrideAPIProtocol sets api protocol for host to initialize http client
+func OverrideAPIProtocol(cfg config.Config, repo glrepo.Interface) {
+	api.Protocol, _ = cfg.Get(repo.RepoHost(), "api_protocol")
+}
+
+func HTTPClientFactory(f *Factory) {
+	f.HttpClient = func() (*gitlab.Client, error) {
+		cfg, err := configFunc()
 		if err != nil {
 			return nil, err
 		}
-		return glrepo.FromURL(remotes[0].FetchURL)
+		repo, err := baseRepoFunc()
+		if err != nil {
+			return nil, err
+		}
+		OverrideAPIProtocol(cfg, repo)
+		return httpClientFunc(cfg, repo)
 	}
+}
+
+func NewFactory() *Factory {
+
 	return &Factory{
 		Config:  configFunc,
 		Remotes: remotesFunc,
 		HttpClient: func() (*gitlab.Client, error) {
-			cfg, err := configFunc()
-			if err != nil {
-				return nil, err
-			}
-			repo, err := baseRepoFunc()
-			if err != nil {
-				return nil, err
-			}
-			return httpClientFunc(cfg, repo)
+			// do not initialize httpclient since it may not be required by
+			// some commands like version, help, etc...
+			// It should be explicitly initialize with HTTPClientFactory()
+			return nil, nil
 		},
 		BaseRepo: baseRepoFunc,
 		Branch: func() (string, error) {
@@ -99,5 +122,13 @@ func New(cachedConfig config.Config, configError error) *Factory {
 			}
 			return currentBranch, nil
 		},
+		IO: utils.InitIOStream(),
 	}
+}
+
+func initConfig() (config.Config, error) {
+	if err := config.MigrateOldConfig(); err != nil {
+		return nil, err
+	}
+	return config.Init()
 }

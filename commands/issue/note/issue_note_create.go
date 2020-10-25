@@ -21,7 +21,7 @@ func NewCmdNote(f *cmdutils.Factory) *cobra.Command {
 		Args:    cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var err error
-			out := utils.ColorableOut(cmd)
+			out := f.IO.StdOut
 
 			apiClient, err := f.HttpClient()
 			if err != nil {
