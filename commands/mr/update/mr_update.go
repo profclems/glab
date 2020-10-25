@@ -88,6 +88,10 @@ func NewCmdUpdate(f *cmdutils.Factory) *cobra.Command {
 				l.AssigneeID = gitlab.Int(user.ID)
 			}
 
+			if removeSource, _ := cmd.Flags().GetBool("remove-source-branch"); removeSource {
+				l.RemoveSourceBranch = gitlab.Bool(true)
+			}
+
 			mr, err = api.UpdateMR(apiClient, repo.FullName(), mr.IID, l)
 			if err != nil {
 				return err
@@ -105,6 +109,7 @@ func NewCmdUpdate(f *cmdutils.Factory) *cobra.Command {
 	mrUpdateCmd.Flags().BoolP("lock-discussion", "", false, "Lock discussion on merge request")
 	mrUpdateCmd.Flags().StringP("description", "d", "", "merge request description")
 	mrUpdateCmd.Flags().StringP("assignee", "a", "", "merge request assignee")
+	mrUpdateCmd.Flags().BoolP("remove-source-branch", "", false, "Remove Source Branch on merge")
 
 	return mrUpdateCmd
 }
