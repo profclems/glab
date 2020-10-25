@@ -1,10 +1,11 @@
 package git
 
 import (
-	"github.com/stretchr/testify/assert"
 	"os/exec"
 	"reflect"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 
 	"github.com/profclems/glab/internal/run"
 	"github.com/profclems/glab/test"
@@ -194,7 +195,6 @@ func TestReadBranchConfig(t *testing.T) {
 	cs.Stub(`branch.branch-name.remote origin
 branch.branch.remote git@gitlab.com:glab-test/test.git
 branch.branch.merge refs/heads/branch-name`)
-
 
 	u, err := ParseURL("git@gitlab.com:glab-test/test.git")
 	assert.Nil(t, err)
