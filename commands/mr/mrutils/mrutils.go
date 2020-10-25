@@ -31,38 +31,48 @@ type MRCheckErrOptions struct {
 	Subscribed bool
 	// Unsubscribed : check and return err if user is already unsubscribed to MR
 	Unsubscribed bool
+	// MergePrivilege : check and return err if user is not authorized to merge
+	MergePrivilege bool
 }
 
 // MRCheckErrors checks and return merge request errors specified in MRCheckErrOptions{}
-func MRCheckErrors(mr *gitlab.MergeRequest, opts MRCheckErrOptions) error {
-	if mr.WorkInProgress && opts.WorkInProgress {
+func MRCheckErrors(mr *gitlab.MergeRequest, err MRCheckErrOptions) error {
+	if mr.WorkInProgress && err.WorkInProgress {
 		return fmt.Errorf("this merge request is still a work in progress. Run `glab mr update %d --ready` to mark it as ready for review", mr.IID)
 	}
 
-	if mr.MergeWhenPipelineSucceeds && opts.PipelineStatus && mr.Pipeline != nil {
+	if mr.MergeWhenPipelineSucceeds && err.PipelineStatus && mr.Pipeline != nil {
 		if mr.Pipeline.Status != "success" {
 			return fmt.Errorf("pipeline for this merge request has failed. Pipeline is required to succeed before merging")
 		}
 	}
 
-	if mr.State == "merged" && opts.Merged {
+	if mr.State == "merged" && err.Merged {
 		return fmt.Errorf("this merge request has already been merged")
 	}
 
-	if mr.State == "closed" && opts.Closed {
+	if mr.State == "closed" && err.Closed {
 		return fmt.Errorf("this merge request has been closed")
 	}
 
-	if mr.State == "opened" && opts.Opened {
+	if mr.State == "opened" && err.Opened {
 		return fmt.Errorf("this merge request is already open")
 	}
 
-	if mr.Subscribed && opts.Subscribed {
+	if mr.Subscribed && err.Subscribed {
 		return fmt.Errorf("you are already subscribed to this merge request")
 	}
 
-	if !mr.Subscribed && opts.Unsubscribed {
+	if !mr.Subscribed && err.Unsubscribed {
 		return fmt.Errorf("you are already unsubscribed to this merge request")
+	}
+
+	if err.MergePrivilege && !mr.User.CanMerge {
+		return fmt.Errorf("you do not have enough priviledges to merge this merge request")
+	}
+
+	if err.Conflict && mr.HasConflicts {
+		return fmt.Errorf("there are merge conflicts. Resolve conflicts and try again or merge locally")
 	}
 
 	return nil

@@ -3,7 +3,6 @@ package cmdutils
 
 import (
 	"fmt"
-	"strconv"
 
 	"github.com/profclems/glab/internal/utils"
 
@@ -37,22 +36,25 @@ func (f *Factory) RepoOverride(repo string) error {
 		return err
 	}
 	// Initialise new http client for new repo host
-	cfg, _ := f.Config()
+	cfg, err := f.Config()
+	if err == nil {
+		OverrideAPIProtocol(cfg, newRepo)
+	}
 	f.HttpClient = func() (*gitlab.Client, error) {
-		return httpClientFunc(cfg, newRepo)
+		return HttpClientFunc(newRepo.RepoHost(), cfg)
 	}
 	return nil
 }
 
-func httpClientFunc(cfg config.Config, repo glrepo.Interface) (*gitlab.Client, error) {
-	token, _ := cfg.Get(repo.RepoHost(), "token")
-	tlsVerify, _ := cfg.Get(repo.RepoHost(), "skip_tls_verify")
-	skipTlsVerify, _ := strconv.ParseBool(tlsVerify)
-	caCert, _ := cfg.Get(repo.RepoHost(), "ca_cert")
+func HttpClientFunc(repoHost string, cfg config.Config) (*gitlab.Client, error) {
+	token, _ := cfg.Get(repoHost, "token")
+	tlsVerify, _ := cfg.Get(repoHost, "skip_tls_verify")
+	skipTlsVerify := tlsVerify == "true" || tlsVerify == "1"
+	caCert, _ := cfg.Get(repoHost, "ca_cert")
 	if caCert != "" {
-		return api.InitWithCustomCA(repo.RepoHost(), token, caCert)
+		return api.InitWithCustomCA(repoHost, token, caCert)
 	}
-	return api.Init(repo.RepoHost(), token, skipTlsVerify)
+	return api.Init(repoHost, token, skipTlsVerify)
 }
 
 func remotesFunc() (glrepo.Remotes, error) {
@@ -80,6 +82,11 @@ func baseRepoFunc() (glrepo.Interface, error) {
 	return glrepo.FromURL(remotes[0].FetchURL)
 }
 
+// OverrideAPIProtocol sets api protocol for host to initialize http client
+func OverrideAPIProtocol(cfg config.Config, repo glrepo.Interface) {
+	api.Protocol, _ = cfg.Get(repo.RepoHost(), "api_protocol")
+}
+
 func HTTPClientFactory(f *Factory) {
 	f.HttpClient = func() (*gitlab.Client, error) {
 		cfg, err := configFunc()
@@ -90,7 +97,8 @@ func HTTPClientFactory(f *Factory) {
 		if err != nil {
 			return nil, err
 		}
-		return httpClientFunc(cfg, repo)
+		OverrideAPIProtocol(cfg, repo)
+		return HttpClientFunc(repo.RepoHost(), cfg)
 	}
 }
 

@@ -24,19 +24,21 @@ import (
 )
 
 // version is set dynamically at build
-var version string
+var version = "DEV"
 
 // build is set dynamically at build
 var build string
 
 // debug is set dynamically at build and can be overridden by
 // the configuration file or environment variable
-// sets to "true" or "false" as string
-var debugMode string
-var debug bool // parsed boolean of debugMode
+// sets to "true" or "false" or "1" or "0" as string
+var debugMode = "false"
+
+// debug is parsed boolean of debugMode
+var debug bool
 
 func main() {
-	debug = debugMode == "true"
+	debug = debugMode == "true" || debugMode == "1"
 
 	cmdFactory := cmdutils.NewFactory()
 
@@ -54,12 +56,14 @@ func main() {
 
 	// Set Debug mode
 	debugMode, _ = cfg.Get("", "debug")
-	if debugSet, _ := strconv.ParseBool(debugMode); debugSet {
-		debug = debugSet
-	}
+	debug = debugMode == "true" || debugMode == "1"
 
 	if pager, _ := cfg.Get("", "pager"); pager != "" {
 		cmdFactory.IO.SetPager(pager)
+	}
+
+	if promptDisabled, _ := cfg.Get("", "no_prompt"); promptDisabled != "" {
+		cmdFactory.IO.SetPrompt(promptDisabled)
 	}
 
 	var expandedArgs []string
