@@ -17,8 +17,6 @@ stages:
 
 default:
   image: golang:1.15
-  tags:
-    - glab-cli
 
 # Disable DIND for SAST because we need to execute a before_script in the gosec-sast job
 variables:
