@@ -22,6 +22,8 @@ before_install:
   - ssh-add ~/.ssh/id_rsa
 
 script:
+  # Add non-sensitive token for test to work
+  - export GITLAB_TOKEN=qRC87Xg9Wd46RhB8J8sp
   - make test
 
 after_success:

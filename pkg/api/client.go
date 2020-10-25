@@ -27,7 +27,6 @@ func Init(host, token string, allowInsecure bool) (*gitlab.Client, error) {
 			DialContext: (&net.Dialer{
 				Timeout:   30 * time.Second,
 				KeepAlive: 30 * time.Second,
-				DualStack: true,
 			}).DialContext,
 			ForceAttemptHTTP2:     true,
 			MaxIdleConns:          100,
@@ -39,25 +38,7 @@ func Init(host, token string, allowInsecure bool) (*gitlab.Client, error) {
 			},
 		},
 	}
-
-	apiClient, err = gitlab.NewClient(token, gitlab.WithHTTPClient(httpClient), gitlab.WithBaseURL(glinstance.APIEndpoint(host, Protocol)))
-	if err != nil {
-		return nil, fmt.Errorf("failed to initialize GitLab client: %v", err)
-	}
-	return apiClient, nil
-}
-
-// InitWithBasicAuth initialises a client with username and password.
-func InitWithBasicAuth(host, username, password string) (*gitlab.Client, error) {
-	apiClient, err = gitlab.NewBasicAuthClient(
-		username,
-		password,
-		gitlab.WithBaseURL(glinstance.APIEndpoint(host, Protocol)),
-	)
-	if err != nil {
-		return nil, err
-	}
-	return apiClient, nil
+	return gitlabClient(httpClient, token, host)
 }
 
 func InitWithCustomCA(host, token, caFile string) (*gitlab.Client, error) {
@@ -78,7 +59,6 @@ func InitWithCustomCA(host, token, caFile string) (*gitlab.Client, error) {
 			DialContext: (&net.Dialer{
 				Timeout:   30 * time.Second,
 				KeepAlive: 30 * time.Second,
-				DualStack: true,
 			}).DialContext,
 			ForceAttemptHTTP2:     true,
 			MaxIdleConns:          100,
@@ -90,7 +70,18 @@ func InitWithCustomCA(host, token, caFile string) (*gitlab.Client, error) {
 			},
 		},
 	}
+	return gitlabClient(httpClient, token, host)
+}
 
-	apiClient, _ = gitlab.NewClient(token, gitlab.WithHTTPClient(httpClient), gitlab.WithBaseURL(glinstance.APIEndpoint(host, Protocol)))
+func gitlabClient(httpClient *http.Client, token, host string) (*gitlab.Client, error) {
+	apiClient, err = gitlab.NewClient(token, gitlab.WithHTTPClient(httpClient), gitlab.WithBaseURL(glinstance.APIEndpoint(host, Protocol)))
+	if err != nil {
+		return nil, fmt.Errorf("failed to initialize GitLab client: %v", err)
+	}
 	return apiClient, nil
 }
+
+//
+//func TestClient(httpClient *http.Client, token, host string) (*gitlab.Client, error) {
+//	return gitlabClient(httpClient, token, host)
+//}
