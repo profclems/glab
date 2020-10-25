@@ -1,10 +1,11 @@
 package git
 
 import (
-	"net/url"
 	"os/exec"
 	"reflect"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 
 	"github.com/profclems/glab/internal/run"
 	"github.com/profclems/glab/test"
@@ -188,31 +189,26 @@ func TestParseExtraCloneArgs(t *testing.T) {
 }
 
 func TestReadBranchConfig(t *testing.T) {
-	type args struct {
-		branch string
+	cs, teardown := test.InitCmdStubber()
+	defer teardown()
+
+	cs.Stub(`branch.branch-name.remote origin
+branch.branch.remote git@gitlab.com:glab-test/test.git
+branch.branch.merge refs/heads/branch-name`)
+
+	u, err := ParseURL("git@gitlab.com:glab-test/test.git")
+	assert.Nil(t, err)
+	wantCfg := BranchConfig{
+		"origin",
+		u,
+		"refs/heads/branch-name",
 	}
-	u, _ := url.Parse("git@gitlab.com:glab-test/test.git")
-	tests := []struct {
-		name    string
-		args    args
-		wantCfg BranchConfig
-	}{
-		{
-			args: args{"trunk"},
-			wantCfg: BranchConfig{
-				"origin",
-				u,
-				"refs/heads/trunk",
-			},
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if gotCfg := ReadBranchConfig(tt.args.branch); !reflect.DeepEqual(gotCfg, tt.wantCfg) {
-				t.Errorf("ReadBranchConfig() = %v, want %v", gotCfg, tt.wantCfg)
-			}
-		})
-	}
+
+	t.Run("", func(t *testing.T) {
+		if gotCfg := ReadBranchConfig("branch-name"); !reflect.DeepEqual(gotCfg, wantCfg) {
+			t.Errorf("ReadBranchConfig() = %v, want %v", gotCfg, wantCfg)
+		}
+	})
 }
 
 func Test_parseRemotes(t *testing.T) {
