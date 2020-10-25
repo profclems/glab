@@ -3,7 +3,6 @@ package cmdutils
 
 import (
 	"fmt"
-	"strconv"
 
 	"github.com/profclems/glab/internal/utils"
 
@@ -42,20 +41,20 @@ func (f *Factory) RepoOverride(repo string) error {
 		OverrideAPIProtocol(cfg, newRepo)
 	}
 	f.HttpClient = func() (*gitlab.Client, error) {
-		return httpClientFunc(cfg, newRepo)
+		return HttpClientFunc(newRepo.RepoHost(), cfg)
 	}
 	return nil
 }
 
-func httpClientFunc(cfg config.Config, repo glrepo.Interface) (*gitlab.Client, error) {
-	token, _ := cfg.Get(repo.RepoHost(), "token")
-	tlsVerify, _ := cfg.Get(repo.RepoHost(), "skip_tls_verify")
-	skipTlsVerify, _ := strconv.ParseBool(tlsVerify)
-	caCert, _ := cfg.Get(repo.RepoHost(), "ca_cert")
+func HttpClientFunc(repoHost string, cfg config.Config) (*gitlab.Client, error) {
+	token, _ := cfg.Get(repoHost, "token")
+	tlsVerify, _ := cfg.Get(repoHost, "skip_tls_verify")
+	skipTlsVerify := tlsVerify == "true" || tlsVerify == "1"
+	caCert, _ := cfg.Get(repoHost, "ca_cert")
 	if caCert != "" {
-		return api.InitWithCustomCA(repo.RepoHost(), token, caCert)
+		return api.InitWithCustomCA(repoHost, token, caCert)
 	}
-	return api.Init(repo.RepoHost(), token, skipTlsVerify)
+	return api.Init(repoHost, token, skipTlsVerify)
 }
 
 func remotesFunc() (glrepo.Remotes, error) {
@@ -99,7 +98,7 @@ func HTTPClientFactory(f *Factory) {
 			return nil, err
 		}
 		OverrideAPIProtocol(cfg, repo)
-		return httpClientFunc(cfg, repo)
+		return HttpClientFunc(repo.RepoHost(), cfg)
 	}
 }
 

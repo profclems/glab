@@ -297,6 +297,8 @@ func (c *fileConfig) Get(hostname, key string) (string, error) {
 }
 
 func (c *fileConfig) GetWithSource(hostname, key string) (string, string, error) {
+	var cfgError error
+
 	if hostname != "" {
 		var notFound *NotFoundError
 
@@ -314,13 +316,11 @@ func (c *fileConfig) GetWithSource(hostname, key string) (string, string, error)
 		}
 
 		if hostValue != "" {
-			// TODO: avoid hard-coding this
-			return hostValue, "~/config/glab-cli/config.yml", nil
+			return hostValue, ConfigFile(), nil
 		}
 	}
 
-	// TODO: avoid hard-coding this
-	defaultSource := "~/config/glab-cli/config.yml"
+	defaultSource := ConfigFile()
 
 	l, _ := c.Local()
 	value, err := l.GetStringValue(key)
@@ -329,8 +329,11 @@ func (c *fileConfig) GetWithSource(hostname, key string) (string, string, error)
 	if (err != nil && errors.As(err, &notFound)) || value == "" {
 		value, err = c.GetStringValue(key)
 		if err != nil && errors.As(err, &notFound) {
-			return defaultFor(key), defaultSource, nil
+			return defaultFor(key), defaultSource, cfgError
 		} else if err != nil {
+			if hostname != "" {
+				err = cfgError
+			}
 			return "", LocalConfigFile(), err
 		}
 	} else if value != "" {
@@ -338,10 +341,10 @@ func (c *fileConfig) GetWithSource(hostname, key string) (string, string, error)
 	}
 
 	if value == "" {
-		return defaultFor(key), defaultSource, nil
+		return defaultFor(key), defaultSource, cfgError
 	}
 
-	return value, defaultSource, nil
+	return value, defaultSource, cfgError
 }
 
 func (c *fileConfig) Set(hostname, key, value string) error {
@@ -639,6 +642,8 @@ func ConfigKeyEquivalence(key string) string {
 		return "host"
 	case "gitlab_token", "oauth_token":
 		return "token"
+	case "no_prompt", "prompt_disabled":
+		return "no_prompt"
 	case "git_remote_url_var", "git_remote_alias", "remote_alias", "remote_nickname", "git_remote_nickname":
 		return "remote_alias"
 	default:
@@ -655,6 +660,8 @@ func EnvKeyEquivalence(key string) []string {
 		return []string{"GITLAB_HOST", "GITLAB_URI", "GL_HOST"}
 	case "token":
 		return []string{"GITLAB_TOKEN", "OAUTH_TOKEN"}
+	case "no_prompt":
+		return []string{"NO_PROMPT", "PROMPT_DISABLED"}
 	case "remote_alias":
 		return []string{"GIT_REMOTE_URL_VAR", "GIT_REMOTE_ALIAS", "REMOTE_ALIAS", "REMOTE_NICKNAME", "GIT_REMOTE_NICKNAME"}
 	default:
