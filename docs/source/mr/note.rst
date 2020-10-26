@@ -13,7 +13,7 @@ Add a comment or note to merge request
 
 ::
 
-  glab mr note <merge-request-id> [flags]
+  glab mr note [<id> | <branch>] [flags]
 
 Options
 ~~~~~~~

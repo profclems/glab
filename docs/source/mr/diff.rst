@@ -1,27 +1,26 @@
-.. _glab_mr_checkout:
+.. _glab_mr_diff:
 
-glab mr checkout
-----------------
+glab mr diff
+------------
 
-Checkout to an open merge request
+View changes in a merge request
 
 Synopsis
 ~~~~~~~~
 
 
-Checkout to an open merge request
+View changes in a merge request
 
 ::
 
-  glab mr checkout <id> [flags]
+  glab mr diff [<id> | <branch>] [flags]
 
 Options
 ~~~~~~~
 
 ::
 
-  -b, --branch string   checkout merge request with <branch> name
-  -t, --track           set checked out branch to track remote branch, adds remote if needed
+      --color string   Use color in diff output: {always|never|auto} (default "auto")
 
 Options inherited from parent commands
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -13,7 +13,7 @@ Revoke approval on a merge request <id>
 
 ::
 
-  glab mr revoke <id> [flags]
+  glab mr revoke [<id> | <branch>] [flags]
 
 Options inherited from parent commands
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

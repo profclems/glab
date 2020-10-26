@@ -13,7 +13,7 @@ List merge request eligible approvers
 
 ::
 
-  glab mr approvers <id> [flags]
+  glab mr approvers [<id> | <branch>] [flags]
 
 Options inherited from parent commands
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

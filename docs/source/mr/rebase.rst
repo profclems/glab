@@ -13,7 +13,7 @@ If you don’t have permissions to push to the merge request’s source branch -
 
 ::
 
-  glab mr rebase <id> [flags]
+  glab mr rebase [<id> | <branch>] [flags]
 
 Options inherited from parent commands
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

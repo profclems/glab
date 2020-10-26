@@ -13,7 +13,7 @@ Update merge requests
 
 ::
 
-  glab mr update <id> [flags]
+  glab mr update [<id> | <branch>] [flags]
 
 Examples
 ~~~~~~~~

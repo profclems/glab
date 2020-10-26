@@ -13,7 +13,7 @@ Unsubscribe from merge requests
 
 ::
 
-  glab mr unsubscribe <id> [flags]
+  glab mr unsubscribe [<id> | <branch>] [flags]
 
 Options inherited from parent commands
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

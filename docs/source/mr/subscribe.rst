@@ -13,7 +13,7 @@ Subscribe to merge requests
 
 ::
 
-  glab mr subscribe <id> [flags]
+  glab mr subscribe [<id> | <branch>] [flags]
 
 Options inherited from parent commands
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

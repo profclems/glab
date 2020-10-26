@@ -13,7 +13,7 @@ Reopen merge requests
 
 ::
 
-  glab mr reopen <id> [flags]
+  glab mr reopen [<id> | <branch>] [flags]
 
 Options inherited from parent commands
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

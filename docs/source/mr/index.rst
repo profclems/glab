@@ -37,6 +37,7 @@ Subcommands
    close <close>
    create <create>
    delete <delete>
+   diff <diff>
    for <for>
    issues <issues>
    list <list>

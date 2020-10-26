@@ -1,26 +1,20 @@
-.. _glab_mr_delete:
+.. _glab_mr_help:
 
-glab mr delete
---------------
+glab mr help
+------------
 
-Delete merge requests
+Help about any command
 
 Synopsis
 ~~~~~~~~
 
 
-Delete merge requests
+Help provides help for any command in the application.
+Simply type mr help [path to command] for full details.
 
 ::
 
-  glab mr delete [<id> | <branch>] [flags]
-
-Examples
-~~~~~~~~
-
-::
-
-  $ glab delete 123
+  glab mr help [command] [flags]
 
 Options inherited from parent commands
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

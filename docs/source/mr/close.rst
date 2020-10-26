@@ -13,7 +13,7 @@ Close merge requests
 
 ::
 
-  glab mr close <id> [flags]
+  glab mr close [<id> | <branch>] [flags]
 
 Options inherited from parent commands
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

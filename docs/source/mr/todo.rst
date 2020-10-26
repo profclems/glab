@@ -13,7 +13,7 @@ Add a ToDo to merge request
 
 ::
 
-  glab mr todo <merge-request-id> [flags]
+  glab mr todo [<id> | <branch>] [flags]
 
 Options inherited from parent commands
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -13,7 +13,7 @@ Get issues related to a particular merge request.
 
 ::
 
-  glab mr issues <id> [flags]
+  glab mr issues [<id> | <branch>] [flags]
 
 Examples
 ~~~~~~~~
