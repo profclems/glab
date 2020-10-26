@@ -42,9 +42,6 @@ code_navigation:
       lsif: dump.lsif
 
 .test:
-  # We limit concurrency because the integration tests execute _real_ actions in GitLab
-  # By limiting the resource group we can ensure that only one test is run in parallel
-  resource_group: test
   variables:
     GOPATH: "/builds/go"
     GIT_CLONE_PATH: $GOPATH/src/github.com/profclems/glab
