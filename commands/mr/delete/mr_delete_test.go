@@ -103,7 +103,7 @@ hosts:
 			name:    "delete no args",
 			wantErr: true,
 			assertFunc: func(t *testing.T, out string) {
-				assert.Contains(t, out, "no open merge request availabe for \"master\"")
+				assert.Contains(t, out, "no open merge request available for \"master\"")
 			},
 		},
 	}
