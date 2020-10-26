@@ -62,4 +62,4 @@ release:
 .PHONY: gen-docs
 gen-docs:
 	go run ./cmd/gen-docs/docs.go
-	cp ./docs/glab.md ./docs/index.md
+	#cp ./docs/glab.rst ./docs/index.rst
