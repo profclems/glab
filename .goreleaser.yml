@@ -37,6 +37,7 @@ archives:
       windows: Windows
       386: i386
       amd64: x86_64
+    allow_different_binary_count: true
 
   - id: nix
     builds: [macos, linux]
