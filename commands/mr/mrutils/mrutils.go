@@ -160,7 +160,7 @@ func GetOpenMRForBranch(apiClient *gitlab.Client, baseRepo glrepo.Interface, cur
 		return nil, fmt.Errorf("failed to get open merge request for %q: %w", currentBranch, err)
 	}
 	if len(mrs) == 0 {
-		return nil, fmt.Errorf("no open merge request availabe for %q", currentBranch)
+		return nil, fmt.Errorf("no open merge request available for %q", currentBranch)
 	}
 	// A single result is expected since gitlab does not allow multiple merge requests for a single source branch
 	return mrs[0], nil

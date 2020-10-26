@@ -81,7 +81,6 @@ func gitlabClient(httpClient *http.Client, token, host string) (*gitlab.Client, 
 	return apiClient, nil
 }
 
-//
-//func TestClient(httpClient *http.Client, token, host string) (*gitlab.Client, error) {
-//	return gitlabClient(httpClient, token, host)
-//}
+func TestClient(httpClient *http.Client, token, host string) (*gitlab.Client, error) {
+	return gitlabClient(httpClient, token, host)
+}
