@@ -19,15 +19,14 @@ func NewCmdConfig(f *cmdutils.Factory) *cobra.Command {
 		Short: `Set and get glab settings`,
 		Long: heredoc.Doc(`Get and set key/value strings.
 
-		Current respected settings:
+Current respected settings:
 
-		- token: Your gitlab access token, defaults to environment variables
-		- gitlab_uri: if unset, defaults to https://gitlab.com
-		- browser: if unset, defaults to environment variables
-		- editor: if unset, defaults to environment variables.
-		- visual: alternative for editor. if unset, defaults to environment variables.
-		- glamour_style: Your desired markdown renderer style. Options are dark, light, notty. Custom styles are allowed set a custom style
-https://github.com/charmbracelet/glamour#styles
+- token: Your gitlab access token, defaults to environment variables
+- gitlab_uri: if unset, defaults to https://gitlab.com
+- browser: if unset, defaults to environment variables
+- editor: if unset, defaults to environment variables.
+- visual: alternative for editor. if unset, defaults to environment variables.
+- glamour_style: Your desired markdown renderer style. Options are dark, light, notty. Custom styles are allowed set a custom style https://github.com/charmbracelet/glamour#styles
 	`),
 		Aliases: []string{"conf"},
 	}
