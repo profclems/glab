@@ -14,7 +14,7 @@ import (
 
 func NewCmdRebase(f *cmdutils.Factory) *cobra.Command {
 	var mrRebaseCmd = &cobra.Command{
-		Use:     "rebase <id> [flags]",
+		Use:     "rebase [<id> | <branch>] [flags]",
 		Short:   `Automatically rebase the source_branch of the merge request against its target_branch.`,
 		Long:    `If you don’t have permissions to push to the merge request’s source branch - you’ll get a 403 Forbidden response.`,
 		Aliases: []string{"accept"},

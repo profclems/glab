@@ -15,7 +15,7 @@ import (
 
 func NewCmdNote(f *cmdutils.Factory) *cobra.Command {
 	var mrCreateNoteCmd = &cobra.Command{
-		Use:     "note <merge-request-id>",
+		Use:     "note [<id> | <branch>]",
 		Aliases: []string{"comment"},
 		Short:   "Add a comment or note to merge request",
 		Long:    ``,

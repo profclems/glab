@@ -14,7 +14,7 @@ import (
 
 func NewCmdTodo(f *cmdutils.Factory) *cobra.Command {
 	var mrToDoCmd = &cobra.Command{
-		Use:     "todo <merge-request-id>",
+		Use:     "todo [<id> | <branch>]",
 		Aliases: []string{"add-todo"},
 		Short:   "Add a ToDo to merge request",
 		Long:    ``,

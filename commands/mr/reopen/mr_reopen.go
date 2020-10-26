@@ -14,7 +14,7 @@ import (
 
 func NewCmdReopen(f *cmdutils.Factory) *cobra.Command {
 	var mrReopenCmd = &cobra.Command{
-		Use:     "reopen <id>",
+		Use:     "reopen [<id> | <branch>]",
 		Short:   `Reopen merge requests`,
 		Long:    ``,
 		Aliases: []string{"open"},

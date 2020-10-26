@@ -33,7 +33,7 @@ func NewCmdDiff(f *cmdutils.Factory, runF func(*DiffOptions) error) *cobra.Comma
 	}
 
 	cmd := &cobra.Command{
-		Use:   "diff [<number> | <url> | <branch>]",
+		Use:   "diff [<id> | <branch>]",
 		Short: "View changes in a merge request",
 		Args:  cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {

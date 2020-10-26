@@ -16,7 +16,7 @@ import (
 
 func NewCmdApprovers(f *cmdutils.Factory) *cobra.Command {
 	var mrApproversCmd = &cobra.Command{
-		Use:     "approvers <id> [flags]",
+		Use:     "approvers [<id> | <branch>] [flags]",
 		Short:   `List merge request eligible approvers`,
 		Long:    ``,
 		Aliases: []string{},
