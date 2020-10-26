@@ -15,7 +15,7 @@ import (
 
 func NewCmdIssues(f *cmdutils.Factory) *cobra.Command {
 	var mrIssuesCmd = &cobra.Command{
-		Use:     "issues <id>",
+		Use:     "issues [<id> | <branch>]",
 		Short:   `Get issues related to a particular merge request.`,
 		Long:    ``,
 		Aliases: []string{"issue"},

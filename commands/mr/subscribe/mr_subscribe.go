@@ -13,7 +13,7 @@ import (
 
 func NewCmdSubscribe(f *cmdutils.Factory) *cobra.Command {
 	var mrSubscribeCmd = &cobra.Command{
-		Use:     "subscribe <id>",
+		Use:     "subscribe [<id> | <branch>]",
 		Short:   `Subscribe to merge requests`,
 		Long:    ``,
 		Aliases: []string{"sub"},

@@ -13,7 +13,7 @@ import (
 
 func NewCmdRevoke(f *cmdutils.Factory) *cobra.Command {
 	var mrRevokeCmd = &cobra.Command{
-		Use:     "revoke <id>",
+		Use:     "revoke [<id> | <branch>]",
 		Short:   `Revoke approval on a merge request <id>`,
 		Long:    ``,
 		Aliases: []string{"unapprove"},
