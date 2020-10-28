@@ -41,6 +41,9 @@ Inspired by `gh`, [the official GitHub CLI tool](https://github.com/cli/cli).
   $ glab pipeline status    # classic ci view
   ```
   
+## Demo
+[![asciicast](https://asciinema.org/a/yeILuPDFtNvjNc1zrA8mFgBN7.svg)](https://asciinema.org/a/yeILuPDFtNvjNc1zrA8mFgBN7)
+  
 ## Learn More
 Read the [documentation](https://clementsam.tech/glab) for more information on this tool.
 
