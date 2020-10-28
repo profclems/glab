@@ -42,7 +42,7 @@ Inspired by `gh`, [the official GitHub CLI tool](https://github.com/cli/cli).
   ```
   
 ## Demo
-[![asciicast](https://asciinema.org/a/yeILuPDFtNvjNc1zrA8mFgBN7.svg)](https://asciinema.org/a/yeILuPDFtNvjNc1zrA8mFgBN7)
+[![asciicast](https://asciinema.org/a/368622.svg)](https://asciinema.org/a/368622)
   
 ## Learn More
 Read the [documentation](https://clementsam.tech/glab) for more information on this tool.
