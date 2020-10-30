@@ -2,6 +2,7 @@ package user
 
 import (
 	"github.com/profclems/glab/commands/cmdutils"
+	userEventsCmd "github.com/profclems/glab/commands/user/events"
 	"github.com/spf13/cobra"
 )
 
@@ -12,6 +13,7 @@ func NewCmdUser(f *cmdutils.Factory) *cobra.Command {
 		Long:  "",
 	}
 
-	//TODO @zemzale 20/10/20 Add command for user events
+	userCmd.AddCommand(userEventsCmd.NewCmdEvents(f))
+
 	return userCmd
 }
