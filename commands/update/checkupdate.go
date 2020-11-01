@@ -16,7 +16,7 @@ func NewCheckUpdateCmd(version, build string) *cobra.Command {
 		Use:     "check-update",
 		Short:   "Check for latest glab releases",
 		Long:    ``,
-		Aliases: []string{"update", ""},
+		Aliases: []string{"update"},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return CheckUpdate(cmd, version, build, false)
 		},
