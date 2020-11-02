@@ -36,7 +36,7 @@ Current respected settings:
 	configCmd.AddCommand(NewCmdConfigGet(f))
 	configCmd.AddCommand(NewCmdConfigSet(f))
 	configCmd.AddCommand(NewCmdConfigInit(f))
-	
+
 	// TODO: deprecate `config init` command since it's been replaced by `auth login`
 	// targetedVersion: 1.12.0
 
