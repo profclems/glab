@@ -222,6 +222,18 @@ func TestMRDiff_notty(t *testing.T) {
     "state": "merged"}]`), nil
 		},
 	)
+	httpmock.RegisterResponder("GET", `https://gitlab.com/api/v4/projects/OWNER%2FREPO/merge_requests/123`,
+		func(req *http.Request) (*http.Response, error) {
+			return httpmock.NewStringResponse(200, `{
+    "id": 123,
+    "iid": 123,
+    "project_id": 3,
+    "title": "test1",
+    "description": "fixed login page css paddings",
+    "state": "merged"}`), nil
+		},
+	)
+
 	testDiff := DiffTest()
 	output, err := runCommand(nil, false, "")
 	if err != nil {
