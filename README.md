@@ -51,7 +51,7 @@ Inspired by `gh`, [the official GitHub CLI tool](https://github.com/cli/cli).
 [![asciicast](https://asciinema.org/a/368622.svg)](https://asciinema.org/a/368622)
   
 ## Learn More
-Read the [documentation](https://clementsam.tech/glab) for more information on this tool.
+Read the [documentation](https://glab.readthedocs.io/) for more information on this tool.
 
 ## Installation
 Download a binary suitable for your OS at the [releases page](https://github.com/profclems/glab/releases/latest).
