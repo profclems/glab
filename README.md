@@ -87,7 +87,7 @@ Downloads available via linuxbrew (homebrew) and tar balls
 
 #### Linuxbrew (Homebrew)
 ```sh
-brew install profclems/tap/glab
+brew install glab
 ```
 Updating:
 ```sh
@@ -108,7 +108,7 @@ Make sure you have snap installed on your Linux Distro (https://snapcraft.io/doc
 
 #### Homebrew
 ```sh
-brew install profclems/tap/glab
+brew install glab
 ```
 Updating:
 ```sh
