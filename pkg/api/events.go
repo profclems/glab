@@ -8,6 +8,7 @@ var CurrentUserEvents = func(client *gitlab.Client) ([]*gitlab.ContributionEvent
 	if client == nil {
 		client = apiClient
 	}
+
 	events, _, err := client.Events.ListCurrentUserContributionEvents(&gitlab.ListContributionEventsOptions{})
 	if err != nil {
 		return nil, err

@@ -2,11 +2,11 @@ package events
 
 import (
 	"fmt"
+	"io"
 
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/internal/utils"
 	"github.com/profclems/glab/pkg/api"
-	"github.com/profclems/glab/pkg/tableprinter"
 	"github.com/spf13/cobra"
 	"github.com/xanzy/go-gitlab"
 )
@@ -22,52 +22,86 @@ func NewCmdEvents(f *cmdutils.Factory) *cobra.Command {
 				return err
 			}
 
+			repo, err := f.BaseRepo()
+			if err != nil {
+				return err
+			}
+
 			events, err := api.CurrentUserEvents(apiClient)
 			if err != nil {
 				return err
 			}
-			projects := make(map[int]*gitlab.Project)
-			for _, e := range events {
-				project, err := api.GetProject(apiClient, e.ProjectID)
-				if err != nil {
-					return err
+
+			if lb, _ := cmd.Flags().GetBool("all"); lb {
+				projects := make(map[int]*gitlab.Project)
+				for _, e := range events {
+					project, err := api.GetProject(apiClient, e.ProjectID)
+					if err != nil {
+						return err
+					}
+					projects[e.ProjectID] = project
 				}
-				projects[e.ProjectID] = project
+
+				title := utils.NewListTitle("User events")
+				title.CurrentPageTotal = len(events)
+
+				DisplayAllEvents(f.IO.StdOut, events, projects)
+				return nil
 			}
 
-			title := utils.NewListTitle("User events")
-			title.CurrentPageTotal = len(events)
-
-			if err = f.IO.StartPager(); err != nil {
+			project, err := api.GetProject(apiClient, repo.FullName())
+			if err != nil {
 				return err
 			}
-			defer f.IO.StopPager()
-			fmt.Fprintf(f.IO.StdOut, "%s\n%s\n", title.Describe(), DisplayAllEvents(events, projects))
 
+			DisplayProjectEvents(f.IO.StdOut, events, project)
 			return nil
 		},
 	}
 
+	cmd.Flags().BoolP("all", "a", false, "Get events from all projects")
+
 	return cmd
 }
 
-func DisplayAllEvents(events []*gitlab.ContributionEvent, projects map[int]*gitlab.Project) string {
-	table := tableprinter.NewTablePrinter()
+func DisplayProjectEvents(w io.Writer, events []*gitlab.ContributionEvent, project *gitlab.Project) {
 	for _, e := range events {
-		table.AddCell(e.ActionName)
-		table.AddCell(projects[e.ProjectID].Name)
-		if e.ActionName == "pushed to" {
-			table.AddCell(e.PushData.Ref)
-			table.AddCell(e.PushData.CommitTitle)
-		} else if e.ActionName == "commented on" {
-			table.AddCell(e.Note.NoteableType)
-			table.AddCell(e.Note.Body)
-		} else {
-			table.AddCell(e.TargetType)
-			table.AddCell(e.Title)
+		if e.ProjectID != project.ID {
+			continue
 		}
-		table.EndRow()
+		printEvent(w, e, project)
 	}
+}
 
-	return table.Render()
+func DisplayAllEvents(w io.Writer, events []*gitlab.ContributionEvent, projects map[int]*gitlab.Project) {
+	for _, e := range events {
+		printEvent(w, e, projects[e.ProjectID])
+	}
+}
+
+func printEvent(w io.Writer, e *gitlab.ContributionEvent, project *gitlab.Project) {
+	switch e.ActionName {
+	case "pushed to":
+		fmt.Fprintf(w, "Pushed to %s %s at %s\n%q\n", e.PushData.RefType, e.PushData.Ref, project.NameWithNamespace, e.PushData.CommitTitle)
+	case "deleted":
+		fmt.Fprintf(w, "Deleted %s %s at %s\n", e.PushData.RefType, e.PushData.Ref, project.NameWithNamespace)
+	case "pushed new":
+		fmt.Fprintf(w, "Pushed new %s %s at %s\n", e.PushData.RefType, e.PushData.Ref, project.NameWithNamespace)
+	case "commented on":
+		fmt.Fprintf(w, "Commented on %s #%s at %s\n%q\n", e.Note.NoteableType, e.Note.Title, project.NameWithNamespace, e.Note.Body)
+	case "accepted":
+		fmt.Fprintf(w, "Accepted %s %s at %s\n", e.TargetType, e.TargetTitle, project.NameWithNamespace)
+	case "opened":
+		fmt.Fprintf(w, "Opened %s %s at %s\n", e.TargetType, e.TargetTitle, project.NameWithNamespace)
+	case "closed":
+		fmt.Fprintf(w, "Closed %s %s at %s\n", e.TargetType, e.TargetTitle, project.NameWithNamespace)
+	case "joined":
+		fmt.Fprintf(w, "Joined %s\n", project.NameWithNamespace)
+	case "left":
+		fmt.Fprintf(w, "Left %s\n", project.NameWithNamespace)
+	default:
+		fmt.Fprintf(w, "%s %q", e.TargetType, e.Title)
+	}
+	fmt.Fprintln(w) // to leave a blank line
+
 }
