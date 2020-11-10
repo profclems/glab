@@ -104,6 +104,12 @@ func printEvent(w io.Writer, e *gitlab.ContributionEvent, project *gitlab.Projec
 		fmt.Fprintf(w, "Joined %s\n", project.NameWithNamespace)
 	case "left":
 		fmt.Fprintf(w, "Left %s\n", project.NameWithNamespace)
+	case "created":
+		targetType := e.TargetType
+		if e.TargetType == "WikiPage::Meta" {
+			targetType = "Wiki page"
+		}
+		fmt.Fprintf(w, "Created %s %s at %s\n", targetType, e.TargetTitle, project.NameWithNamespace)
 	default:
 		fmt.Fprintf(w, "%s %q", e.TargetType, e.Title)
 	}
