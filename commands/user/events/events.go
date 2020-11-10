@@ -32,6 +32,11 @@ func NewCmdEvents(f *cmdutils.Factory) *cobra.Command {
 				return err
 			}
 
+			if err = f.IO.StartPager(); err != nil {
+				return err
+			}
+			defer f.IO.StopPager()
+
 			if lb, _ := cmd.Flags().GetBool("all"); lb {
 				projects := make(map[int]*gitlab.Project)
 				for _, e := range events {
