@@ -18,7 +18,7 @@ func NewCmdSearch(f *cmdutils.Factory) *cobra.Command {
 		Use:     "search [flags]",
 		Short:   `Search for GitLab repositories and projects by name`,
 		Long:    ``,
-		Args:    cobra.ExactArgs(1),
+		Args:    cobra.ExactArgs(0),
 		Aliases: []string{"find", "lookup"},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var err error
