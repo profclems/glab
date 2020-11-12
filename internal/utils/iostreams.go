@@ -9,8 +9,6 @@ import (
 	"strings"
 
 	"github.com/google/shlex"
-	"github.com/mattn/go-isatty"
-	"github.com/spf13/cobra"
 )
 
 var (
@@ -138,11 +136,6 @@ func isStdoutTerminal() bool {
 	return _isStdoutTerminal
 }
 
-// IsTerminal reports whether the file descriptor is connected to a terminal
-func IsTerminal(f *os.File) bool {
-	return isatty.IsTerminal(f.Fd()) || isatty.IsCygwinTerminal(f.Fd())
-}
-
 func IOTest() (*IOStreams, *bytes.Buffer, *bytes.Buffer, *bytes.Buffer) {
 	in := &bytes.Buffer{}
 	out := &bytes.Buffer{}
@@ -152,22 +145,4 @@ func IOTest() (*IOStreams, *bytes.Buffer, *bytes.Buffer, *bytes.Buffer) {
 		StdOut: out,
 		StdErr: errOut,
 	}, in, out, errOut
-}
-
-// TODO: remove after making sure no function uses it
-func ColorableOut(cmd *cobra.Command) io.Writer {
-	out := cmd.OutOrStdout()
-	if outFile, isFile := out.(*os.File); isFile {
-		return NewColorable(outFile)
-	}
-	return out
-}
-
-// TODO: remove
-func ColorableErr(cmd *cobra.Command) io.Writer {
-	err := cmd.ErrOrStderr()
-	if outFile, isFile := err.(*os.File); isFile {
-		return NewColorable(outFile)
-	}
-	return err
 }

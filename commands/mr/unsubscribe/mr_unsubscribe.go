@@ -20,7 +20,6 @@ func NewCmdUnsubscribe(f *cmdutils.Factory) *cobra.Command {
 		Args:    cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var err error
-			out := utils.ColorableOut(cmd)
 
 			apiClient, err := f.HttpClient()
 			if err != nil {
@@ -38,15 +37,15 @@ func NewCmdUnsubscribe(f *cmdutils.Factory) *cobra.Command {
 				return err
 			}
 
-			fmt.Fprintf(out, "- Unsubscribing from Merge Request !%d\n", mr.IID)
+			fmt.Fprintf(f.IO.StdOut, "- Unsubscribing from Merge Request !%d\n", mr.IID)
 
 			mr, err = api.UnsubscribeFromMR(apiClient, repo.FullName(), mr.IID, nil)
 			if err != nil {
 				return err
 			}
 
-			fmt.Fprintf(out, "%s You have successfully unsubscribed from merge request !%d\n", utils.GreenCheck(), mr.IID)
-			fmt.Fprintln(out, mrutils.DisplayMR(mr))
+			fmt.Fprintf(f.IO.StdOut, "%s You have successfully unsubscribed from merge request !%d\n", utils.GreenCheck(), mr.IID)
+			fmt.Fprintln(f.IO.StdOut, mrutils.DisplayMR(mr))
 
 			return nil
 		},

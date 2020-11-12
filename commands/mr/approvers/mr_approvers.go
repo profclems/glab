@@ -22,8 +22,6 @@ func NewCmdApprovers(f *cmdutils.Factory) *cobra.Command {
 		Aliases: []string{},
 		Args:    cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			out := utils.ColorableOut(cmd)
-
 			apiClient, err := f.HttpClient()
 			if err != nil {
 				return err
@@ -34,21 +32,21 @@ func NewCmdApprovers(f *cmdutils.Factory) *cobra.Command {
 				return err
 			}
 
-			fmt.Fprintf(out, "\nListing Merge Request !%d eligible approvers\n", mr.IID)
+			fmt.Fprintf(f.IO.StdOut, "\nListing Merge Request !%d eligible approvers\n", mr.IID)
 
 			mrApprovals, err := api.GetMRApprovalState(apiClient, repo.FullName(), mr.IID)
 			if err != nil {
 				return err
 			}
 			if mrApprovals.ApprovalRulesOverwritten {
-				fmt.Fprintln(out, utils.Yellow("Approval rules overwritten"))
+				fmt.Fprintln(f.IO.StdOut, utils.Yellow("Approval rules overwritten"))
 			}
 			for _, rule := range mrApprovals.Rules {
 				table := tableprinter.NewTablePrinter()
 				if rule.Approved {
-					fmt.Fprintln(out, utils.Green(fmt.Sprintf("Rule %q sufficient approvals (%d/%d required):", rule.Name, len(rule.ApprovedBy), rule.ApprovalsRequired)))
+					fmt.Fprintln(f.IO.StdOut, utils.Green(fmt.Sprintf("Rule %q sufficient approvals (%d/%d required):", rule.Name, len(rule.ApprovedBy), rule.ApprovalsRequired)))
 				} else {
-					fmt.Fprintln(out, utils.Yellow(fmt.Sprintf("Rule %q insufficient approvals (%d/%d required):", rule.Name, len(rule.ApprovedBy), rule.ApprovalsRequired)))
+					fmt.Fprintln(f.IO.StdOut, utils.Yellow(fmt.Sprintf("Rule %q insufficient approvals (%d/%d required):", rule.Name, len(rule.ApprovedBy), rule.ApprovalsRequired)))
 				}
 
 				eligibleApprovers := rule.EligibleApprovers
@@ -75,7 +73,7 @@ func NewCmdApprovers(f *cmdutils.Factory) *cobra.Command {
 					approved := "👍"
 					table.AddRow(approver.Name, approver.Username, approved, "")
 				}
-				fmt.Fprintln(out, table)
+				fmt.Fprintln(f.IO.StdOut, table)
 			}
 			return nil
 		},

@@ -22,7 +22,6 @@ func NewCmdNote(f *cmdutils.Factory) *cobra.Command {
 		Args:    cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var err error
-			out := utils.ColorableOut(cmd)
 
 			apiClient, err := f.HttpClient()
 			if err != nil {
@@ -61,7 +60,7 @@ func NewCmdNote(f *cmdutils.Factory) *cobra.Command {
 				return err
 			}
 
-			fmt.Fprintf(out, "%s#note_%d\n", mr.WebURL, noteInfo.ID)
+			fmt.Fprintf(f.IO.StdOut, "%s#note_%d\n", mr.WebURL, noteInfo.ID)
 			return nil
 		},
 	}

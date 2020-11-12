@@ -20,8 +20,6 @@ func NewCmdDelete(f *cmdutils.Factory) *cobra.Command {
 		Args:    cobra.MaximumNArgs(1),
 		Example: "$ glab delete 123",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			out := utils.ColorableOut(cmd)
-
 			apiClient, err := f.HttpClient()
 			if err != nil {
 				return err
@@ -32,13 +30,13 @@ func NewCmdDelete(f *cmdutils.Factory) *cobra.Command {
 				return err
 			}
 
-			fmt.Fprintf(out, "- Deleting Merge Request !%d\n", mr.IID)
+			fmt.Fprintf(f.IO.StdOut, "- Deleting Merge Request !%d\n", mr.IID)
 
 			if err = api.DeleteMR(apiClient, repo.FullName(), mr.IID); err != nil {
 				return err
 			}
 
-			fmt.Fprintf(out, "%s Merge request !%d deleted\n", utils.RedCheck(), mr.IID)
+			fmt.Fprintf(f.IO.StdOut, "%s Merge request !%d deleted\n", utils.RedCheck(), mr.IID)
 
 			return nil
 		},

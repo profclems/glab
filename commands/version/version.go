@@ -7,18 +7,20 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func NewCmdVersion(version, build string) *cobra.Command {
-	versionOutput := fmt.Sprintf("glab %s (%s)", version, build)
+var VersionOutput = "DEV"
+
+func NewCmdVersion(s *utils.IOStreams, version, build string) *cobra.Command {
+	VersionOutput = fmt.Sprintf("glab %s (%s)", version, build)
 	var versionCmd = &cobra.Command{
 		Use:     "version",
 		Short:   "show glab version information",
 		Long:    ``,
 		Aliases: []string{"v"},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			fmt.Fprintln(utils.ColorableOut(cmd), versionOutput)
+			fmt.Fprintln(s.StdOut, VersionOutput)
 			return nil
 		},
 	}
-	versionCmd.Root().SetVersionTemplate(versionOutput)
+	versionCmd.Root().SetVersionTemplate(VersionOutput)
 	return versionCmd
 }

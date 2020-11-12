@@ -31,6 +31,7 @@ require (
 	github.com/tcnksm/go-gitconfig v0.1.2
 	github.com/xanzy/go-gitlab v0.39.0
 	github.com/yuin/goldmark v1.2.1 // indirect
+	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9
 	golang.org/x/net v0.0.0-20200822124328-c89045814202 // indirect
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c

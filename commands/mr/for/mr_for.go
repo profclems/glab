@@ -31,7 +31,6 @@ func NewCmdFor(f *cmdutils.Factory) *cobra.Command {
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var err error
-			out := utils.ColorableOut(cmd)
 
 			apiClient, err := f.HttpClient()
 			if err != nil {
@@ -135,7 +134,7 @@ func NewCmdFor(f *cmdutils.Factory) *cobra.Command {
 				return err
 			}
 
-			fmt.Fprintln(out, mrutils.DisplayMR(mr))
+			fmt.Fprintln(f.IO.StdOut, mrutils.DisplayMR(mr))
 
 			return nil
 		},

@@ -22,7 +22,7 @@ func NewCmdSearch(f *cmdutils.Factory) *cobra.Command {
 		Aliases: []string{"find", "lookup"},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var err error
-			out := utils.ColorableOut(cmd)
+
 			apiClient, err := f.HttpClient()
 			if err != nil {
 				return err
@@ -61,7 +61,7 @@ func NewCmdSearch(f *cmdutils.Factory) *cobra.Command {
 				table.EndRow()
 			}
 
-			fmt.Fprintf(out, "%s\n%s\n", title, table.Render())
+			fmt.Fprintf(f.IO.StdOut, "%s\n%s\n", title, table.Render())
 			return nil
 		},
 	}

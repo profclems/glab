@@ -8,11 +8,9 @@ import (
 	"os"
 	"strings"
 
-	"github.com/profclems/glab/commands/cmdutils"
-	"github.com/profclems/glab/internal/utils"
-
 	"github.com/MakeNowJust/heredoc"
 	"github.com/dustin/go-humanize"
+	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/spf13/cobra"
 	"github.com/xanzy/go-gitlab"
 )
@@ -37,8 +35,6 @@ func NewCmdArchive(f *cmdutils.Factory) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var name string
 			var err error
-
-			colorableOut := utils.ColorableOut(cmd)
 
 			if len(args) != 0 {
 				err = f.RepoOverride(args[0])
@@ -96,12 +92,12 @@ func NewCmdArchive(f *cmdutils.Factory) *cobra.Command {
 				return fmt.Errorf("failed to write repos: %v", err)
 			}
 
-			fmt.Fprint(colorableOut, "\n")
+			fmt.Fprint(f.IO.StdOut, "\n")
 			_ = out.Close()
 			if err = os.Rename(archiveName+".tmp", archiveName); err != nil {
 				return fmt.Errorf("failed to rename tmp repos: %v", err)
 			}
-			fmt.Fprintln(colorableOut, "Complete...", archiveName)
+			fmt.Fprintln(f.IO.StdOut, "Complete...", archiveName)
 			return nil
 		},
 	}

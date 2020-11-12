@@ -39,8 +39,6 @@ func TraceCmdFunc(cmd *cobra.Command, args []string, f *cmdutils.Factory) error 
 	var jobID int
 	var err error
 
-	out := utils.ColorableOut(cmd)
-
 	apiClient, err := f.HttpClient()
 	if err != nil {
 		return err
@@ -71,7 +69,7 @@ func TraceCmdFunc(cmd *cobra.Command, args []string, f *cmdutils.Factory) error 
 		l.Page = 1
 		l.PerPage = 1
 
-		fmt.Fprintf(out, "Searching for latest pipeline on %s...\n", branch)
+		fmt.Fprintf(f.IO.StdOut, "Searching for latest pipeline on %s...\n", branch)
 
 		pipes, err := api.GetPipelines(apiClient, l, repo.FullName())
 		if err != nil {
@@ -79,12 +77,12 @@ func TraceCmdFunc(cmd *cobra.Command, args []string, f *cmdutils.Factory) error 
 		}
 
 		if len(pipes) == 0 {
-			fmt.Fprintln(out, "No pipeline running or available on "+branch+"branch")
+			fmt.Fprintln(f.IO.StdOut, "No pipeline running or available on "+branch+"branch")
 			return nil
 		}
 
 		pipeline := pipes[0]
-		fmt.Fprintf(out, "Getting jobs for pipeline %d...\n", pipeline.ID)
+		fmt.Fprintf(f.IO.StdOut, "Getting jobs for pipeline %d...\n", pipeline.ID)
 
 		jobs, err := api.GetPipelineJobs(apiClient, pipeline.ID, repo.FullName())
 		if err != nil {
@@ -126,7 +124,7 @@ func TraceCmdFunc(cmd *cobra.Command, args []string, f *cmdutils.Factory) error 
 		return err
 	}
 
-	err = pipelineutils.RunTrace(apiClient, context.Background(), out, repo.FullName(), job.Pipeline.Sha, job.Name)
+	err = pipelineutils.RunTrace(apiClient, context.Background(), f.IO.StdOut, repo.FullName(), job.Pipeline.Sha, job.Name)
 	if err != nil {
 		return err
 	}

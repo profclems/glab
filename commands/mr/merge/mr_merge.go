@@ -26,7 +26,6 @@ func NewCmdMerge(f *cmdutils.Factory) *cobra.Command {
 		Args: cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var err error
-			out := utils.ColorableOut(cmd)
 
 			apiClient, err := f.HttpClient()
 			if err != nil {
@@ -69,7 +68,7 @@ func NewCmdMerge(f *cmdutils.Factory) *cobra.Command {
 				opts.SHA = gitlab.String(m)
 			}
 
-			fmt.Fprintf(out, "- Merging merge request !%d\n", mr.IID)
+			fmt.Fprintf(f.IO.StdOut, "- Merging merge request !%d\n", mr.IID)
 
 			mr, err = api.MergeMR(apiClient, repo.FullName(), mr.IID, opts)
 
@@ -77,8 +76,8 @@ func NewCmdMerge(f *cmdutils.Factory) *cobra.Command {
 				return err
 			}
 
-			fmt.Fprintln(out, utils.GreenCheck(), "Merged")
-			fmt.Fprintln(out, mrutils.DisplayMR(mr))
+			fmt.Fprintln(f.IO.StdOut, utils.GreenCheck(), "Merged")
+			fmt.Fprintln(f.IO.StdOut, mrutils.DisplayMR(mr))
 
 			return nil
 		},

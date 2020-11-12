@@ -6,8 +6,6 @@ import (
 	"github.com/profclems/glab/pkg/api"
 
 	"github.com/profclems/glab/commands/cmdutils"
-	"github.com/profclems/glab/internal/utils"
-
 	"github.com/spf13/cobra"
 	"github.com/xanzy/go-gitlab"
 )
@@ -22,7 +20,6 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 
 			var err error
-			out := utils.ColorableOut(cmd)
 
 			apiClient, err := f.HttpClient()
 			if err != nil {
@@ -50,7 +47,7 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 			if err != nil {
 				return err
 			}
-			fmt.Fprintf(out, "Created label: %s\nWith color: %s\n", label.Name, label.Color)
+			fmt.Fprintf(f.IO.StdOut, "Created label: %s\nWith color: %s\n", label.Name, label.Color)
 
 			return nil
 		},

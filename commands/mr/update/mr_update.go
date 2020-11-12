@@ -6,7 +6,6 @@ import (
 
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/commands/mr/mrutils"
-	"github.com/profclems/glab/internal/utils"
 	"github.com/profclems/glab/pkg/api"
 
 	"github.com/MakeNowJust/heredoc"
@@ -27,7 +26,6 @@ func NewCmdUpdate(f *cmdutils.Factory) *cobra.Command {
 		Args: cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var err error
-			out := utils.ColorableOut(cmd)
 
 			apiClient, err := f.HttpClient()
 			if err != nil {
@@ -97,7 +95,7 @@ func NewCmdUpdate(f *cmdutils.Factory) *cobra.Command {
 				return err
 			}
 
-			fmt.Fprintln(out, mrutils.DisplayMR(mr))
+			fmt.Fprintln(f.IO.StdOut, mrutils.DisplayMR(mr))
 			return nil
 		},
 	}

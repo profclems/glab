@@ -32,8 +32,6 @@ func NewCmdStatus(f *cmdutils.Factory) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var err error
 
-			out := utils.ColorableOut(cmd)
-
 			apiClient, err := f.HttpClient()
 			if err != nil {
 				return err
@@ -141,7 +139,7 @@ func NewCmdStatus(f *cmdutils.Factory) *cobra.Command {
 				return nil
 			}
 			redCheck := utils.Red("✘")
-			fmt.Fprintf(out, "%s No pipelines running or available on %s branch\n", redCheck, branch)
+			fmt.Fprintf(f.IO.StdOut, "%s No pipelines running or available on %s branch\n", redCheck, branch)
 			return nil
 		},
 	}

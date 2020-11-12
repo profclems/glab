@@ -60,7 +60,7 @@ func listReleases(cmd *cobra.Command, args []string) error {
 
 		cfg, _ := factory.Config()
 		glamourStyle, _ := cfg.Get(repo.RepoHost(), "glamour_style")
-		fmt.Fprintln(utils.ColorableOut(cmd), releaseutils.DisplayRelease(release, glamourStyle))
+		fmt.Fprintln(factory.IO.StdOut, releaseutils.DisplayRelease(release, glamourStyle))
 	} else {
 		l.PerPage = 30
 
@@ -74,7 +74,7 @@ func listReleases(cmd *cobra.Command, args []string) error {
 		title.Page = 0
 		title.CurrentPageTotal = len(releases)
 
-		fmt.Fprintf(utils.ColorableOut(cmd), "%s\n%s\n", title.Describe(), releaseutils.DisplayAllReleases(releases, repo.FullName()))
+		fmt.Fprintf(factory.IO.StdOut, "%s\n%s\n", title.Describe(), releaseutils.DisplayAllReleases(releases, repo.FullName()))
 	}
 	return nil
 }

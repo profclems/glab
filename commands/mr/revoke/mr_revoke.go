@@ -20,7 +20,6 @@ func NewCmdRevoke(f *cmdutils.Factory) *cobra.Command {
 		Args:    cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var err error
-			out := utils.ColorableOut(cmd)
 
 			apiClient, err := f.HttpClient()
 			if err != nil {
@@ -40,14 +39,14 @@ func NewCmdRevoke(f *cmdutils.Factory) *cobra.Command {
 				return err
 			}
 
-			fmt.Fprintf(out, "- Revoking approval for Merge Request #%d...\n", mr.IID)
+			fmt.Fprintf(f.IO.StdOut, "- Revoking approval for Merge Request #%d...\n", mr.IID)
 
 			err = api.UnapproveMR(apiClient, repo.FullName(), mr.IID)
 			if err != nil {
 				return err
 			}
 
-			fmt.Fprintln(out, utils.GreenCheck(), "Merge Request approval revoked")
+			fmt.Fprintln(f.IO.StdOut, utils.GreenCheck(), "Merge Request approval revoked")
 
 			return nil
 		},
