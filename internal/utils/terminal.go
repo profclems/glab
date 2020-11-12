@@ -2,9 +2,10 @@ package utils
 
 import (
 	"fmt"
+	"os"
+
 	"github.com/mattn/go-isatty"
 	"golang.org/x/crypto/ssh/terminal"
-	"os"
 )
 
 // IsTerminal reports whether the file descriptor is connected to a terminal
