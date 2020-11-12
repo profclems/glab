@@ -36,7 +36,7 @@ func TestRootVersion(t *testing.T) {
 	os.Stdout = old // restoring the real stdout
 	out := <-outC
 
-	assert.Contains(t, out, "glab v1.0.0 (2020-01-01)")
+	assert.Equal(t, "glab version 1.0.0 (2020-01-01)\n", out)
 }
 
 func TestRootNoArg(t *testing.T) {

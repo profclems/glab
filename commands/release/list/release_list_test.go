@@ -6,6 +6,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/profclems/glab/internal/utils"
+
 	cmdTestUtils "github.com/profclems/glab/commands/cmdtest"
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/pkg/api"
@@ -106,7 +108,11 @@ func TestNewCmdReleaseList(t *testing.T) {
 		},
 	}
 
+	io, _, stdout, stderr := utils.IOTest()
 	f := cmdTestUtils.StubFactory("https://gitlab.com/glab-cli/test")
+	f.IO = io
+	f.IO.IsaTTY = true
+	f.IO.IsErrTTY = true
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -114,7 +120,7 @@ func TestNewCmdReleaseList(t *testing.T) {
 			cmd := NewCmdReleaseList(f)
 			cmdutils.EnableRepoOverride(cmd, f)
 
-			output, err := cmdTestUtils.RunCommand(cmd, tt.args)
+			_, err := cmdTestUtils.RunCommand(cmd, tt.args)
 			if tt.wantErr {
 				require.Error(t, err)
 				return
@@ -122,8 +128,8 @@ func TestNewCmdReleaseList(t *testing.T) {
 				require.Nil(t, err)
 			}
 
-			out := stripansi.Strip(output.String())
-			outErr := stripansi.Strip(output.Stderr())
+			out := stripansi.Strip(stdout.String())
+			outErr := stripansi.Strip(stderr.String())
 
 			tt.stdOutFunc(t, out)
 			assert.Contains(t, outErr, tt.stdErr)

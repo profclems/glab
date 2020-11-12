@@ -5,6 +5,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/profclems/glab/internal/utils"
+
 	"github.com/acarl005/stripansi"
 	"github.com/profclems/glab/commands/cmdtest"
 	"github.com/profclems/glab/commands/cmdutils"
@@ -36,7 +38,12 @@ hosts:
     token: OTOKEN
 `, "")()
 
+	io, _, stdout, stderr := utils.IOTest()
 	stubFactory, _ := cmdtest.StubFactoryWithConfig("")
+	stubFactory.IO = io
+	stubFactory.IO.IsaTTY = true
+	stubFactory.IO.IsErrTTY = true
+
 	timer, _ := time.Parse(time.RFC3339, "2014-11-12T11:45:26.371Z")
 	api.CreateMRNote = func(client *gitlab.Client, projectID interface{}, mrID int, opts *gitlab.CreateMergeRequestNoteOptions) (*gitlab.Note, error) {
 		if projectID == "PROJECT_MR_WITH_EMPTY_NOTE" {
@@ -87,44 +94,43 @@ hosts:
 		name          string
 		args          string
 		want          bool
-		assertionFunc func(*testing.T, string, string)
+		assertionFunc func(*testing.T, string, string, error)
 	}{
 		{
 			name: "Has -m flag",
 			args: "223 -m \"Some test note\"",
-			assertionFunc: func(t *testing.T, out, outErr string) {
+			assertionFunc: func(t *testing.T, out, outErr string, err error) {
 				require.Contains(t, out, "https://gitlab.com/glab-cli/test/-/merge_requests/223#note_1")
 			},
 		},
-		/*
-			{
-				name: "Has no flag",
-				args: "11",
-				assertionFunc: func(t *testing.T, out, outErr string) {
-					require.Contains(t, out, "aborted... Note has an empty message")
-				},
+		{
+			name: "Has no flag",
+			args: "11",
+			assertionFunc: func(t *testing.T, out, outErr string, err error) {
+				// TODO: better test survey package
+				//require.Equal(t, "aborted... Note has an empty message", err.Error())
 			},
-		*/
+		},
 		{
 			name: "With --repo flag",
 			args: "225 -m \"Some test note\" -R profclems/test",
-			assertionFunc: func(t *testing.T, out, outErr string) {
+			assertionFunc: func(t *testing.T, out, outErr string, err error) {
 				require.Contains(t, out, "https://gitlab.com/profclems/test/-/merge_requests/225#note_1")
 			},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			output, err := cmdtest.RunCommand(cmd, tt.args)
+			_, err := cmdtest.RunCommand(cmd, tt.args)
 			if err != nil {
 				t.Error(err)
 				return
 			}
 
-			out := stripansi.Strip(output.String())
-			outErr := stripansi.Strip(output.Stderr())
+			out := stripansi.Strip(stdout.String())
+			outErr := stripansi.Strip(stderr.String())
 
-			tt.assertionFunc(t, out, outErr)
+			tt.assertionFunc(t, out, outErr, err)
 		})
 	}
 }

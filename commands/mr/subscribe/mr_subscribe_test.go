@@ -5,6 +5,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/profclems/glab/internal/utils"
+
 	"github.com/acarl005/stripansi"
 	"github.com/profclems/glab/commands/cmdtest"
 	"github.com/profclems/glab/commands/cmdutils"
@@ -27,7 +29,12 @@ hosts:
     username: monalisa
     token: OTOKEN
 `, "")()
+
+	io, _, stdout, stderr := utils.IOTest()
 	stubFactory, _ := cmdtest.StubFactoryWithConfig("")
+	stubFactory.IO = io
+	stubFactory.IO.IsaTTY = true
+	stubFactory.IO.IsErrTTY = true
 
 	oldSubscribeMR := api.SubscribeToMR
 	timer, _ := time.Parse(time.RFC3339, "2014-11-12T11:45:26.371Z")
@@ -113,7 +120,7 @@ hosts:
 
 	for _, tc := range testCases {
 		t.Run(tc.Name, func(t *testing.T) {
-			output, err := cmdtest.RunCommand(cmd, tc.Issue)
+			_, err := cmdtest.RunCommand(cmd, tc.Issue)
 
 			if tc.wantErr {
 				require.Error(t, err)
@@ -122,10 +129,11 @@ hosts:
 				require.NoError(t, err)
 			}
 
-			out := stripansi.Strip(output.String())
+			out := stripansi.Strip(stdout.String())
 
 			for _, msg := range tc.ExpectedMsg {
 				assert.Contains(t, out, msg)
+				assert.Equal(t, "", stderr.String())
 			}
 		})
 	}
