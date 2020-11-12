@@ -5,6 +5,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/profclems/glab/internal/utils"
+
 	"github.com/profclems/glab/internal/config"
 
 	"github.com/acarl005/stripansi"
@@ -27,7 +29,11 @@ hosts:
     token: OTOKEN
 `, "")()
 	t.Parallel()
+	io, _, stdout, stderr := utils.IOTest()
 	stubFactory, _ := cmdtest.StubFactoryWithConfig("")
+	stubFactory.IO = io
+	stubFactory.IO.IsaTTY = true
+	stubFactory.IO.IsErrTTY = true
 	oldDeleteMR := api.DeleteMR
 
 	api.DeleteMR = func(client *gitlab.Client, projectID interface{}, mrID int) error {
@@ -70,22 +76,22 @@ hosts:
 		args       []string
 		wantErr    bool
 		errMsg     string
-		assertFunc func(t *testing.T, out string)
+		assertFunc func(*testing.T, string, string, error)
 	}{
 		{
 			name:    "delete",
 			args:    []string{"0"},
 			wantErr: true,
 
-			assertFunc: func(t *testing.T, out string) {
-				assert.Contains(t, out, "invalid merge request ID provided")
+			assertFunc: func(t *testing.T, out, outErr string, err error) {
+				assert.Equal(t, "invalid merge request ID provided", err.Error())
 			},
 		},
 		{
 			name:    "id exists",
 			args:    []string{"1"},
 			wantErr: false,
-			assertFunc: func(t *testing.T, out string) {
+			assertFunc: func(t *testing.T, out, outErr string, err error) {
 				assert.Contains(t, out, "- Deleting Merge Request !1\n")
 				assert.Contains(t, out, "✔ Merge request !1 deleted\n")
 			},
@@ -94,7 +100,7 @@ hosts:
 			name:    "delete on different repo",
 			args:    []string{"1", "-R", "profclems/glab"},
 			wantErr: false,
-			assertFunc: func(t *testing.T, out string) {
+			assertFunc: func(t *testing.T, out, outErr string, err error) {
 				assert.Contains(t, out, "- Deleting Merge Request !1\n")
 				assert.Contains(t, out, "✔ Merge request !1 deleted\n")
 			},
@@ -102,8 +108,8 @@ hosts:
 		{
 			name:    "delete no args",
 			wantErr: true,
-			assertFunc: func(t *testing.T, out string) {
-				assert.Contains(t, out, "no open merge request available for \"master\"")
+			assertFunc: func(t *testing.T, out, outErr string, err error) {
+				assert.Equal(t, "no open merge request available for \"master\"", err.Error())
 			},
 		},
 	}
@@ -117,17 +123,18 @@ hosts:
 
 			cli := strings.Join(tt.args, " ")
 			t.Log(cli)
-			output, err := cmdtest.RunCommand(cmd, cli)
+			_, err := cmdtest.RunCommand(cmd, cli)
 			if !tt.wantErr {
 				assert.Nil(t, err)
 			} else {
 				assert.NotNil(t, err)
 			}
 
-			out := stripansi.Strip(output.String())
-			outErr := stripansi.Strip(output.Stderr())
+			out := stripansi.Strip(stdout.String())
+			outErr := stripansi.Strip(stderr.String())
+			t.Log(outErr)
 
-			tt.assertFunc(t, out)
+			tt.assertFunc(t, out, outErr, err)
 			assert.Contains(t, outErr, tt.errMsg)
 		})
 	}

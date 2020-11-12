@@ -20,8 +20,6 @@ func NewCmdReopen(f *cmdutils.Factory) *cobra.Command {
 		Aliases: []string{"open"},
 		Args:    cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			out := utils.ColorableOut(cmd)
-
 			apiClient, err := f.HttpClient()
 			if err != nil {
 				return err
@@ -42,15 +40,15 @@ func NewCmdReopen(f *cmdutils.Factory) *cobra.Command {
 			l := &gitlab.UpdateMergeRequestOptions{}
 			l.StateEvent = gitlab.String("reopen")
 
-			fmt.Fprintf(out, "- Reopening Merge request !%d...\n", mr.IID)
+			fmt.Fprintf(f.IO.StdOut, "- Reopening Merge request !%d...\n", mr.IID)
 
 			mr, err = api.UpdateMR(apiClient, repo.FullName(), mr.IID, l)
 			if err != nil {
 				return err
 			}
 
-			fmt.Fprintf(out, "%s Merge request !%d reopened\n", utils.GreenCheck(), mr.IID)
-			fmt.Fprintln(out, mrutils.DisplayMR(mr))
+			fmt.Fprintf(f.IO.StdOut, "%s Merge request !%d reopened\n", utils.GreenCheck(), mr.IID)
+			fmt.Fprintln(f.IO.StdOut, mrutils.DisplayMR(mr))
 
 			return nil
 		},

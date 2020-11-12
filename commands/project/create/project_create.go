@@ -82,7 +82,6 @@ func runCreateProject(cmd *cobra.Command, args []string, f *cmdutils.Factory) er
 		isPath = true
 	}
 
-	out := utils.ColorableOut(cmd)
 	apiClient, err := f.HttpClient()
 	if err != nil {
 		return err
@@ -151,16 +150,9 @@ func runCreateProject(cmd *cobra.Command, args []string, f *cmdutils.Factory) er
 	project, err := api.CreateProject(apiClient, opts)
 
 	greenCheck := utils.Green("✓")
-	isTTY := false
-	if outFile, isFile := out.(*os.File); isFile {
-		isTTY = utils.IsTerminal(outFile)
-		if isTTY {
-			// FIXME: duplicates colorableOut
-			out = utils.NewColorable(outFile)
-		}
-	}
+
 	if err == nil {
-		fmt.Fprintf(out, "%s Created repository %s on GitLab: %s\n", greenCheck, project.NameWithNamespace, project.WebURL)
+		fmt.Fprintf(f.IO.StdOut, "%s Created repository %s on GitLab: %s\n", greenCheck, project.NameWithNamespace, project.WebURL)
 		if isPath {
 			cfg, _ := f.Config()
 			protocol, _ := cfg.Get(repo.RepoHost(), "git_protocol")
@@ -178,9 +170,9 @@ func runCreateProject(cmd *cobra.Command, args []string, f *cmdutils.Factory) er
 			if err != nil {
 				return err
 			}
-			fmt.Fprintf(out, "%s Added remote %s\n", greenCheck, remote)
+			fmt.Fprintf(f.IO.StdOut, "%s Added remote %s\n", greenCheck, remote)
 
-		} else if isTTY {
+		} else if f.IO.IsaTTY {
 			doSetup, err := utils.Confirm(fmt.Sprintf("Create a local project directory for %s?", project.NameWithNamespace))
 			if err != nil {
 				return err
@@ -192,7 +184,7 @@ func runCreateProject(cmd *cobra.Command, args []string, f *cmdutils.Factory) er
 				if err != nil {
 					return err
 				}
-				fmt.Fprintf(out, "%s Initialized repository in './%s/'\n", greenCheck, projectPath)
+				fmt.Fprintf(f.IO.StdOut, "%s Initialized repository in './%s/'\n", greenCheck, projectPath)
 			}
 		}
 	} else {

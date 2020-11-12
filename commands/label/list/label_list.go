@@ -21,7 +21,6 @@ func NewCmdList(f *cmdutils.Factory) *cobra.Command {
 		Args:    cobra.ExactArgs(0),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var err error
-			out := utils.ColorableOut(cmd)
 
 			apiClient, err := f.HttpClient()
 			if err != nil {
@@ -49,7 +48,7 @@ func NewCmdList(f *cmdutils.Factory) *cobra.Command {
 			if err != nil {
 				return err
 			}
-			fmt.Fprintf(out, "Showing label %d of %d on %s\n\n", len(labels), len(labels), repo.FullName())
+			fmt.Fprintf(f.IO.StdOut, "Showing label %d of %d on %s\n\n", len(labels), len(labels), repo.FullName())
 			var labelPrintInfo string
 			for _, label := range labels {
 				labelPrintInfo += label.Name
@@ -58,7 +57,7 @@ func NewCmdList(f *cmdutils.Factory) *cobra.Command {
 				}
 				labelPrintInfo += "\n"
 			}
-			fmt.Fprintln(out, utils.Indent(labelPrintInfo, " "))
+			fmt.Fprintln(f.IO.StdOut, utils.Indent(labelPrintInfo, " "))
 
 			// Cache labels for host
 			//labelNames := make([]string, 0, len(labels))

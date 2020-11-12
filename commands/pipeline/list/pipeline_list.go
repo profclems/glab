@@ -27,8 +27,6 @@ func NewCmdList(f *cmdutils.Factory) *cobra.Command {
 			var err error
 			var titleQualifier string
 
-			out := utils.ColorableOut(cmd)
-
 			apiClient, err := f.HttpClient()
 			if err != nil {
 				return err
@@ -70,7 +68,7 @@ func NewCmdList(f *cmdutils.Factory) *cobra.Command {
 			title.Page = l.Page
 			title.CurrentPageTotal = len(pipes)
 
-			fmt.Fprintf(out, "%s\n%s\n", title.Describe(), pipelineutils.DisplayMultiplePipelines(pipes, repo.FullName()))
+			fmt.Fprintf(f.IO.StdOut, "%s\n%s\n", title.Describe(), pipelineutils.DisplayMultiplePipelines(pipes, repo.FullName()))
 			return nil
 		},
 	}
