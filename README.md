@@ -115,6 +115,14 @@ Updating:
 brew upgrade glab
 ```
 
+### KISS Linux
+`glab` is available on the [KISS Linux Community Repo](https://github.com/kisslinux/community) as `gitlab-glab`.
+If you already have the community repo configured in your `KISS_PATH` you can install `glab` through your terminal.
+```sh
+kiss b gitlab-glab && kiss i gitlab-glab
+```
+If you do not have the community repo configured in your `KISS_PATH`, follow the guide on the official guide [Here](https://k1ss.org/install#3.0) to learn how to setup it up.
+
 ### Building From Source
 If a supported binary for your OS is not found at the [releases page](https://github.com/profclems/glab/releases/latest), you can build from source:
 
