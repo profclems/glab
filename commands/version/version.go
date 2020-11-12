@@ -2,25 +2,32 @@ package version
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/profclems/glab/internal/utils"
 	"github.com/spf13/cobra"
 )
 
-var VersionOutput = "DEV"
-
-func NewCmdVersion(s *utils.IOStreams, version, build string) *cobra.Command {
-	VersionOutput = fmt.Sprintf("glab %s (%s)", version, build)
+func NewCmdVersion(s *utils.IOStreams, version, buildDate string) *cobra.Command {
 	var versionCmd = &cobra.Command{
 		Use:     "version",
 		Short:   "show glab version information",
 		Long:    ``,
 		Aliases: []string{"v"},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			fmt.Fprintln(s.StdOut, VersionOutput)
+			fmt.Fprint(s.StdOut, Scheme(version, buildDate))
 			return nil
 		},
 	}
-	versionCmd.Root().SetVersionTemplate(VersionOutput)
 	return versionCmd
+}
+
+func Scheme(version, buildDate string) string {
+	version = strings.TrimPrefix(version, "v")
+
+	if buildDate != "" {
+		version = fmt.Sprintf("%s (%s)", version, buildDate)
+	}
+
+	return fmt.Sprintf("glab version %s\n", version)
 }
