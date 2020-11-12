@@ -2,10 +2,11 @@ package version
 
 import (
 	"bytes"
-	"github.com/profclems/glab/internal/utils"
 	"io"
 	"os"
 	"testing"
+
+	"github.com/profclems/glab/internal/utils"
 
 	"github.com/stretchr/testify/assert"
 )
