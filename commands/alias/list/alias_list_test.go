@@ -37,7 +37,7 @@ func TestAliasList(t *testing.T) {
 				  co: mr checkout
 				  gc: "!glab mr create -f \"$@\" | pbcopy"
 			`),
-			wantStdout: "co\tmr checkout                     \ngc\t!glab mr create -f \"$@\" | pbcopy",
+			wantStdout: "co\tmr checkout                     \ngc\t!glab mr create -f \"$@\" | pbcopy\n",
 			wantStderr: "",
 			isaTTy:     true,
 		},
