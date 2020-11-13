@@ -8,11 +8,17 @@ import (
 	"github.com/spf13/cast"
 )
 
-var (
-	separator         = "\t"
-	maxColWidth   int = 0
-	terminalWidth int = 80
-)
+var tp *TablePrinter
+
+func init() {
+	tp = &TablePrinter{
+		TotalRows:     0,
+		Wrap:          false,
+		MaxColWidth:   0,
+		Separator:     "\t",
+		TerminalWidth: 80,
+	}
+}
 
 // TablePrinter represents a decorator that renders the data formatted in a tabular form.
 type TablePrinter struct {
@@ -22,7 +28,7 @@ type TablePrinter struct {
 	Wrap bool
 	// MaxColWidth is the maximum allowed width for cells in the table
 	MaxColWidth int
-	// Separator is the seperator for columns in the table. Default is " "
+	// Separator is the seperator for columns in the table. Default is "\t"
 	Separator string
 	// Rows is the collection of rows in the table
 	Rows []*TableRow
@@ -45,29 +51,40 @@ type TableRow struct {
 	Separator string
 }
 
-func NewTablePrinter() TablePrinter {
-	t := TablePrinter{
-		Separator:     separator,
-		MaxColWidth:   maxColWidth,
+func NewTablePrinter() *TablePrinter {
+	t := &TablePrinter{
+		Separator:     tp.Separator,
+		MaxColWidth:   tp.MaxColWidth,
 		Wrap:          false,
-		TerminalWidth: terminalWidth,
+		TerminalWidth: tp.TerminalWidth,
 	}
-
-	t.Rows = make([]*TableRow, 1)
-	t.Rows[0] = &TableRow{}
 
 	return t
 }
 
-func SetTerminalWidth(width int) {
-	terminalWidth = width
+// SetTerminalWidth sets the maximum width for the terminal
+func SetTerminalWidth(width int) { tp.SetTerminalWidth(width) }
+
+func (t *TablePrinter) SetTerminalWidth(width int) {
+	t.TerminalWidth = width
 }
 
-func SetSeparator(s string) {
-	separator = s
+// SetSeparator sets the separator for the columns in the table
+func SetSeparator(s string) { tp.SetSeparator(s) }
+
+func (t *TablePrinter) SetSeparator(s string) {
+	t.Separator = s
+}
+
+func (t *TablePrinter) makeRow() {
+	if t.Rows == nil {
+		t.Rows = make([]*TableRow, 1)
+		t.Rows[0] = &TableRow{}
+	}
 }
 
 func (t *TablePrinter) AddCell(s interface{}) {
+	t.makeRow()
 	rowI := len(t.Rows) - 1
 	row := t.Rows[rowI]
 
@@ -80,24 +97,6 @@ func (t *TablePrinter) AddCell(s interface{}) {
 	row.Cells = append(row.Cells, cell)
 }
 
-func (t *TablePrinter) appendCellToIndex(s interface{}, index int) {
-	rowI := len(t.Rows) - 1
-	last := len(t.Rows[rowI].Cells) - 1
-
-	if last <= index {
-		t.AddCell(s)
-		return
-	}
-
-	t.Rows[rowI].Cells = append(t.Rows[rowI].Cells, t.Rows[rowI].Cells[last])
-	copy(t.Rows[rowI].Cells[(index+1):], t.Rows[rowI].Cells[index:last])
-
-	field := TableCell{
-		Value: s,
-	}
-	t.Rows[rowI].Cells[index] = &field
-}
-
 // AddCellf formats according to a format specifier and adds cell to row
 func (t *TablePrinter) AddCellf(s string, f ...interface{}) {
 	t.AddCell(fmt.Sprintf(s, f...))
@@ -108,11 +107,6 @@ func (t *TablePrinter) AddRow(str ...interface{}) {
 		t.AddCell(s)
 	}
 	t.EndRow()
-}
-
-// AddCellI appends a cell to the given index
-func (t *TablePrinter) AddCellI(index int, str interface{}) {
-	t.appendCellToIndex(str, index)
 }
 
 func (t *TablePrinter) AddRowFunc(f func(int, int) string) {
@@ -209,27 +203,7 @@ func (t *TablePrinter) Render() string {
 	// remove nil cells and rows
 	t.purgeRow()
 
-	//// determine the width for each column (cell in a row)
-	//var colWidths []int
-	//for _, row := range t.Rows {
-	//	for i, cell := range row.Cells {
-	//		// resize colwidth array
-	//		if i+1 > len(colWidths) {
-	//			colWidths = append(colWidths, 0)
-	//		}
-	//		cellwidth := cell.LineWidth()
-	//		if t.MaxColWidth != 0 && cellwidth > t.MaxColWidth {
-	//			cellwidth = t.MaxColWidth
-	//		}
-	//
-	//		if cellwidth > colWidths[i] {
-	//			colWidths[i] = cellwidth
-	//		}
-	//	}
-	//}
-	// determine the width for each column (cell in a row)
 	colWidths := t.colWidths()
-	//log.Fatalln(colWidths)
 
 	var lines []string
 	for _, row := range t.Rows {
@@ -311,7 +285,6 @@ func (t *TablePrinter) colWidths() []int {
 			}
 		}
 		// cap all but first column to fit available terminal width
-		// TODO: support weighted instead of even redistribution
 		for col := 1; col < numCols; col++ {
 			availColWidth := availWidth / (numCols - 1)
 			if colWidths[col] > availColWidth {
