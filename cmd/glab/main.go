@@ -107,7 +107,9 @@ func main() {
 	}
 
 	// Override the default column separator of tableprinter
-	tableprinter.DefaultSeparator = "  "
+	tableprinter.SetSeparator("  ")
+	// Override the default terminal width of tableprinter
+	tableprinter.SetTerminalWidth(cmdFactory.IO.TerminalWidth())
 
 	rootCmd.SetArgs(expandedArgs)
 

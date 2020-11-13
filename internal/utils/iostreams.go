@@ -11,11 +11,6 @@ import (
 	"github.com/google/shlex"
 )
 
-var (
-	_isStdoutTerminal = false
-	checkedTerminal   = false
-)
-
 type IOStreams struct {
 	In     io.ReadCloser
 	StdOut io.Writer
@@ -128,12 +123,8 @@ func (s *IOStreams) StopPager() {
 	s.pagerProcess = nil
 }
 
-func isStdoutTerminal() bool {
-	if !checkedTerminal {
-		_isStdoutTerminal = IsTerminal(os.Stdout)
-		checkedTerminal = true
-	}
-	return _isStdoutTerminal
+func (s *IOStreams) TerminalWidth() int {
+	return TerminalWidth(s.StdOut)
 }
 
 func IOTest() (*IOStreams, *bytes.Buffer, *bytes.Buffer, *bytes.Buffer) {
