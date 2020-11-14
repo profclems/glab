@@ -83,7 +83,7 @@ scoop update glab
 ```
 
 ### Linux
-Downloads available via linuxbrew (homebrew) and tar balls
+Prebuilt binaries available at the [releases page](https://github.com/profclems/glab/releases/latest).
 
 #### Linuxbrew (Homebrew)
 ```sh
@@ -100,8 +100,19 @@ Make sure you have snap installed on your Linux Distro (https://snapcraft.io/doc
 1. `sudo snap install --edge glab`
 1. `sudo snap connect glab:ssh-keys` to grant ssh access
 
-### Arch Linux
+#### Arch Linux
 `glab` is available through the [gitlab-glab-bin](https://aur.archlinux.org/packages/gitlab-glab-bin/) package on the AUR or download and install an archive from the [releases page](https://github.com/profclems/glab/releases/latest). Arch Linux also supports [snap](https://snapcraft.io/docs/installing-snap-on-arch-linux).
+```sh
+pacman -Sy gitlab-glab-bin
+```
+
+#### KISS Linux
+`glab` is available on the [KISS Linux Community Repo](https://github.com/kisslinux/community) as `gitlab-glab`.
+If you already have the community repo configured in your `KISS_PATH` you can install `glab` through your terminal.
+```sh
+kiss b gitlab-glab && kiss i gitlab-glab
+```
+If you do not have the community repo configured in your `KISS_PATH`, follow the guide on the official guide [Here](https://k1ss.org/install#3.0) to learn how to setup it up.
 
 ### MacOS
 `glab` is available via Homebrew
@@ -114,14 +125,6 @@ Updating:
 ```sh
 brew upgrade glab
 ```
-
-### KISS Linux
-`glab` is available on the [KISS Linux Community Repo](https://github.com/kisslinux/community) as `gitlab-glab`.
-If you already have the community repo configured in your `KISS_PATH` you can install `glab` through your terminal.
-```sh
-kiss b gitlab-glab && kiss i gitlab-glab
-```
-If you do not have the community repo configured in your `KISS_PATH`, follow the guide on the official guide [Here](https://k1ss.org/install#3.0) to learn how to setup it up.
 
 ### Building From Source
 If a supported binary for your OS is not found at the [releases page](https://github.com/profclems/glab/releases/latest), you can build from source:
