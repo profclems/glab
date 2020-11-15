@@ -25,9 +25,9 @@ require (
 	github.com/otiai10/copy v1.2.0
 	github.com/pkg/errors v0.9.1
 	github.com/rivo/tview v0.0.0-20200712113419-c65badfc3d92
+	github.com/spf13/cobra v1.1.1
 	github.com/rivo/uniseg v0.1.0
 	github.com/spf13/cast v1.3.0
-	github.com/spf13/cobra v1.0.0
 	github.com/spf13/pflag v1.0.5
 	github.com/stretchr/testify v1.6.1
 	github.com/tcnksm/go-gitconfig v0.1.2
