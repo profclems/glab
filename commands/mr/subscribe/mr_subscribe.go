@@ -13,14 +13,13 @@ import (
 
 func NewCmdSubscribe(f *cmdutils.Factory) *cobra.Command {
 	var mrSubscribeCmd = &cobra.Command{
-		Use:     "subscribe <id>",
+		Use:     "subscribe [<id> | <branch>]",
 		Short:   `Subscribe to merge requests`,
 		Long:    ``,
 		Aliases: []string{"sub"},
 		Args:    cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var err error
-			out := utils.ColorableOut(cmd)
 
 			apiClient, err := f.HttpClient()
 			if err != nil {
@@ -38,15 +37,15 @@ func NewCmdSubscribe(f *cmdutils.Factory) *cobra.Command {
 				return err
 			}
 
-			fmt.Fprintf(out, "- Subscribing to merge request !%d\n", mr.IID)
+			fmt.Fprintf(f.IO.StdOut, "- Subscribing to merge request !%d\n", mr.IID)
 
 			mr, err = api.SubscribeToMR(apiClient, repo.FullName(), mr.IID, nil)
 			if err != nil {
 				return err
 			}
 
-			fmt.Fprintf(out, "%s You have successfully subscribed to merge request !%d\n", utils.GreenCheck(), mr.IID)
-			fmt.Fprintln(out, mrutils.DisplayMR(mr))
+			fmt.Fprintf(f.IO.StdOut, "%s You have successfully subscribed to merge request !%d\n", utils.GreenCheck(), mr.IID)
+			fmt.Fprintln(f.IO.StdOut, mrutils.DisplayMR(mr))
 
 			return nil
 		},

@@ -1,8 +1,6 @@
 package commands
 
 import (
-	"fmt"
-
 	aliasCmd "github.com/profclems/glab/commands/alias"
 	authCmd "github.com/profclems/glab/commands/auth"
 	"github.com/profclems/glab/commands/cmdutils"
@@ -16,6 +14,7 @@ import (
 	projectCmd "github.com/profclems/glab/commands/project"
 	releaseCmd "github.com/profclems/glab/commands/release"
 	updateCmd "github.com/profclems/glab/commands/update"
+	userCmd "github.com/profclems/glab/commands/user"
 	versionCmd "github.com/profclems/glab/commands/version"
 	"github.com/profclems/glab/internal/glrepo"
 
@@ -60,16 +59,6 @@ func NewCmdRoot(f *cmdutils.Factory, version, buildDate string) *cobra.Command {
 			https://github.com/charmbracelet/glamour#styles
 		`),
 		},
-		RunE: func(cmd *cobra.Command, args []string) error {
-			if len(args) > 0 {
-				fmt.Printf("Unknown command: %s\n", args[0])
-				return cmd.Usage()
-			} else if ok, _ := cmd.Flags().GetBool("version"); ok {
-				return versionCmd.NewCmdVersion(version, buildDate).RunE(cmd, args)
-			}
-
-			return cmd.Help()
-		},
 	}
 
 	rootCmd.SetOut(f.IO.StdOut)
@@ -85,12 +74,16 @@ func NewCmdRoot(f *cmdutils.Factory, version, buildDate string) *cobra.Command {
 		return &cmdutils.FlagError{Err: err}
 	})
 
+	formattedVersion := versionCmd.Scheme(version, buildDate)
+	rootCmd.SetVersionTemplate(formattedVersion)
+	rootCmd.Version = formattedVersion
+
 	// Child commands
 	rootCmd.AddCommand(aliasCmd.NewCmdAlias(f))
 	rootCmd.AddCommand(configCmd.NewCmdConfig(f))
 	rootCmd.AddCommand(completionCmd.NewCmdCompletion(f.IO))
-	rootCmd.AddCommand(versionCmd.NewCmdVersion(version, buildDate))
-	rootCmd.AddCommand(updateCmd.NewCheckUpdateCmd(version, buildDate))
+	rootCmd.AddCommand(versionCmd.NewCmdVersion(f.IO, version, buildDate))
+	rootCmd.AddCommand(updateCmd.NewCheckUpdateCmd(f.IO, version, buildDate))
 	rootCmd.AddCommand(authCmd.NewCmdAuth(f))
 
 	// the commands below require apiClient and resolved repos
@@ -103,6 +96,7 @@ func NewCmdRoot(f *cmdutils.Factory, version, buildDate string) *cobra.Command {
 	rootCmd.AddCommand(pipelineCmd.NewCmdPipeline(f))
 	rootCmd.AddCommand(projectCmd.NewCmdRepo(f))
 	rootCmd.AddCommand(releaseCmd.NewCmdRelease(f))
+	rootCmd.AddCommand(userCmd.NewCmdUser(f))
 
 	rootCmd.Flags().BoolP("version", "v", false, "show glab version information")
 	return rootCmd

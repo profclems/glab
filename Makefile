@@ -43,7 +43,7 @@ test: clean
 
 .PHONY: internal-test
 internal-test:
-	GO111MODULE=on go test -coverprofile=coverage-main.out -covermode=count -coverpkg ./... -run=$(run) $(GOURL)/cmd/glab $(GOURL)/commands/... $(GOURL)/internal/...
+	GO111MODULE=on go test -coverprofile=coverage-main.out -covermode=count -coverpkg ./... -run=$(run) $(GOURL)/cmd/glab $(GOURL)/commands/... $(GOURL)/internal/... $(GOURL)/pkg/...
 	go get -u github.com/wadey/gocovmerge
 	gocovmerge coverage-*.out > coverage.txt && rm coverage-*.out
 
@@ -62,4 +62,4 @@ release:
 .PHONY: gen-docs
 gen-docs:
 	go run ./cmd/gen-docs/docs.go
-	cp ./docs/glab.md ./docs/index.md
+	#cp ./docs/glab.rst ./docs/index.rst

@@ -15,7 +15,7 @@ import (
 
 func NewCmdIssues(f *cmdutils.Factory) *cobra.Command {
 	var mrIssuesCmd = &cobra.Command{
-		Use:     "issues <id>",
+		Use:     "issues [<id> | <branch>]",
 		Short:   `Get issues related to a particular merge request.`,
 		Long:    ``,
 		Aliases: []string{"issue"},
@@ -23,7 +23,6 @@ func NewCmdIssues(f *cmdutils.Factory) *cobra.Command {
 		Example: "$ glab mr issues 46",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var err error
-			out := utils.ColorableOut(cmd)
 
 			apiClient, err := f.HttpClient()
 			if err != nil {
@@ -48,7 +47,7 @@ func NewCmdIssues(f *cmdutils.Factory) *cobra.Command {
 			title.ListActionType = "search"
 			title.CurrentPageTotal = len(mrIssues)
 
-			fmt.Fprintf(out, "%s\n%s\n", title.Describe(), issueutils.DisplayIssueList(mrIssues, repo.FullName()))
+			fmt.Fprintf(f.IO.StdOut, "%s\n%s\n", title.Describe(), issueutils.DisplayIssueList(mrIssues, repo.FullName()))
 			return nil
 		},
 	}

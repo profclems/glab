@@ -30,7 +30,6 @@ func NewCmdContributors(f *cmdutils.Factory) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 
 			var err error
-			out := utils.ColorableOut(cmd)
 
 			apiClient, err := f.HttpClient()
 			if err != nil {
@@ -54,7 +53,7 @@ func NewCmdContributors(f *cmdutils.Factory) *cobra.Command {
 					utils.Green(string(rune(user.Additions))))
 			}
 
-			fmt.Fprintln(out, usersPrintDetails)
+			fmt.Fprintln(f.IO.StdOut, usersPrintDetails)
 			return err
 		},
 	}

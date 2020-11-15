@@ -24,7 +24,7 @@ var (
 
 func NewCmdCheckout(f *cmdutils.Factory) *cobra.Command {
 	var mrCheckoutCmd = &cobra.Command{
-		Use:   "checkout <mr-id>",
+		Use:   "checkout <id>",
 		Short: "Checkout to an open merge request",
 		Long:  ``,
 		Args:  cobra.ExactArgs(1),

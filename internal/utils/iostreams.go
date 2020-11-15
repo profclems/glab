@@ -9,13 +9,6 @@ import (
 	"strings"
 
 	"github.com/google/shlex"
-	"github.com/mattn/go-isatty"
-	"github.com/spf13/cobra"
-)
-
-var (
-	_isStdoutTerminal = false
-	checkedTerminal   = false
 )
 
 type IOStreams struct {
@@ -130,17 +123,8 @@ func (s *IOStreams) StopPager() {
 	s.pagerProcess = nil
 }
 
-func isStdoutTerminal() bool {
-	if !checkedTerminal {
-		_isStdoutTerminal = IsTerminal(os.Stdout)
-		checkedTerminal = true
-	}
-	return _isStdoutTerminal
-}
-
-// IsTerminal reports whether the file descriptor is connected to a terminal
-func IsTerminal(f *os.File) bool {
-	return isatty.IsTerminal(f.Fd()) || isatty.IsCygwinTerminal(f.Fd())
+func (s *IOStreams) TerminalWidth() int {
+	return TerminalWidth(s.StdOut)
 }
 
 func IOTest() (*IOStreams, *bytes.Buffer, *bytes.Buffer, *bytes.Buffer) {
@@ -152,22 +136,4 @@ func IOTest() (*IOStreams, *bytes.Buffer, *bytes.Buffer, *bytes.Buffer) {
 		StdOut: out,
 		StdErr: errOut,
 	}, in, out, errOut
-}
-
-// TODO: remove after making sure no function uses it
-func ColorableOut(cmd *cobra.Command) io.Writer {
-	out := cmd.OutOrStdout()
-	if outFile, isFile := out.(*os.File); isFile {
-		return NewColorable(outFile)
-	}
-	return out
-}
-
-// TODO: remove
-func ColorableErr(cmd *cobra.Command) io.Writer {
-	err := cmd.ErrOrStderr()
-	if outFile, isFile := err.(*os.File); isFile {
-		return NewColorable(outFile)
-	}
-	return err
 }

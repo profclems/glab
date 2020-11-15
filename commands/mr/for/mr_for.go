@@ -31,7 +31,6 @@ func NewCmdFor(f *cmdutils.Factory) *cobra.Command {
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var err error
-			out := utils.ColorableOut(cmd)
 
 			apiClient, err := f.HttpClient()
 			if err != nil {
@@ -105,7 +104,7 @@ func NewCmdFor(f *cmdutils.Factory) *cobra.Command {
 
 			l := &gitlab.CreateMergeRequestOptions{}
 			l.Title = gitlab.String(mergeTitle)
-			l.Description = gitlab.String(fmt.Sprintf("Closes !%d", issue.IID))
+			l.Description = gitlab.String(fmt.Sprintf("Closes #%d", issue.IID))
 			l.Labels = gitlab.Labels{mergeLabel}
 			l.SourceBranch = gitlab.String(sourceBranch)
 			l.TargetBranch = gitlab.String(targetBranch)
@@ -135,7 +134,7 @@ func NewCmdFor(f *cmdutils.Factory) *cobra.Command {
 				return err
 			}
 
-			fmt.Fprintln(out, mrutils.DisplayMR(mr))
+			fmt.Fprintln(f.IO.StdOut, mrutils.DisplayMR(mr))
 
 			return nil
 		},

@@ -15,14 +15,12 @@ import (
 
 func NewCmdClose(f *cmdutils.Factory) *cobra.Command {
 	var mrCloseCmd = &cobra.Command{
-		Use:   "close <id>",
+		Use:   "close [<id> | <branch>]",
 		Short: `Close merge requests`,
 		Long:  ``,
 		Args:  cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var err error
-			out := utils.ColorableOut(cmd)
-
 			apiClient, err := f.HttpClient()
 			if err != nil {
 				return err
@@ -46,13 +44,13 @@ func NewCmdClose(f *cmdutils.Factory) *cobra.Command {
 			l.StateEvent = gitlab.String("close")
 			arrIds := strings.Split(strings.Trim(mergeID, "[] "), ",")
 			for _, i2 := range arrIds {
-				fmt.Fprintf(out, "- Closing Merge request...")
+				fmt.Fprintf(f.IO.StdOut, "- Closing Merge request...")
 				mr, err := api.UpdateMR(apiClient, repo.FullName(), utils.StringToInt(i2), l)
 				if err != nil {
 					return err
 				}
-				fmt.Fprintf(out, "%s Merge request !%s\n", utils.RedCheck(), i2)
-				fmt.Fprintln(out, mrutils.DisplayMR(mr))
+				fmt.Fprintf(f.IO.StdOut, "%s Merge request !%s\n", utils.RedCheck(), i2)
+				fmt.Fprintln(f.IO.StdOut, mrutils.DisplayMR(mr))
 			}
 
 			return nil

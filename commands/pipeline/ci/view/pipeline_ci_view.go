@@ -61,7 +61,7 @@ func NewCmdView(f *cmdutils.Factory) *cobra.Command {
 			defer recoverPanic(a)
 			var err error
 
-			cOut = utils.ColorableOut(cmd)
+			cOut = f.IO.StdOut
 
 			apiClient, err = f.HttpClient()
 			if err != nil {

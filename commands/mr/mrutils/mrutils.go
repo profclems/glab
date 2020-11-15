@@ -139,12 +139,13 @@ func MRFromArgs(f *cmdutils.Factory, args []string) (*gitlab.MergeRequest, glrep
 		if err != nil {
 			return nil, nil, err
 		}
-	} else {
-		mr, err = api.GetMR(apiClient, baseRepo.FullName(), mrID, &gitlab.GetMergeRequestsOptions{})
-		if err != nil {
-			return nil, nil, fmt.Errorf("failed to get merge request %d: %w", mrID, err)
-		}
-
+		mrID = mr.IID
+	}
+	// fetching multiple MRs does not return many major params in the payload
+	// so we fetch again using the single mr endpoint
+	mr, err = api.GetMR(apiClient, baseRepo.FullName(), mrID, &gitlab.GetMergeRequestsOptions{})
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to get merge request %d: %w", mrID, err)
 	}
 
 	return mr, baseRepo, nil
@@ -160,7 +161,7 @@ func GetOpenMRForBranch(apiClient *gitlab.Client, baseRepo glrepo.Interface, cur
 		return nil, fmt.Errorf("failed to get open merge request for %q: %w", currentBranch, err)
 	}
 	if len(mrs) == 0 {
-		return nil, fmt.Errorf("no open merge request availabe for %q", currentBranch)
+		return nil, fmt.Errorf("no open merge request available for %q", currentBranch)
 	}
 	// A single result is expected since gitlab does not allow multiple merge requests for a single source branch
 	return mrs[0], nil

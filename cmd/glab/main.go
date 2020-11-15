@@ -107,7 +107,9 @@ func main() {
 	}
 
 	// Override the default column separator of tableprinter
-	tableprinter.DefaultSeparator = "  "
+	tableprinter.SetSeparator("  ")
+	// Override the default terminal width of tableprinter
+	tableprinter.SetTerminalWidth(cmdFactory.IO.TerminalWidth())
 
 	rootCmd.SetArgs(expandedArgs)
 
@@ -123,7 +125,7 @@ func main() {
 
 	checkUpdate, _ := cfg.Get("", "check_update")
 	if checkUpdate, err := strconv.ParseBool(checkUpdate); err == nil && checkUpdate {
-		err = update.CheckUpdate(rootCmd, version, build, true)
+		err = update.CheckUpdate(rootCmd, cmdFactory.IO, version, build, true)
 		if err != nil && debug {
 			printError(os.Stderr, err, rootCmd, debug)
 		}

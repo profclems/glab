@@ -14,14 +14,13 @@ import (
 
 func NewCmdTodo(f *cmdutils.Factory) *cobra.Command {
 	var mrToDoCmd = &cobra.Command{
-		Use:     "todo <merge-request-id>",
+		Use:     "todo [<id> | <branch>]",
 		Aliases: []string{"add-todo"},
 		Short:   "Add a ToDo to merge request",
 		Long:    ``,
 		Args:    cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var err error
-			out := utils.ColorableOut(cmd)
 
 			apiClient, err := f.HttpClient()
 			if err != nil {
@@ -38,7 +37,7 @@ func NewCmdTodo(f *cmdutils.Factory) *cobra.Command {
 				return err
 			}
 
-			fmt.Fprintln(out, utils.GreenCheck(), "Done!!")
+			fmt.Fprintln(f.IO.StdOut, utils.GreenCheck(), "Done!!")
 
 			return nil
 		},
