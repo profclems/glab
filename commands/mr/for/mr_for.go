@@ -152,7 +152,7 @@ func NewCmdFor(f *cmdutils.Factory) *cobra.Command {
 	mrForCmd.Flags().BoolP("remove-source-branch", "", false, "Remove Source Branch on merge")
 	mrForCmd.Flags().IntP("milestone", "m", -1, "add milestone by <id> for merge request")
 	mrForCmd.Flags().StringP("target-branch", "b", "", "The target or base branch into which you want your code merged")
-	mrForCmd.Flags().BoolP("with-labels", "", false, "Copy labels from issue to the merge reuqest")
+	mrForCmd.Flags().BoolP("with-labels", "", false, "Copy labels from issue to the merge request")
 
 	return mrForCmd
 }
