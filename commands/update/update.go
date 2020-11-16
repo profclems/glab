@@ -2,19 +2,22 @@ package update
 
 import (
 	"encoding/json"
+	"strings"
 	"time"
+
+	"github.com/hashicorp/go-version"
 
 	"github.com/profclems/glab/internal/request"
 )
 
 type ReleaseInfo struct {
-	Name        string    `json:"name"`
+	Version     string    `json:"tag_name"`
 	PreRelease  bool      `json:"prerelease"`
-	HTMLUrl     string    `json:"html_url"`
+	URL         string    `json:"html_url"`
 	PublishedAt time.Time `json:"published_at"`
 }
 
-// GetUpdateInfo checks for latest glab releases
+// GetUpdateInfo checks for latest glab release and returns the ReleaseInfo
 func GetUpdateInfo() (ReleaseInfo, error) {
 	releasesUrl := "https://api.github.com/repos/profclems/glab/releases/latest"
 	resp, err := request.MakeRequest("{}", releasesUrl, "GET")
@@ -27,4 +30,14 @@ func GetUpdateInfo() (ReleaseInfo, error) {
 		return ReleaseInfo{}, err
 	}
 	return releaseInfo, nil
+}
+
+func isOlderVersion(latestVersion, appVersion string) bool {
+	latestVersion = strings.TrimSpace(latestVersion)
+	appVersion = strings.TrimSpace(appVersion)
+
+	vv, ve := version.NewVersion(latestVersion)
+	vw, we := version.NewVersion(appVersion)
+
+	return ve == nil && we == nil && vv.GreaterThan(vw)
 }

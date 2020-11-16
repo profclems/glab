@@ -40,8 +40,8 @@ func Test_isLatestVersion(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := isLatestVersion(tt.args.latestVersion, tt.args.currentVersion); got != tt.want {
-				t.Errorf("isLatestVersion(%s, %s) = %v, want %v",
+			if got := isOlderVersion(tt.args.latestVersion, tt.args.currentVersion); got != tt.want {
+				t.Errorf("isOlderVersion(%s, %s) = %v, want %v",
 					tt.args.latestVersion, tt.args.currentVersion, got, tt.want)
 			}
 		})

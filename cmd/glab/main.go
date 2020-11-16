@@ -125,7 +125,7 @@ func main() {
 
 	checkUpdate, _ := cfg.Get("", "check_update")
 	if checkUpdate, err := strconv.ParseBool(checkUpdate); err == nil && checkUpdate {
-		err = update.CheckUpdate(rootCmd, cmdFactory.IO, version, build, true)
+		err = update.CheckUpdate(cmdFactory.IO, version, true)
 		if err != nil && debug {
 			printError(os.Stderr, err, rootCmd, debug)
 		}
