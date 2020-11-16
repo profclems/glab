@@ -131,7 +131,8 @@ func TestNewCmdCreate_autofill(t *testing.T) {
 		out := stripansi.Strip(stdout.String())
 		outErr := stripansi.Strip(stderr.String())
 
-		assert.Contains(t, out, `!1 Update somefile.txt`)
+		// newline ensures we have no trailing characters
+		assert.Contains(t, out, "!1 Update somefile.txt\n")
 		assert.Contains(t, outErr, "\nCreating merge request for test-cli into master in glab-cli/test\n\n")
 		assert.Contains(t, out, "https://gitlab.com/glab-cli/test/-/merge_requests/1")
 		stdout.Reset()
