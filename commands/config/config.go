@@ -146,6 +146,7 @@ Examples:
 			return configInit(f)
 		},
 	}
+	configInitCmd.Deprecated = "use `glab auth login` which is secure and has additional options."
 	return configInitCmd
 }
 
