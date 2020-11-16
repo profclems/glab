@@ -6,6 +6,7 @@ require (
 	github.com/AlecAivazis/survey/v2 v2.2.2
 	github.com/MakeNowJust/heredoc v1.0.0
 	github.com/acarl005/stripansi v0.0.0-20180116102854-5a71ef0e047d
+	github.com/alecthomas/assert v0.0.0-20170929043011-405dbfeb8e38
 	github.com/charmbracelet/glamour v0.2.0
 	github.com/cli/safeexec v1.0.0
 	github.com/dustin/go-humanize v1.0.0
