@@ -2,7 +2,7 @@ stages:
   - test
 
 default:
-  image: golang:1.15
+  image: winamd64/golang:1.15
 
 variables:
   SAST_DISABLE_DIND: "true"
