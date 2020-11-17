@@ -53,6 +53,7 @@ code_navigation:
   variables:
     GITLAB_TOKEN: "qRC87Xg9Wd46RhB8J8sp"
     CODECOV_TOKEN: "1597edbc-8760-42c1-ab79-c192ad151717"
+    GO111MODULE: "on"
   before_script:
     # Add a non-sensitive ssh key for test to work.
     - mkdir ~/.ssh && chmod 700 ~/.ssh
@@ -65,9 +66,7 @@ code_navigation:
   script:
     - go version
     - go get -t -v ./...
-    - GO111MODULE=on go test -cover ./... 
-  after_script:
-    - bash <(curl -s https://codecov.io/bash)
+    - go test -cover ./... 
 
 test:linux:
   stage: test
