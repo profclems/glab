@@ -22,8 +22,8 @@ import (
 )
 
 var (
-	projectPath string
-	GlabBinaryPath string
+	projectPath       string
+	GlabBinaryPath    string
 	CachedTestFactory *cmdutils.Factory
 )
 
@@ -31,7 +31,7 @@ type fatalLogger interface {
 	Fatal(...interface{})
 }
 
-func init()  {
+func init() {
 	path, _ := os.Getwd()
 	projectPath = strings.SplitN(path, "/glab/", 2)[0] + "/glab/"
 }
