@@ -22,7 +22,8 @@ import (
 )
 
 var (
-	GlabBinaryPath    = "../../bin/glab"
+	projectPath string
+	GlabBinaryPath string
 	CachedTestFactory *cmdutils.Factory
 )
 
@@ -30,16 +31,21 @@ type fatalLogger interface {
 	Fatal(...interface{})
 }
 
+func init()  {
+	path, _ := os.Getwd()
+	projectPath = strings.SplitN(path, "/glab/", 2)[0] + "/glab/"
+}
+
 func InitTest(m *testing.M, suffix string) {
 	rand.Seed(time.Now().UnixNano())
 	// Build a glab binary with test symbols. If the parent test binary was run
 	// with coverage enabled, enable coverage on the child binary, too.
 	var err error
-	GlabBinaryPath, err = filepath.Abs(os.ExpandEnv("$GOPATH/src/github.com/profclems/glab/test/testdata/glab.test"))
+	GlabBinaryPath, err = filepath.Abs(os.ExpandEnv(projectPath + "testdata/glab.test"))
 	if err != nil {
 		log.Fatal(err)
 	}
-	testCmd := []string{"test", "-c", "-o", GlabBinaryPath, "github.com/profclems/glab/cmd/glab"}
+	testCmd := []string{"test", "-c", "-o", GlabBinaryPath, projectPath + "cmd/glab"}
 	if coverMode := testing.CoverMode(); coverMode != "" {
 		testCmd = append(testCmd, "-covermode", coverMode, "-coverpkg", "./...")
 	}
@@ -102,11 +108,11 @@ func CopyTestRepo(log fatalLogger, name string) string {
 		rand.Seed(time.Now().UnixNano())
 		name = strconv.Itoa(int(rand.Uint64()))
 	}
-	dest, err := filepath.Abs(os.ExpandEnv("$GOPATH/src/github.com/profclems/glab/test/testdata-" + name))
+	dest, err := filepath.Abs(os.ExpandEnv(projectPath + "test/testdata-" + name))
 	if err != nil {
 		log.Fatal(err)
 	}
-	src, err := filepath.Abs(os.ExpandEnv("$GOPATH/src/github.com/profclems/glab/test/testdata"))
+	src, err := filepath.Abs(os.ExpandEnv(projectPath + "test/testdata"))
 	if err != nil {
 		log.Fatal(err)
 	}
