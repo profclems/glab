@@ -56,7 +56,6 @@ test:linux:
   
 test:windows:
   stage: test
-  extends: .test
   image: winamd64/golang:1.15
   variables:
     DOCKER_CLI_EXPERIMENTAL: "enabled"
