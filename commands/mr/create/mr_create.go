@@ -72,7 +72,38 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 				sourceBranch = b
 			}
 
-			if fill, _ := cmd.Flags().GetBool("fill"); !fill {
+			if fill, _ := cmd.Flags().GetBool("fill"); fill {
+				branch, err := f.Branch()
+				if err != nil {
+					return err
+				}
+				commit, _ := git.LatestCommit(branch)
+				if commit != nil {
+					mergeDescription, err = git.CommitBody(strings.Trim(commit.Sha, `'`))
+					if err != nil {
+						return err
+					}
+					mergeTitle = utils.Humanize(commit.Title)
+				} else {
+					mergeTitle = utils.Humanize(branch)
+				}
+				_, err = api.GetCommit(apiClient, repo.FullName(), targetBranch)
+				if err != nil {
+					return fmt.Errorf("target branch %s does not exist on remote. Specify target branch with --target-branch flag",
+						targetBranch)
+				}
+				if c, err := git.UncommittedChangeCount(); c != 0 {
+					if err != nil {
+						return err
+					}
+					fmt.Fprintf(out, "warning: you have %s\n", utils.Pluralize(c, "uncommitted changes"))
+				}
+
+				err = git.Push(repoRemote.PushURL.String(), sourceBranch)
+				if err != nil {
+					return err
+				}
+			} else {
 				if title, _ := cmd.Flags().GetString("title"); title != "" {
 					mergeTitle = strings.Trim(title, " ")
 				} else {
@@ -90,30 +121,6 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 							FileName: "*_MR_EDITMSG.md",
 						})
 					}
-				}
-			} else {
-				branch, _ := git.CurrentBranch()
-				commit, _ := git.LatestCommit(branch)
-				_, err := api.GetCommit(apiClient, repo.FullName(), targetBranch)
-				if err != nil {
-					return fmt.Errorf("target branch %s does not exist on remote. Specify target branch with --target-branch flag",
-						targetBranch)
-				}
-				mergeDescription, err = git.CommitBody(branch)
-				if err != nil {
-					return err
-				}
-				mergeTitle = utils.Humanize(commit.Title)
-				if c, err := git.UncommittedChangeCount(); c != 0 {
-					if err != nil {
-						return err
-					}
-					fmt.Fprintf(out, "warning: you have %v uncommitted changes\n", c)
-				}
-
-				err = git.Push(repoRemote.PushURL.String(), sourceBranch)
-				if err != nil {
-					return err
 				}
 			}
 			isDraft, _ := cmd.Flags().GetBool("draft")
