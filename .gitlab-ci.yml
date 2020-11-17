@@ -65,7 +65,7 @@ code_navigation:
   script:
     - go version
     - go get -t -v ./...
-    - make test
+    - GO111MODULE=on go test -cover ./... 
   after_script:
     - bash <(curl -s https://codecov.io/bash)
 
