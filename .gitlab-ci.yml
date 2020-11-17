@@ -2,7 +2,7 @@ stages:
   - test
 
 default:
-  image: winamd64/golang:1.15
+  image: golang:1.15
 
 variables:
   SAST_DISABLE_DIND: "true"
@@ -57,4 +57,14 @@ test:linux:
 test:windows:
   stage: test
   extends: .test
-  image: golang:windowsservercore
+  image: winamd64/golang:1.15
+  variables:
+    DOCKER_CLI_EXPERIMENTAL: "enabled"
+  tags:
+    - shared-windows
+    - windows
+    - windows-1809
+  before_script:
+    - choco install make
+    - choco install runinbash
+    
