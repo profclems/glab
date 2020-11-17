@@ -64,7 +64,7 @@ code_navigation:
   after_script:
     - bash <(curl -s https://codecov.io/bash)
 
-test:
+test/linux:
   stage: test
   extends: .test
   image: golang:1.15
