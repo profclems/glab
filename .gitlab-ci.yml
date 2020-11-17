@@ -16,7 +16,7 @@ stages:
   - test
 
 default:
-  image: golang:1.15
+  image: golang:1.15-alpine
 
 # Disable DIND for SAST because we need to execute a before_script in the gosec-sast job
 variables:
@@ -67,9 +67,9 @@ code_navigation:
 test:
   stage: test
   extends: .test
-  image: golang:1.15
+  image: golang:1.15-alpine
   
 test/windows:
   stage: test
   extends: .test
-  image: golang:1.15-windowsservercore-1809
+  image: golang:1.15-windowsservercore
