@@ -57,4 +57,4 @@ test:linux:
 test:windows:
   stage: test
   extends: .test
-  image: winamd64/golang
+  image: golang:windowsservercore
