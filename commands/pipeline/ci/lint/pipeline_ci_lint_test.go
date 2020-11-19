@@ -1,11 +1,15 @@
 package lint
 
 import (
-	"os/exec"
 	"testing"
 
+	"github.com/profclems/glab/internal/config"
+	"github.com/profclems/glab/internal/utils"
+	"github.com/profclems/glab/pkg/api"
+	"github.com/stretchr/testify/assert"
+	"github.com/xanzy/go-gitlab"
+
 	"github.com/profclems/glab/commands/cmdtest"
-	"github.com/stretchr/testify/require"
 )
 
 func TestMain(m *testing.M) {
@@ -13,15 +17,33 @@ func TestMain(m *testing.M) {
 }
 
 func Test_pipelineCILint(t *testing.T) {
-	t.Parallel()
-	repo := cmdtest.CopyTestRepo(t, "pipeline_ci_lint_test")
-	cmd := exec.Command(cmdtest.GlabBinaryPath, "pipeline", "ci", "lint")
-	cmd.Dir = repo
+	defer config.StubConfig(`---
+hosts:
+  gitlab.com:
+    username: monalisa
+    token: OTOKEN
+`, "")()
 
-	b, err := cmd.CombinedOutput()
+	api.PipelineCILint = func(client *gitlab.Client, content string) (*gitlab.LintResult, error) {
+		return &gitlab.LintResult{
+			Status: "200",
+			Errors: nil,
+		}, nil
+	}
+	io, _, stdout, stderr := utils.IOTest()
+
+	stubFactory, err := cmdtest.StubFactoryWithConfig("")
+	assert.Nil(t, err)
+	stubFactory.IO = io
+	stubFactory.IO.IsaTTY = true
+	stubFactory.IO.IsErrTTY = true
+
+	cmd := NewCmdLint(stubFactory)
+
+	_, err = cmd.ExecuteC()
 	if err != nil {
-		t.Log(string(b))
 		t.Fatal(err)
 	}
-	require.Contains(t, string(b), "CI yml is Valid!")
+	assert.Contains(t, stdout.String(), "CI yml is Valid!")
+	assert.Equal(t, "", stderr.String())
 }
