@@ -30,12 +30,19 @@ ifndef CGO_LDFLAGS
     export CGO_LDFLAGS := $(LDFLAGS)
 endif
 
-HASGOTESTSUM := $(shell which gotestsum &> /dev/null)
+HASGOTESTSUM := $(shell which gotestsum 2> /dev/null)
+HASGOCILINT := $(shell which golangci-lint 2> /dev/null)
 
 ifdef HASGOTESTSUM
     GOTEST=gotestsum
 else
     GOTEST=bin/gotestsum
+endif
+
+ifdef HASGOCILINT
+    GOLINT=golangci-lint
+else
+    GOLINT=bin/golangci-lint
 endif
 
 GO_LDFLAGS := -X main.build=$(BUILD_DATE) $(GO_LDFLAGS)
@@ -107,8 +114,15 @@ test: export CGO_ENABLED=1
 test:  bin/gotestsum ## Run tests
 	$(GOTEST) --no-summary=skipped --junitfile ./coverage.xml --format ${TEST_FORMAT} -- -race -coverprofile=./coverage.txt -covermode=atomic $(filter-out -v,${GOARGS}) $(if ${TEST_PKGS},${TEST_PKGS},./...)
 
+
+ifdef HASGOCILINT
+bin/golangci-lint:
+	echo "Skip this"
+else
 bin/golangci-lint: bin/golangci-lint-${GOLANGCI_VERSION}
 	@ln -sf golangci-lint-${GOLANGCI_VERSION} bin/golangci-lint
+endif
+
 bin/golangci-lint-${GOLANGCI_VERSION}:
 	@mkdir -p bin
 	curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | bash -s -- -b ./bin/ v${GOLANGCI_VERSION}
@@ -116,11 +130,11 @@ bin/golangci-lint-${GOLANGCI_VERSION}:
 
 .PHONY: lint
 lint: bin/golangci-lint ## Run linter
-	bin/golangci-lint run
+	$(GOLINT) run
 
 .PHONY: fix
 fix: bin/golangci-lint ## Fix lint violations
-	bin/golangci-lint run --fix
+	$(GOLINT) run --fix
 	gofmt -s -w .
 	goimports -w .
 
