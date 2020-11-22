@@ -17,6 +17,7 @@ func NewCmdReopen(f *cmdutils.Factory) *cobra.Command {
 		Use:     "reopen [<id> | <branch>]",
 		Short:   `Reopen merge requests`,
 		Long:    ``,
+		Args:    cobra.MaximumNArgs(1),
 		Aliases: []string{"open"},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			apiClient, err := f.HttpClient()

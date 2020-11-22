@@ -17,6 +17,7 @@ func NewCmdClose(f *cmdutils.Factory) *cobra.Command {
 		Use:   "close [<id> | <branch>]",
 		Short: `Close merge requests`,
 		Long:  ``,
+		Args:  cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var err error
 			apiClient, err := f.HttpClient()
