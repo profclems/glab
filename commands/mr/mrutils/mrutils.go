@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/internal/glrepo"
@@ -155,11 +156,18 @@ func MRFromArgs(f *cmdutils.Factory, args []string) (*gitlab.MergeRequest, glrep
 
 func MRsFromArgs(f *cmdutils.Factory, args []string) ([]*gitlab.MergeRequest, glrepo.Interface, error) {
 	if len(args) <= 1 {
-		mrID, baseRepo, err := MRFromArgs(f, args)
-		if err != nil {
-			return nil, nil, err
+		var arrIDs []string
+		if len(args) == 1 {
+			arrIDs = strings.Split(args[0], ",")
 		}
-		return []*gitlab.MergeRequest{mrID}, baseRepo, err
+		if len(arrIDs) <= 1 {
+			mr, baseRepo, err := MRFromArgs(f, args)
+			if err != nil {
+				return nil, nil, err
+			}
+			return []*gitlab.MergeRequest{mr}, baseRepo, err
+		}
+		args = arrIDs
 	}
 
 	apiClient, err := f.HttpClient()
