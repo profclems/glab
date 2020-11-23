@@ -49,7 +49,7 @@ func InitIOStream() *IOStreams {
 		ioStream.IsInTTY = IsTerminal(stdin)
 	}
 
-	_isColorEnabled = isColorEnabled() && stdoutIsTTY
+	_isColorEnabled = isColorEnabled() && stdoutIsTTY && stderrIsTTY
 
 	return ioStream
 }
@@ -59,6 +59,10 @@ func (s *IOStreams) PromptEnabled() bool {
 		return false
 	}
 	return s.IsInTTY && s.IsaTTY
+}
+
+func (s *IOStreams) ColorEnabled() bool {
+	return isColorEnabled() && s.IsaTTY && s.IsErrTTY
 }
 
 func (s *IOStreams) SetPrompt(promptDisabled string) {

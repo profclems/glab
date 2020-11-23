@@ -1,6 +1,7 @@
 package glinstance
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 )
@@ -56,7 +57,7 @@ func StripHostProtocol(h string) (hostname, protocol string) {
 	return
 }
 
-// APIEndpoint returns the API endpoint prefix for a GitLab instance :)
+// APIEndpoint returns the REST API endpoint prefix for a GitLab instance :)
 func APIEndpoint(hostname, protocol string) string {
 	if protocol == "" {
 		protocol = "https"
@@ -65,4 +66,30 @@ func APIEndpoint(hostname, protocol string) string {
 		return fmt.Sprintf("%s://%s/api/v4/", protocol, hostname)
 	}
 	return "https://gitlab.com/api/v4/"
+}
+
+// GraphQLEndpoint returns the GraphQL API endpoint prefix for a GitLab instance :)
+func GraphQLEndpoint(hostname, protocol string) string {
+	if protocol == "" {
+		protocol = "https"
+	}
+	if IsSelfHosted(hostname) {
+		return fmt.Sprintf("%s://%s/api/graphql/", protocol, hostname)
+	}
+	return "https://gitlab.com/api/graphql/"
+}
+
+func HostnameValidator(v interface{}) error {
+	hostname, valid := v.(string)
+	if !valid {
+		return errors.New("hostname is not a string")
+	}
+
+	if len(strings.TrimSpace(hostname)) < 1 {
+		return errors.New("a value is required")
+	}
+	if strings.ContainsRune(hostname, '/') || strings.ContainsRune(hostname, ':') {
+		return errors.New("invalid hostname")
+	}
+	return nil
 }

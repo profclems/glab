@@ -60,9 +60,9 @@ func NewCmdClone(f *cmdutils.Factory) *cobra.Command {
 			skipTlsVerify, _ := strconv.ParseBool(tlsVerify)
 			caCert, _ := cfg.Get(host, "ca_cert")
 			if caCert != "" {
-				apiClient, _ = api.InitWithCustomCA(host, token, caCert)
+				apiClient, _ = api.InitWithCustomCA(host, token, caCert, false)
 			} else {
-				apiClient, _ = api.Init(host, token, skipTlsVerify)
+				apiClient, _ = api.Init(host, token, skipTlsVerify, false)
 			}
 
 			repo := args[0]
