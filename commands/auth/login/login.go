@@ -154,7 +154,7 @@ func loginRun() error {
 	existingToken, _, _ := cfg.GetWithSource(hostname, "token")
 
 	if existingToken != "" && opts.Interactive {
-		apiClient, err := cmdutils.HttpClientFunc(hostname, cfg)
+		apiClient, err := cmdutils.HttpClientFunc(hostname, cfg, false)
 		if err != nil {
 			return err
 		}
@@ -224,7 +224,7 @@ func loginRun() error {
 		fmt.Fprintf(opts.IO.StdErr, "%s Configured git protocol\n", utils.GreenCheck())
 	}
 
-	apiClient, err := cmdutils.HttpClientFunc(hostname, cfg)
+	apiClient, err := cmdutils.HttpClientFunc(hostname, cfg, false)
 	if err != nil {
 		return err
 	}

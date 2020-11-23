@@ -20,7 +20,7 @@ var (
 )
 
 // Init initializes a gitlab client for use throughout glab.
-func Init(host, token string, allowInsecure bool) (*gitlab.Client, error) {
+func Init(host, token string, allowInsecure bool, isGraphQL bool) (*gitlab.Client, error) {
 	httpClient := &http.Client{
 		Transport: &http.Transport{
 			Proxy: http.ProxyFromEnvironment,
@@ -38,10 +38,10 @@ func Init(host, token string, allowInsecure bool) (*gitlab.Client, error) {
 			},
 		},
 	}
-	return gitlabClient(httpClient, token, host)
+	return gitlabClient(httpClient, token, host, isGraphQL)
 }
 
-func InitWithCustomCA(host, token, caFile string) (*gitlab.Client, error) {
+func InitWithCustomCA(host, token, caFile string, isGraphQL bool) (*gitlab.Client, error) {
 	caCert, err := ioutil.ReadFile(caFile)
 	if err != nil {
 		return nil, err
@@ -70,11 +70,20 @@ func InitWithCustomCA(host, token, caFile string) (*gitlab.Client, error) {
 			},
 		},
 	}
-	return gitlabClient(httpClient, token, host)
+	return gitlabClient(httpClient, token, host, isGraphQL)
 }
 
-func gitlabClient(httpClient *http.Client, token, host string) (*gitlab.Client, error) {
-	apiClient, err = gitlab.NewClient(token, gitlab.WithHTTPClient(httpClient), gitlab.WithBaseURL(glinstance.APIEndpoint(host, Protocol)))
+func gitlabClient(httpClient *http.Client, token, host string, isGraphQL bool) (*gitlab.Client, error) {
+	var baseURL string
+	if host == "" {
+		host = glinstance.OverridableDefault()
+	}
+	if isGraphQL {
+		baseURL = glinstance.GraphQLEndpoint(host, Protocol)
+	} else {
+		baseURL = glinstance.APIEndpoint(host, Protocol)
+	}
+	apiClient, err = gitlab.NewClient(token, gitlab.WithHTTPClient(httpClient), gitlab.WithBaseURL(baseURL))
 	if err != nil {
 		return nil, fmt.Errorf("failed to initialize GitLab client: %v", err)
 	}
@@ -82,5 +91,5 @@ func gitlabClient(httpClient *http.Client, token, host string) (*gitlab.Client, 
 }
 
 func TestClient(httpClient *http.Client, token, host string) (*gitlab.Client, error) {
-	return gitlabClient(httpClient, token, host)
+	return gitlabClient(httpClient, token, host, false)
 }

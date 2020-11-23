@@ -4,6 +4,8 @@ package cmdutils
 import (
 	"fmt"
 
+	"github.com/profclems/glab/internal/glinstance"
+
 	"github.com/profclems/glab/internal/utils"
 
 	"github.com/profclems/glab/internal/config"
@@ -41,20 +43,23 @@ func (f *Factory) RepoOverride(repo string) error {
 		OverrideAPIProtocol(cfg, newRepo)
 	}
 	f.HttpClient = func() (*gitlab.Client, error) {
-		return HttpClientFunc(newRepo.RepoHost(), cfg)
+		return HttpClientFunc(newRepo.RepoHost(), cfg, false)
 	}
 	return nil
 }
 
-func HttpClientFunc(repoHost string, cfg config.Config) (*gitlab.Client, error) {
+func HttpClientFunc(repoHost string, cfg config.Config, isGraphQL bool) (*gitlab.Client, error) {
+	if repoHost == "" {
+		repoHost = glinstance.OverridableDefault()
+	}
 	token, _ := cfg.Get(repoHost, "token")
 	tlsVerify, _ := cfg.Get(repoHost, "skip_tls_verify")
 	skipTlsVerify := tlsVerify == "true" || tlsVerify == "1"
 	caCert, _ := cfg.Get(repoHost, "ca_cert")
 	if caCert != "" {
-		return api.InitWithCustomCA(repoHost, token, caCert)
+		return api.InitWithCustomCA(repoHost, token, caCert, isGraphQL)
 	}
-	return api.Init(repoHost, token, skipTlsVerify)
+	return api.Init(repoHost, token, skipTlsVerify, isGraphQL)
 }
 
 func remotesFunc() (glrepo.Remotes, error) {
@@ -95,10 +100,11 @@ func HTTPClientFactory(f *Factory) {
 		}
 		repo, err := baseRepoFunc()
 		if err != nil {
-			return nil, err
+			// use default hostname if remote resolver fails
+			repo = glrepo.NewWithHost("", "", glinstance.OverridableDefault())
 		}
 		OverrideAPIProtocol(cfg, repo)
-		return HttpClientFunc(repo.RepoHost(), cfg)
+		return HttpClientFunc(repo.RepoHost(), cfg, false)
 	}
 }
 

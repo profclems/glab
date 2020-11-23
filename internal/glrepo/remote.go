@@ -59,6 +59,14 @@ type Remote struct {
 	Repo Interface
 }
 
+func (r Remote) RepoNamespace() string {
+	return r.Repo.RepoNamespace()
+}
+
+func (r Remote) RepoGroup() string {
+	return r.Repo.RepoGroup()
+}
+
 func (r Remote) FullName() string {
 	return r.Repo.FullName()
 }

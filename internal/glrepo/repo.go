@@ -66,9 +66,15 @@ func FullNameFromURL(remoteURL string) (string, error) {
 }
 
 // Interface describes an object that represents a GitLab repository
+// Contains methods for these methods representing these placeholders for a
+// project path with :host/:group/:namespace/:repo
+// RepoHost = :host, RepoOwner = :group/:namespace, RepoNamespace = :namespace,
+// FullName = :group/:namespace/:repo, RepoGroup = :group, RepoName = :repo
 type Interface interface {
 	RepoName() string
 	RepoOwner() string
+	RepoNamespace() string
+	RepoGroup() string
 	RepoHost() string
 	FullName() string
 }
@@ -80,12 +86,19 @@ func New(owner, repo string) Interface {
 
 // NewWithHost is like New with an explicit host name
 func NewWithHost(owner, repo, hostname string) Interface {
-	return &glRepo{
+	rp := &glRepo{
 		owner:    owner,
 		name:     repo,
 		fullname: fmt.Sprintf("%s/%s", owner, repo),
 		hostname: normalizeHostname(hostname),
 	}
+	if ri := strings.SplitN(owner, "/", 2); len(ri) == 2 {
+		rp.group = ri[0]
+		rp.namespace = ri[1]
+	} else {
+		rp.namespace = owner
+	}
+	return rp
 }
 
 // FromFullName extracts the GitLab repository information from the following
@@ -140,24 +153,45 @@ func IsSame(a, b Interface) bool {
 }
 
 type glRepo struct {
-	owner    string
-	name     string
-	fullname string
-	hostname string
+	group     string
+	owner     string
+	name      string
+	fullname  string
+	hostname  string
+	namespace string
 }
 
+// RepoNamespace returns the namespace of the project. Eg. if project path is :group/:namespace:/repo
+// RepoNamespace returns the :namespace
+func (r glRepo) RepoNamespace() string {
+	return r.namespace
+}
+
+// RepoGroup returns the group namespace of the project. Eg. if project path is :group/:namespace:/repo
+// RepoGroup returns the :group
+func (r glRepo) RepoGroup() string {
+	return r.group
+}
+
+// RepoOwner returns the group and namespace in the form "group/namespace". Returns "namespace" if group is not present
 func (r glRepo) RepoOwner() string {
+	if r.group != "" {
+		return r.group + "/" + r.namespace
+	}
 	return r.owner
 }
 
+// RepoName returns the repo name without the path or namespace.
 func (r glRepo) RepoName() string {
 	return r.name
 }
 
+// RepoHost returns the hostname
 func (r glRepo) RepoHost() string {
 	return r.hostname
 }
 
+// FullName returns the full project path :group/:namespace/:repo or :namespace/:repo if group is not present
 func (r glRepo) FullName() string {
 	return r.fullname
 }
