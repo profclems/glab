@@ -2,7 +2,6 @@ package close
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/commands/mr/mrutils"
@@ -26,30 +25,26 @@ func NewCmdClose(f *cmdutils.Factory) *cobra.Command {
 				return err
 			}
 
-			mr, repo, err := mrutils.MRFromArgs(f, args)
+			mrs, repo, err := mrutils.MRsFromArgs(f, args)
 			if err != nil {
 				return err
 			}
 
-			if err = mrutils.MRCheckErrors(mr, mrutils.MRCheckErrOptions{
-				Closed: true,
-				Merged: true,
-			}); err != nil {
-				return err
-			}
-
-			mergeID := args[0]
-
 			l := &gitlab.UpdateMergeRequestOptions{}
 			l.StateEvent = gitlab.String("close")
-			arrIds := strings.Split(strings.Trim(mergeID, "[] "), ",")
-			for _, i2 := range arrIds {
+			for _, mr := range mrs {
+				if err = mrutils.MRCheckErrors(mr, mrutils.MRCheckErrOptions{
+					Closed: true,
+					Merged: true,
+				}); err != nil {
+					return err
+				}
 				fmt.Fprintf(f.IO.StdOut, "- Closing Merge request...")
-				mr, err := api.UpdateMR(apiClient, repo.FullName(), utils.StringToInt(i2), l)
+				_, err := api.UpdateMR(apiClient, repo.FullName(), mr.IID, l)
 				if err != nil {
 					return err
 				}
-				fmt.Fprintf(f.IO.StdOut, "%s Merge request !%s\n", utils.RedCheck(), i2)
+				fmt.Fprintf(f.IO.StdOut, "%s Merge request !%d\n", utils.RedCheck(), mr.IID)
 				fmt.Fprintln(f.IO.StdOut, mrutils.DisplayMR(mr))
 			}
 
