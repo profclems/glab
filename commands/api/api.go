@@ -123,6 +123,24 @@ original query accepts an '$endCursor: String' variable and that it fetches the
 			    }
 			  }
 			'
+
+			$ glab api graphql --paginate -f query='
+			  query($endCursor: String) {
+			    project(fullPath: "gitlab-org/graphql-sandbox") {
+			      name
+			      issues(first: 2, after: $endCursor) {
+			        edges {
+			          node {
+			            title
+			          }
+			        }
+			        pageInfo {
+			          endCursor
+			          hasNextPage
+			        }
+			      }
+			    }
+			  }'
 		`),
 		Annotations: map[string]string{
 			"help:environment": heredoc.Doc(`
@@ -134,7 +152,6 @@ original query accepts an '$endCursor: String' variable and that it fetches the
 		RunE: func(c *cobra.Command, args []string) error {
 			opts.RequestPath = args[0]
 			opts.RequestMethodPassed = c.Flags().Changed("method")
-
 			opts.Config, _ = f.Config()
 
 			if c.Flags().Changed("hostname") {

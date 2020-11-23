@@ -90,6 +90,6 @@ func gitlabClient(httpClient *http.Client, token, host string, isGraphQL bool) (
 	return apiClient, nil
 }
 
-func TestClient(httpClient *http.Client, token, host string) (*gitlab.Client, error) {
-	return gitlabClient(httpClient, token, host, false)
+func TestClient(httpClient *http.Client, token, host string, isGraphQL bool) (*gitlab.Client, error) {
+	return gitlabClient(httpClient, token, host, isGraphQL)
 }

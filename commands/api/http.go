@@ -5,11 +5,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"net/http"
 	"net/url"
 	"strconv"
 	"strings"
 
-	"github.com/google/go-querystring/query"
 	"github.com/hashicorp/go-retryablehttp"
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/internal/config"
@@ -19,12 +19,13 @@ import (
 type HTTPResponse struct {
 	Response *gitlab.Response
 	Output   *bytes.Buffer
+	Request  *retryablehttp.Request
 }
 
 func httpRequest(client *gitlab.Client, config config.Config, hostname string, method string, p string, params interface{}, headers []string) (*HTTPResponse, error) {
 	var err error
 	isGraphQL := p == "graphql"
-	if client.BaseURL().String() != hostname || isGraphQL {
+	if client.BaseURL().Host != hostname || isGraphQL {
 		client, err = cmdutils.HttpClientFunc(hostname, config, isGraphQL)
 		if err != nil {
 			return nil, err
@@ -91,6 +92,7 @@ func httpRequest(client *gitlab.Client, config config.Config, hostname string, m
 		return nil, err
 	}
 	hr.Response = resp
+	hr.Request = req
 	return hr, err
 }
 
@@ -117,9 +119,22 @@ func parseQuery(path string, params map[string]interface{}) (string, error) {
 	if len(params) == 0 {
 		return path, nil
 	}
-	q, err := query.Values(params)
-	if err != nil {
-		return path, fmt.Errorf("error parsing query params %w", err)
+	q := url.Values{}
+	for key, value := range params {
+		switch v := value.(type) {
+		case string:
+			q.Add(key, v)
+		case []byte:
+			q.Add(key, string(v))
+		case nil:
+			q.Add(key, "")
+		case int:
+			q.Add(key, fmt.Sprintf("%d", v))
+		case bool:
+			q.Add(key, fmt.Sprintf("%v", v))
+		default:
+			return "", fmt.Errorf("unknown type %v", v)
+		}
 	}
 
 	sep := "?"
@@ -129,8 +144,8 @@ func parseQuery(path string, params map[string]interface{}) (string, error) {
 	return path + sep + q.Encode(), nil
 }
 
-func newRequest(method string, baseURL *url.URL, body interface{}, userAgent string, headers []string, bodyIsJSON bool) (*retryablehttp.Request, error) {
-	req, err := retryablehttp.NewRequest(method, baseURL.String(), body)
+func newRequest(method string, baseURL *url.URL, body io.Reader, userAgent string, headers []string, bodyIsJSON bool) (*retryablehttp.Request, error) {
+	req, err := http.NewRequest(method, baseURL.String(), body)
 	if err != nil {
 		return nil, err
 	}
@@ -159,5 +174,11 @@ func newRequest(method string, baseURL *url.URL, body interface{}, userAgent str
 		req.Header.Set("User-Agent", userAgent)
 	}
 
-	return req, nil
+	//req, err := retryablehttp.NewRequest(method, baseURL.String(), body)
+	rReq, err := retryablehttp.FromRequest(req)
+	if err != nil {
+		return nil, err
+	}
+
+	return rReq, nil
 }

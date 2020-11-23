@@ -121,7 +121,7 @@ func runCommand(remotes glrepo.Remotes, isTTY bool, cli string) (*test.CmdOut, e
 			return config.NewBlankConfig(), nil
 		},
 		HttpClient: func() (*gitlab.Client, error) {
-			return api.TestClient(&http.Client{}, "xxxx", "gitlab.com")
+			return api.TestClient(&http.Client{}, "xxxx", "gitlab.com", false)
 		},
 		BaseRepo: func() (glrepo.Interface, error) {
 			return glrepo.New("OWNER", "REPO"), nil
