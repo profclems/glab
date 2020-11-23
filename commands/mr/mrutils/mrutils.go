@@ -1,8 +1,10 @@
 package mrutils
 
 import (
+	"context"
 	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/internal/glrepo"
@@ -10,6 +12,7 @@ import (
 	"github.com/profclems/glab/pkg/api"
 	"github.com/profclems/glab/pkg/tableprinter"
 	"github.com/xanzy/go-gitlab"
+	"golang.org/x/sync/errgroup"
 )
 
 type MRCheckErrOptions struct {
@@ -149,6 +152,61 @@ func MRFromArgs(f *cmdutils.Factory, args []string) (*gitlab.MergeRequest, glrep
 	}
 
 	return mr, baseRepo, nil
+}
+
+func MRsFromArgs(f *cmdutils.Factory, args []string) ([]*gitlab.MergeRequest, glrepo.Interface, error) {
+	if len(args) <= 1 {
+		var arrIDs []string
+		if len(args) == 1 {
+			arrIDs = strings.Split(args[0], ",")
+		}
+		if len(arrIDs) <= 1 {
+			mr, baseRepo, err := MRFromArgs(f, args)
+			if err != nil {
+				return nil, nil, err
+			}
+			return []*gitlab.MergeRequest{mr}, baseRepo, err
+		}
+		args = arrIDs
+	}
+
+	apiClient, err := f.HttpClient()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	baseRepo, err := f.BaseRepo()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	errGroup, _ := errgroup.WithContext(context.Background())
+	mrs := make([]*gitlab.MergeRequest, len(args))
+	for i, arg := range args {
+		i, arg := i, arg
+		errGroup.Go(func() error {
+			mrID, err := strconv.Atoi(arg)
+			if err != nil {
+				return err
+			}
+			if mrID == 0 {
+				return fmt.Errorf("invalid merge request ID provided")
+			}
+			// fetching multiple MRs does not return many major params in the payload
+			// so we fetch again using the single mr endpoint
+			mr, err := api.GetMR(apiClient, baseRepo.FullName(), mrID, &gitlab.GetMergeRequestsOptions{})
+			if err != nil {
+				return fmt.Errorf("failed to get merge request %d: %w", mrID, err)
+			}
+			mrs[i] = mr
+			return nil
+		})
+	}
+	if err := errGroup.Wait(); err != nil {
+		return nil, nil, err
+	}
+	return mrs, baseRepo, nil
+
 }
 
 func GetOpenMRForBranch(apiClient *gitlab.Client, baseRepo glrepo.Interface, currentBranch string) (*gitlab.MergeRequest, error) {
