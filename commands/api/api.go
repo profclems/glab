@@ -22,7 +22,7 @@ import (
 	"github.com/profclems/glab/internal/glrepo"
 	"github.com/profclems/glab/internal/utils"
 	"github.com/spf13/cobra"
-	jsonpretty "github.com/tidwall/pretty"
+	jsonPretty "github.com/tidwall/pretty"
 	"github.com/xanzy/go-gitlab"
 )
 
@@ -315,7 +315,7 @@ func processResponse(resp *HTTPResponse, opts *ApiOptions, headersOutputStream i
 	}
 
 	if isJSON && opts.IO.ColorEnabled() {
-		result := jsonpretty.Color(jsonpretty.Pretty(resp.Output.Bytes()), nil)
+		result := jsonPretty.Color(jsonPretty.Pretty(resp.Output.Bytes()), nil)
 		_, err = fmt.Fprintln(opts.IO.StdOut, string(result))
 	} else {
 		_, err = io.Copy(opts.IO.StdOut, responseBody)
@@ -356,12 +356,10 @@ func fillPlaceholders(value string, opts *ApiOptions) (string, error) {
 
 	filled := placeholderRE.ReplaceAllStringFunc(value, func(m string) string {
 		switch m {
-		case ":group/:namespace/:repo":
+		case ":group/:namespace/:repo", ":fullpath":
 			return url.PathEscape(baseRepo.FullName())
 		case ":namespace/:repo":
 			return url.PathEscape(baseRepo.RepoNamespace() + "/" + baseRepo.RepoName())
-		case ":fullpath":
-			return url.PathEscape(baseRepo.FullName())
 		case ":group":
 			return baseRepo.RepoGroup()
 		case ":namespace":
@@ -375,7 +373,8 @@ func fillPlaceholders(value string, opts *ApiOptions) (string, error) {
 			}
 			return branch
 		default:
-			panic(fmt.Sprintf("invalid placeholder: %q", m))
+			err = fmt.Errorf("invalid placeholder: %q", m)
+			return ""
 		}
 	})
 
