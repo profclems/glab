@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/profclems/glab/pkg/api"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -69,8 +70,9 @@ If the current directory is a git directory, the GitLab authenticated host in th
 directory will be used else gitlab.com will be used.
 Override the GitLab hostname with '--hostname'.
 
-Placeholder values ":fullpath", ":group", ":namespace", ":repo", and ":branch" in the endpoint argument will
-get replaced with values from the repository of the current directory.
+Placeholder values ":fullpath" or ":id"", ":user" or ":username", ":group", ":namespace", 
+":repo", and ":branch" in the endpoint argument will get replaced with values from the 
+repository of the current directory.
 
 The default HTTP request method is "GET" normally and "POST" if any parameters
 were added. Override the method with '--method'.
@@ -247,7 +249,7 @@ func apiRun(opts *ApiOptions) error {
 
 	hasNextPage := true
 	for hasNextPage {
-		resp, err := httpRequest(httpClient, opts.Config, host, method, requestPath, requestBody, requestHeaders)
+		resp, err := httpRequest(api.GetClient(), opts.Config, host, method, requestPath, requestBody, requestHeaders)
 		if err != nil {
 			return err
 		}
@@ -278,45 +280,42 @@ func apiRun(opts *ApiOptions) error {
 	return nil
 }
 
-func processResponse(resp *HTTPResponse, opts *ApiOptions, headersOutputStream io.Writer) (endCursor string, err error) {
+func processResponse(resp *http.Response, opts *ApiOptions, headersOutputStream io.Writer) (endCursor string, err error) {
 	if opts.ShowResponseHeaders {
-		fmt.Fprintln(headersOutputStream, resp.Response.Proto, resp.Response.Status)
-		printHeaders(headersOutputStream, resp.Response.Header, opts.IO.ColorEnabled())
+		fmt.Fprintln(headersOutputStream, resp.Proto, resp.Status)
+		printHeaders(headersOutputStream, resp.Header, opts.IO.ColorEnabled())
 		fmt.Fprint(headersOutputStream, "\r\n")
 	}
 
-	if resp.Response.StatusCode == 204 {
+	if resp.StatusCode == 204 {
 		return
 	}
-	var responseBody io.Reader = resp.Output
+	var responseBody io.Reader = resp.Body
 
-	isJSON, _ := regexp.MatchString(`[/+]json(;|$)`, resp.Response.Header.Get("Content-Type"))
+	isJSON, _ := regexp.MatchString(`[/+]json(;|$)`, resp.Header.Get("Content-Type"))
 
 	var serverError string
-	if isJSON && (opts.RequestPath == "graphql" || resp.Response.StatusCode >= 400) {
-		responseBody, serverError, err = parseErrorResponse(responseBody, resp.Response.StatusCode)
+	if isJSON && (opts.RequestPath == "graphql" || resp.StatusCode >= 400) {
+		responseBody, serverError, err = parseErrorResponse(responseBody, resp.StatusCode)
 		if err != nil {
 			return
 		}
 	}
 
 	var bodyCopy *bytes.Buffer
-	isGraphQLPaginate := isJSON && resp.Response.StatusCode == 200 && opts.Paginate && opts.RequestPath == "graphql"
+	isGraphQLPaginate := isJSON && resp.StatusCode == 200 && opts.Paginate && opts.RequestPath == "graphql"
 	if isGraphQLPaginate {
 		bodyCopy = &bytes.Buffer{}
 		responseBody = io.TeeReader(responseBody, bodyCopy)
 	}
 
-	if opts.RequestPath == "graphql" {
-		_, err = io.Copy(resp.Output, responseBody)
-		if err != nil {
-			return
-		}
-	}
-
 	if isJSON && opts.IO.ColorEnabled() {
-		result := jsonPretty.Color(jsonPretty.Pretty(resp.Output.Bytes()), nil)
-		_, err = fmt.Fprintln(opts.IO.StdOut, string(result))
+		out := &bytes.Buffer{}
+		_, err = io.Copy(out, responseBody)
+		if err == nil {
+			result := jsonPretty.Color(jsonPretty.Pretty(out.Bytes()), nil)
+			_, err = fmt.Fprintln(opts.IO.StdOut, string(result))
+		}
 	} else {
 		_, err = io.Copy(opts.IO.StdOut, responseBody)
 	}
@@ -328,8 +327,8 @@ func processResponse(resp *HTTPResponse, opts *ApiOptions, headersOutputStream i
 		fmt.Fprintf(opts.IO.StdErr, "glab: %s\n", serverError)
 		err = cmdutils.SilentError
 		return
-	} else if resp.Response.StatusCode > 299 {
-		fmt.Fprintf(opts.IO.StdErr, "glab: HTTP %d\n", resp.Response.StatusCode)
+	} else if resp.StatusCode > 299 {
+		fmt.Fprintf(opts.IO.StdErr, "glab: HTTP %d\n", resp.StatusCode)
 		err = cmdutils.SilentError
 		return
 	}
@@ -341,7 +340,7 @@ func processResponse(resp *HTTPResponse, opts *ApiOptions, headersOutputStream i
 	return
 }
 
-var placeholderRE = regexp.MustCompile(`:(group/:namespace/:repo|namespace/:repo|fullpath|group|namespace|repo|branch)\b`)
+var placeholderRE = regexp.MustCompile(`:(group/:namespace/:repo|namespace/:repo|fullpath|id|user|username|group|namespace|repo|branch)\b`)
 
 // fillPlaceholders populates `:namespace` and `:repo` placeholders with values from the current repository
 func fillPlaceholders(value string, opts *ApiOptions) (string, error) {
@@ -356,12 +355,20 @@ func fillPlaceholders(value string, opts *ApiOptions) (string, error) {
 
 	filled := placeholderRE.ReplaceAllStringFunc(value, func(m string) string {
 		switch m {
-		case ":group/:namespace/:repo", ":fullpath":
+		case ":group/:namespace/:repo", ":fullpath", ":id":
 			return url.PathEscape(baseRepo.FullName())
 		case ":namespace/:repo":
 			return url.PathEscape(baseRepo.RepoNamespace() + "/" + baseRepo.RepoName())
 		case ":group":
 			return baseRepo.RepoGroup()
+		case ":user", ":username":
+			h, e := opts.HttpClient()
+			u, e := api.CurrentUser(h)
+			if e == nil && u != nil {
+				return u.Username
+			}
+			err = e
+			return m
 		case ":namespace":
 			return baseRepo.RepoNamespace()
 		case ":repo":

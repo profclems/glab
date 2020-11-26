@@ -2,6 +2,7 @@ package api
 
 import (
 	"bytes"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"testing"
@@ -101,6 +102,7 @@ hosts:
 	}
 	var client = &http.Client{}
 	client.Transport = roundTripFunc(func(req *http.Request) (*http.Response, error) {
+		t.Log("Tsti")
 		return &http.Response{
 			StatusCode: http.StatusOK,
 			Request:    req,
@@ -144,7 +146,7 @@ hosts:
 				method:  "GET",
 				u:       "https://gitlab.com/api/v4/projects/gitlab-com%2Fwww-gitlab-com",
 				body:    "",
-				headers: "Private-Token: OTOKEN\r\nUser-Agent: go-gitlab\r\n",
+				headers: "Private-Token: OTOKEN\r\nUser-Agent: GLab - GitLab CLI\r\n",
 			},
 		},
 		{
@@ -162,7 +164,7 @@ hosts:
 				method:  "GET",
 				u:       "https://gitlab.com/api/v4/projects/gitlab-com%2Fwww-gitlab-com",
 				body:    "",
-				headers: "Private-Token: OTOKEN\r\nUser-Agent: go-gitlab\r\n",
+				headers: "Private-Token: OTOKEN\r\nUser-Agent: GLab - GitLab CLI\r\n",
 			},
 		},
 		{
@@ -182,7 +184,7 @@ hosts:
 				method:  "GET",
 				u:       "https://gitlab.com/api/v4/projects/gitlab-com%2Fwww-gitlab-com?a=b",
 				body:    "",
-				headers: "Private-Token: OTOKEN\r\nUser-Agent: go-gitlab\r\n",
+				headers: "Private-Token: OTOKEN\r\nUser-Agent: GLab - GitLab CLI\r\n",
 			},
 		},
 		{
@@ -202,7 +204,7 @@ hosts:
 				method:  "POST",
 				u:       "https://gitlab.com/api/graphql/",
 				body:    `{"variables":{"a":"b"}}`,
-				headers: "Content-Type: application/json; charset=utf-8\r\nPrivate-Token: OTOKEN\r\nUser-Agent: go-gitlab\r\n",
+				headers: "Content-Type: application/json; charset=utf-8\r\nPrivate-Token: OTOKEN\r\nUser-Agent: GLab - GitLab CLI\r\n",
 			},
 		},
 		{
@@ -223,7 +225,7 @@ hosts:
 				method:  "POST",
 				u:       "https://gitlab.com/api/v4/projects",
 				body:    `CUSTOM`,
-				headers: "Accept: application/json\r\nContent-Type: text/plain\r\nPrivate-Token: OTOKEN\r\nUser-Agent: go-gitlab\r\n",
+				headers: "Accept: application/json\r\nContent-Type: text/plain\r\nPrivate-Token: OTOKEN\r\nUser-Agent: GLab - GitLab CLI\r\n",
 			},
 		},
 	}
@@ -236,6 +238,9 @@ hosts:
 				t.Errorf("httpRequest() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
+			if !assert.NotNil(t, got) {
+				return
+			}
 			req := got.Request
 			if req.Method != tt.want.method {
 				t.Errorf("Request.Method = %q, want %q", req.Method, tt.want.method)
@@ -243,9 +248,8 @@ hosts:
 			if req.URL.String() != tt.want.u {
 				t.Errorf("Request.URL = %q, want %q", req.URL.String(), tt.want.u)
 			}
-
 			if tt.want.body != "" {
-				bb, err := req.BodyBytes()
+				bb, err := ioutil.ReadAll(req.Body)
 				if err != nil {
 					t.Errorf("Request.Body ReadAll error = %v", err)
 					return

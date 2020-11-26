@@ -10,29 +10,22 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/hashicorp/go-retryablehttp"
-	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/internal/config"
-	"github.com/xanzy/go-gitlab"
+	"github.com/profclems/glab/pkg/api"
 )
 
-type HTTPResponse struct {
-	Response *gitlab.Response
-	Output   *bytes.Buffer
-	Request  *retryablehttp.Request
-}
-
-func httpRequest(client *gitlab.Client, config config.Config, hostname string, method string, p string, params interface{}, headers []string) (*HTTPResponse, error) {
+func httpRequest(client *api.Client, config config.Config, hostname string, method string, p string, params interface{}, headers []string) (*http.Response, error) {
 	var err error
 	isGraphQL := p == "graphql"
-	if client.BaseURL().Host != hostname || isGraphQL {
-		client, err = cmdutils.HttpClientFunc(hostname, config, isGraphQL)
+	if client.Lab().BaseURL().Host != hostname || isGraphQL {
+		fmt.Println("tes")
+		client, err = api.NewClientWithCfg(hostname, config, isGraphQL)
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	baseURL := client.BaseURL()
+	baseURL := client.Lab().BaseURL()
 	baseURLStr := baseURL.String()
 	if strings.Contains(p, "://") {
 		baseURLStr = p
@@ -77,23 +70,12 @@ func httpRequest(client *gitlab.Client, config config.Config, hostname string, m
 	}
 
 	baseURL, _ = url.Parse(baseURLStr)
-	req, err := newRequest(method, baseURL, body, client.UserAgent, headers, bodyIsJSON)
+	req, err := newRequest(client, method, baseURL, body, client.LabClient.UserAgent, headers, bodyIsJSON)
 
 	if err != nil {
 		return nil, err
 	}
-
-	hr := &HTTPResponse{
-		Output:   &bytes.Buffer{},
-		Response: &gitlab.Response{},
-	}
-	resp, err := client.Do(req, hr.Output)
-	if err != nil {
-		return nil, err
-	}
-	hr.Response = resp
-	hr.Request = req
-	return hr, err
+	return client.HTTPClient().Do(req)
 }
 
 func groupGraphQLVariables(params map[string]interface{}) map[string]interface{} {
@@ -144,7 +126,7 @@ func parseQuery(path string, params map[string]interface{}) (string, error) {
 	return path + sep + q.Encode(), nil
 }
 
-func newRequest(method string, baseURL *url.URL, body io.Reader, userAgent string, headers []string, bodyIsJSON bool) (*retryablehttp.Request, error) {
+func newRequest(c *api.Client, method string, baseURL *url.URL, body io.Reader, userAgent string, headers []string, bodyIsJSON bool) (*http.Request, error) {
 	req, err := http.NewRequest(method, baseURL.String(), body)
 	if err != nil {
 		return nil, err
@@ -166,6 +148,7 @@ func newRequest(method string, baseURL *url.URL, body io.Reader, userAgent strin
 			req.Header.Add(name, value)
 		}
 	}
+
 	if bodyIsJSON && req.Header.Get("Content-Type") == "" {
 		req.Header.Set("Content-Type", "application/json; charset=utf-8")
 	}
@@ -174,11 +157,13 @@ func newRequest(method string, baseURL *url.URL, body io.Reader, userAgent strin
 		req.Header.Set("User-Agent", userAgent)
 	}
 
-	//req, err := retryablehttp.NewRequest(method, baseURL.String(), body)
-	rReq, err := retryablehttp.FromRequest(req)
-	if err != nil {
-		return nil, err
+	// TODO: support GITLAB_CI_TOKEN
+	switch c.AuthType {
+	case api.OAuthToken:
+		req.Header.Set("Authorization", "Bearer "+c.Token())
+	case api.PrivateToken:
+		req.Header.Set("PRIVATE-TOKEN", c.Token())
 	}
 
-	return rReq, nil
+	return req, nil
 }

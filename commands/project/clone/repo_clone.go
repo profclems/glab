@@ -52,25 +52,20 @@ func NewCmdClone(f *cmdutils.Factory) *cobra.Command {
 			}
 
 			cfg, _ := f.Config()
-			protocol, _ := cfg.Get(host, "git_protocol")
-			token, _ := cfg.Get(host, "token")
-
-			// TODO: avoid rewriting this for factory.NewClient()
-			tlsVerify, _ := cfg.Get(host, "skip_tls_verify")
-			skipTlsVerify, _ := strconv.ParseBool(tlsVerify)
-			caCert, _ := cfg.Get(host, "ca_cert")
-			if caCert != "" {
-				apiClient, _ = api.InitWithCustomCA(host, token, caCert, false)
-			} else {
-				apiClient, _ = api.Init(host, token, skipTlsVerify, false)
-			}
+			client, _ := api.NewClientWithCfg(host, cfg, false)
+			apiClient = client.Lab()
 
 			repo := args[0]
-			u, _ := api.CurrentUser(apiClient)
+			u, err := api.CurrentUser(apiClient)
+			if err != nil {
+				return err
+			}
+
+			protocol, _ := cfg.Get(host, "git_protocol")
 
 			remoteArgs := &glrepo.RemoteArgs{
 				Protocol: protocol,
-				Token:    token,
+				Token:    client.Token(),
 				Url:      host,
 				Username: u.Username,
 			}
@@ -87,7 +82,6 @@ func NewCmdClone(f *cmdutils.Factory) *cobra.Command {
 				if err != nil {
 					return err
 				}
-				//repo, err = gitRemoteURL(project, &remoteArgs{})
 				repo, err = glrepo.RemoteURL(project, remoteArgs)
 				if err != nil {
 					return err
