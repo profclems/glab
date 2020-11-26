@@ -8,9 +8,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/cli/safeexec"
-
 	"github.com/mattn/go-isatty"
+	"github.com/profclems/glab/pkg/execext"
 	"golang.org/x/crypto/ssh/terminal"
 )
 
@@ -59,7 +58,7 @@ func TerminalWidth(out io.Writer) int {
 	}
 
 	if isCygwinTerminal(out) {
-		tputExe, err := safeexec.LookPath("tput")
+		tputExe, err := execext.LookPath("tput")
 		if err != nil {
 			return defaultWidth
 		}
