@@ -32,14 +32,11 @@
 package execext
 
 import (
-	"errors"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 )
-
-// ErrNotFound is the error resulting if a path search failed to find an executable file.
-var ErrNotFound = errors.New("executable file not found in %PATH%")
 
 func chkStat(file string) error {
 	d, err := os.Stat(file)
@@ -119,5 +116,5 @@ func LookPath(file string) (string, error) {
 			return f, nil
 		}
 	}
-	return "", &Error{file, ErrNotFound}
+	return "", &exec.Error{file, exec.ErrNotFound}
 }
