@@ -101,7 +101,7 @@ func LookPath(file string) (string, error) {
 		if f, err := findExecutable(file, exts); err == nil {
 			return f, nil
 		} else {
-			return "", &Error{file, err}
+			return "", &exec.Error{file, err}
 		}
 	}
 	// EXTENDED: this is the only part removed to avoid searching for executables in the
