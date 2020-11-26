@@ -8,7 +8,6 @@ require (
 	github.com/acarl005/stripansi v0.0.0-20180116102854-5a71ef0e047d
 	github.com/alecthomas/assert v0.0.0-20170929043011-405dbfeb8e38
 	github.com/charmbracelet/glamour v0.2.0
-	github.com/cli/safeexec v1.0.0
 	github.com/dustin/go-humanize v1.0.0
 	github.com/gdamore/tcell v1.4.0
 	github.com/google/renameio v0.1.0
@@ -16,13 +15,14 @@ require (
 	github.com/gosuri/uilive v0.0.4
 	github.com/hashicorp/go-version v1.2.1
 	github.com/jarcoal/httpmock v1.0.6
+	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51
 	github.com/lunixbochs/vtclean v1.0.0
 	github.com/mattn/go-colorable v0.1.8
 	github.com/mattn/go-isatty v0.0.12
 	github.com/mattn/go-runewidth v0.0.9
 	github.com/mgutz/ansi v0.0.0-20200706080929-d51e80ef957d
 	github.com/mitchellh/go-homedir v1.1.0
-	github.com/onsi/gomega v1.10.2 // indirect
+	github.com/onsi/gomega v1.10.3 // indirect
 	github.com/otiai10/copy v1.2.0
 	github.com/pkg/errors v0.9.1
 	github.com/rivo/tview v0.0.0-20200712113419-c65badfc3d92
@@ -32,10 +32,7 @@ require (
 	github.com/stretchr/testify v1.6.1
 	github.com/tcnksm/go-gitconfig v0.1.2
 	github.com/xanzy/go-gitlab v0.39.0
-	github.com/yuin/goldmark v1.2.1 // indirect
 	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9
-	golang.org/x/net v0.0.0-20200822124328-c89045814202 // indirect
 	golang.org/x/sync v0.0.0-20190423024810-112230192c58
-	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c
 )

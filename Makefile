@@ -134,6 +134,7 @@ lint: bin/golangci-lint ## Run linter
 
 .PHONY: fix
 fix: bin/golangci-lint ## Fix lint violations
+	go mod tidy
 	$(GOLINT) run --fix
 	gofmt -s -w .
 	goimports -w .
