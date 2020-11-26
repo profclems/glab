@@ -1,6 +1,5 @@
 package api
 
-/*
 import (
 	"bytes"
 	"encoding/json"
@@ -378,7 +377,11 @@ func Test_apiRun(t *testing.T) {
 					resp.Request = req
 					return resp, nil
 				}
-				return api.TestClient(&http.Client{Transport: tr}, "OTOKEN", "gitlab.com", false)
+				a, err := api.TestClient(&http.Client{Transport: tr}, "OTOKEN", "gitlab.com", false)
+				if err != nil {
+					return nil, err
+				}
+				return a.Lab(), nil
 			}
 
 			err := apiRun(&tt.options)
@@ -405,14 +408,14 @@ func Test_apiRun_paginationREST(t *testing.T) {
 			StatusCode: 200,
 			Body:       ioutil.NopCloser(bytes.NewBufferString(`{"page":1}`)),
 			Header: http.Header{
-				"Link": []string{`<https://github.com/api/v4/projects/1227/issues?page=2>; rel="next", <https://github.com/api/v4/projects/1227/issues?page=3>; rel="last"`},
+				"Link": []string{`<https://gitlab.com/api/v4/projects/1227/issues?page=2>; rel="next", <https://gitlab.com/api/v4/projects/1227/issues?page=3>; rel="last"`},
 			},
 		},
 		{
 			StatusCode: 200,
 			Body:       ioutil.NopCloser(bytes.NewBufferString(`{"page":2}`)),
 			Header: http.Header{
-				"Link": []string{`<https://github.com/api/v4/projects/1227/issues?page=3>; rel="next", <https://github.com/api/v4/projects/1227/issues?page=3>; rel="last"`},
+				"Link": []string{`<https://gitlab.com/api/v4/projects/1227/issues?page=3>; rel="next", <https://gitlab.com/api/v4/projects/1227/issues?page=3>; rel="last"`},
 			},
 		},
 		{
@@ -432,7 +435,11 @@ func Test_apiRun_paginationREST(t *testing.T) {
 				requestCount++
 				return resp, nil
 			}
-			return api.TestClient(&http.Client{Transport: tr}, "OTOKEN", "gitlab.com", false)
+			a, err := api.TestClient(&http.Client{Transport: tr}, "OTOKEN", "gitlab.com", false)
+			if err != nil {
+				return nil, err
+			}
+			return a.Lab(), nil
 		},
 
 		RequestPath: "issues",
@@ -445,9 +452,9 @@ func Test_apiRun_paginationREST(t *testing.T) {
 	assert.Equal(t, `{"page":1}{"page":2}{"page":3}`, stdout.String(), "stdout")
 	assert.Equal(t, "", stderr.String(), "stderr")
 
-	assert.Equal(t, "https://github.com/api/v4/issues?per_page=100", responses[0].Request.URL.String())
-	assert.Equal(t, "https://github.com/api/v4/projects/1227/issues?page=2", responses[1].Request.URL.String())
-	assert.Equal(t, "https://github.com/api/v4/projects/1227/issues?page=3", responses[2].Request.URL.String())
+	assert.Equal(t, "https://gitlab.com/api/v4/issues?per_page=100", responses[0].Request.URL.String())
+	assert.Equal(t, "https://gitlab.com/api/v4/projects/1227/issues?page=2", responses[1].Request.URL.String())
+	assert.Equal(t, "https://gitlab.com/api/v4/projects/1227/issues?page=3", responses[2].Request.URL.String())
 }
 
 func Test_apiRun_paginationGraphQL(t *testing.T) {
@@ -493,7 +500,11 @@ func Test_apiRun_paginationGraphQL(t *testing.T) {
 				requestCount++
 				return resp, nil
 			}
-			return api.TestClient(&http.Client{Transport: tr}, "OTOKEN", "gitlab.com", false)
+			a, err := api.TestClient(&http.Client{Transport: tr}, "OTOKEN", "gitlab.com", false)
+			if err != nil {
+				return nil, err
+			}
+			return a.Lab(), nil
 		},
 
 		RequestMethod: "POST",
@@ -580,15 +591,17 @@ func Test_apiRun_inputFile(t *testing.T) {
 				HttpClient: func() (*gitlab.Client, error) {
 					var tr roundTripFunc = func(req *http.Request) (*http.Response, error) {
 						var err error
-						t.Log(ioutil.ReadAll(req.Body))
 						if bodyBytes, err = ioutil.ReadAll(req.Body); err != nil {
 							return nil, err
 						}
 						resp.Request = req
 						return resp, nil
 					}
-
-					return api.TestClient(&http.Client{Transport: tr}, "OTOKEN", "gitlab.com", false)
+					a, err := api.TestClient(&http.Client{Transport: tr}, "OTOKEN", "gitlab.com", false)
+					if err != nil {
+						return nil, err
+					}
+					return a.Lab(), nil
 				},
 			}
 
@@ -598,7 +611,7 @@ func Test_apiRun_inputFile(t *testing.T) {
 			}
 
 			assert.Equal(t, "POST", resp.Request.Method)
-			assert.Equal(t, "/hello?a=b&c=d", resp.Request.URL.RequestURI())
+			assert.Equal(t, "/api/v4/hello?a=b&c=d", resp.Request.URL.RequestURI())
 			assert.Equal(t, tt.contentLength, resp.Request.ContentLength)
 			assert.Equal(t, "", resp.Request.Header.Get("Content-Type"))
 			assert.Equal(t, tt.inputContents, bodyBytes)
@@ -690,15 +703,15 @@ func Test_magicFieldValue(t *testing.T) {
 		{
 			name: "placeholder",
 			args: args{
-				v: ":owner",
+				v: ":namespace",
 				opts: &ApiOptions{
 					IO: io,
 					BaseRepo: func() (glrepo.Interface, error) {
-						return glrepo.New("gitlab-bot", "robot-uprising"), nil
+						return glrepo.New("gitlab-com", "www-gitlab-com"), nil
 					},
 				},
 			},
-			want:    "gitlab-bot",
+			want:    "gitlab-com",
 			wantErr: false,
 		},
 		{
@@ -773,31 +786,31 @@ func Test_fillPlaceholders(t *testing.T) {
 		{
 			name: "no changes",
 			args: args{
-				value: "projects/owner%20Frepo/releases",
+				value: "projects/namespace%2Frepo/releases",
 				opts: &ApiOptions{
 					BaseRepo: nil,
 				},
 			},
-			want:    "projects/owner%20Frepo/releases",
+			want:    "projects/namespace%2Frepo/releases",
 			wantErr: false,
 		},
 		{
 			name: "has substitutes",
 			args: args{
-				value: "projects/:owner%20F:repo/releases",
+				value: "projects/:namespace%2F:repo/releases",
 				opts: &ApiOptions{
 					BaseRepo: func() (glrepo.Interface, error) {
-						return glrepo.New("gitlab-bot", "robot-uprising"), nil
+						return glrepo.New("gitlab-com", "www-gitlab-com"), nil
 					},
 				},
 			},
-			want:    "projects/gitlab-bot%2Frobot-uprising/releases",
+			want:    "projects/gitlab-com%2Fwww-gitlab-com/releases",
 			wantErr: false,
 		},
 		{
 			name: "has branch placeholder",
 			args: args{
-				value: "projects/glab-cli%2Ftest/branches/:branch/protection/required_status_checks",
+				value: "projects/glab-cli%2Ftest/branches/:branch/.../.../",
 				opts: &ApiOptions{
 					BaseRepo: func() (glrepo.Interface, error) {
 						return glrepo.New("glab-cli", "test"), nil
@@ -807,7 +820,7 @@ func Test_fillPlaceholders(t *testing.T) {
 					},
 				},
 			},
-			want:    "projects/glab-cli%2Ftest/branches/trunk/protection/required_status_checks",
+			want:    "projects/glab-cli%2Ftest/branches/master/.../.../",
 			wantErr: false,
 		},
 		{
@@ -829,12 +842,12 @@ func Test_fillPlaceholders(t *testing.T) {
 		{
 			name: "no greedy substitutes",
 			args: args{
-				value: ":ownership/:repository",
+				value: ":namespaces/:repository",
 				opts: &ApiOptions{
 					BaseRepo: nil,
 				},
 			},
-			want:    ":ownership/:repository",
+			want:    ":namespaces/:repository",
 			wantErr: false,
 		},
 	}
@@ -851,4 +864,3 @@ func Test_fillPlaceholders(t *testing.T) {
 		})
 	}
 }
-*/
