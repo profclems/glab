@@ -62,7 +62,7 @@ func init() {
 }
 
 // RefreshClient re-initializes the api client
-func RefreshClient()  {
+func RefreshClient() {
 	a = &Client{
 		Protocol:           "https",
 		AuthType:           NoToken,
@@ -88,7 +88,7 @@ func (c *Client) HTTPClient() *http.Client {
 	return c.httpClient
 }
 
-func (c *Client) OverrideHTTPClient(client *http.Client)  {
+func (c *Client) OverrideHTTPClient(client *http.Client) {
 	c.httpClientOverride = client
 }
 

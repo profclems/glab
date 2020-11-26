@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/profclems/glab/pkg/api"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -15,6 +14,8 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+
+	"github.com/profclems/glab/pkg/api"
 
 	"github.com/MakeNowJust/heredoc"
 	"github.com/profclems/glab/commands/cmdutils"
