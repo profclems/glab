@@ -18,7 +18,6 @@ func httpRequest(client *api.Client, config config.Config, hostname string, meth
 	var err error
 	isGraphQL := p == "graphql"
 	if client.Lab().BaseURL().Host != hostname || isGraphQL {
-		fmt.Println("tes")
 		client, err = api.NewClientWithCfg(hostname, config, isGraphQL)
 		if err != nil {
 			return nil, err

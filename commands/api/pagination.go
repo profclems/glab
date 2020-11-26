@@ -33,6 +33,7 @@ func findEndCursor(r io.Reader) string {
 	var hasNextPage bool
 	var foundEndCursor bool
 	var foundNextPage bool
+	var isKey bool
 
 loop:
 	for {
@@ -43,7 +44,7 @@ loop:
 		if err != nil {
 			return ""
 		}
-
+		isKey = len(stack) > 0 && stack[len(stack)-1] == '{' && idx%2 == 0
 		switch tt := t.(type) {
 		case json.Delim:
 			switch tt {
@@ -56,30 +57,26 @@ loop:
 				contextKey = ""
 				idx = 0
 			}
-		default:
-			isKey := len(stack) > 0 && stack[len(stack)-1] == '{' && idx%2 == 0
-			idx++
-
-			switch tt := t.(type) {
-			case string:
-				if isKey {
-					lastKey = tt
-				} else if contextKey == "pageInfo" && lastKey == "endCursor" {
-					endCursor = tt
-					foundEndCursor = true
-					if foundNextPage {
-						break loop
-					}
-				}
-			case bool:
-				if contextKey == "pageInfo" && lastKey == "hasNextPage" {
-					hasNextPage = tt
-					foundNextPage = true
-					if foundEndCursor {
-						break loop
-					}
+		case string:
+			if isKey {
+				lastKey = tt
+			} else if contextKey == "pageInfo" && lastKey == "endCursor" {
+				endCursor = tt
+				foundEndCursor = true
+				if foundNextPage {
+					break loop
 				}
 			}
+			idx++
+		case bool:
+			if contextKey == "pageInfo" && lastKey == "hasNextPage" {
+				hasNextPage = tt
+				foundNextPage = true
+				if foundEndCursor {
+					break loop
+				}
+			}
+			idx++
 		}
 	}
 
