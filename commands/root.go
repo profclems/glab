@@ -2,6 +2,7 @@ package commands
 
 import (
 	aliasCmd "github.com/profclems/glab/commands/alias"
+	apiCmd "github.com/profclems/glab/commands/api"
 	authCmd "github.com/profclems/glab/commands/auth"
 	"github.com/profclems/glab/commands/cmdutils"
 	completionCmd "github.com/profclems/glab/commands/completion"
@@ -97,6 +98,7 @@ func NewCmdRoot(f *cmdutils.Factory, version, buildDate string) *cobra.Command {
 	rootCmd.AddCommand(projectCmd.NewCmdRepo(f))
 	rootCmd.AddCommand(releaseCmd.NewCmdRelease(f))
 	rootCmd.AddCommand(userCmd.NewCmdUser(f))
+	rootCmd.AddCommand(apiCmd.NewCmdApi(f, nil))
 
 	rootCmd.Flags().BoolP("version", "v", false, "show glab version information")
 	return rootCmd
