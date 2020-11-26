@@ -1,14 +1,15 @@
 ![GLab](https://user-images.githubusercontent.com/9063085/90530075-d7a58580-e14a-11ea-9727-4f592f7dcf2e.png)
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/profclems/glab)](https://goreportcard.com/report/github.com/profclems/glab)
+[![codecov](https://codecov.io/gh/profclems/glab/branch/trunk/graph/badge.svg?token=32J5DT3PQQ)](https://codecov.io/gh/profclems/glab)
 [![Documentation Status](https://readthedocs.org/projects/glab/badge/?version=latest)](https://glab.readthedocs.io/en/latest/?badge=latest)
 [![Gitter](https://badges.gitter.im/glabcli/community.svg)](https://gitter.im/glabcli/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 [![License](https://img.shields.io/github/license/profclems/glab)](LICENSE)
-[![Twitter](https://img.shields.io/twitter/url?style=social&url=https%3A%2F%2Fgithub.com%2Fprofclems%2Fglab)](https://twitter.com/intent/tweet?text=Take%20Gitlab%20to%20the%20command%20line%20with%20%23glab,%20an%20open-source%20GitLab%20CLI%20tool:&url=https%3A%2F%2Fgithub.com%2Fprofclems%2Fglab)
+[![Twitter](https://img.shields.io/twitter/url?style=social&url=https%3A%2F%2Fgithub.com%2Fprofclems%2Fglab)](https://twitter.com/intent/tweet?text=Take%20GitLab%20to%20the%20command%20line%20with%20%23glab,%20an%20open-source%20GitLab%20CLI%20tool:&url=https%3A%2F%2Fgithub.com%2Fprofclems%2Fglab)
 
 
 GLab is an open source Gitlab Cli tool written in Go (golang) to help work seamlessly with Gitlab from the command line. Work with issues, merge requests, **watch running pipelines directly from your CLI** among other features. 
-Inspired by `gh`, [the official GitHub CLI tool](https://github.com/cli/cli).
+Inspired by [`gh`](https://github.com/cli/cli), the official GitHub CLI tool.
 
 ![image](https://user-images.githubusercontent.com/41906128/88968573-0b556400-d29f-11ea-8504-8ecd9c292263.png)
 
