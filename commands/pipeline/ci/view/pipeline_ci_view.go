@@ -92,6 +92,9 @@ func NewCmdView(f *cmdutils.Factory) *cobra.Command {
 				return err
 			}
 			CommitSHA = commit.ID
+			if commit.LastPipeline == nil {
+				return fmt.Errorf("Can't find pipeline for commit : %s", CommitSHA)
+			}
 			root := tview.NewPages()
 			root.SetBorderPadding(1, 1, 2, 2).SetBorder(true).SetTitle(fmt.Sprintf(" Pipeline #%d triggered %s by %s ", commit.LastPipeline.ID, utils.TimeToPrettyTimeAgo(*commit.AuthoredDate), commit.AuthorName))
 
