@@ -182,9 +182,8 @@ var GetPipelineFromBranch = func(client *gitlab.Client, ref, repo string) ([]*gi
 		}
 	}
 	l := &gitlab.ListProjectPipelinesOptions{
-		Ref:     gitlab.String(ref),
-		OrderBy: gitlab.String("updated_at"),
-		Sort:    gitlab.String("desc"),
+		Ref:  gitlab.String(ref),
+		Sort: gitlab.String("desc"),
 	}
 	l.Page = 1
 	l.PerPage = 1

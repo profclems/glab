@@ -52,9 +52,8 @@ func NewCmdStatus(f *cmdutils.Factory) *cobra.Command {
 				}
 			}
 			l := &gitlab.ListProjectPipelinesOptions{
-				Ref:     gitlab.String(branch),
-				OrderBy: gitlab.String("updated_at"),
-				Sort:    gitlab.String("desc"),
+				Ref:  gitlab.String(branch),
+				Sort: gitlab.String("desc"),
 			}
 			l.Page = 1
 			l.PerPage = 1
