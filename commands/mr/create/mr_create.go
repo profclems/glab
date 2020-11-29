@@ -88,7 +88,7 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 
 			if opts.CreateSourceBranch && opts.SourceBranch == "" {
 				opts.SourceBranch = utils.ReplaceNonAlphaNumericChars(opts.Title, "-")
-			} else {
+			} else if opts.SourceBranch == "" {
 				b, err := git.CurrentBranch()
 				if err != nil {
 					return err
@@ -120,7 +120,7 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 					if err != nil {
 						return err
 					}
-					fmt.Fprintf(out, "warning: you have %s\n", utils.Pluralize(c, "uncommitted changes"))
+					fmt.Fprintf(f.IO.StdErr, "\nwarning: you have %s\n", utils.Pluralize(c, "uncommitted change"))
 				}
 
 				err = git.Push(repoRemote.PushURL.String(), opts.SourceBranch)
@@ -244,12 +244,12 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 					Branch: gitlab.String(opts.SourceBranch),
 					Ref:    gitlab.String(opts.TargetBranch),
 				}
-				fmt.Fprintln(out, "Creating related branch...")
+				fmt.Fprintln(f.IO.StdErr, "\nCreating related branch...")
 				branch, err := api.CreateBranch(apiClient, repo.FullName(), lb)
 				if err == nil {
-					fmt.Fprintln(out, "Branch created: ", branch.WebURL)
+					fmt.Fprintln(f.IO.StdErr, "Branch created: ", branch.WebURL)
 				} else {
-					fmt.Fprintln(out, "Error creating branch: ", err)
+					fmt.Fprintln(f.IO.StdErr, "Error creating branch: ", err.Error())
 				}
 			}
 
@@ -259,6 +259,13 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 					return err
 				}
 			}
+
+			message := "\nCreating merge request for %s into %s in %s\n\n"
+			if opts.IsDraft || opts.IsWIP {
+				message = "\nCreating draft merge request for %s into %s in %s\n\n"
+			}
+
+			fmt.Fprintf(f.IO.StdErr, message, utils.Cyan(opts.SourceBranch), utils.Cyan(opts.TargetBranch), repo.FullName())
 
 			mr, err := api.CreateMR(apiClient, repo.FullName(), mrCreateOpts)
 			if err != nil {
