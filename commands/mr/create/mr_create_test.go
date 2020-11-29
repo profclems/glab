@@ -132,7 +132,7 @@ func TestNewCmdCreate_autofill(t *testing.T) {
 		outErr := stripansi.Strip(stderr.String())
 
 		assert.Contains(t, out, `!1 Update somefile.txt`)
-		cmdtest.Eq(t, outErr, "\nwarning: you have 2 uncommitted changes\n\nCreating merge request for test-cli into master in glab-cli/test\n\n")
+		assert.Contains(t, outErr, "\nCreating merge request for test-cli into master in glab-cli/test\n\n")
 		assert.Contains(t, out, "https://gitlab.com/glab-cli/test/-/merge_requests/1")
 		stdout.Reset()
 		stderr.Reset()
