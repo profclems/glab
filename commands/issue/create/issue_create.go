@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/profclems/glab/pkg/prompt"
+
 	"github.com/profclems/glab/pkg/api"
 
 	"github.com/profclems/glab/commands/cmdutils"
@@ -46,13 +48,19 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 			if title, _ := cmd.Flags().GetString("title"); title != "" {
 				issueTitle = title
 			} else {
-				issueTitle = utils.AskQuestionWithInput("Title", "", true)
+				err = prompt.AskQuestionWithInput(&issueTitle, "Title", "", true)
+				if err != nil {
+					return err
+				}
 			}
 			if description, _ := cmd.Flags().GetString("description"); description != "" {
 				issueDescription = description
 			} else {
 				if editor, _ := cmd.Flags().GetBool("no-editor"); editor {
-					issueDescription = utils.AskQuestionMultiline("Description:", "")
+					err = prompt.AskMultiline(&issueDescription, "Description:", "")
+					if err != nil {
+						return err
+					}
 				} else {
 					issueDescription = utils.Editor(utils.EditorOptions{
 						Label:    "Description:",
@@ -67,9 +75,16 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 				labelsEntry := cachedLabels
 				if labelsEntry != "" {
 					labels := strings.Split(labelsEntry, ",")
-					issueLabel = strings.Join(utils.AskQuestionWithMultiSelect("Label(s)", labels), ",")
+					err = prompt.MultiSelect(&labels, "Label(s)", labels)
+					if err != nil {
+						return err
+					}
+					issueLabel = strings.Join(labels, ",")
 				} else {
-					issueLabel = utils.AskQuestionWithInput("Label(s) [Comma Separated]", "", false)
+					err = prompt.AskQuestionWithInput(&issueLabel, "Label(s) [Comma Separated]", "", false)
+					if err != nil {
+						return err
+					}
 				}
 			}
 			l.Title = gitlab.String(issueTitle)

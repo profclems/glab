@@ -6,6 +6,8 @@ import (
 	"path"
 	"strings"
 
+	"github.com/profclems/glab/pkg/prompt"
+
 	"github.com/profclems/glab/internal/glrepo"
 	"github.com/profclems/glab/pkg/api"
 
@@ -173,7 +175,8 @@ func runCreateProject(cmd *cobra.Command, args []string, f *cmdutils.Factory) er
 			fmt.Fprintf(f.IO.StdOut, "%s Added remote %s\n", greenCheck, remote)
 
 		} else if f.IO.IsaTTY {
-			doSetup, err := utils.Confirm(fmt.Sprintf("Create a local project directory for %s?", project.NameWithNamespace))
+			var doSetup bool
+			err := prompt.Confirm(fmt.Sprintf("Create a local project directory for %s?", project.NameWithNamespace), &doSetup)
 			if err != nil {
 				return err
 			}
