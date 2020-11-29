@@ -646,6 +646,8 @@ func ConfigKeyEquivalence(key string) string {
 		return "no_prompt"
 	case "git_remote_url_var", "git_remote_alias", "remote_alias", "remote_nickname", "git_remote_nickname":
 		return "remote_alias"
+	case "editor", "visual", "glab_editor":
+		return "editor"
 	default:
 		return key
 	}
@@ -662,6 +664,8 @@ func EnvKeyEquivalence(key string) []string {
 		return []string{"GITLAB_TOKEN", "OAUTH_TOKEN"}
 	case "no_prompt":
 		return []string{"NO_PROMPT", "PROMPT_DISABLED"}
+	case "editor", "visual", "glab_editor":
+		return []string{"GLAB_EDITOR", "VISUAL", "EDITOR"}
 	case "remote_alias":
 		return []string{"GIT_REMOTE_URL_VAR", "GIT_REMOTE_ALIAS", "REMOTE_ALIAS", "REMOTE_NICKNAME", "GIT_REMOTE_NICKNAME"}
 	default:
