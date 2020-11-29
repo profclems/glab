@@ -1,42 +1,42 @@
 package create
 
 import (
+	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/AlecAivazis/survey/v2"
-	"github.com/profclems/glab/pkg/surveyext"
-
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/commands/mr/mrutils"
 	"github.com/profclems/glab/internal/git"
 	"github.com/profclems/glab/internal/utils"
 	"github.com/profclems/glab/pkg/api"
 	"github.com/profclems/glab/pkg/prompt"
-
-	"strings"
-
 	"github.com/spf13/cobra"
 	"github.com/xanzy/go-gitlab"
 )
 
 type CreateOpts struct {
-	Title              string
-	Description        string
-	MileStone          int
-	SourceBranch       string
-	TargetBranch       string
-	Labels             string
-	Assignees          string
-	TargetProject      int
+	Title        string
+	Description  string
+	SourceBranch string
+	TargetBranch string
+	Labels       string
+	Assignees    string
+
+	MileStone     int
+	TargetProject int
+
 	CreateSourceBranch bool
 	RemoveSourceBranch bool
 	AllowCollaboration bool
 
-	Autofill   bool
-	IsDraft    bool
-	IsWIP      bool
-	ShouldPush bool
-	NoEditor   bool
+	Autofill      bool
+	IsDraft       bool
+	IsWIP         bool
+	ShouldPush    bool
+	NoEditor      bool
+	IsInteractive bool
 }
 
 func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
@@ -52,6 +52,16 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 
 			out := f.IO.StdOut
 			mrCreateOpts := &gitlab.CreateMergeRequestOptions{}
+
+			hasTitle := cmd.Flags().Changed("title")
+			hasDescription := cmd.Flags().Changed("description")
+
+			// disable interactive mode if title and description are explicitly defined
+			opts.IsInteractive = !(hasTitle && hasDescription)
+
+			if opts.IsInteractive && !f.IO.PromptEnabled() && !opts.Autofill {
+				return &cmdutils.FlagError{Err: errors.New("--title or --fill required for non-interactive mode")}
+			}
 
 			apiClient, err := f.HttpClient()
 			if err != nil {
@@ -117,7 +127,7 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 				if err != nil {
 					return err
 				}
-			} else {
+			} else if opts.IsInteractive {
 				var templateName string
 				var templateContents string
 				if opts.Description == "" {
@@ -177,8 +187,21 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 						if err != nil {
 							return err
 						}
-						err = DescriptionPrompt(opts, templateContents, editor)
+						err = cmdutils.DescriptionPrompt(&opts.Description, templateContents, editor)
+						if err != nil {
+							return err
+						}
 					}
+				}
+				if opts.Labels == "" {
+					err = prompt.AskQuestionWithInput(&opts.Labels, "Label(s) [Comma Separated]", "", false)
+					if err != nil {
+						return err
+					}
+				}
+			} else {
+				if opts.Title == "" {
+					return fmt.Errorf("title can't be blank")
 				}
 			}
 
@@ -189,10 +212,9 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 					opts.Title = "WIP: " + opts.Title
 				}
 			}
-			mergeLabel, _ := cmd.Flags().GetString("label")
 			mrCreateOpts.Title = gitlab.String(opts.Title)
 			mrCreateOpts.Description = gitlab.String(opts.Description)
-			mrCreateOpts.Labels = gitlab.Labels{mergeLabel}
+			mrCreateOpts.Labels = gitlab.Labels{opts.Labels}
 			mrCreateOpts.SourceBranch = gitlab.String(opts.SourceBranch)
 			mrCreateOpts.TargetBranch = gitlab.String(opts.TargetBranch)
 			if opts.MileStone != -1 {
@@ -209,13 +231,12 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 			}
 			if opts.Assignees != "" {
 				arrIds := strings.Split(strings.Trim(opts.Assignees, "[] "), ",")
-				var t2 []int
+				var assigneeIDs []int
 
-				for _, i := range arrIds {
-					j := utils.StringToInt(i)
-					t2 = append(t2, j)
+				for _, id := range arrIds {
+					assigneeIDs = append(assigneeIDs, utils.StringToInt(id))
 				}
-				mrCreateOpts.AssigneeIDs = t2
+				mrCreateOpts.AssigneeIDs = assigneeIDs
 			}
 
 			if opts.CreateSourceBranch {
@@ -229,6 +250,13 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 					fmt.Fprintln(out, "Branch created: ", branch.WebURL)
 				} else {
 					fmt.Fprintln(out, "Error creating branch: ", err)
+				}
+			}
+
+			if opts.ShouldPush {
+				err = git.Push(repoRemote.PushURL.String(), opts.SourceBranch)
+				if err != nil {
+					return err
 				}
 			}
 
@@ -259,39 +287,4 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 	mrCreateCmd.Flags().BoolVarP(&opts.NoEditor, "no-editor", "", false, "Don't open editor to enter description. If set to true, uses prompt. Default is false")
 
 	return mrCreateCmd
-}
-
-func DescriptionPrompt(mrOpts *CreateOpts, templateContent, editorCommand string) error {
-	if templateContent != "" {
-		if mrOpts.Description != "" {
-			// prevent excessive newlines between default body and template
-			mrOpts.Description = strings.TrimRight(mrOpts.Description, "\n")
-			mrOpts.Description += "\n\n"
-		}
-		mrOpts.Description += templateContent
-	}
-
-	qs := []*survey.Question{
-		{
-			Name: "Body",
-			Prompt: &surveyext.GLabEditor{
-				BlankAllowed:  true,
-				EditorCommand: editorCommand,
-				Editor: &survey.Editor{
-					Message:       "Body",
-					FileName:      "*.md",
-					Default:       mrOpts.Description,
-					HideDefault:   true,
-					AppendDefault: true,
-				},
-			},
-		},
-	}
-
-	err := prompt.Ask(qs, mrOpts)
-	if err != nil {
-		return err
-	}
-
-	return nil
 }

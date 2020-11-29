@@ -7,6 +7,10 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/AlecAivazis/survey/v2"
+	"github.com/profclems/glab/pkg/prompt"
+	"github.com/profclems/glab/pkg/surveyext"
+
 	"github.com/profclems/glab/internal/config"
 
 	"github.com/profclems/glab/internal/git"
@@ -77,4 +81,39 @@ func GetEditor(cf func() (config.Config, error)) (string, error) {
 	editorCommand, _ := cfg.Get("", "editor")
 
 	return editorCommand, nil
+}
+
+func DescriptionPrompt(response *string, templateContent, editorCommand string) error {
+	defaultBody := *response
+	if templateContent != "" {
+		if defaultBody != "" {
+			// prevent excessive newlines between default body and template
+			defaultBody = strings.TrimRight(defaultBody, "\n")
+			defaultBody += "\n\n"
+		}
+		defaultBody += templateContent
+	}
+
+	qs := []*survey.Question{
+		{
+			Name: "Description",
+			Prompt: &surveyext.GLabEditor{
+				BlankAllowed:  true,
+				EditorCommand: editorCommand,
+				Editor: &survey.Editor{
+					Message:       "Description",
+					FileName:      "*.md",
+					Default:       defaultBody,
+					HideDefault:   true,
+					AppendDefault: true,
+				},
+			},
+		},
+	}
+
+	err := prompt.Ask(qs, response)
+	if err != nil {
+		return err
+	}
+	return nil
 }
