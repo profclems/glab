@@ -61,9 +61,8 @@ func TraceCmdFunc(cmd *cobra.Command, args []string, f *cmdutils.Factory) error 
 		jobID = utils.StringToInt(args[0])
 	} else {
 		l := &gitlab.ListProjectPipelinesOptions{
-			Ref:     gitlab.String(branch),
-			OrderBy: gitlab.String("updated_at"),
-			Sort:    gitlab.String("desc"),
+			Ref:  gitlab.String(branch),
+			Sort: gitlab.String("desc"),
 		}
 
 		l.Page = 1
