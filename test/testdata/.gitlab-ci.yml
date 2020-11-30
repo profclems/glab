@@ -8,13 +8,12 @@ stages:
   - cleanup
 
 before_script:
-  - echo "Before script section"
-  - echo "For example you might run an update here or install a build dependency"
-  - echo "Or perhaps you might print out some debugging details"
+  - echo "This is a before script section"
+  - echo "Anything to run such as dependencies or debugging"
 
 after_script:
-  - echo "After script section"
-  - echo "For example you might do some cleanup here"
+  - echo "This is a after script section"
+  - echo "Let's do some cleanup"
 
 build1:
   stage: build
@@ -107,46 +106,11 @@ deploy5:really_a_long_name_for:
     - echo "Do a manual deploy here"
     - sleep 3
 
-deploy5:
-  stage: deploy
-  script:
-    - echo "Do a manual deploy here"
-    - sleep 8
-
 deploy6:
   stage: deploy
   script:
     - echo "Do a manual deploy here"
-    - sleep 6
-
-deploy7:
-  stage: deploy
-  script:
-    - echo "Do a manual deploy here"
-    - sleep 5
-
-deploy8:
-  stage: deploy
-  script:
-    - echo "Do a manual deploy here"
     - sleep 4
-
-deploy9:
-  stage: deploy
-  script:
-    - echo "Do a manual deploy here"
-    - sleep 5
-
-deploy10:
-  stage: deploy
-  script:
-    - echo "Do a manual deploy here"
-    - sleep 4
-
-deploy5:
-  stage: deploy
-  script:
-    - echo "Do a manual deploy here"
 
 report1:
     stage: report

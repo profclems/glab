@@ -1,1 +1,3 @@
 0000000000000000000000000000000000000000 79204f14c8e64b4d6775c0078180175a02354e2c Clement Sam <clementsam75@gmail.com> 1598640399 +0000	clone: from gitlab.com:glab-cli/test.git
+79204f14c8e64b4d6775c0078180175a02354e2c e9646f6a6cab77a6353db058cefcdaf39bf396d5 Clement Sam <clementsam75@gmail.com> 1606759646 +0000	pull: Fast-forward
+e9646f6a6cab77a6353db058cefcdaf39bf396d5 b38dd911e39fe6c64e383e4fa1ffd7345a1ad82e Clement Sam <clementsam75@gmail.com> 1606759661 +0000	merge test-cli: Merge made by the 'recursive' strategy.
