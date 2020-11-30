@@ -176,7 +176,7 @@ func runCreateProject(cmd *cobra.Command, args []string, f *cmdutils.Factory) er
 
 		} else if f.IO.IsaTTY {
 			var doSetup bool
-			err := prompt.Confirm(fmt.Sprintf("Create a local project directory for %s?", project.NameWithNamespace), &doSetup)
+			err := prompt.Confirm(&doSetup, fmt.Sprintf("Create a local project directory for %s?", project.NameWithNamespace))
 			if err != nil {
 				return err
 			}
