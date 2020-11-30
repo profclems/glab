@@ -3,7 +3,6 @@ package create
 import (
 	"bytes"
 	"fmt"
-	"net/http"
 	"os/exec"
 	"strings"
 	"testing"
@@ -26,14 +25,7 @@ var (
 	cmd         *cobra.Command
 	stdout      *bytes.Buffer
 	stderr      *bytes.Buffer
-	testbranch  string
 )
-
-type roundTripFunc func(r *http.Request) (*http.Response, error)
-
-func (s roundTripFunc) RoundTrip(r *http.Request) (*http.Response, error) {
-	return s(r)
-}
 
 func TestMain(m *testing.M) {
 	defer config.StubConfig(`---
@@ -85,7 +77,6 @@ hosts:
 }
 
 func TestMrCmd(t *testing.T) {
-	t.Parallel()
 
 	cliStr := []string{"-t", "myMRtitle",
 		"-d", "myMRbody",
@@ -118,16 +109,16 @@ func TestMrCmd(t *testing.T) {
 }
 
 func TestNewCmdCreate_autofill(t *testing.T) {
-	t.Parallel()
 	t.Run("create_autofill", func(t *testing.T) {
+		testRepo := cmdtest.CopyTestRepo(t, "mr_cmd_autofill")
 		git := exec.Command("git", "checkout", "mr-autofill-test-br")
+		git.Dir = testRepo
 		b, err := git.CombinedOutput()
 		if err != nil {
 			t.Log(string(b))
 			t.Fatal(err)
 		}
-
-		_, err = cmdtest.RunCommand(cmd, "-f -b master")
+		_, err = cmdtest.RunCommand(cmd, "-f -b master -s mr-autofill-test-br")
 		if err != nil {
 			t.Error(err)
 			return
@@ -147,7 +138,6 @@ func TestNewCmdCreate_autofill(t *testing.T) {
 }
 
 func TestMRCreate_nontty_insufficient_flags(t *testing.T) {
-	t.Parallel()
 	stubFactory.IO.SetPrompt("true")
 	cmd = NewCmdCreate(stubFactory)
 	_, err := cmdtest.RunCommand(cmd, "")
@@ -161,7 +151,9 @@ func TestMRCreate_nontty_insufficient_flags(t *testing.T) {
 }
 
 func TestMrBodyAndTitle(t *testing.T) {
+	testRepo := cmdtest.CopyTestRepo(t, "mr_cmd_autofill")
 	git := exec.Command("git", "checkout", "mr-autofill-test-br")
+	git.Dir = testRepo
 	b, err := git.CombinedOutput()
 	if err != nil {
 		t.Log(string(b))
