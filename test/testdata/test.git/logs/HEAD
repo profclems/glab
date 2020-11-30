@@ -1,1 +1,19 @@
 0000000000000000000000000000000000000000 79204f14c8e64b4d6775c0078180175a02354e2c Clement Sam <clementsam75@gmail.com> 1598640399 +0000	clone: from gitlab.com:glab-cli/test.git
+79204f14c8e64b4d6775c0078180175a02354e2c dba49a3f16cb34b13476e704bc095c15474f57e3 Clement Sam <clementsam75@gmail.com> 1606759208 +0000	checkout: moving from master to test-cli
+dba49a3f16cb34b13476e704bc095c15474f57e3 1922abaa4d1fe954ec2effc563ade0118d22fbe7 Clement Sam <clementsam75@gmail.com> 1606759455 +0000	pull: Fast-forward
+1922abaa4d1fe954ec2effc563ade0118d22fbe7 701ea5fe3cbfed95824c168ac1575008086e503e Clement Sam <clementsam75@gmail.com> 1606759593 +0000	commit: minor changes
+701ea5fe3cbfed95824c168ac1575008086e503e 79204f14c8e64b4d6775c0078180175a02354e2c Clement Sam <clementsam75@gmail.com> 1606759638 +0000	checkout: moving from test-cli to master
+79204f14c8e64b4d6775c0078180175a02354e2c e9646f6a6cab77a6353db058cefcdaf39bf396d5 Clement Sam <clementsam75@gmail.com> 1606759646 +0000	pull: Fast-forward
+e9646f6a6cab77a6353db058cefcdaf39bf396d5 b38dd911e39fe6c64e383e4fa1ffd7345a1ad82e Clement Sam <clementsam75@gmail.com> 1606759661 +0000	merge test-cli: Merge made by the 'recursive' strategy.
+b38dd911e39fe6c64e383e4fa1ffd7345a1ad82e 701ea5fe3cbfed95824c168ac1575008086e503e Clement Sam <clementsam75@gmail.com> 1606759692 +0000	checkout: moving from master to test-cli
+701ea5fe3cbfed95824c168ac1575008086e503e b38dd911e39fe6c64e383e4fa1ffd7345a1ad82e Clement Sam <clementsam75@gmail.com> 1606759710 +0000	checkout: moving from test-cli to master
+b38dd911e39fe6c64e383e4fa1ffd7345a1ad82e 701ea5fe3cbfed95824c168ac1575008086e503e Clement Sam <clementsam75@gmail.com> 1606759727 +0000	checkout: moving from master to test-cli
+701ea5fe3cbfed95824c168ac1575008086e503e b38dd911e39fe6c64e383e4fa1ffd7345a1ad82e Clement Sam <clementsam75@gmail.com> 1606759839 +0000	checkout: moving from test-cli to master
+b38dd911e39fe6c64e383e4fa1ffd7345a1ad82e b38dd911e39fe6c64e383e4fa1ffd7345a1ad82e Clement Sam <clementsam75@gmail.com> 1606759855 +0000	checkout: moving from master to mr-autofill-test-br
+b38dd911e39fe6c64e383e4fa1ffd7345a1ad82e a25fb990be59913967ae419c8efc0f482f3aee10 Clement Sam <clementsam75@gmail.com> 1606759935 +0000	commit: docs: add some changes to txt file
+a25fb990be59913967ae419c8efc0f482f3aee10 a25fb990be59913967ae419c8efc0f482f3aee10 Clement Sam <clementsam75@gmail.com> 1606760030 +0000	reset: moving to HEAD
+a25fb990be59913967ae419c8efc0f482f3aee10 a25fb990be59913967ae419c8efc0f482f3aee10 Clement Sam <clementsam75@gmail.com> 1606760060 +0000	reset: moving to HEAD
+a25fb990be59913967ae419c8efc0f482f3aee10 a25fb990be59913967ae419c8efc0f482f3aee10 Clement Sam <clementsam75@gmail.com> 1606760128 +0000	reset: moving to a25fb990be59913967ae419c8efc0f482f3aee10
+a25fb990be59913967ae419c8efc0f482f3aee10 b38dd911e39fe6c64e383e4fa1ffd7345a1ad82e Clement Sam <clementsam75@gmail.com> 1606760149 +0000	reset: moving to b38dd911e39fe6c64e383e4fa1ffd7345a1ad82e
+b38dd911e39fe6c64e383e4fa1ffd7345a1ad82e a9adc3cd1e94242afb3b7f948bf91cabdf765fd2 Clement Sam <clementsam75@gmail.com> 1606760196 +0000	commit: docs: add some changes to txt file
+a9adc3cd1e94242afb3b7f948bf91cabdf765fd2 b38dd911e39fe6c64e383e4fa1ffd7345a1ad82e Clement Sam <clementsam75@gmail.com> 1606765437 +0000	checkout: moving from mr-autofill-test-br to master

@@ -6,6 +6,10 @@
 [remote "origin"]
 	url = git@gitlab.com:glab-cli/test.git
 	fetch = +refs/heads/*:refs/remotes/origin/*
+	glab-resolved = base
 [branch "master"]
 	remote = origin
 	merge = refs/heads/master
+[branch "test-cli"]
+	remote = origin
+	merge = refs/heads/test-cli

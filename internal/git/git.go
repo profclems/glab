@@ -150,7 +150,7 @@ type Commit struct {
 }
 
 func LatestCommit(ref string) (*Commit, error) {
-	logCmd := GitCommand("show", "-s", "--format='%h %s'", ref)
+	logCmd := GitCommand("show", "-s", "--format=%h %s", ref)
 	output, err := run.PrepareCmd(logCmd).Output()
 	if err != nil {
 		return &Commit{}, err

@@ -28,7 +28,6 @@ hosts:
     username: monalisa
     token: OTOKEN
 `, "")()
-	t.Parallel()
 	io, _, stdout, stderr := utils.IOTest()
 	stubFactory, _ := cmdtest.StubFactoryWithConfig("")
 	stubFactory.IO = io
