@@ -53,7 +53,7 @@ var Ask = func(qs []*survey.Question, response interface{}, opts ...survey.AskOp
 	return survey.Ask(qs, response, opts...)
 }
 
-var Confirm = func(prompt string, result *bool) error {
+var Confirm = func(result *bool, prompt string) error {
 	p := &survey.Confirm{
 		Message: prompt,
 		Default: true,

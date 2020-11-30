@@ -194,7 +194,7 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 					}
 				}
 				if opts.Labels == "" {
-					err = prompt.AskQuestionWithInput(&opts.Labels, "Label(s) [Comma Separated]", "", false)
+					err = cmdutils.LabelsPrompt(&opts.Labels, apiClient, repoRemote)
 					if err != nil {
 						return err
 					}

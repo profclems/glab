@@ -469,7 +469,11 @@ func AddRemote(name, u string) (*Remote, error) {
 }
 
 func SetRemoteResolution(name, resolution string) error {
-	addCmd := exec.Command("git", "config", "--add", fmt.Sprintf("remote.%s.glab-resolved", name), resolution)
+	return SetConfig(name, "glab-resolved", resolution)
+}
+
+func SetConfig(remote, key, value string) error {
+	addCmd := exec.Command("git", "config", "--add", fmt.Sprintf("remote.%s.%s", remote, key), value)
 	return run.PrepareCmd(addCmd).Run()
 }
 

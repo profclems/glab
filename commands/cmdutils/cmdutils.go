@@ -7,6 +7,10 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/profclems/glab/internal/glrepo"
+	"github.com/profclems/glab/pkg/api"
+	"github.com/xanzy/go-gitlab"
+
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/profclems/glab/pkg/prompt"
 	"github.com/profclems/glab/pkg/surveyext"
@@ -114,6 +118,53 @@ func DescriptionPrompt(response *string, templateContent, editorCommand string) 
 	err := prompt.Ask(qs, response)
 	if err != nil {
 		return err
+	}
+	if *response == "" {
+		*response = defaultBody
+	}
+	return nil
+}
+
+func LabelsPrompt(response *string, apiClient *gitlab.Client, repoRemote *glrepo.Remote) (err error) {
+	var addLabels bool
+	err = prompt.Confirm(&addLabels, "Do you want to add labels?")
+	if err != nil {
+		return
+	}
+	if addLabels {
+		labelOptions, _ := git.Config("remote." + repoRemote.Name + ".glab-cached-labels")
+		if labelOptions == "" {
+			lOpts := &gitlab.ListLabelsOptions{}
+			lOpts.PerPage = 100
+			labels, err := api.ListLabels(apiClient, repoRemote.FullName(), lOpts)
+			if err == nil && labels != nil {
+				for i, label := range labels {
+					if i > 0 {
+						labelOptions += ","
+					}
+					labelOptions += label.Name
+				}
+				if labelOptions != "" {
+					// silently fails if not a git repo
+					_ = git.SetConfig(repoRemote.Name, "glab-cached-labels", labelOptions)
+				}
+			}
+		}
+		if labelOptions != "" {
+			var selectedLabels []string
+			err = prompt.MultiSelect(&selectedLabels, "Select Labels", strings.Split(labelOptions, ","))
+			if err != nil {
+				return err
+			}
+			if len(selectedLabels) > 0 {
+				*response = strings.Join(selectedLabels, ",")
+			}
+		} else {
+			err = prompt.AskQuestionWithInput(response, "Label(s) [Comma Separated]", "", false)
+			if err != nil {
+				return err
+			}
+		}
 	}
 	return nil
 }
