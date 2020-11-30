@@ -2,13 +2,14 @@ package cmdutils
 
 import (
 	"fmt"
-	"github.com/profclems/glab/internal/glrepo"
-	"github.com/profclems/glab/pkg/api"
-	"github.com/xanzy/go-gitlab"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/profclems/glab/internal/glrepo"
+	"github.com/profclems/glab/pkg/api"
+	"github.com/xanzy/go-gitlab"
 
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/profclems/glab/pkg/prompt"
