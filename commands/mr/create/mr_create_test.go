@@ -3,6 +3,7 @@ package create
 import (
 	"bytes"
 	"fmt"
+	"net/http"
 	"os/exec"
 	"strings"
 	"testing"
@@ -25,7 +26,14 @@ var (
 	cmd         *cobra.Command
 	stdout      *bytes.Buffer
 	stderr      *bytes.Buffer
+	testbranch  string
 )
+
+type roundTripFunc func(r *http.Request) (*http.Response, error)
+
+func (s roundTripFunc) RoundTrip(r *http.Request) (*http.Response, error) {
+	return s(r)
+}
 
 func TestMain(m *testing.M) {
 	defer config.StubConfig(`---
@@ -52,12 +60,14 @@ hosts:
 			return nil, err
 		}
 		return &gitlab.MergeRequest{
-			ID:          1,
-			IID:         1,
-			Title:       *opts.Title,
-			Labels:      opts.Labels,
-			State:       "opened",
-			Description: *opts.Description,
+			ID:           1,
+			IID:          1,
+			Title:        *opts.Title,
+			Labels:       opts.Labels,
+			State:        "opened",
+			Description:  *opts.Description,
+			SourceBranch: *opts.SourceBranch,
+			TargetBranch: *opts.TargetBranch,
 			Author: &gitlab.BasicUser{
 				ID:       1,
 				Name:     "John Dev Wick",
@@ -75,6 +85,7 @@ hosts:
 }
 
 func TestMrCmd(t *testing.T) {
+	t.Parallel()
 
 	cliStr := []string{"-t", "myMRtitle",
 		"-d", "myMRbody",
@@ -98,25 +109,19 @@ func TestMrCmd(t *testing.T) {
 	stdout.Reset()
 	stderr.Reset()
 
-	assert.Contains(t, cmdtest.FirstLine([]byte(out)), `!1 myMRtitle`)
+	assert.Contains(t, cmdtest.FirstLine([]byte(out)), `!1 myMRtitle (test-cli)`)
 	// TODO: fix creating mr for default branch
-	cmdtest.Eq(t, outErr, "\nCreating merge request for test-cli into master in glab-cli/test\n\n")
+	assert.Contains(t, outErr, "\nCreating merge request for test-cli into master in glab-cli/test\n\n")
 	assert.Contains(t, out, "https://gitlab.com/glab-cli/test/-/merge_requests/1")
 	stdout.Reset()
 	stderr.Reset()
 }
 
 func TestNewCmdCreate_autofill(t *testing.T) {
+	t.Parallel()
 	t.Run("create_autofill", func(t *testing.T) {
-		git := exec.Command("git", "checkout", "test-cli")
+		git := exec.Command("git", "checkout", "mr-autofill-test-br")
 		b, err := git.CombinedOutput()
-		if err != nil {
-			t.Log(string(b))
-			t.Fatal(err)
-		}
-
-		git = exec.Command("git", "pull", "origin", "test-cli")
-		b, err = git.CombinedOutput()
 		if err != nil {
 			t.Log(string(b))
 			t.Fatal(err)
@@ -131,16 +136,18 @@ func TestNewCmdCreate_autofill(t *testing.T) {
 		out := stripansi.Strip(stdout.String())
 		outErr := stripansi.Strip(stderr.String())
 
-		// newline ensures we have no trailing characters
-		assert.Contains(t, out, "!1 Update somefile.txt\n")
-		assert.Contains(t, outErr, "\nCreating merge request for test-cli into master in glab-cli/test\n\n")
-		assert.Contains(t, out, "https://gitlab.com/glab-cli/test/-/merge_requests/1")
+		assert.Equal(t, `!1 docs: add some changes to txt file (mr-autofill-test-br)
+ https://gitlab.com/glab-cli/test/-/merge_requests/1
+
+`, out)
+		assert.Contains(t, outErr, "\nCreating merge request for mr-autofill-test-br into master in glab-cli/test\n\n")
 		stdout.Reset()
 		stderr.Reset()
 	})
 }
 
 func TestMRCreate_nontty_insufficient_flags(t *testing.T) {
+	t.Parallel()
 	stubFactory.IO.SetPrompt("true")
 	cmd = NewCmdCreate(stubFactory)
 	_, err := cmdtest.RunCommand(cmd, "")
@@ -151,4 +158,31 @@ func TestMRCreate_nontty_insufficient_flags(t *testing.T) {
 	assert.Equal(t, "--title or --fill required for non-interactive mode", err.Error())
 
 	assert.Equal(t, "", stdout.String())
+}
+
+func TestMrBodyAndTitle(t *testing.T) {
+	git := exec.Command("git", "checkout", "mr-autofill-test-br")
+	b, err := git.CombinedOutput()
+	if err != nil {
+		t.Log(string(b))
+		t.Fatal(err)
+	}
+	opts := &CreateOpts{
+		SourceBranch:         "mr-autofill-test-br",
+		TargetBranch:         "master",
+		TargetTrackingBranch: "origin/master",
+	}
+	t.Run("", func(t *testing.T) {
+		if err = mrBodyAndTitle(opts); err != nil {
+			t.Errorf("unexpected error: %v", err)
+			return
+		}
+
+		assert.Equal(t, "docs: add some changes to txt file", opts.Title)
+		assert.Equal(t, `Here, I am adding some commit body.
+Little longer
+
+Resolves #1
+`, opts.Description)
+	})
 }

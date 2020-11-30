@@ -5,6 +5,9 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/profclems/glab/internal/config"
+	"github.com/profclems/glab/internal/glrepo"
+
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/commands/mr/mrutils"
@@ -17,12 +20,13 @@ import (
 )
 
 type CreateOpts struct {
-	Title        string
-	Description  string
-	SourceBranch string
-	TargetBranch string
-	Labels       string
-	Assignees    string
+	Title                string
+	Description          string
+	SourceBranch         string
+	TargetBranch         string
+	TargetTrackingBranch string
+	Labels               string
+	Assignees            string
 
 	MileStone     int
 	TargetProject int
@@ -37,10 +41,25 @@ type CreateOpts struct {
 	ShouldPush    bool
 	NoEditor      bool
 	IsInteractive bool
+
+	IO       *utils.IOStreams
+	Branch   func() (string, error)
+	Remotes  func() (glrepo.Remotes, error)
+	Lab      func() (*gitlab.Client, error)
+	Config   func() (config.Config, error)
+	BaseRepo func() (glrepo.Interface, error)
 }
 
 func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
-	opts := &CreateOpts{}
+	opts := &CreateOpts{
+		IO:       f.IO,
+		Branch:   f.Branch,
+		Remotes:  f.Remotes,
+		Lab:      f.HttpClient,
+		Config:   f.Config,
+		BaseRepo: f.BaseRepo,
+	}
+
 	var mrCreateCmd = &cobra.Command{
 		Use:     "create",
 		Short:   `Create new merge request`,
@@ -50,7 +69,7 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var err error
 
-			out := f.IO.StdOut
+			out := opts.IO.StdOut
 			mrCreateOpts := &gitlab.CreateMergeRequestOptions{}
 
 			hasTitle := cmd.Flags().Changed("title")
@@ -59,21 +78,21 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 			// disable interactive mode if title and description are explicitly defined
 			opts.IsInteractive = !(hasTitle && hasDescription)
 
-			if opts.IsInteractive && !f.IO.PromptEnabled() && !opts.Autofill {
+			if opts.IsInteractive && !opts.IO.PromptEnabled() && !opts.Autofill {
 				return &cmdutils.FlagError{Err: errors.New("--title or --fill required for non-interactive mode")}
 			}
 
-			apiClient, err := f.HttpClient()
+			labClient, err := opts.Lab()
 			if err != nil {
 				return err
 			}
 
-			repo, err := f.BaseRepo()
+			repo, err := opts.BaseRepo()
 			if err != nil {
 				return err
 			}
 
-			remotes, err := f.Remotes()
+			remotes, err := opts.Remotes()
 			if err != nil {
 				return err
 			}
@@ -85,33 +104,22 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 			if opts.TargetBranch == "" {
 				opts.TargetBranch, _ = git.GetDefaultBranch(repoRemote.PushURL.String())
 			}
+			opts.TargetTrackingBranch = fmt.Sprintf("%s/%s", repoRemote.Name, opts.TargetBranch)
 
 			if opts.CreateSourceBranch && opts.SourceBranch == "" {
 				opts.SourceBranch = utils.ReplaceNonAlphaNumericChars(opts.Title, "-")
 			} else if opts.SourceBranch == "" {
-				b, err := git.CurrentBranch()
+				opts.SourceBranch, err = opts.Branch()
 				if err != nil {
 					return err
 				}
-				opts.SourceBranch = b
 			}
 
 			if opts.Autofill {
-				branch, err := f.Branch()
-				if err != nil {
+				if err = mrBodyAndTitle(opts); err != nil {
 					return err
 				}
-				commit, _ := git.LatestCommit(branch)
-				if commit != nil {
-					opts.Description, err = git.CommitBody(strings.Trim(commit.Sha, `'`))
-					if err != nil {
-						return err
-					}
-					opts.Title = utils.Humanize(commit.Title)
-				} else {
-					opts.Title = utils.Humanize(branch)
-				}
-				_, err = api.GetCommit(apiClient, repo.FullName(), opts.TargetBranch)
+				_, err = api.GetCommit(labClient, repo.FullName(), opts.TargetBranch)
 				if err != nil {
 					return fmt.Errorf("target branch %s does not exist on remote. Specify target branch with --target-branch flag",
 						opts.TargetBranch)
@@ -120,7 +128,7 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 					if err != nil {
 						return err
 					}
-					fmt.Fprintf(f.IO.StdErr, "\nwarning: you have %s\n", utils.Pluralize(c, "uncommitted change"))
+					fmt.Fprintf(opts.IO.StdErr, "\nwarning: you have %s\n", utils.Pluralize(c, "uncommitted change"))
 				}
 
 				err = git.Push(repoRemote.PushURL.String(), opts.SourceBranch)
@@ -183,7 +191,7 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 							return err
 						}
 					} else {
-						editor, err := cmdutils.GetEditor(f.Config)
+						editor, err := cmdutils.GetEditor(opts.Config)
 						if err != nil {
 							return err
 						}
@@ -194,7 +202,7 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 					}
 				}
 				if opts.Labels == "" {
-					err = cmdutils.LabelsPrompt(&opts.Labels, apiClient, repoRemote)
+					err = cmdutils.LabelsPrompt(&opts.Labels, labClient, repoRemote)
 					if err != nil {
 						return err
 					}
@@ -244,12 +252,12 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 					Branch: gitlab.String(opts.SourceBranch),
 					Ref:    gitlab.String(opts.TargetBranch),
 				}
-				fmt.Fprintln(f.IO.StdErr, "\nCreating related branch...")
-				branch, err := api.CreateBranch(apiClient, repo.FullName(), lb)
+				fmt.Fprintln(opts.IO.StdErr, "\nCreating related branch...")
+				branch, err := api.CreateBranch(labClient, repo.FullName(), lb)
 				if err == nil {
-					fmt.Fprintln(f.IO.StdErr, "Branch created: ", branch.WebURL)
+					fmt.Fprintln(opts.IO.StdErr, "Branch created: ", branch.WebURL)
 				} else {
-					fmt.Fprintln(f.IO.StdErr, "Error creating branch: ", err.Error())
+					fmt.Fprintln(opts.IO.StdErr, "Error creating branch: ", err.Error())
 				}
 			}
 
@@ -265,9 +273,9 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 				message = "\nCreating draft merge request for %s into %s in %s\n\n"
 			}
 
-			fmt.Fprintf(f.IO.StdErr, message, utils.Cyan(opts.SourceBranch), utils.Cyan(opts.TargetBranch), repo.FullName())
+			fmt.Fprintf(opts.IO.StdErr, message, utils.Cyan(opts.SourceBranch), utils.Cyan(opts.TargetBranch), repo.FullName())
 
-			mr, err := api.CreateMR(apiClient, repo.FullName(), mrCreateOpts)
+			mr, err := api.CreateMR(labClient, repo.FullName(), mrCreateOpts)
 			if err != nil {
 				return err
 			}
@@ -294,4 +302,29 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 	mrCreateCmd.Flags().BoolVarP(&opts.NoEditor, "no-editor", "", false, "Don't open editor to enter description. If set to true, uses prompt. Default is false")
 
 	return mrCreateCmd
+}
+
+func mrBodyAndTitle(opts *CreateOpts) error {
+	// TODO: detect forks
+	commits, err := git.Commits(opts.TargetTrackingBranch, opts.SourceBranch)
+	if err != nil {
+		return err
+	}
+	if len(commits) == 1 {
+		opts.Title = commits[0].Title
+		body, err := git.CommitBody(commits[0].Sha)
+		if err != nil {
+			return err
+		}
+		opts.Description = body
+	} else {
+		opts.Title = utils.Humanize(opts.SourceBranch)
+
+		var body strings.Builder
+		for i := len(commits) - 1; i >= 0; i-- {
+			fmt.Fprintf(&body, "- %s\n", commits[i].Title)
+		}
+		opts.Description = body.String()
+	}
+	return nil
 }
