@@ -82,6 +82,7 @@ func TestMrCmd(t *testing.T) {
 		"--milestone", "1",
 		"--assignee", "testuser",
 		"-R", "glab-cli/test",
+		"-s", "test-cli",
 	}
 
 	cli := strings.Join(cliStr, " ")
@@ -98,8 +99,11 @@ func TestMrCmd(t *testing.T) {
 	stderr.Reset()
 
 	assert.Contains(t, cmdtest.FirstLine([]byte(out)), `!1 myMRtitle`)
-	cmdtest.Eq(t, outErr, "")
+	// TODO: fix creating mr for default branch
+	cmdtest.Eq(t, outErr, "\nCreating merge request for test-cli into master in glab-cli/test\n\n")
 	assert.Contains(t, out, "https://gitlab.com/glab-cli/test/-/merge_requests/1")
+	stdout.Reset()
+	stderr.Reset()
 }
 
 func TestNewCmdCreate_autofill(t *testing.T) {
@@ -128,8 +132,22 @@ func TestNewCmdCreate_autofill(t *testing.T) {
 		outErr := stripansi.Strip(stderr.String())
 
 		assert.Contains(t, out, `!1 Update somefile.txt`)
-		cmdtest.Eq(t, outErr, "")
+		assert.Contains(t, outErr, "\nCreating merge request for test-cli into master in glab-cli/test\n\n")
 		assert.Contains(t, out, "https://gitlab.com/glab-cli/test/-/merge_requests/1")
-
+		stdout.Reset()
+		stderr.Reset()
 	})
+}
+
+func TestMRCreate_nontty_insufficient_flags(t *testing.T) {
+	stubFactory.IO.SetPrompt("true")
+	cmd = NewCmdCreate(stubFactory)
+	_, err := cmdtest.RunCommand(cmd, "")
+	if err == nil {
+		t.Fatal("expected error")
+	}
+
+	assert.Equal(t, "--title or --fill required for non-interactive mode", err.Error())
+
+	assert.Equal(t, "", stdout.String())
 }

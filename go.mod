@@ -10,11 +10,9 @@ require (
 	github.com/charmbracelet/glamour v0.2.1-0.20200724174618-1246d13c1684
 	github.com/dustin/go-humanize v1.0.0
 	github.com/gdamore/tcell v1.4.0
-	github.com/google/go-querystring v1.0.0
 	github.com/google/renameio v0.1.0
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510
 	github.com/gosuri/uilive v0.0.4
-	github.com/hashicorp/go-retryablehttp v0.6.4
 	github.com/hashicorp/go-version v1.2.1
 	github.com/jarcoal/httpmock v1.0.6
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51

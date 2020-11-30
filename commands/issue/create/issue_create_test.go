@@ -71,7 +71,7 @@ func Test_IssueCreate(t *testing.T) {
 	outErr := stripansi.Strip(stderr.String())
 	expectedOut := fmt.Sprintf("#1 myissuetitle (%s)", utils.TimeToPrettyTimeAgo(timer))
 	cmdtest.Eq(t, cmdtest.FirstLine([]byte(out)), expectedOut)
-	cmdtest.Eq(t, outErr, "")
+	cmdtest.Eq(t, outErr, "\n- Creating issue in glab-cli/test\n")
 	assert.Contains(t, out, "https://gitlab.com/glab-cli/test/-/issues/1")
 
 	api.CreateIssue = oldCreateIssue

@@ -6,68 +6,10 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/profclems/glab/pkg/prompt"
+
 	"github.com/AlecAivazis/survey/v2"
 )
-
-func AskQuestionWithInput(question, defaultVal string, isRequired bool) string {
-	str := ""
-	prompt := &survey.Input{
-		Message: question,
-	}
-	var err error
-	if isRequired {
-		err = survey.AskOne(prompt, &str, survey.WithValidator(survey.Required))
-	} else {
-		err = survey.AskOne(prompt, &str)
-	}
-	if err != nil {
-		log.Fatal(err)
-	}
-	str = strings.TrimSuffix(str, "\n")
-	if str == "" && defaultVal != "" {
-		return defaultVal
-	}
-	return str
-}
-
-// Confirm prompts user for a confirmation and returns a bool value
-func Confirm(question string) (confirmed bool, err error) {
-	confirmed = false
-	prompt := &survey.Confirm{
-		Message: question,
-	}
-	err = survey.AskOne(prompt, &confirmed)
-	return
-}
-
-func AskQuestionWithMultiSelect(question string, options []string) []string {
-	labels := []string{}
-	prompt := &survey.MultiSelect{
-		Message: question,
-		Options: options,
-	}
-	err := survey.AskOne(prompt, &labels)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return labels
-}
-
-func AskQuestionMultiline(question string, defaultVal string) string {
-	str := ""
-	prompt := &survey.Multiline{
-		Message: question,
-	}
-	err := survey.AskOne(prompt, &str)
-	if err != nil {
-		log.Fatal(err)
-	}
-	str = strings.TrimSuffix(str, "\n")
-	if str == "" && defaultVal != "" {
-		return defaultVal
-	}
-	return str
-}
 
 type EditorOptions struct {
 	FileName      string
@@ -80,7 +22,7 @@ type EditorOptions struct {
 
 func Editor(opts EditorOptions) string {
 	var container string
-	prompt := &survey.Editor{
+	editor := &survey.Editor{
 		Renderer:      survey.Renderer{},
 		Message:       opts.Label,
 		Default:       opts.Default,
@@ -89,7 +31,7 @@ func Editor(opts EditorOptions) string {
 		AppendDefault: opts.AppendDefault,
 		FileName:      opts.FileName,
 	}
-	err := survey.AskOne(prompt, &container)
+	err := prompt.AskOne(editor, &container)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -98,10 +40,7 @@ func Editor(opts EditorOptions) string {
 
 // ReplaceNonAlphaNumericChars : Replaces non alpha-numeric values with provided char/string
 func ReplaceNonAlphaNumericChars(words, replaceWith string) string {
-	reg, err := regexp.Compile("[^A-Za-z0-9]+")
-	if err != nil {
-		log.Fatal(err)
-	}
+	reg := regexp.MustCompile("[^A-Za-z0-9]+")
 	newStr := reg.ReplaceAllString(strings.Trim(words, " "), replaceWith)
 	return newStr
 }

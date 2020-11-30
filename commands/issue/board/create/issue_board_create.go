@@ -3,6 +3,8 @@ package create
 import (
 	"fmt"
 
+	"github.com/profclems/glab/pkg/prompt"
+
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/internal/utils"
 	"github.com/profclems/glab/pkg/api"
@@ -37,7 +39,10 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 			}
 
 			if boardName == "" {
-				boardName = utils.AskQuestionWithInput("Board Name:", "", true)
+				err = prompt.AskQuestionWithInput(&boardName, "Board Name:", "", true)
+				if err != nil {
+					return err
+				}
 			}
 
 			opts := &gitlab.CreateIssueBoardOptions{

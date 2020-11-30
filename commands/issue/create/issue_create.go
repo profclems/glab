@@ -1,20 +1,37 @@
 package create
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 
-	"github.com/profclems/glab/pkg/api"
-
+	"github.com/AlecAivazis/survey/v2"
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/commands/issue/issueutils"
 	"github.com/profclems/glab/internal/utils"
-
+	"github.com/profclems/glab/pkg/api"
+	"github.com/profclems/glab/pkg/prompt"
 	"github.com/spf13/cobra"
 	"github.com/xanzy/go-gitlab"
 )
 
+type CreateOpts struct {
+	Title       string
+	Description string
+	Labels      string
+	Assignees   string
+
+	Weight    int
+	MileStone int
+	LinkedMR  int
+
+	NoEditor       bool
+	IsConfidential bool
+	IsInteractive  bool
+}
+
 func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
+	opts := &CreateOpts{}
 	var issueCreateCmd = &cobra.Command{
 		Use:     "create [flags]",
 		Short:   `Create an issue`,
@@ -22,13 +39,17 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 		Aliases: []string{"new"},
 		Args:    cobra.ExactArgs(0),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			l := &gitlab.CreateIssueOptions{}
-			var (
-				issueTitle       string
-				issueLabel       string
-				issueDescription string
-				err              error
-			)
+			issueCreateOpts := &gitlab.CreateIssueOptions{}
+
+			hasTitle := cmd.Flags().Changed("title")
+			hasDescription := cmd.Flags().Changed("description")
+
+			// disable interactive mode if title and description are explicitly defined
+			opts.IsInteractive = !(hasTitle && hasDescription)
+
+			if opts.IsInteractive && !f.IO.PromptEnabled() {
+				return &cmdutils.FlagError{Err: errors.New("--title and --description required for non-interactive mode")}
+			}
 
 			apiClient, err := f.HttpClient()
 			if err != nil {
@@ -40,65 +61,111 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 				return err
 			}
 
-			cfg, _ := f.Config()
-			cachedLabels, _ := cfg.Get(repo.RepoHost(), "project_labels")
+			var templateName string
+			var templateContents string
 
-			if title, _ := cmd.Flags().GetString("title"); title != "" {
-				issueTitle = title
-			} else {
-				issueTitle = utils.AskQuestionWithInput("Title", "", true)
-			}
-			if description, _ := cmd.Flags().GetString("description"); description != "" {
-				issueDescription = description
-			} else {
-				if editor, _ := cmd.Flags().GetBool("no-editor"); editor {
-					issueDescription = utils.AskQuestionMultiline("Description:", "")
-				} else {
-					issueDescription = utils.Editor(utils.EditorOptions{
-						Label:    "Description:",
-						Help:     "Enter the issue description. ",
-						FileName: "*_ISSUE_EDITMSG.md",
-					})
-				}
-			}
-			if label, _ := cmd.Flags().GetString("label"); label != "" {
-				issueLabel = strings.Trim(label, "[] ")
-			} else {
-				labelsEntry := cachedLabels
-				if labelsEntry != "" {
-					labels := strings.Split(labelsEntry, ",")
-					issueLabel = strings.Join(utils.AskQuestionWithMultiSelect("Label(s)", labels), ",")
-				} else {
-					issueLabel = utils.AskQuestionWithInput("Label(s) [Comma Separated]", "", false)
-				}
-			}
-			l.Title = gitlab.String(issueTitle)
-			l.Labels = gitlab.Labels{issueLabel}
-			l.Description = &issueDescription
-			if confidential, _ := cmd.Flags().GetBool("confidential"); confidential {
-				l.Confidential = gitlab.Bool(confidential)
-			}
-			if weight, _ := cmd.Flags().GetInt("weight"); weight != -1 {
-				l.Weight = gitlab.Int(weight)
-			}
-			if a, _ := cmd.Flags().GetInt("linked-mr"); a != -1 {
-				l.MergeRequestToResolveDiscussionsOf = gitlab.Int(a)
-			}
-			if a, _ := cmd.Flags().GetInt("milestone"); a != -1 {
-				l.MilestoneID = gitlab.Int(a)
-			}
-			if a, _ := cmd.Flags().GetString("assignee"); a != "" {
-				assignID := a
-				arrIds := strings.Split(strings.Trim(assignID, "[] "), ",")
-				var t2 []int
+			if opts.IsInteractive {
+				if opts.Description == "" {
+					if editor, _ := cmd.Flags().GetBool("no-editor"); editor {
+						err = prompt.AskMultiline(&opts.Description, "Description:", "")
+						if err != nil {
+							return err
+						}
+					} else {
 
-				for _, i := range arrIds {
-					j := utils.StringToInt(i)
-					t2 = append(t2, j)
+						templateResponse := struct {
+							Index int
+						}{}
+						templateNames, err := cmdutils.ListGitLabTemplates(cmdutils.IssueTemplate)
+						if err != nil {
+							return fmt.Errorf("error getting templates: %w", err)
+						}
+
+						templateNames = append(templateNames, "Open a blank merge request")
+
+						selectQs := []*survey.Question{
+							{
+								Name: "index",
+								Prompt: &survey.Select{
+									Message: "Choose a template",
+									Options: templateNames,
+								},
+							},
+						}
+
+						if err := prompt.Ask(selectQs, &templateResponse); err != nil {
+							return fmt.Errorf("could not prompt: %w", err)
+						}
+						if templateResponse.Index != len(templateNames) {
+							templateName = templateNames[templateResponse.Index]
+							templateContents, err = cmdutils.LoadGitLabTemplate(cmdutils.IssueTemplate, templateName)
+							if err != nil {
+								return fmt.Errorf("failed to get template contents: %w", err)
+							}
+						}
+					}
 				}
-				l.AssigneeIDs = t2
+				if opts.Title == "" {
+					err = prompt.AskQuestionWithInput(&opts.Title, "Title", "", true)
+					if err != nil {
+						return err
+					}
+				}
+				if opts.Description == "" {
+					if opts.NoEditor {
+						err = prompt.AskMultiline(&opts.Description, "Description:", "")
+						if err != nil {
+							return err
+						}
+					} else {
+						editor, err := cmdutils.GetEditor(f.Config)
+						if err != nil {
+							return err
+						}
+						err = cmdutils.DescriptionPrompt(&opts.Description, templateContents, editor)
+						if err != nil {
+							return err
+						}
+					}
+				}
+				if opts.Labels == "" {
+					err = prompt.AskQuestionWithInput(&opts.Labels, "Label(s) [Comma Separated]", "", false)
+					if err != nil {
+						return err
+					}
+				}
+			} else {
+				if opts.Title == "" {
+					return fmt.Errorf("title can't be blank")
+				}
 			}
-			issue, err := api.CreateIssue(apiClient, repo.FullName(), l)
+
+			issueCreateOpts.Title = gitlab.String(opts.Title)
+			issueCreateOpts.Labels = gitlab.Labels{opts.Labels}
+			issueCreateOpts.Description = &opts.Description
+			if opts.IsConfidential {
+				issueCreateOpts.Confidential = gitlab.Bool(opts.IsConfidential)
+			}
+			if opts.Weight != -1 {
+				issueCreateOpts.Weight = gitlab.Int(opts.Weight)
+			}
+			if opts.LinkedMR != -1 {
+				issueCreateOpts.MergeRequestToResolveDiscussionsOf = gitlab.Int(opts.LinkedMR)
+			}
+			if opts.MileStone != -1 {
+				issueCreateOpts.MilestoneID = gitlab.Int(opts.MileStone)
+			}
+			if opts.Assignees != "" {
+				arrIds := strings.Split(strings.Trim(opts.Assignees, "[] "), ",")
+				var assigneeIDs []int
+
+				for _, id := range arrIds {
+					assigneeIDs = append(assigneeIDs, utils.StringToInt(id))
+				}
+				issueCreateOpts.AssigneeIDs = assigneeIDs
+			}
+			fmt.Fprintln(f.IO.StdErr, "\n- Creating issue in", repo.FullName())
+			issue, err := api.CreateIssue(apiClient, repo.FullName(), issueCreateOpts)
 			if err != nil {
 				return err
 			}
@@ -106,15 +173,15 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 			return nil
 		},
 	}
-	issueCreateCmd.Flags().StringP("title", "t", "", "Supply a title for issue")
-	issueCreateCmd.Flags().StringP("description", "d", "", "Supply a description for issue")
-	issueCreateCmd.Flags().StringP("label", "l", "", "Add label by name. Multiple labels should be comma separated")
-	issueCreateCmd.Flags().StringP("assignee", "a", "", "Assign issue to people by their ID. Multiple values should be comma separated ")
-	issueCreateCmd.Flags().IntP("milestone", "m", -1, "The global ID of a milestone to assign issue")
-	issueCreateCmd.Flags().BoolP("confidential", "c", false, "Set an issue to be confidential. Default is false")
-	issueCreateCmd.Flags().IntP("linked-mr", "", -1, "The IID of a merge request in which to resolve all issues")
-	issueCreateCmd.Flags().IntP("weight", "w", -1, "The weight of the issue. Valid values are greater than or equal to 0.")
-	issueCreateCmd.Flags().BoolP("no-editor", "", false, "Don't open editor to enter description. If set to true, uses prompt. Default is false")
+	issueCreateCmd.Flags().StringVarP(&opts.Title, "title", "t", "", "Supply a title for issue")
+	issueCreateCmd.Flags().StringVarP(&opts.Description, "description", "d", "", "Supply a description for issue")
+	issueCreateCmd.Flags().StringVarP(&opts.Labels, "label", "l", "", "Add label by name. Multiple labels should be comma separated")
+	issueCreateCmd.Flags().StringVarP(&opts.Assignees, "assignee", "a", "", "Assign issue to people by their ID. Multiple values should be comma separated ")
+	issueCreateCmd.Flags().IntVarP(&opts.MileStone, "milestone", "m", -1, "The global ID of a milestone to assign issue")
+	issueCreateCmd.Flags().BoolVarP(&opts.IsConfidential, "confidential", "c", false, "Set an issue to be confidential. Default is false")
+	issueCreateCmd.Flags().IntVarP(&opts.LinkedMR, "linked-mr", "", -1, "The IID of a merge request in which to resolve all issues")
+	issueCreateCmd.Flags().IntVarP(&opts.Weight, "weight", "w", -1, "The weight of the issue. Valid values are greater than or equal to 0.")
+	issueCreateCmd.Flags().BoolVarP(&opts.NoEditor, "no-editor", "", false, "Don't open editor to enter description. If set to true, uses prompt. Default is false")
 
 	return issueCreateCmd
 }
