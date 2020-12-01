@@ -2,6 +2,8 @@ package delete
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/MakeNowJust/heredoc"
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/internal/glrepo"
@@ -10,23 +12,22 @@ import (
 	"github.com/profclems/glab/pkg/prompt"
 	"github.com/spf13/cobra"
 	"github.com/xanzy/go-gitlab"
-	"strings"
 )
 
 type DeleteOpts struct {
 	ForceDelete bool
-	RepoName	string
-	Args		[]string
+	RepoName    string
+	Args        []string
 
-	IO *utils.IOStreams
-	Lab func() (*gitlab.Client, error)
+	IO       *utils.IOStreams
+	Lab      func() (*gitlab.Client, error)
 	BaseRepo func() (glrepo.Interface, error)
 }
 
 func NewCmdDelete(f *cmdutils.Factory) *cobra.Command {
 	var opts = &DeleteOpts{
-		IO: f.IO,
-		Lab: f.HttpClient,
+		IO:       f.IO,
+		Lab:      f.HttpClient,
 		BaseRepo: f.BaseRepo,
 	}
 
