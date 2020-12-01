@@ -2,6 +2,7 @@
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/profclems/glab)](https://goreportcard.com/report/github.com/profclems/glab)
 [![codecov](https://codecov.io/gh/profclems/glab/branch/trunk/graph/badge.svg?token=32J5DT3PQQ)](https://codecov.io/gh/profclems/glab)
+[![pipeline status](https://gitlab.com/profclems/glab/badges/trunk/pipeline.svg)](https://gitlab.com/profclems/glab/-/pipelines)
 [![Documentation Status](https://readthedocs.org/projects/glab/badge/?version=latest)](https://glab.readthedocs.io/en/latest/?badge=latest)
 [![Gitter](https://badges.gitter.im/glabcli/community.svg)](https://gitter.im/glabcli/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 [![License](https://img.shields.io/github/license/profclems/glab)](LICENSE)
