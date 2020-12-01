@@ -127,7 +127,7 @@ func DescriptionPrompt(response *string, templateContent, editorCommand string) 
 
 func LabelsPrompt(response *string, apiClient *gitlab.Client, repoRemote *glrepo.Remote) (err error) {
 	var addLabels bool
-	err = prompt.Confirm(&addLabels, "Do you want to add labels?")
+	err = prompt.Confirm(&addLabels, "Do you want to add labels?", true)
 	if err != nil {
 		return
 	}
