@@ -28,6 +28,7 @@ Subcommands
    clone <clone>
    contributors <contributors>
    create <create>
+   delete <delete>
    search <search>
    
 

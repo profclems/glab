@@ -39,6 +39,7 @@ Options
       --remove-source-branch   Remove Source Branch on merge
   -b, --target-branch string   The target or base branch into which you want your code merged
       --wip                    Mark merge request as a work in progress. Overrides --draft
+      --with-labels            Copy labels from issue to the merge request
 
 Options inherited from parent commands
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
