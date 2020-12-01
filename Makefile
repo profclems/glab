@@ -58,9 +58,10 @@ GOLANGCI_VERSION = 1.32.2
 # Use with care
 -include override.mk
 
+.PHONY: build
+.DEFAULT_GOAL := build
 build:
 	go build -trimpath -ldflags "$(GO_LDFLAGS) -X main.debugMode=false" -o $(BUILDLOC) $(GOURL)/cmd/glab
-.PHONY: build
 
 clean: ## Clear the working area and the project
 	rm -rf ./bin ./.glab-cli ./test/testdata-* ./coverage.txt coverage-*
@@ -147,6 +148,5 @@ list: ## List all make targets
 	@${MAKE} -pRrn : -f $(MAKEFILE_LIST) 2>/dev/null | awk -v RS= -F: '/^# File/,/^# Finished Make data base/ {if ($$1 !~ "^[#.]") {print $$1}}' | egrep -v -e '^[^[:alnum:]]' -e '^$@$$' | sort
 
 .PHONY: help
-.DEFAULT_GOAL := help
 help:
 	@grep -h -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
