@@ -63,6 +63,9 @@ code_navigation:
     - make test
   after_script:
     - bash <(curl -s https://codecov.io/bash)
+  only:
+    changes:
+      - *.{go,sum,mod}
 
 test:
   stage: test
