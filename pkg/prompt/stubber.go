@@ -10,7 +10,7 @@ import (
 
 func StubConfirm(result bool) func() {
 	orig := Confirm
-	Confirm = func(r *bool, _ string) error {
+	Confirm = func(r *bool, _ string, _ bool) error {
 		*r = result
 		return nil
 	}
