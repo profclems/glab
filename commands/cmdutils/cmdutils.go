@@ -56,7 +56,6 @@ func LoadGitLabTemplate(tmplType, tmplName string) (string, error) {
 	return strings.TrimSpace(string(tmpl)), nil
 }
 
-
 // TODO: properly handle errors in this function.
 //       For now, it returns nil and empty slice if there's an error
 func ListGitLabTemplates(tmplType string) ([]string, error) {
