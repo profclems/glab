@@ -13,3 +13,6 @@
 [branch "test-cli"]
 	remote = origin
 	merge = refs/heads/test-cli
+[branch "mr-autofill-test-br"]
+	remote = origin
+	merge = refs/heads/mr-autofill-test-br
