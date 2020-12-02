@@ -1,10 +1,2 @@
-701ea5fe3cbfed95824c168ac1575008086e503e		branch 'test-cli' of gitlab.com:glab-cli/test
-79204f14c8e64b4d6775c0078180175a02354e2c	not-for-merge	branch 'Testing' of gitlab.com:glab-cli/test
-5d3de07d4b44d9c5e2d664a12b1c268957bfec75	not-for-merge	branch 'fixed-branch' of gitlab.com:glab-cli/test
-6df88860c0abd0a75760b87315a8095b9bc345a6	not-for-merge	branch 'ft-pager' of gitlab.com:glab-cli/test
-b38dd911e39fe6c64e383e4fa1ffd7345a1ad82e	not-for-merge	branch 'master' of gitlab.com:glab-cli/test
-3d195f9442bbaf68f88aea107c2ae9d9b02b28d1	not-for-merge	branch 'newbranch' of gitlab.com:glab-cli/test
-6da602e6771636999f2475bf4a5aa2e48469bcac	not-for-merge	branch 'test' of gitlab.com:glab-cli/test
-ef36a53289a34cb51ad01a0c4a0bcf941eceb468	not-for-merge	branch 'test-br' of gitlab.com:glab-cli/test
-6caeb21d0dc2a5bd65bb693fea6dff6bacbd1260	not-for-merge	branch 'test-ci' of gitlab.com:glab-cli/test
-75ec1b8075060a39f243cc825ce19cb792a0febf	not-for-merge	branch 'trunk' of gitlab.com:glab-cli/test
+0ac6aab9e6e89c94f7166f12840177b0d9c11156		branch 'master' of gitlab.com:glab-cli/test
+0ac6aab9e6e89c94f7166f12840177b0d9c11156	not-for-merge	branch '1-ci-failure-occured' of gitlab.com:glab-cli/test

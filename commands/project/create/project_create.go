@@ -2,6 +2,7 @@ package create
 
 import (
 	"fmt"
+	"net/url"
 	"os"
 	"path"
 	"strings"
@@ -88,10 +89,6 @@ func runCreateProject(cmd *cobra.Command, args []string, f *cmdutils.Factory) er
 	if err != nil {
 		return err
 	}
-	repo, err := f.BaseRepo()
-	if err != nil {
-		return err
-	}
 
 	group, err := cmd.Flags().GetString("group")
 	if err != nil {
@@ -157,14 +154,22 @@ func runCreateProject(cmd *cobra.Command, args []string, f *cmdutils.Factory) er
 		fmt.Fprintf(f.IO.StdOut, "%s Created repository %s on GitLab: %s\n", greenCheck, project.NameWithNamespace, project.WebURL)
 		if isPath {
 			cfg, _ := f.Config()
-			protocol, _ := cfg.Get(repo.RepoHost(), "git_protocol")
-			token, _ := cfg.Get(repo.RepoHost(), "token")
-			remote, err := glrepo.RemoteURL(project, &glrepo.RemoteArgs{
+			webURL, _ := url.Parse(project.WebURL)
+			protocol, _ := cfg.Get(webURL.Host, "git_protocol")
+
+			remoteArgs := &glrepo.RemoteArgs{
 				Protocol: protocol,
-				Token:    token,
-				Url:      repo.RepoHost(),
-				Username: repo.RepoOwner(),
-			})
+				Url:      webURL.Host,
+			}
+
+			if protocol != "ssh" {
+				remoteArgs.Token, _ = cfg.Get(webURL.Host, "token")
+				currentUser, err := api.CurrentUser(apiClient)
+				if err == nil {
+					remoteArgs.Username = currentUser.Username
+				}
+			}
+			remote, err := glrepo.RemoteURL(project, remoteArgs)
 			if err != nil {
 				return err
 			}
