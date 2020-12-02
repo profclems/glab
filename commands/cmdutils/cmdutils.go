@@ -56,18 +56,23 @@ func LoadGitLabTemplate(tmplType, tmplName string) (string, error) {
 	return strings.TrimSpace(string(tmpl)), nil
 }
 
+
+// TODO: properly handle errors in this function.
+//       For now, it returns nil and empty slice if there's an error
 func ListGitLabTemplates(tmplType string) ([]string, error) {
 	wdir, err := git.ToplevelDir()
 	tmplFolder := filepath.Join(wdir, ".gitlab", tmplType)
 	var files []string
 	f, err := os.Open(tmplFolder)
+	// if error return an empty slice since it only returns PathError
 	if err != nil {
-		return files, err
+		return files, nil
 	}
 	fileNames, err := f.Readdirnames(-1)
 	defer f.Close()
 	if err != nil {
-		return files, err
+		// return empty slice if error
+		return files, nil
 	}
 
 	for _, file := range fileNames {

@@ -81,7 +81,7 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 							return fmt.Errorf("error getting templates: %w", err)
 						}
 
-						templateNames = append(templateNames, "Open a blank merge request")
+						templateNames = append(templateNames, "Open a blank Issue")
 
 						selectQs := []*survey.Question{
 							{
