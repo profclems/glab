@@ -2,6 +2,8 @@ package run
 
 import (
 	"fmt"
+	"regexp"
+	"strings"
 
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/internal/git"
@@ -11,6 +13,10 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/xanzy/go-gitlab"
 )
+
+const keyValuePair = ".+:.+"
+
+var re = regexp.MustCompile(keyValuePair)
 
 func getDefaultBranch(f *cmdutils.Factory) string {
 	repo, err := f.BaseRepo()
@@ -57,17 +63,24 @@ func NewCmdRun(f *cmdutils.Factory) *cobra.Command {
 				return err
 			}
 
-			// TODO: support setting pipeline variables via cli.
-			v := []*gitlab.PipelineVariable{
-				{
-					Key:          "GLAB_CLI_KEY",
-					Value:        "GLAB_CLI_VAL",
-					VariableType: "env_var",
-				},
+			pipelineVars := []*gitlab.PipelineVariable{}
+
+			if customPipelineVars, _ := cmd.Flags().GetStringSlice("variables"); len(customPipelineVars) > 0 {
+				for _, v := range customPipelineVars {
+					if !re.MatchString(v) {
+						return fmt.Errorf("Bad pipeline variable : \"%s\" should be of format KEY:VALUE", v)
+					}
+					s := strings.Split(v, ":")
+					pipelineVars = append(pipelineVars, &gitlab.PipelineVariable{
+						Key:          s[0],
+						Value:        s[1],
+						VariableType: "env_var",
+					})
+				}
 			}
 
 			c := &gitlab.CreatePipelineOptions{
-				Variables: v,
+				Variables: pipelineVars,
 			}
 
 			if m, _ := cmd.Flags().GetString("branch"); m != "" {
@@ -86,6 +99,7 @@ func NewCmdRun(f *cmdutils.Factory) *cobra.Command {
 		},
 	}
 	pipelineRunCmd.Flags().StringP("branch", "b", "", "Create pipeline on branch/ref <string>")
+	pipelineRunCmd.Flags().StringSliceP("variables", "", []string{}, "Pass variables to pipeline")
 
 	return pipelineRunCmd
 }
