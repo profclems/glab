@@ -1,0 +1,35 @@
+# Maintainer: Niclas Mietz <hi@solidnerd.dev>
+pkgname=glab
+pkgver=1.12.1
+pkgrel=0
+pkgdesc="An open source GitLab CLI tool written in Go"
+url="https://github.com/profclems/glab"
+arch="all"
+license="MIT"
+makedepends="go"
+# depends="muslc"
+# pkgusers="glab"
+# pkggroups="glab"
+options="!check chmod-clean" # Need to be run in a git repo
+source="${pkgname}-v${pkgver}.tar.gz::${url}/archive/v${pkgver}.tar.gz"
+
+builddir="$srcdir/src/pofclems/glab/$pkgname"
+
+export GOPATH="$srcdir"
+export CGO_ENABLED=0
+
+prepare() {
+	mkdir -p ${builddir%/*}
+	mv "$srcdir"/$pkgname-$pkgver "$builddir"/
+}
+
+build() {
+  make build
+}
+
+package() {
+	install -Dm755 "$builddir"/bin/glab \
+  "$pkgdir"/usr/bin/glab
+  install -Dm644 $builddir/LICENSE "$pkgdir/usr/share/licenses/${pkgname}/LICENSE"
+}
+sha512sums="34eb532af2c819425fd19e9a59568498eee43c8870295dc38c2da4f97201f9f42314754d7cc307fb7690f748f0049e39778f5369eaf17325f0b63a7dead0c453  glab-v1.12.1.tar.gz"
