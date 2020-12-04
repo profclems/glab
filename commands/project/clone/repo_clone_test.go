@@ -1,30 +1,32 @@
 package clone
 
 import (
+	"os"
+	"strings"
+	"testing"
+
 	"github.com/google/shlex"
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/internal/config"
 	"github.com/profclems/glab/test"
 	"github.com/stretchr/testify/require"
-	"os"
-	"strings"
-	"testing"
 
 	"github.com/profclems/glab/commands/cmdtest"
 	"github.com/profclems/glab/internal/utils"
 	"github.com/stretchr/testify/assert"
 )
+
 func TestMain(m *testing.M) {
 	cmdtest.InitTest(m, "repo_clone_test")
 }
 
 func TestNewCmdClone(t *testing.T) {
 	testCases := []struct {
-		name     string
-		args     string
-		wantOpts CloneOptions
+		name        string
+		args        string
+		wantOpts    CloneOptions
 		wantCtxOpts ContextOpts
-		wantErr  string
+		wantErr     string
 	}{
 		{
 			name:    "no arguments",
@@ -35,7 +37,7 @@ func TestNewCmdClone(t *testing.T) {
 			name: "repo argument",
 			args: "NAMESPACE/REPO",
 			wantOpts: CloneOptions{
-				GitFlags:    []string{},
+				GitFlags: []string{},
 			},
 			wantCtxOpts: ContextOpts{
 				Repo: "NAMESPACE/REPO",
@@ -45,7 +47,7 @@ func TestNewCmdClone(t *testing.T) {
 			name: "directory argument",
 			args: "NAMESPACE/REPO mydir",
 			wantOpts: CloneOptions{
-				GitFlags:    []string{"mydir"},
+				GitFlags: []string{"mydir"},
 			},
 			wantCtxOpts: ContextOpts{
 				Repo: "NAMESPACE/REPO",
@@ -55,7 +57,7 @@ func TestNewCmdClone(t *testing.T) {
 			name: "git clone arguments",
 			args: "NAMESPACE/REPO -- --depth 1 --recurse-submodules",
 			wantOpts: CloneOptions{
-				GitFlags:    []string{"--depth", "1", "--recurse-submodules"},
+				GitFlags: []string{"--depth", "1", "--recurse-submodules"},
 			},
 			wantCtxOpts: ContextOpts{
 				Repo: "NAMESPACE/REPO",

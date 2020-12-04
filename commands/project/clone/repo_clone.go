@@ -25,13 +25,13 @@ type CloneOptions struct {
 	WithIssuesEnabled bool
 	WithShared        bool
 	Archived          bool
-	ArchivedSet		  bool
+	ArchivedSet       bool
 	Visibility        string
 	Owned             bool
 	GitFlags          []string
 	Dir               string
 	Host              string
-	Protocol 		  string
+	Protocol          string
 
 	RemoteArgs *glrepo.RemoteArgs
 
@@ -47,10 +47,10 @@ type ContextOpts struct {
 	Repo    string
 }
 
-func NewCmdClone(f *cmdutils.Factory, runE func(*CloneOptions, *ContextOpts) error ) *cobra.Command {
+func NewCmdClone(f *cmdutils.Factory, runE func(*CloneOptions, *ContextOpts) error) *cobra.Command {
 	opts := &CloneOptions{
-		IO:       f.IO,
-		Config:   f.Config,
+		IO:     f.IO,
+		Config: f.Config,
 	}
 
 	ctxOpts := &ContextOpts{}
@@ -219,7 +219,7 @@ func cloneRun(opts *CloneOptions, ctxOpts *ContextOpts) (err error) {
 				ctxOpts.Repo = fmt.Sprintf("%s/%s", opts.CurrentUser.Username, ctxOpts.Repo)
 			}
 		}
-		if ctxOpts.Project == nil{
+		if ctxOpts.Project == nil {
 			ctxOpts.Project, err = api.GetProject(opts.APIClient.Lab(), ctxOpts.Repo)
 			if err != nil {
 				return
