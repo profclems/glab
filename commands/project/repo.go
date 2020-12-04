@@ -21,7 +21,7 @@ func NewCmdRepo(f *cmdutils.Factory) *cobra.Command {
 	}
 
 	repoCmd.AddCommand(repoCmdArchive.NewCmdArchive(f))
-	repoCmd.AddCommand(repoCmdClone.NewCmdClone(f))
+	repoCmd.AddCommand(repoCmdClone.NewCmdClone(f, nil))
 	repoCmd.AddCommand(repoCmdContributors.NewCmdContributors(f))
 	repoCmd.AddCommand(repoCmdCreate.NewCmdCreate(f))
 	repoCmd.AddCommand(repoCmdDelete.NewCmdDelete(f))
