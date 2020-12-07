@@ -10,6 +10,6 @@ jobs:
     steps:
       - uses: alex-page/github-project-automation-plus@v0.3.0
         with:
-          project: GLab: A GitLab CLI Tool
+          project: "GLab: A GitLab CLI Tool"
           column: Needs Review 👀
           repo-token: ${{ secrets.BOT_TOKEN }}
