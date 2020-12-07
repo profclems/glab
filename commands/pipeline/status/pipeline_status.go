@@ -71,6 +71,7 @@ func NewCmdStatus(f *cmdutils.Factory) *cobra.Command {
 
 				// start listening for updates and render
 				writer.Start()
+				defer writer.Stop()
 				for isRunning {
 					jobs, err := api.GetPipelineJobs(apiClient, runningPipeline.ID, repo.FullName())
 					if err != nil {
@@ -127,7 +128,6 @@ func NewCmdStatus(f *cmdutils.Factory) *cobra.Command {
 							isRunning = false
 						}
 					}
-					writer.Stop()
 
 					if retry == "View Logs" {
 						// ToDo: bad idea to call another sub-command. should be fixed to avoid cyclo imports
