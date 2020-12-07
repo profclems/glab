@@ -18,14 +18,20 @@ jobs:
         uses: actions/setup-go@v2
         with:
           go-version: 1.14
+
+      - name: Generate changelog
+        run: |
+          echo "GORELEASER_CURRENT_TAG=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+          git fetch --unshallow
+          scripts/changelog | tee CHANGELOG.md
       
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v2
         with:
           version: latest
-          args: release --rm-dist
+          args: release --rm-dist --release-notes=CHANGELOG.md
         env:
-          GITHUB_TOKEN: ${{ secrets.PS_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.BOT_TOKEN }}
       
       - name: Bump Homebrew formula
         uses: mislav/bump-homebrew-formula-action@v1
@@ -34,3 +40,18 @@ jobs:
           formula-name: glab
         env:
           COMMITTER_TOKEN: ${{ secrets.PS_TOKEN }}
+      
+      - name: Move project cards
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{secrets.BOT_TOKEN}}
+          PENDING_RELEASE_COLUMN: 11177289
+          DONE_COLUMN: 10210364
+        run: |
+          api() { gh api -H 'accept: application/vnd.github.inertia-preview+json' "$@"; }
+          api-write() { [[ $GITHUB_REF == *-* ]] && echo "skipping: api $*" || api "$@"; }
+          cards=$(api --paginate projects/columns/$PENDING_RELEASE_COLUMN/cards | jq ".[].id")
+          for card in $cards; do
+            api-write --silent projects/columns/cards/$card/moves -f position=top -F column_id=$DONE_COLUMN
+          done
+          echo "moved ${#cards[@]} cards to the Done column"
