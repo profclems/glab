@@ -18,14 +18,20 @@ jobs:
         uses: actions/setup-go@v2
         with:
           go-version: 1.14
+
+      - name: Generate changelog
+        run: |
+          echo "GORELEASER_CURRENT_TAG=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+          git fetch --unshallow
+          scripts/changelog | tee CHANGELOG.md
       
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v2
         with:
           version: latest
-          args: release --rm-dist
+          args: release --rm-dist --release-notes=CHANGELOG.md
         env:
-          GITHUB_TOKEN: ${{ secrets.PS_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.BOT_TOKEN }}
       
       - name: Bump Homebrew formula
         uses: mislav/bump-homebrew-formula-action@v1
