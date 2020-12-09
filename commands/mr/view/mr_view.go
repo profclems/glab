@@ -202,7 +202,7 @@ func printTTYMRPreview(out io.Writer, mr *gitlab.MergeRequest) error {
 	}
 
 	fmt.Fprintln(out)
-	fmt.Fprintf(out, utils.Gray("View this pull request on GitLab: %s\n"), mr.WebURL)
+	fmt.Fprintf(out, utils.Gray("View this merge request on GitLab: %s\n"), mr.WebURL)
 
 	return nil
 }

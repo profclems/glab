@@ -147,7 +147,7 @@ func TestMRView(t *testing.T) {
 			},
 			{
 				ID:    1,
-				Body:  "Marked PR as ready",
+				Body:  "Marked MR as ready",
 				Title: "",
 				Author: author{
 					ID:       1,
@@ -180,7 +180,7 @@ func TestMRView(t *testing.T) {
 		require.Contains(t, out, "mrTitle !13")
 		require.Equal(t, outErr, "")
 		assert.Contains(t, out, "https://gitlab.com/glab-cli/test/-/merge_requests/13")
-		assert.Contains(t, out, "johnwick Marked PR as ready")
+		assert.Contains(t, out, "johnwick Marked MR as ready")
 	})
 
 	t.Run("no_tty", func(t *testing.T) {
