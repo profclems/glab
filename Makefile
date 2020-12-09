@@ -113,7 +113,7 @@ test: TEST_FORMAT ?= short
 test: SHELL = /bin/bash
 test: export CGO_ENABLED=1
 test:  bin/gotestsum ## Run tests
-	$(GOTEST) --no-summary=skipped --junitfile ./coverage.xml --format ${TEST_FORMAT} -- -race -coverprofile=./coverage.txt -covermode=atomic $(filter-out -v,${GOARGS}) $(if ${TEST_PKGS},${TEST_PKGS},./...)
+	$(GOTEST) --no-summary=skipped --junitfile ./coverage.xml --format ${TEST_FORMAT} -- -coverprofile=./coverage.txt -covermode=atomic $(filter-out -v,${GOARGS}) $(if ${TEST_PKGS},${TEST_PKGS},./...)
 
 
 ifdef HASGOCILINT
