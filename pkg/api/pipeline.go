@@ -95,7 +95,7 @@ var GetPipelineJob = func(client *gitlab.Client, jid int, repo string) (*gitlab.
 	return job, err
 }
 
-var GetJobs = func(client *gitlab.Client, repo string, opts *gitlab.ListJobsOptions) ([]gitlab.Job, error) {
+var GetJobs = func(client *gitlab.Client, repo string, opts *gitlab.ListJobsOptions) ([]*gitlab.Job, error) {
 	if client == nil {
 		client = apiClient
 	}
