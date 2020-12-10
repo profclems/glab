@@ -8,14 +8,13 @@ before:
     - go mod tidy
     
 builds:
-  - main: ./cmd/glab
-    env:
-      - CGO_ENABLED=0
-    ldflags:
-      - -s -w -X main.version={{.Version}} -X main.build={{time "2006-01-02"}}
   - <<: &build_defaults
-      binary: bin/glab
       main: ./cmd/glab
+      binary: bin/glab
+      env:
+        - CGO_ENABLED=0
+      ldflags:
+        - -s -w -X main.version={{.Version}} -X main.build={{time "2006-01-02"}}
     id: macos
     goos: [darwin]
     goarch: [amd64]
