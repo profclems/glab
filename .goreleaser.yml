@@ -8,14 +8,13 @@ before:
     - go mod tidy
     
 builds:
-  - main: ./cmd/glab
-    env:
-      - CGO_ENABLED=0
-    ldflags:
-      - -s -w -X main.version={{.Version}} -X main.build={{time "2006-01-02"}}
   - <<: &build_defaults
-      binary: bin/glab
       main: ./cmd/glab
+      binary: bin/glab
+      env:
+        - CGO_ENABLED=0
+      ldflags:
+        - -s -w -X main.version={{.Version}} -X main.build={{time "2006-01-02"}}
     id: macos
     goos: [darwin]
     goarch: [amd64]
@@ -31,31 +30,26 @@ builds:
     goarch: [386, amd64]
 
 archives:
-  - replacements:
-      darwin: Darwin
-      linux: Linux
-      windows: Windows
-      386: i386
-      amd64: x86_64
-    allow_different_binary_count: true
-
   - id: nix
     builds: [macos, linux]
     <<: &archive_defaults
       name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}"
-    wrap_in_directory: false
-    allow_different_binary_count: true
-    replacements:
+      wrap_in_directory: false
+    format: tar.gz
+    replacements: 
       darwin: macOS
       linux: Linux
-    format: tar.gz
+      <<: &arch_replacemens
+        386: i386
+        amd64: x86_64
 
   - id: windows
     builds: [windows]
     <<: *archive_defaults
-    wrap_in_directory: false
-    allow_different_binary_count: true
     format: zip
+    replacements: 
+      windows: Windows
+      <<: *arch_replacemens
 
 scoop:
   url_template: "http://github.com/profclems/glab/releases/download/{{ .Tag }}/{{ .ArtifactName }}"
