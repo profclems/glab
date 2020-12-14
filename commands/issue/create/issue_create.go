@@ -166,9 +166,7 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 				if err != nil {
 					return err
 				}
-				for _, user := range users {
-					issueCreateOpts.AssigneeIDs = append(issueCreateOpts.AssigneeIDs, user.ID)
-				}
+				issueCreateOpts.AssigneeIDs = cmdutils.IDsFromUsers(users)
 			}
 			fmt.Fprintln(f.IO.StdErr, "\n- Creating issue in", repo.FullName())
 			issue, err := api.CreateIssue(apiClient, repo.FullName(), issueCreateOpts)

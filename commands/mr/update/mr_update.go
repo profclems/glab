@@ -83,9 +83,7 @@ func NewCmdUpdate(f *cmdutils.Factory) *cobra.Command {
 				if err != nil {
 					return err
 				}
-				for _, user := range users {
-					l.AssigneeIDs = append(l.AssigneeIDs, user.ID)
-				}
+				l.AssigneeIDs = cmdutils.IDsFromUsers(users)
 			}
 
 			if removeSource, _ := cmd.Flags().GetBool("remove-source-branch"); removeSource {

@@ -242,9 +242,7 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 				if err != nil {
 					return err
 				}
-				for _, user := range users {
-					mrCreateOpts.AssigneeIDs = append(mrCreateOpts.AssigneeIDs, user.ID)
-				}
+				mrCreateOpts.AssigneeIDs = cmdutils.IDsFromUsers(users)
 			}
 
 			if opts.CreateSourceBranch {

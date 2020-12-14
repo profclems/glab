@@ -172,3 +172,12 @@ func LabelsPrompt(response *string, apiClient *gitlab.Client, repoRemote *glrepo
 	}
 	return nil
 }
+
+//IDsFromUsers collects all user IDs from a slice of users
+func IDsFromUsers(users []*gitlab.User) []int {
+	ids := make([]int, len(users))
+	for i, user := range users {
+		ids[i] = user.ID
+	}
+	return ids
+}
