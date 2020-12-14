@@ -3,12 +3,10 @@ package create
 import (
 	"errors"
 	"fmt"
-	"strings"
 
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/commands/issue/issueutils"
-	"github.com/profclems/glab/internal/utils"
 	"github.com/profclems/glab/pkg/api"
 	"github.com/profclems/glab/pkg/prompt"
 	"github.com/spf13/cobra"
@@ -19,7 +17,7 @@ type CreateOpts struct {
 	Title       string
 	Description string
 	Labels      string
-	Assignees   string
+	Assignees   []string
 
 	Weight    int
 	MileStone int
@@ -163,14 +161,12 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 			if opts.MileStone != -1 {
 				issueCreateOpts.MilestoneID = gitlab.Int(opts.MileStone)
 			}
-			if opts.Assignees != "" {
-				arrIds := strings.Split(strings.Trim(opts.Assignees, "[] "), ",")
-				var assigneeIDs []int
-
-				for _, id := range arrIds {
-					assigneeIDs = append(assigneeIDs, utils.StringToInt(id))
+			if len(opts.Assignees) > 0 {
+				users, err := api.UsersByNames(apiClient, opts.Assignees)
+				if err != nil {
+					return err
 				}
-				issueCreateOpts.AssigneeIDs = assigneeIDs
+				issueCreateOpts.AssigneeIDs = cmdutils.IDsFromUsers(users)
 			}
 			fmt.Fprintln(f.IO.StdErr, "\n- Creating issue in", repo.FullName())
 			issue, err := api.CreateIssue(apiClient, repo.FullName(), issueCreateOpts)
@@ -184,7 +180,7 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 	issueCreateCmd.Flags().StringVarP(&opts.Title, "title", "t", "", "Supply a title for issue")
 	issueCreateCmd.Flags().StringVarP(&opts.Description, "description", "d", "", "Supply a description for issue")
 	issueCreateCmd.Flags().StringVarP(&opts.Labels, "label", "l", "", "Add label by name. Multiple labels should be comma separated")
-	issueCreateCmd.Flags().StringVarP(&opts.Assignees, "assignee", "a", "", "Assign issue to people by their ID. Multiple values should be comma separated ")
+	issueCreateCmd.Flags().StringSliceVarP(&opts.Assignees, "assignee", "a", []string{}, "Assign issue to people by their `usernames`")
 	issueCreateCmd.Flags().IntVarP(&opts.MileStone, "milestone", "m", -1, "The global ID of a milestone to assign issue")
 	issueCreateCmd.Flags().BoolVarP(&opts.IsConfidential, "confidential", "c", false, "Set an issue to be confidential. Default is false")
 	issueCreateCmd.Flags().IntVarP(&opts.LinkedMR, "linked-mr", "", -1, "The IID of a merge request in which to resolve all issues")

@@ -78,12 +78,12 @@ func NewCmdUpdate(f *cmdutils.Factory) *cobra.Command {
 				l.Description = gitlab.String(m)
 			}
 
-			if assignee, _ := cmd.Flags().GetString("assignee"); assignee != "" {
-				user, err := api.UserByName(apiClient, assignee)
+			if assignees, _ := cmd.Flags().GetStringSlice("assignees"); len(assignees) > 0 {
+				users, err := api.UsersByNames(apiClient, assignees)
 				if err != nil {
 					return err
 				}
-				l.AssigneeID = gitlab.Int(user.ID)
+				l.AssigneeIDs = cmdutils.IDsFromUsers(users)
 			}
 
 			if removeSource, _ := cmd.Flags().GetBool("remove-source-branch"); removeSource {
@@ -106,7 +106,7 @@ func NewCmdUpdate(f *cmdutils.Factory) *cobra.Command {
 	mrUpdateCmd.Flags().StringP("title", "t", "", "Title of merge request")
 	mrUpdateCmd.Flags().BoolP("lock-discussion", "", false, "Lock discussion on merge request")
 	mrUpdateCmd.Flags().StringP("description", "d", "", "merge request description")
-	mrUpdateCmd.Flags().StringP("assignee", "a", "", "merge request assignee")
+	mrUpdateCmd.Flags().StringSliceP("assignees", "a", []string{}, "Assign merge request to people by their `usernames`")
 	mrUpdateCmd.Flags().BoolP("remove-source-branch", "", false, "Remove Source Branch on merge")
 
 	return mrUpdateCmd

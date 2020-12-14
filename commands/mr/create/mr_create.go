@@ -26,7 +26,7 @@ type CreateOpts struct {
 	TargetBranch         string
 	TargetTrackingBranch string
 	Labels               string
-	Assignees            string
+	Assignees            []string
 
 	MileStone     int
 	TargetProject int
@@ -237,14 +237,12 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 			if opts.TargetProject != -1 {
 				mrCreateOpts.TargetProjectID = gitlab.Int(opts.TargetProject)
 			}
-			if opts.Assignees != "" {
-				arrIds := strings.Split(strings.Trim(opts.Assignees, "[] "), ",")
-				var assigneeIDs []int
-
-				for _, id := range arrIds {
-					assigneeIDs = append(assigneeIDs, utils.StringToInt(id))
+			if len(opts.Assignees) > 0 {
+				users, err := api.UsersByNames(labClient, opts.Assignees)
+				if err != nil {
+					return err
 				}
-				mrCreateOpts.AssigneeIDs = assigneeIDs
+				mrCreateOpts.AssigneeIDs = cmdutils.IDsFromUsers(users)
 			}
 
 			if opts.CreateSourceBranch {
@@ -291,7 +289,7 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 	mrCreateCmd.Flags().StringVarP(&opts.Title, "title", "t", "", "Supply a title for merge request")
 	mrCreateCmd.Flags().StringVarP(&opts.Description, "description", "d", "", "Supply a description for merge request")
 	mrCreateCmd.Flags().StringVarP(&opts.Labels, "label", "l", "", "Add label by name. Multiple labels should be comma separated")
-	mrCreateCmd.Flags().StringVarP(&opts.Assignees, "assignee", "a", "", "Assign merge request to people by their IDs. Multiple values should be comma separated ")
+	mrCreateCmd.Flags().StringSliceVarP(&opts.Assignees, "assignee", "a", []string{}, "Assign merge request to people by their `usernames`")
 	mrCreateCmd.Flags().StringVarP(&opts.SourceBranch, "source-branch", "s", "", "The Branch you are creating the merge request. Default is the current branch.")
 	mrCreateCmd.Flags().StringVarP(&opts.TargetBranch, "target-branch", "b", "", "The target or base branch into which you want your code merged")
 	mrCreateCmd.Flags().IntVarP(&opts.TargetProject, "target-project", "", -1, "Add target project by id")
