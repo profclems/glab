@@ -109,7 +109,13 @@ func DisplayAllMRs(mrs []*gitlab.MergeRequest, projectID string) string {
 	return table.Render()
 }
 
+//MRFromArgs is wrapper around MRFromArgsWithOpts without any custom options
 func MRFromArgs(f *cmdutils.Factory, args []string) (*gitlab.MergeRequest, glrepo.Interface, error) {
+	return MRFromArgsWithOpts(f, args, &gitlab.GetMergeRequestsOptions{})
+}
+
+//MRFromArgsWithOpts gets MR with custom request options passed down to it
+func MRFromArgsWithOpts(f *cmdutils.Factory, args []string, opts *gitlab.GetMergeRequestsOptions) (*gitlab.MergeRequest, glrepo.Interface, error) {
 	var mrID int
 	var mr *gitlab.MergeRequest
 
@@ -146,7 +152,7 @@ func MRFromArgs(f *cmdutils.Factory, args []string) (*gitlab.MergeRequest, glrep
 	}
 	// fetching multiple MRs does not return many major params in the payload
 	// so we fetch again using the single mr endpoint
-	mr, err = api.GetMR(apiClient, baseRepo.FullName(), mrID, &gitlab.GetMergeRequestsOptions{})
+	mr, err = api.GetMR(apiClient, baseRepo.FullName(), mrID, opts)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to get merge request %d: %w", mrID, err)
 	}

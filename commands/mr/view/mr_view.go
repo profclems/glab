@@ -7,8 +7,6 @@ import (
 
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/commands/mr/mrutils"
-	"github.com/profclems/glab/internal/config"
-	"github.com/profclems/glab/internal/glrepo"
 	"github.com/profclems/glab/internal/utils"
 	"github.com/profclems/glab/pkg/api"
 
@@ -17,18 +15,17 @@ import (
 	"github.com/xanzy/go-gitlab"
 )
 
-var (
-	showSystemLogs bool
-	showComments   bool
-	limit          int
-	pageNumber     int
-	baseRepo       glrepo.Interface
-	cfg            config.Config
-	glamourStyle   string
-	notes          []*gitlab.Note
-)
+type ViewOpts struct {
+	ShowComments   bool
+	ShowSystemLogs bool
+	OpenInBrowser  bool
+
+	CommentPageNumber int
+	CommentLimit      int
+}
 
 func NewCmdView(f *cmdutils.Factory) *cobra.Command {
+	opts := ViewOpts{}
 	var mrViewCmd = &cobra.Command{
 		Use:     "view {<id> | <branch>}",
 		Short:   `Display the title, body, and other information about a merge request.`,
@@ -36,75 +33,63 @@ func NewCmdView(f *cmdutils.Factory) *cobra.Command {
 		Aliases: []string{"show"},
 		Args:    cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			var err error
-
 			apiClient, err := f.HttpClient()
 			if err != nil {
 				return err
 			}
 
-			mr, repo, err := mrutils.MRFromArgs(f, args)
+			mr, baseRepo, err := mrutils.MRFromArgsWithOpts(f, args, &gitlab.GetMergeRequestsOptions{
+				IncludeDivergedCommitsCount: gitlab.Bool(true),
+				RenderHTML:                  gitlab.Bool(true),
+				IncludeRebaseInProgress:     gitlab.Bool(true),
+			})
 			if err != nil {
 				return err
 			}
+			cfg, _ := f.Config()
 
-			baseRepo = repo
-			cfg, _ = f.Config()
-
-			opts := &gitlab.GetMergeRequestsOptions{}
-			opts.IncludeDivergedCommitsCount = gitlab.Bool(true)
-			opts.RenderHTML = gitlab.Bool(true)
-			opts.IncludeRebaseInProgress = gitlab.Bool(true)
-
-			mr, err = api.GetMR(apiClient, baseRepo.FullName(), mr.IID, opts)
-			if err != nil {
-				return err
-			}
-
-			if lb, _ := cmd.Flags().GetBool("web"); lb { //open in browser if --web flag is specified
-				if f.IO.IsErrTTY && f.IO.IsaTTY {
+			if opts.OpenInBrowser { //open in browser if --web flag is specified
+				if f.IO.IsOutputTTY() {
 					fmt.Fprintf(f.IO.StdErr, "Opening %s in your browser.\n", utils.DisplayURL(mr.WebURL))
 				}
 
 				browser, _ := cfg.Get(baseRepo.RepoHost(), "browser")
 				return utils.OpenInBrowser(mr.WebURL, browser)
 			}
-			cfg, _ := f.Config()
-			glamourStyle, _ = cfg.Get(baseRepo.RepoHost(), "glamour_style")
 
-			if showComments {
+			notes := []*gitlab.Note{}
+
+			if opts.ShowComments {
 				l := &gitlab.ListMergeRequestNotesOptions{
 					Sort: gitlab.String("asc"),
 				}
-				if pageNumber != 0 {
-					l.Page = pageNumber
-				}
-				if limit != 0 {
-					l.PerPage = limit
-				}
+				l.Page = opts.CommentPageNumber
+				l.PerPage = opts.CommentLimit
+
 				notes, err = api.ListMRNotes(apiClient, baseRepo.FullName(), mr.IID, l)
 				if err != nil {
 					return err
 				}
 			}
 
-			err = f.IO.StartPager()
-			if err != nil {
+			if err := f.IO.StartPager(); err != nil {
 				return err
 			}
 			defer f.IO.StopPager()
-			if f.IO.IsErrTTY && f.IO.IsaTTY {
-				return printTTYMRPreview(f.IO.StdOut, mr)
+
+			if f.IO.IsOutputTTY() {
+				glamourStyle, _ := cfg.Get(baseRepo.RepoHost(), "glamour_style")
+				return printTTYMRPreview(f.IO.StdOut, mr, notes, opts, glamourStyle)
 			}
 			return printRawMRPreview(f.IO.StdOut, mr)
 		},
 	}
 
-	mrViewCmd.Flags().BoolVarP(&showComments, "comments", "c", false, "Show mr comments and activities")
-	mrViewCmd.Flags().BoolVarP(&showSystemLogs, "system-logs", "s", false, "Show system activities / logs")
-	mrViewCmd.Flags().BoolP("web", "w", false, "Open mr in a browser. Uses default browser or browser specified in BROWSER variable")
-	mrViewCmd.Flags().IntVarP(&pageNumber, "page", "p", 1, "Page number")
-	mrViewCmd.Flags().IntVarP(&limit, "per-page", "P", 20, "Number of items to list per page")
+	mrViewCmd.Flags().BoolVarP(&opts.ShowComments, "comments", "c", false, "Show mr comments and activities")
+	mrViewCmd.Flags().BoolVarP(&opts.ShowSystemLogs, "system-logs", "s", false, "Show system activities / logs")
+	mrViewCmd.Flags().BoolVarP(&opts.OpenInBrowser, "web", "w", false, "Open mr in a browser. Uses default browser or browser specified in BROWSER variable")
+	mrViewCmd.Flags().IntVarP(&opts.CommentPageNumber, "page", "p", 0, "Page number")
+	mrViewCmd.Flags().IntVarP(&opts.CommentLimit, "per-page", "P", 20, "Number of items to list per page")
 
 	return mrViewCmd
 }
@@ -137,7 +122,7 @@ func mrState(mr *gitlab.MergeRequest) (mrState string) {
 	return mrState
 }
 
-func printTTYMRPreview(out io.Writer, mr *gitlab.MergeRequest) error {
+func printTTYMRPreview(out io.Writer, mr *gitlab.MergeRequest, notes []*gitlab.Note, opts ViewOpts, glamourStyle string) error {
 	mrTimeAgo := utils.TimeToPrettyTimeAgo(*mr.CreatedAt)
 	// Header
 	fmt.Fprint(out, mrState(mr))
@@ -172,7 +157,7 @@ func printTTYMRPreview(out io.Writer, mr *gitlab.MergeRequest) error {
 	}
 
 	// Comments
-	if showComments {
+	if opts.ShowComments {
 		fmt.Fprintln(out, heredoc.Doc(` 
 			--------------------------------------------
 			Comments / Notes
@@ -180,7 +165,7 @@ func printTTYMRPreview(out io.Writer, mr *gitlab.MergeRequest) error {
 			`))
 		if len(notes) > 0 {
 			for _, note := range notes {
-				if note.System && !showSystemLogs {
+				if note.System && !opts.ShowSystemLogs {
 					continue
 				}
 				createdAt := utils.TimeToPrettyTimeAgo(*note.CreatedAt)

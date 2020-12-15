@@ -58,7 +58,7 @@ func (s *IOStreams) PromptEnabled() bool {
 	if s.promptDisabled {
 		return false
 	}
-	return s.IsInTTY && s.IsaTTY
+	return s.IsOutputTTY()
 }
 
 func (s *IOStreams) ColorEnabled() bool {
@@ -129,6 +129,11 @@ func (s *IOStreams) StopPager() {
 
 func (s *IOStreams) TerminalWidth() int {
 	return TerminalWidth(s.StdOut)
+}
+
+//IsOutputTTY returns true if both stdout and stderr is TTY
+func (s IOStreams) IsOutputTTY() bool {
+	return s.IsErrTTY && s.IsaTTY
 }
 
 func IOTest() (*IOStreams, *bytes.Buffer, *bytes.Buffer, *bytes.Buffer) {
