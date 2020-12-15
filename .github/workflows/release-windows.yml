@@ -27,7 +27,7 @@ jobs:
              
       - name: Build GLab For Windows
         run: |
-          make build  && ./bin/glab.exe --version
+          make build && Rename-Item -LiteralPath "bin/glab" -NewName "bin/glab.exe" && "bin/glab.exe"
                
       - name: Create Installer
         run: |
