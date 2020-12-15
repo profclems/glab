@@ -21,10 +21,11 @@ jobs:
         run: |
           Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
       
-      - name: Install InnoSetup
+      - name: Install Build Tools
         run: |
-          choco install innosetup 
-          
-      - name: Install Make
+          choco install innosetup make
+             
+      - name: Build GLab For Windows
         run: |
-          choco install make
+          make build
+          ./bin/glab --version
