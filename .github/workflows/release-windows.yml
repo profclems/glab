@@ -27,5 +27,8 @@ jobs:
              
       - name: Build GLab For Windows
         run: |
-          make build
-          ./bin/glab --version
+          make build  && ./bin/glab.exe --version
+               
+      - name: Create Installer
+        run: |
+          iscc "scripts/setup_windows.iss"
