@@ -1,9 +1,6 @@
-name: goreleaser
+name: Build Windows Installer
 
-on:
-  push:
-    tags:
-      - "*"
+on: [push]
 
 jobs:
   windows-installer:
