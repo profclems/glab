@@ -31,10 +31,14 @@ jobs:
                
       - name: Create Installer
         run: |
+          echo "GLAB_CURRENT_TAG=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
           $srcDir = Convert-Path .
           Rename-Item -Path $srcDir/bin/glab -NewName glab.exe
           Copy-Item -Path $srcDir/scripts/setup_windows.iss -Destination $srcDir
           iscc "setup_windows.iss"
 
       - name: Upload Installer to Release
-        run: gh release upload v1.12.1 ./bin/glab_1.12.1_Windows_x86_64_installer.exe
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{secrets.BOT_TOKEN}}
+        run: gh release upload v1.12.1 ./bin/glab_1.12.1_Windows_x86_64_installer.exe --clobber
