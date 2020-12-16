@@ -31,4 +31,5 @@ jobs:
                
       - name: Create Installer
         run: |
-          iscc "scripts/setup_windows.iss"
+          $srcDir = Split-Path -Path $MyInvocation.MyCommand.Definition -Parent; Copy-Item -Path $srcDir/scripts/setup_windows.iss -Destination $srcDir
+          iscc "setup_windows.iss"
