@@ -23,22 +23,32 @@ jobs:
       
       - name: Install Build Tools
         run: |
-          choco install innosetup make
+          choco install innosetup make hashtab
              
       - name: Build GLab For Windows
+        id: buildwin
         run: |
           make build && Get-ChildItem bin
-               
+          echo ::set-output name=tag::${GITHUB_REF:11}
+          echo ::set-output name=vtag::${GITHUB_REF:10}
+
       - name: Create Installer
         run: |
-          echo "GLAB_CURRENT_TAG=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
           $srcDir = Convert-Path .
           Rename-Item -Path $srcDir/bin/glab -NewName glab.exe
           Copy-Item -Path $srcDir/scripts/setup_windows.iss -Destination $srcDir
           iscc "setup_windows.iss"
 
+      - name: Generate Hash
+        env:
+          GITHUB_TOKEN: ${{secrets.BOT_TOKEN}}
+        run:
+          gh release download -p "checksums.txt"
+          echo "$(Get-FileHash ./bin/glab_${{ steps.buildwin.outputs.tag }}_Windows_x86_64_installer.exe -Algorithm SHA256 | Select-Object "Hash" | ForEach-Object {$_.Hash})  glab_${{ steps.buildwin.outputs.tag }}_Windows_x86_64_installer.exe" >> checksums.txt
+
       - name: Upload Installer to Release
         continue-on-error: true
         env:
           GITHUB_TOKEN: ${{secrets.BOT_TOKEN}}
-        run: gh release upload v1.12.1 ./bin/glab_1.12.1_Windows_x86_64_installer.exe --clobber
+        run: |
+          gh release upload "${{ steps.buildwin.outputs.vtag }}" ./bin/glab_${{ steps.buildwin.outputs.tag }}_Windows_x86_64_installer.exe checksums.txt --clobber
