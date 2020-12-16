@@ -35,3 +35,6 @@ jobs:
           Rename-Item -Path $srcDir/bin/glab -NewName glab.exe
           Copy-Item -Path $srcDir/scripts/setup_windows.iss -Destination $srcDir
           iscc "setup_windows.iss"
+
+      - name: Upload Installer to Release
+        run: gh release upload v1.12.1 ./bin/glab_1.12.1_Windows_x86_64_installer.exe
