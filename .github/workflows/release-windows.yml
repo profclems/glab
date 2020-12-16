@@ -23,7 +23,7 @@ jobs:
       
       - name: Install Build Tools
         run: |
-          choco install innosetup make hashtab
+          choco install innosetup make
              
       - name: Build GLab For Windows
         id: buildwin
