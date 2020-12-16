@@ -4,6 +4,7 @@ import (
 	aliasCmd "github.com/profclems/glab/commands/alias"
 	apiCmd "github.com/profclems/glab/commands/api"
 	authCmd "github.com/profclems/glab/commands/auth"
+	pipelineCmd "github.com/profclems/glab/commands/ci"
 	"github.com/profclems/glab/commands/cmdutils"
 	completionCmd "github.com/profclems/glab/commands/completion"
 	configCmd "github.com/profclems/glab/commands/config"
@@ -11,7 +12,6 @@ import (
 	issueCmd "github.com/profclems/glab/commands/issue"
 	labelCmd "github.com/profclems/glab/commands/label"
 	mrCmd "github.com/profclems/glab/commands/mr"
-	pipelineCmd "github.com/profclems/glab/commands/pipeline"
 	projectCmd "github.com/profclems/glab/commands/project"
 	releaseCmd "github.com/profclems/glab/commands/release"
 	updateCmd "github.com/profclems/glab/commands/update"
@@ -94,7 +94,7 @@ func NewCmdRoot(f *cmdutils.Factory, version, buildDate string) *cobra.Command {
 	rootCmd.AddCommand(issueCmd.NewCmdIssue(f))
 	rootCmd.AddCommand(labelCmd.NewCmdLabel(f))
 	rootCmd.AddCommand(mrCmd.NewCmdMR(f))
-	rootCmd.AddCommand(pipelineCmd.NewCmdPipeline(f))
+	rootCmd.AddCommand(pipelineCmd.NewCmdCI(f))
 	rootCmd.AddCommand(projectCmd.NewCmdRepo(f))
 	rootCmd.AddCommand(releaseCmd.NewCmdRelease(f))
 	rootCmd.AddCommand(userCmd.NewCmdUser(f))

@@ -1,10 +1,13 @@
-package ci
+// This package contains the old `glab pipeline ci` command which has been deprecated
+// in favour of the `glab ci` command.
+// This package is kept for backward compatibility but issues a deprecation warning
+package legacyci
 
 import (
+	ciLintCmd "github.com/profclems/glab/commands/ci/lint"
+	ciTraceCmd "github.com/profclems/glab/commands/ci/trace"
+	ciViewCmd "github.com/profclems/glab/commands/ci/view"
 	"github.com/profclems/glab/commands/cmdutils"
-	ciLintCmd "github.com/profclems/glab/commands/pipeline/ci/lint"
-	ciTraceCmd "github.com/profclems/glab/commands/pipeline/ci/trace"
-	ciViewCmd "github.com/profclems/glab/commands/pipeline/ci/view"
 
 	"github.com/MakeNowJust/heredoc"
 	"github.com/spf13/cobra"
@@ -22,5 +25,6 @@ func NewCmdCI(f *cmdutils.Factory) *cobra.Command {
 	pipelineCICmd.AddCommand(ciTraceCmd.NewCmdTrace(f))
 	pipelineCICmd.AddCommand(ciViewCmd.NewCmdView(f))
 	pipelineCICmd.AddCommand(ciLintCmd.NewCmdLint(f))
+	pipelineCICmd.Deprecated = "This command is deprecated. All the commands under it has been moved to `ci` or `pipeline` command"
 	return pipelineCICmd
 }

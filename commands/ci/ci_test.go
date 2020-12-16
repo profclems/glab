@@ -1,4 +1,4 @@
-package pipeline
+package ci
 
 import (
 	"bytes"
@@ -15,7 +15,7 @@ func TestPipelineCmd(t *testing.T) {
 	r, w, _ := os.Pipe()
 	os.Stdout = w
 
-	assert.Nil(t, NewCmdPipeline(&cmdutils.Factory{}).Execute())
+	assert.Nil(t, NewCmdCI(&cmdutils.Factory{}).Execute())
 
 	outC := make(chan string)
 	// copy the output in a separate goroutine so printing can't block indefinitely

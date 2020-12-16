@@ -11,8 +11,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/profclems/glab/commands/ci/ciutils"
 	"github.com/profclems/glab/commands/cmdutils"
-	"github.com/profclems/glab/commands/pipeline/pipelineutils"
 	"github.com/profclems/glab/internal/git"
 	"github.com/profclems/glab/internal/utils"
 	"github.com/profclems/glab/pkg/api"
@@ -239,7 +239,7 @@ func inputCapture(a *tview.Application, root *tview.Pages, navi navigator, input
 			a.Suspend(func() {
 				ctx, cancel := context.WithCancel(context.Background())
 				go func() {
-					err := pipelineutils.RunTrace(apiClient, ctx, cOut, projectID, CommitSHA, curJob.Name)
+					err := ciutils.RunTrace(apiClient, ctx, cOut, projectID, CommitSHA, curJob.Name)
 					if err != nil {
 						a.Stop()
 						log.Fatal(err)
@@ -402,7 +402,7 @@ func jobsView(app *tview.Application, jobsCh chan []*gitlab.Job, inputCh chan st
 			tv.SetBorderPadding(0, 0, 1, 1).SetBorder(true)
 
 			go func() {
-				err := pipelineutils.RunTrace(apiClient, context.Background(), vtclean.NewWriter(tview.ANSIWriter(tv), true), projectID, CommitSHA, curJob.Name)
+				err := ciutils.RunTrace(apiClient, context.Background(), vtclean.NewWriter(tview.ANSIWriter(tv), true), projectID, CommitSHA, curJob.Name)
 				if err != nil {
 					app.Stop()
 					log.Fatal(err)
