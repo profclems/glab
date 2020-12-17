@@ -9,10 +9,44 @@
 [![Twitter](https://img.shields.io/twitter/url?style=social&url=https%3A%2F%2Fgithub.com%2Fprofclems%2Fglab)](https://twitter.com/intent/tweet?text=Take%20GitLab%20to%20the%20command%20line%20with%20%23glab,%20an%20open-source%20GitLab%20CLI%20tool:&url=https%3A%2F%2Fgithub.com%2Fprofclems%2Fglab)
 
 
-GLab is an open source Gitlab Cli tool written in Go (golang) to help work seamlessly with Gitlab from the command line. Work with issues, merge requests, **watch running pipelines directly from your CLI** among other features. 
+GLab is an open source GitLab CLI tool written in Go (golang) to help work seamlessly with GitLab from the command line. Work with issues, merge requests, **watch running pipelines directly from your CLI** among other features. 
 Inspired by [`gh`](https://github.com/cli/cli), the official GitHub CLI tool.
 
 ![image](https://user-images.githubusercontent.com/41906128/88968573-0b556400-d29f-11ea-8504-8ecd9c292263.png)
+
+Table of Contents
+=================
+
+* [Usage](#usage)
+   * [Core Commands](#core-commands)
+   * [Additional Commands](#additional-commands)
+   * [Examples](#examples)
+* [Demo](#demo)
+* [Learn More](#learn-more)
+* [Installation](#installation)
+   * [Quick Install (Bash)](#quick-install-bash)
+   * [Windows](#windows)
+      * [WinGet](#winget)
+      * [Scoop](#scoop)
+      * [EXE Installer](#exe-installer)
+   * [Linux](#linux)
+      * [Linuxbrew (Homebrew)](#linuxbrew-homebrew)
+      * [Snapcraft](#snapcraft)
+      * [Arch Linux](#arch-linux)
+      * [KISS Linux](#kiss-linux)
+   * [MacOS](#macos)
+      * [Homebrew](#homebrew)
+   * [Building From Source](#building-from-source)
+      * [Prerequisites](#prerequisites-for-building-from-source-are)
+* [Authentication](#authentication)
+* [Configuration](#configuration)
+* [Environment Variables](#environment-variables)
+* [Issues](#issues)
+* [Contributing](#contributing)
+   * [Support glab <g-emoji class="g-emoji" alias="sparkling_heart" fallback-src="https://github.githubassets.com/images/icons/emoji/unicode/1f496.png">💖</g-emoji>](#support-glab-)
+      * [Individuals](#individuals)
+      * [Backers](#backers)
+* [License](#license)
 
 ## Usage
   ```bash
@@ -21,6 +55,7 @@ Inspired by [`gh`](https://github.com/cli/cli), the official GitHub CLI tool.
 
 ### Core Commands
 ```bash
+  api:         Make authenticated REST/GRAPHQL requests to the GitLab API
   auth:        Manage glab's authentication state
   issue:       Work with GitLab issues
   label:       Manage labels on remote
@@ -72,7 +107,16 @@ curl -s https://raw.githubusercontent.com/profclems/glab/trunk/scripts/quick_ins
 **NOTE**: Please take care when running scripts in this fashion. Consider peaking at the install script itself and verify that it works as intended.
 
 ### Windows
-Available for download on [scoop](https://scoop.sh) or manually as an installable executable file or a Portable archived file in tar and zip formats at the [releases page](https://github.com/profclems/glab/releases/latest).
+Available for download via [WinGet](https://github.com/microsoft/winget-cli), [scoop](https://scoop.sh), or downloadable EXE installer file.
+
+#### WinGet
+```sh
+winget install glab
+```
+Updating:
+```sh
+winget install glab
+```
 
 #### Scoop
 ```sh
@@ -83,6 +127,9 @@ Updating:
 ```sh
 scoop update glab
 ```
+#### EXE Installer
+
+EXE installers are available for download on the [releases page](https://github.com/profclems/glab/releases/latest).
 
 ### Linux
 Prebuilt binaries available at the [releases page](https://github.com/profclems/glab/releases/latest).
