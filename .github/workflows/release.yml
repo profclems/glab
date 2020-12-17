@@ -55,3 +55,54 @@ jobs:
             api-write --silent projects/columns/cards/$card/moves -f position=top -F column_id=$DONE_COLUMN
           done
           echo "moved ${#cards[@]} cards to the Done column"
+
+  exe-installer:
+    needs: goreleaser
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.15
+
+      - name: Install Chocolatey
+        run: |
+          Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
+
+      - name: Install Build Tools
+        run: |
+          choco install innosetup make
+
+      - name: Build GLab For Windows
+        id: buildwin
+        run: |
+          make build && Get-ChildItem bin
+          echo ::set-output name=tag::${GITHUB_REF#refs/tags/v}
+          echo ::set-output name=vtag::${GITHUB_REF#refs/tags/}
+
+      - name: Create Installer
+        run: |
+          $srcDir = Convert-Path .
+          Rename-Item -Path $srcDir/bin/glab -NewName glab.exe
+          Copy-Item -Path $srcDir/scripts/setup_windows.iss -Destination $srcDir
+          iscc "setup_windows.iss" /DVersion=${{steps.buildwin.outputs.tag}}
+
+      - name: Generate Hash
+        env:
+          GITHUB_TOKEN: ${{secrets.BOT_TOKEN}}
+        run:
+          gh release download -p "checksums.txt"
+          echo "$((Get-FileHash ./bin/glab_${{ steps.buildwin.outputs.tag }}_Windows_x86_64_installer.exe -Algorithm SHA256).Hash.ToLower()  glab_${{ steps.buildwin.outputs.tag }}_Windows_x86_64_installer.exe" >> checksums.txt
+
+      - name: Upload Installer to Release
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{secrets.BOT_TOKEN}}
+        run: |
+          gh release upload "${{ steps.buildwin.outputs.vtag }}" ./bin/glab_${{ steps.buildwin.outputs.tag }}_Windows_x86_64_installer.exe checksums.txt --clobber
