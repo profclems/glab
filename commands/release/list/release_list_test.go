@@ -3,9 +3,10 @@ package list
 import (
 	"errors"
 	"fmt"
-	"github.com/google/shlex"
 	"testing"
 	"time"
+
+	"github.com/google/shlex"
 
 	"github.com/profclems/glab/internal/utils"
 

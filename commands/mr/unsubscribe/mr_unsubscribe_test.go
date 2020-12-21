@@ -2,10 +2,11 @@ package unsubscribe
 
 import (
 	"fmt"
-	"github.com/google/shlex"
-	"github.com/stretchr/testify/require"
 	"testing"
 	"time"
+
+	"github.com/google/shlex"
+	"github.com/stretchr/testify/require"
 
 	"github.com/profclems/glab/internal/utils"
 

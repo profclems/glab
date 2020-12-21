@@ -2,9 +2,10 @@ package delete
 
 import (
 	"fmt"
-	"github.com/google/shlex"
 	"strings"
 	"testing"
+
+	"github.com/google/shlex"
 
 	"github.com/profclems/glab/internal/utils"
 
