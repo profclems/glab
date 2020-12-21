@@ -145,7 +145,6 @@ func TestTraceRun(t *testing.T) {
 			args: `886379752`,
 			assertContains: func(t *testing.T, out string) {
 				assert.Contains(t, out, "Getting job trace...\n")
-				assert.Contains(t, out, "Job succeeded")
 			},
 		},
 		{
@@ -178,7 +177,6 @@ func TestTraceRun(t *testing.T) {
 				t.Fatal(err)
 			}
 			tt.assertContains(t, stdout.String())
-			stdout.Reset()
 		})
 	}
 
