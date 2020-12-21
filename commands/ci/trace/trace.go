@@ -3,9 +3,10 @@ package trace
 import (
 	"context"
 	"fmt"
+	"regexp"
+
 	"github.com/profclems/glab/internal/glrepo"
 	"github.com/profclems/glab/pkg/prompt"
-	"regexp"
 
 	"github.com/profclems/glab/commands/ci/ciutils"
 	ciViewCmd "github.com/profclems/glab/commands/ci/view"
@@ -21,19 +22,19 @@ import (
 )
 
 type TraceOpts struct {
-	Branch 	string
-	JobID	int
+	Branch string
+	JobID  int
 
-	BaseRepo   func()(glrepo.Interface, error)
-	HTTPClient func()(*gitlab.Client, error)
-	IO *utils.IOStreams
+	BaseRepo   func() (glrepo.Interface, error)
+	HTTPClient func() (*gitlab.Client, error)
+	IO         *utils.IOStreams
 }
 
 func NewCmdTrace(f *cmdutils.Factory, runE func(traceOpts *TraceOpts) error) *cobra.Command {
 	opts := &TraceOpts{
-		BaseRepo: f.BaseRepo,
+		BaseRepo:   f.BaseRepo,
 		HTTPClient: f.HttpClient,
-		IO: f.IO,
+		IO:         f.IO,
 	}
 	var pipelineCITraceCmd = &cobra.Command{
 		Use:   "trace [<job-id>] [flags]",

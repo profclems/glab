@@ -2,11 +2,12 @@ package trace
 
 import (
 	"bytes"
+	"os/exec"
+	"testing"
+
 	"github.com/alecthomas/assert"
 	"github.com/google/shlex"
 	"github.com/profclems/glab/pkg/prompt"
-	"os/exec"
-	"testing"
 
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/internal/config"
@@ -55,8 +56,8 @@ hosts:
 	}
 
 	tests := []struct {
-		name string
-		args string
+		name     string
+		args     string
 		wantOpts *TraceOpts
 	}{
 		{
@@ -64,7 +65,7 @@ hosts:
 			args: ``,
 			wantOpts: &TraceOpts{
 				Branch: "test-cli",
-				JobID: 0,
+				JobID:  0,
 			},
 		},
 		{
@@ -72,7 +73,7 @@ hosts:
 			args: `224356863`,
 			wantOpts: &TraceOpts{
 				Branch: "test-cli",
-				JobID: 224356863,
+				JobID:  224356863,
 			},
 		},
 		{
@@ -80,7 +81,7 @@ hosts:
 			args: "224356863 -X glab-cli/test",
 			wantOpts: &TraceOpts{
 				Branch: "test-cli",
-				JobID: 224356863,
+				JobID:  224356863,
 			},
 		},
 	}
