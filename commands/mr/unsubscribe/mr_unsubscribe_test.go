@@ -2,6 +2,8 @@ package unsubscribe
 
 import (
 	"fmt"
+	"github.com/google/shlex"
+	"github.com/stretchr/testify/require"
 	"testing"
 	"time"
 
@@ -12,7 +14,6 @@ import (
 	"github.com/profclems/glab/internal/config"
 	"github.com/profclems/glab/pkg/api"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"github.com/xanzy/go-gitlab"
 )
 
@@ -117,13 +118,19 @@ hosts:
 
 	for _, tc := range testCases {
 		t.Run(tc.Name, func(t *testing.T) {
-
-			_, err := cmdtest.RunCommand(cmd, tc.Issue)
-			if tc.wantErr {
-				require.Error(t, err)
-				return
-			} else {
-				require.NoError(t, err)
+			argv, err := shlex.Split(tc.Issue)
+			if err != nil {
+				t.Fatal(err)
+			}
+			cmd.SetArgs(argv)
+			_, err = cmd.ExecuteC()
+			if err != nil {
+				if tc.wantErr {
+					require.Error(t, err)
+					return
+				} else {
+					t.Fatal(err)
+				}
 			}
 
 			out := stripansi.Strip(stdout.String())

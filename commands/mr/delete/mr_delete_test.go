@@ -2,6 +2,7 @@ package delete
 
 import (
 	"fmt"
+	"github.com/google/shlex"
 	"strings"
 	"testing"
 
@@ -122,7 +123,12 @@ hosts:
 
 			cli := strings.Join(tt.args, " ")
 			t.Log(cli)
-			_, err := cmdtest.RunCommand(cmd, cli)
+			argv, err := shlex.Split(cli)
+			if err != nil {
+				t.Fatal(err)
+			}
+			cmd.SetArgs(argv)
+			_, err = cmd.ExecuteC()
 			if !tt.wantErr {
 				assert.Nil(t, err)
 			} else {

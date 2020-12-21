@@ -83,26 +83,26 @@ func InitTest(m *testing.M, suffix string) {
 }
 
 func RunCommand(cmd *cobra.Command, cli string, stds ...*bytes.Buffer) (*test.CmdOut, error) {
-	var stdin *bytes.Buffer
+	//var stdin *bytes.Buffer
 	var stderr *bytes.Buffer
 	var stdout *bytes.Buffer
 
-	for i, std := range stds {
-		if std != nil {
-			if i == 0 {
-				stdin = std
-			}
-			if i == 1 {
-				stdout = std
-			}
-			if i == 2 {
-				stderr = std
-			}
-		}
-	}
-	cmd.SetIn(stdin)
-	cmd.SetOut(stdout)
-	cmd.SetErr(stderr)
+	//for i, std := range stds {
+	//	if std != nil {
+	//		if i == 0 {
+	//			stdin = std
+	//		}
+	//		if i == 1 {
+	//			stdout = std
+	//		}
+	//		if i == 2 {
+	//			stderr = std
+	//		}
+	//	}
+	//}
+	//cmd.SetIn(stdin)
+	//cmd.SetOut(stdout)
+	//cmd.SetErr(stderr)
 
 	argv, err := shlex.Split(cli)
 	if err != nil {

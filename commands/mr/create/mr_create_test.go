@@ -3,6 +3,8 @@ package create
 import (
 	"bytes"
 	"fmt"
+	"github.com/google/shlex"
+	"github.com/profclems/glab/test"
 	"os/exec"
 	"strings"
 	"testing"
@@ -26,6 +28,20 @@ var (
 	stdout      *bytes.Buffer
 	stderr      *bytes.Buffer
 )
+
+func runCommand(cmd *cobra.Command, cli string) (*test.CmdOut, error) {
+	argv, err := shlex.Split(cli)
+	if err != nil {
+		return nil, err
+	}
+	cmd.SetArgs(argv)
+	_, err = cmd.ExecuteC()
+
+	return &test.CmdOut{
+		OutBuf: stdout,
+		ErrBuf: stderr,
+	}, err
+}
 
 func TestMain(m *testing.M) {
 	defer config.StubConfig(`---
@@ -89,7 +105,7 @@ func TestMrCmd(t *testing.T) {
 
 	cli := strings.Join(cliStr, " ")
 	t.Log(cli)
-	_, err := cmdtest.RunCommand(cmd, cli)
+	_, err := runCommand(cmd, cli)
 	if err != nil {
 		t.Error(err)
 		return
@@ -118,7 +134,7 @@ func TestNewCmdCreate_autofill(t *testing.T) {
 			t.Log(string(b))
 			t.Fatal(err)
 		}
-		_, err = cmdtest.RunCommand(cmd, "-f -b master -s mr-autofill-test-br")
+		_, err = runCommand(cmd, "-f -b master -s mr-autofill-test-br")
 		if err != nil {
 			t.Error(err)
 			return
@@ -140,7 +156,7 @@ func TestNewCmdCreate_autofill(t *testing.T) {
 func TestMRCreate_nontty_insufficient_flags(t *testing.T) {
 	stubFactory.IO.SetPrompt("true")
 	cmd = NewCmdCreate(stubFactory)
-	_, err := cmdtest.RunCommand(cmd, "")
+	_, err := runCommand(cmd, "")
 	if err == nil {
 		t.Fatal("expected error")
 	}
