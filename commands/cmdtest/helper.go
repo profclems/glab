@@ -109,7 +109,6 @@ func RunCommand(cmd *cobra.Command, cli string, stds ...*bytes.Buffer) (*test.Cm
 		return nil, err
 	}
 	cmd.SetArgs(argv)
-
 	_, err = cmd.ExecuteC()
 
 	return &test.CmdOut{
@@ -170,6 +169,7 @@ func StubFactory(repo string) *cmdutils.Factory {
 	cmdutils.CachedConfig = config.NewBlankConfig()
 
 	CachedTestFactory = cmdutils.NewFactory()
+	cmdutils.HTTPClientFactory(CachedTestFactory)
 	if repo != "" {
 		_ = CachedTestFactory.RepoOverride(repo)
 	}
@@ -186,6 +186,7 @@ func StubFactoryWithConfig(repo string) (*cmdutils.Factory, error) {
 		return nil, cmdutils.ConfigError
 	}
 	CachedTestFactory = cmdutils.NewFactory()
+	cmdutils.HTTPClientFactory(CachedTestFactory)
 	if repo != "" {
 		_ = CachedTestFactory.RepoOverride(repo)
 	}

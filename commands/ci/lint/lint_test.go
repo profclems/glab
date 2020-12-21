@@ -1,11 +1,12 @@
 package lint
 
 import (
-	"os/exec"
 	"testing"
 
+	"github.com/alecthomas/assert"
+	"github.com/profclems/glab/internal/utils"
+
 	"github.com/profclems/glab/commands/cmdtest"
-	"github.com/stretchr/testify/require"
 )
 
 func TestMain(m *testing.M) {
@@ -13,15 +14,88 @@ func TestMain(m *testing.M) {
 }
 
 func Test_pipelineCILint(t *testing.T) {
-	t.Parallel()
-	repo := cmdtest.CopyTestRepo(t, "ci_lint_test")
-	cmd := exec.Command(cmdtest.GlabBinaryPath, "ci", "lint")
-	cmd.Dir = repo
+	io, _, stdout, stderr := utils.IOTest()
+	fac := cmdtest.StubFactory("")
+	fac.IO = io
+	fac.IO.StdErr = stderr
+	fac.IO.StdOut = stdout
 
-	b, err := cmd.CombinedOutput()
-	if err != nil {
-		t.Log(string(b))
-		t.Fatal(err)
+	tests := []struct {
+		Name    string
+		Args    string
+		StdOut  string
+		StdErr  string
+		WantErr error
+	}{
+		{
+			Name:   "with no path specified",
+			Args:   "",
+			StdOut: "✓ CI yml is Valid!\n",
+			StdErr: "Getting contents in .gitlab-ci.yml\nValidating...\n",
+		},
+		{
+			Name:   "with path specified as url",
+			Args:   "https://gitlab.com/profclems/glab/-/raw/trunk/.gitlab-ci.yml",
+			StdOut: "✓ CI yml is Valid!\n",
+			StdErr: "Getting contents in https://gitlab.com/profclems/glab/-/raw/trunk/.gitlab-ci.yml\nValidating...\n",
+		},
 	}
-	require.Contains(t, string(b), "CI yml is Valid!")
+
+	cmd := NewCmdLint(fac)
+
+	for _, test := range tests {
+		t.Run(test.Name, func(t *testing.T) {
+			_, err := cmdtest.RunCommand(cmd, test.Args)
+			if err != nil {
+				if test.WantErr == nil {
+					t.Fatal(err)
+				}
+				assert.Equal(t, err, test.WantErr)
+			}
+			assert.Equal(t, test.StdErr, stderr.String())
+			assert.Equal(t, test.StdOut, stdout.String())
+			stdout.Reset()
+			stderr.Reset()
+		})
+	}
+}
+
+func Test_lintRun(t *testing.T) {
+	io, _, stdout, stderr := utils.IOTest()
+	fac := cmdtest.StubFactory("")
+	fac.IO = io
+	fac.IO.StdErr = stderr
+	fac.IO.StdOut = stdout
+
+	tests := []struct {
+		name    string
+		path    string
+		StdOut  string
+		StdErr  string
+		wantErr bool
+		errMsg  string
+	}{
+		{
+			name:    "with invalid path specified",
+			path:    "WRONG_PATH",
+			StdOut:  "",
+			StdErr:  "Getting contents in WRONG_PATH\n",
+			wantErr: true,
+			errMsg:  "WRONG_PATH: no such file or directory",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := lintRun(fac, tt.path)
+			if err != nil {
+				if !tt.wantErr {
+					t.Errorf("lintRun() error = %v, wantErr %v", err, tt.wantErr)
+				}
+				assert.Equal(t, tt.errMsg, err.Error())
+			}
+
+			assert.Equal(t, tt.StdErr, stderr.String())
+			assert.Equal(t, tt.StdOut, stdout.String())
+		})
+	}
 }
