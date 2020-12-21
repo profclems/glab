@@ -27,10 +27,7 @@ const (
 const UserAgent = "GLab - GitLab CLI"
 
 // Global api client to be used throughout glab
-var a *Client
-
-// TODO: remove this after replacing in all api files
-var apiClient *gitlab.Client
+var apiClient *Client
 
 // Client represents an argument to NewClient
 type Client struct {
@@ -63,7 +60,7 @@ func init() {
 
 // RefreshClient re-initializes the api client
 func RefreshClient() {
-	a = &Client{
+	apiClient = &Client{
 		Protocol:           "https",
 		AuthType:           NoToken,
 		httpClient:         &http.Client{},
@@ -73,11 +70,11 @@ func RefreshClient() {
 
 // GetAPIClient returns the global DotEnv instance.
 func GetClient() *Client {
-	return a
+	return apiClient
 }
 
 // HTTPClient returns the httpClient instance used to initialise the gitlab api client
-func HTTPClient() *http.Client { return a.HTTPClient() }
+func HTTPClient() *http.Client { return apiClient.HTTPClient() }
 func (c *Client) HTTPClient() *http.Client {
 	if c.httpClientOverride != nil {
 		return c.httpClientOverride
@@ -93,25 +90,25 @@ func (c *Client) OverrideHTTPClient(client *http.Client) {
 }
 
 // Token returns the authentication token
-func Token() string { return a.Token() }
+func Token() string { return apiClient.Token() }
 func (c *Client) Token() string {
 	return c.token
 }
 
-func SetProtocol(protocol string) { a.SetProtocol(protocol) }
+func SetProtocol(protocol string) { apiClient.SetProtocol(protocol) }
 func (c *Client) SetProtocol(protocol string) {
 	c.Protocol = protocol
 }
 
 // NewClient initializes a api client for use throughout glab.
 func NewClient(host, token string, allowInsecure bool, isGraphQL bool) (*Client, error) {
-	a.host = host
-	a.token = token
-	a.allowInsecure = allowInsecure
-	a.isGraphQL = isGraphQL
+	apiClient.host = host
+	apiClient.token = token
+	apiClient.allowInsecure = allowInsecure
+	apiClient.isGraphQL = isGraphQL
 
-	if a.httpClientOverride != nil {
-		a.httpClient = &http.Client{
+	if apiClient.httpClientOverride != nil {
+		apiClient.httpClient = &http.Client{
 			Transport: &http.Transport{
 				Proxy: http.ProxyFromEnvironment,
 				DialContext: (&net.Dialer{
@@ -124,25 +121,25 @@ func NewClient(host, token string, allowInsecure bool, isGraphQL bool) (*Client,
 				TLSHandshakeTimeout:   10 * time.Second,
 				ExpectContinueTimeout: 1 * time.Second,
 				TLSClientConfig: &tls.Config{
-					InsecureSkipVerify: a.allowInsecure,
+					InsecureSkipVerify: apiClient.allowInsecure,
 				},
 			},
 		}
 	}
-	a.refreshLabInstance = true
-	err := a.NewLab()
-	return a, err
+	apiClient.refreshLabInstance = true
+	err := apiClient.NewLab()
+	return apiClient, err
 }
 
 // NewClientWithCustomCA initializes the global api client with a self-signed certificate
 func NewClientWithCustomCA(host, token, caFile string, isGraphQL bool) (*Client, error) {
-	a.host = host
-	a.token = token
-	a.caFile = caFile
-	a.isGraphQL = isGraphQL
+	apiClient.host = host
+	apiClient.token = token
+	apiClient.caFile = caFile
+	apiClient.isGraphQL = isGraphQL
 
-	if a.httpClientOverride != nil {
-		caCert, err := ioutil.ReadFile(a.caFile)
+	if apiClient.httpClientOverride != nil {
+		caCert, err := ioutil.ReadFile(apiClient.caFile)
 		if err != nil {
 			return nil, fmt.Errorf("error reading cert file: %w", err)
 		}
@@ -153,7 +150,7 @@ func NewClientWithCustomCA(host, token, caFile string, isGraphQL bool) (*Client,
 		}
 		caCertPool.AppendCertsFromPEM(caCert)
 
-		a.httpClient = &http.Client{
+		apiClient.httpClient = &http.Client{
 			Transport: &http.Transport{
 				Proxy: http.ProxyFromEnvironment,
 				DialContext: (&net.Dialer{
@@ -171,9 +168,9 @@ func NewClientWithCustomCA(host, token, caFile string, isGraphQL bool) (*Client,
 			},
 		}
 	}
-	a.refreshLabInstance = true
-	err := a.NewLab()
-	return a, err
+	apiClient.refreshLabInstance = true
+	err := apiClient.NewLab()
+	return apiClient, err
 }
 
 // NewClientWithCfg initializes the global api with the config data
@@ -205,7 +202,7 @@ func (c *Client) NewLab() error {
 	if c.httpClientOverride != nil {
 		httpClient = c.httpClientOverride
 	}
-	if a.refreshLabInstance {
+	if apiClient.refreshLabInstance {
 		if c.host == "" {
 			c.host = glinstance.OverridableDefault()
 		}
@@ -220,7 +217,6 @@ func (c *Client) NewLab() error {
 		}
 		c.LabClient.UserAgent = UserAgent
 
-		apiClient = c.LabClient
 		if c.token != "" {
 			c.AuthType = PrivateToken
 		}
@@ -254,7 +250,7 @@ func TestClient(httpClient *http.Client, token, host string, isGraphQL bool) (*C
 	testClient.SetProtocol("https")
 	testClient.OverrideHTTPClient(httpClient)
 	if token != "" {
-		a.AuthType = PrivateToken
+		apiClient.AuthType = PrivateToken
 	}
 	return testClient, nil
 }

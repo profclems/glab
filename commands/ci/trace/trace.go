@@ -3,6 +3,8 @@ package trace
 import (
 	"context"
 	"fmt"
+	"github.com/profclems/glab/internal/glrepo"
+	"github.com/profclems/glab/pkg/prompt"
 	"regexp"
 
 	"github.com/profclems/glab/commands/ci/ciutils"
@@ -18,57 +20,75 @@ import (
 	"github.com/xanzy/go-gitlab"
 )
 
-func NewCmdTrace(f *cmdutils.Factory) *cobra.Command {
+type TraceOpts struct {
+	Branch 	string
+	JobID	int
+
+	BaseRepo   func()(glrepo.Interface, error)
+	HTTPClient func()(*gitlab.Client, error)
+	IO *utils.IOStreams
+}
+
+func NewCmdTrace(f *cmdutils.Factory, runE func(traceOpts *TraceOpts) error) *cobra.Command {
+	opts := &TraceOpts{
+		BaseRepo: f.BaseRepo,
+		HTTPClient: f.HttpClient,
+		IO: f.IO,
+	}
 	var pipelineCITraceCmd = &cobra.Command{
-		Use:   "trace <job-id> [flags]",
+		Use:   "trace [<job-id>] [flags]",
 		Short: `Trace a CI job log in real time`,
 		Example: heredoc.Doc(`
 	$ glab ci trace
+	#=> interactively select a job to trace
+
+	$ glab ci trace 224356863
+	#=> trace job with id 224356863
 	`),
-		Long: ``,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return TraceCmdFunc(cmd, args, f)
+			var err error
+
+			if len(args) != 0 {
+				opts.JobID = utils.StringToInt(args[0])
+			}
+			if opts.Branch == "" {
+				opts.Branch, err = git.CurrentBranch()
+				if err != nil {
+					return err
+				}
+			}
+			if runE != nil {
+				return runE(opts)
+			}
+			return TraceRun(opts)
 		},
 	}
 
-	pipelineCITraceCmd.Flags().StringP("branch", "b", "", "Check pipeline status for a branch. (Default is the current branch)")
+	pipelineCITraceCmd.Flags().StringVarP(&opts.Branch, "branch", "b", "", "Check pipeline status for a branch. (Default is the current branch)")
 	return pipelineCITraceCmd
 }
 
-func TraceCmdFunc(cmd *cobra.Command, args []string, f *cmdutils.Factory) error {
-	var jobID int
-	var err error
-
-	apiClient, err := f.HttpClient()
+func TraceRun(opts *TraceOpts) error {
+	apiClient, err := opts.HTTPClient()
 	if err != nil {
 		return err
 	}
 
-	repo, err := f.BaseRepo()
+	repo, err := opts.BaseRepo()
 	if err != nil {
 		return err
 	}
 
-	branch, _ := cmd.Flags().GetString("branch")
-	if branch == "" {
-		branch, err = git.CurrentBranch()
-		if err != nil {
-			return err
-		}
-	}
-
-	if len(args) != 0 {
-		jobID = utils.StringToInt(args[0])
-	} else {
+	if opts.JobID < 1 {
 		l := &gitlab.ListProjectPipelinesOptions{
-			Ref:  gitlab.String(branch),
+			Ref:  gitlab.String(opts.Branch),
 			Sort: gitlab.String("desc"),
 		}
 
 		l.Page = 1
 		l.PerPage = 1
 
-		fmt.Fprintf(f.IO.StdOut, "Searching for latest pipeline on %s...\n", branch)
+		fmt.Fprintf(opts.IO.StdOut, "\nSearching for latest pipeline on %s...\n", opts.Branch)
 
 		pipes, err := api.GetPipelines(apiClient, l, repo.FullName())
 		if err != nil {
@@ -76,12 +96,12 @@ func TraceCmdFunc(cmd *cobra.Command, args []string, f *cmdutils.Factory) error 
 		}
 
 		if len(pipes) == 0 {
-			fmt.Fprintln(f.IO.StdOut, "No pipeline running or available on "+branch+"branch")
+			fmt.Fprintln(opts.IO.StdOut, "No pipeline running or available on "+opts.Branch+"branch")
 			return nil
 		}
 
 		pipeline := pipes[0]
-		fmt.Fprintf(f.IO.StdOut, "Getting jobs for pipeline %d...\n", pipeline.ID)
+		fmt.Fprintf(opts.IO.StdOut, "Getting jobs for pipeline %d...\n\n", pipeline.ID)
 
 		jobs, err := api.GetPipelineJobs(apiClient, pipeline.ID, repo.FullName())
 		if err != nil {
@@ -95,35 +115,35 @@ func TraceCmdFunc(cmd *cobra.Command, args []string, f *cmdutils.Factory) error 
 			jobOptions = append(jobOptions, fmt.Sprintf("%s (%d) - %s", job.Name, job.ID, job.Status))
 		}
 
-		prompt := &survey.Select{
+		promptOpts := &survey.Select{
 			Message: "Select pipeline job to trace:",
 			Options: jobOptions,
 		}
 
-		_ = survey.AskOne(prompt, &selectedJob)
+		_ = prompt.AskOne(promptOpts, &selectedJob)
 
 		if selectedJob != "" {
 			re := regexp.MustCompile(`(?s)\((.*)\)`)
 			m := re.FindAllStringSubmatch(selectedJob, -1)
-			jobID = utils.StringToInt(m[0][1])
+			opts.JobID = utils.StringToInt(m[0][1])
 		} else {
-			jobID = jobs[0].ID
+			opts.JobID = jobs[0].ID
 		}
 	}
 
-	commit, err := api.GetCommit(apiClient, repo.FullName(), branch)
+	commit, err := api.GetCommit(apiClient, repo.FullName(), opts.Branch)
 	if err != nil {
 		return err
 	}
 
 	ciViewCmd.CommitSHA = commit.ID
-
-	job, err := api.GetPipelineJob(apiClient, jobID, repo.FullName())
+	job, err := api.GetPipelineJob(apiClient, opts.JobID, repo.FullName())
 	if err != nil {
 		return err
 	}
+	fmt.Fprintln(opts.IO.StdOut)
 
-	err = ciutils.RunTrace(apiClient, context.Background(), f.IO.StdOut, repo.FullName(), job.Pipeline.Sha, job.Name)
+	err = ciutils.RunTrace(apiClient, context.Background(), opts.IO.StdOut, repo.FullName(), job.Pipeline.Sha, job.Name)
 	if err != nil {
 		return err
 	}
