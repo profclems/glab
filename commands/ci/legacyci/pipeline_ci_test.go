@@ -29,6 +29,6 @@ func TestNewCmdCI(t *testing.T) {
 
 	assert.Contains(t, stdout.String(), "Work with GitLab CI pipelines and jobs\n")
 	assert.Contains(t, stderr.String(), "")
-	assert.Contains(t, stdout.String(), "This command is deprecated. All the commands under it has been moved to `ci` or `pipeline` command\n")
+	assert.Contains(t, stdout.String(), "This command is deprecated. All the commands under it has been moved to `ci` or `pipeline` command. See https://github.com/profclems/glab/issues/372 for more info.\n")
 
 }

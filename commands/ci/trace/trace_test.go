@@ -18,11 +18,10 @@ var (
 	stubFactory *cmdutils.Factory
 	cmd         *cobra.Command
 	stdout      *bytes.Buffer
-	stderr      *bytes.Buffer
 )
 
 func TestMain(m *testing.M) {
-	cmdtest.InitTest(m, "pipeline_ci_trace_test")
+	cmdtest.InitTest(m, "ci_trace_test")
 }
 
 func Test_ciTrace(t *testing.T) {
@@ -35,13 +34,13 @@ hosts:
 `, "")()
 
 	var io *utils.IOStreams
-	io, _, stdout, stderr = utils.IOTest()
+	io, _, stdout, _ = utils.IOTest()
 	stubFactory, _ = cmdtest.StubFactoryWithConfig("https://gitlab.com/glab-cli/test.git")
 	stubFactory.IO = io
 	stubFactory.IO.IsaTTY = true
 	stubFactory.IO.IsErrTTY = true
 
-	repo := cmdtest.CopyTestRepo(t, "pipeline_ci_trace_test")
+	repo := cmdtest.CopyTestRepo(t, "ci_trace_test")
 	gitCmd := exec.Command("git", "fetch", "origin")
 	gitCmd.Dir = repo
 	if b, err := gitCmd.CombinedOutput(); err != nil {

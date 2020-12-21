@@ -2,7 +2,7 @@ package ci
 
 import (
 	pipeDeleteCmd "github.com/profclems/glab/commands/ci/delete"
-	legaciCICmd "github.com/profclems/glab/commands/ci/legacyci"
+	legacyCICmd "github.com/profclems/glab/commands/ci/legacyci"
 	ciLintCmd "github.com/profclems/glab/commands/ci/lint"
 	pipeListCmd "github.com/profclems/glab/commands/ci/list"
 	pipeRunCmd "github.com/profclems/glab/commands/ci/run"
@@ -24,7 +24,7 @@ func NewCmdCI(f *cmdutils.Factory) *cobra.Command {
 
 	cmdutils.EnableRepoOverride(ciCmd, f)
 
-	ciCmd.AddCommand(legaciCICmd.NewCmdCI(f))
+	ciCmd.AddCommand(legacyCICmd.NewCmdCI(f))
 	ciCmd.AddCommand(ciTraceCmd.NewCmdTrace(f))
 	ciCmd.AddCommand(ciViewCmd.NewCmdView(f))
 	ciCmd.AddCommand(ciLintCmd.NewCmdLint(f))

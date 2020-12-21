@@ -24,9 +24,9 @@ func NewCmdLint(f *cmdutils.Factory) *cobra.Command {
 		Short: "Checks if your .gitlab-ci.yml file is valid.",
 		Long:  ``,
 		Example: heredoc.Doc(`
-		$ glab pipeline ci lint  # Uses .gitlab-ci.yml in the current directory
-		$ glab pipeline ci lint .gitlab-ci.yml
-		$ glab pipeline ci lint path/to/.gitlab-ci.yml
+		$ glab ci lint  # Uses .gitlab-ci.yml in the current directory
+		$ glab ci lint .gitlab-ci.yml
+		$ glab ci lint path/to/.gitlab-ci.yml
 	`),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var err error

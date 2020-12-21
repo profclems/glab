@@ -30,6 +30,6 @@ func TestPipelineCmd(t *testing.T) {
 	os.Stdout = old // restoring the real stdout
 	out := <-outC
 
-	assert.Contains(t, out, "Use \"pipeline [command] --help\" for more information about a command.\n")
+	assert.Contains(t, out, "Use \"ci [command] --help\" for more information about a command.\n")
 
 }
