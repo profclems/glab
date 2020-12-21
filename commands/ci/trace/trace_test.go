@@ -142,7 +142,7 @@ func TestTraceRun(t *testing.T) {
 		},
 		{
 			desc: "Has arg with job-id",
-			args: `224356863`,
+			args: `886379752`,
 			assertContains: func(t *testing.T, out string) {
 				assert.Contains(t, out, "Getting job trace...\n")
 				assert.Contains(t, out, "Job succeeded")
@@ -150,7 +150,7 @@ func TestTraceRun(t *testing.T) {
 		},
 		{
 			desc: "On a specified repo with job ID",
-			args: "224356863 -X glab-cli/test",
+			args: "886379752 -X glab-cli/test",
 			assertContains: func(t *testing.T, out string) {
 				assert.Contains(t, out, "Getting job trace...\n")
 				assert.Contains(t, out, "Job succeeded")

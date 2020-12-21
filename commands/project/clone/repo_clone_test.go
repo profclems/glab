@@ -1,9 +1,12 @@
 package clone
 
 import (
+	"bytes"
 	"os"
 	"strings"
 	"testing"
+
+	"github.com/spf13/cobra"
 
 	"github.com/google/shlex"
 	"github.com/profclems/glab/commands/cmdutils"
@@ -18,6 +21,41 @@ import (
 
 func TestMain(m *testing.M) {
 	cmdtest.InitTest(m, "repo_clone_test")
+}
+
+func runCommand(cmd *cobra.Command, cli string, stds ...*bytes.Buffer) (*test.CmdOut, error) {
+	var stdin *bytes.Buffer
+	var stderr *bytes.Buffer
+	var stdout *bytes.Buffer
+
+	for i, std := range stds {
+		if std != nil {
+			if i == 0 {
+				stdin = std
+			}
+			if i == 1 {
+				stdout = std
+			}
+			if i == 2 {
+				stderr = std
+			}
+		}
+	}
+	cmd.SetIn(stdin)
+	cmd.SetOut(stdout)
+	cmd.SetErr(stderr)
+
+	argv, err := shlex.Split(cli)
+	if err != nil {
+		return nil, err
+	}
+	cmd.SetArgs(argv)
+	_, err = cmd.ExecuteC()
+
+	return &test.CmdOut{
+		OutBuf: stdout,
+		ErrBuf: stderr,
+	}, err
 }
 
 func TestNewCmdClone(t *testing.T) {
@@ -133,7 +171,7 @@ hosts:
 	defer restore()
 
 	cmd := NewCmdClone(fac, nil)
-	out, err := cmdtest.RunCommand(cmd, "test", stdin, stdout, stderr)
+	out, err := runCommand(cmd, "test", stdin, stdout, stderr)
 	if err != nil {
 		t.Errorf("unexpected error: %q", err)
 		return
@@ -175,7 +213,7 @@ hosts:
 
 	cmd := NewCmdClone(fac, nil)
 	// TODO: stub api.ListGroupProjects endpoint
-	out, err := cmdtest.RunCommand(cmd, "-g glab-cli", stdin, stdout, stderr)
+	out, err := runCommand(cmd, "-g glab-cli", stdin, stdout, stderr)
 	if err != nil {
 		t.Errorf("unexpected error: %q", err)
 		return
