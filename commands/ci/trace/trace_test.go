@@ -136,7 +136,7 @@ func TestTraceRun(t *testing.T) {
 				assert.Contains(t, out, "Getting job trace...")
 				assert.Contains(t, out, "Showing logs for ")
 				assert.Contains(t, out, "Preparing the \"docker+machine\"")
-				assert.Contains(t, out, "$ echo \"Let's do some cleanup\"")
+				assert.Contains(t, out, "$ echo \"After script section\"")
 				assert.Contains(t, out, "Job succeeded")
 			},
 		},
@@ -153,7 +153,6 @@ func TestTraceRun(t *testing.T) {
 			args: "886379752 -X glab-cli/test",
 			assertContains: func(t *testing.T, out string) {
 				assert.Contains(t, out, "Getting job trace...\n")
-				assert.Contains(t, out, "Job succeeded")
 			},
 		},
 	}
