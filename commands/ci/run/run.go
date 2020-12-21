@@ -42,11 +42,11 @@ func getDefaultBranch(f *cmdutils.Factory) string {
 func NewCmdRun(f *cmdutils.Factory) *cobra.Command {
 	var pipelineRunCmd = &cobra.Command{
 		Use:     "run [flags]",
-		Short:   `Create a new pipeline run`,
+		Short:   `Create or run a new CI pipeline`,
 		Aliases: []string{"create"},
 		Example: heredoc.Doc(`
-	$ glab pipeline run
-	$ glab pipeline run -b trunk
+	$ glab ci run
+	$ glab ci run -b trunk
 	`),
 		Long: ``,
 		Args: cobra.ExactArgs(0),

@@ -1,4 +1,4 @@
-package pipeline
+package ci
 
 import (
 	"bytes"
@@ -15,7 +15,7 @@ func TestPipelineCmd(t *testing.T) {
 	r, w, _ := os.Pipe()
 	os.Stdout = w
 
-	assert.Nil(t, NewCmdPipeline(&cmdutils.Factory{}).Execute())
+	assert.Nil(t, NewCmdCI(&cmdutils.Factory{}).Execute())
 
 	outC := make(chan string)
 	// copy the output in a separate goroutine so printing can't block indefinitely
@@ -30,6 +30,6 @@ func TestPipelineCmd(t *testing.T) {
 	os.Stdout = old // restoring the real stdout
 	out := <-outC
 
-	assert.Contains(t, out, "Use \"pipeline [command] --help\" for more information about a command.\n")
+	assert.Contains(t, out, "Use \"ci [command] --help\" for more information about a command.\n")
 
 }

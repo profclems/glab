@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"time"
 
+	ciTraceCmd "github.com/profclems/glab/commands/ci/trace"
 	"github.com/profclems/glab/commands/cmdutils"
-	ciTraceCmd "github.com/profclems/glab/commands/pipeline/ci/trace"
 	"github.com/profclems/glab/internal/git"
 	"github.com/profclems/glab/internal/utils"
 	"github.com/profclems/glab/pkg/api"
@@ -20,12 +20,12 @@ import (
 func NewCmdStatus(f *cmdutils.Factory) *cobra.Command {
 	var pipelineStatusCmd = &cobra.Command{
 		Use:     "status [flags]",
-		Short:   `View a running pipeline on current or other branch specified`,
+		Short:   `View a running CI pipeline on current or other branch specified`,
 		Aliases: []string{"stats"},
 		Example: heredoc.Doc(`
-	$ glab pipeline status --live
-	$ glab pipeline status --branch=master   // Get pipeline for master branch
-	$ glab pipe status   // Get pipeline for current branch
+	$ glab ci status --live
+	$ glab ci status --branch=master   // Get pipeline for master branch
+	$ glab ci status   // Get pipeline for current branch
 	`),
 		Long: ``,
 		Args: cobra.ExactArgs(0),
@@ -57,7 +57,7 @@ func NewCmdStatus(f *cmdutils.Factory) *cobra.Command {
 			}
 			l.Page = 1
 			l.PerPage = 1
-			//pid := manip.StringToInt(args[0])
+
 			pipes, err := api.GetPipelines(apiClient, l, repo.FullName())
 			if err != nil {
 				return err

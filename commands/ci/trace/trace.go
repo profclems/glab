@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"regexp"
 
+	"github.com/profclems/glab/commands/ci/ciutils"
+	ciViewCmd "github.com/profclems/glab/commands/ci/view"
 	"github.com/profclems/glab/commands/cmdutils"
-	ciViewCmd "github.com/profclems/glab/commands/pipeline/ci/view"
-	"github.com/profclems/glab/commands/pipeline/pipelineutils"
 	"github.com/profclems/glab/internal/git"
 	"github.com/profclems/glab/internal/utils"
 	"github.com/profclems/glab/pkg/api"
@@ -21,9 +21,9 @@ import (
 func NewCmdTrace(f *cmdutils.Factory) *cobra.Command {
 	var pipelineCITraceCmd = &cobra.Command{
 		Use:   "trace <job-id> [flags]",
-		Short: `Work with GitLab CI pipelines and jobs`,
+		Short: `Trace a CI job log in real time`,
 		Example: heredoc.Doc(`
-	$ glab pipeline ci trace
+	$ glab ci trace
 	`),
 		Long: ``,
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -123,7 +123,7 @@ func TraceCmdFunc(cmd *cobra.Command, args []string, f *cmdutils.Factory) error 
 		return err
 	}
 
-	err = pipelineutils.RunTrace(apiClient, context.Background(), f.IO.StdOut, repo.FullName(), job.Pipeline.Sha, job.Name)
+	err = ciutils.RunTrace(apiClient, context.Background(), f.IO.StdOut, repo.FullName(), job.Pipeline.Sha, job.Name)
 	if err != nil {
 		return err
 	}

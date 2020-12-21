@@ -9,13 +9,13 @@ import (
 )
 
 func TestMain(m *testing.M) {
-	cmdtest.InitTest(m, "pipeline_ci_lint_test")
+	cmdtest.InitTest(m, "ci_lint_test")
 }
 
 func Test_pipelineCILint(t *testing.T) {
 	t.Parallel()
-	repo := cmdtest.CopyTestRepo(t, "pipeline_ci_lint_test")
-	cmd := exec.Command(cmdtest.GlabBinaryPath, "pipeline", "ci", "lint")
+	repo := cmdtest.CopyTestRepo(t, "ci_lint_test")
+	cmd := exec.Command(cmdtest.GlabBinaryPath, "ci", "lint")
 	cmd.Dir = repo
 
 	b, err := cmd.CombinedOutput()

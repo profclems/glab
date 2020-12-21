@@ -108,13 +108,16 @@ func RootHelpFunc(command *cobra.Command, args []string) {
 		Body  string
 	}
 
-	helpEntries := []helpEntry{}
+	var helpEntries []helpEntry
 	if command.Long != "" {
 		helpEntries = append(helpEntries, helpEntry{"", command.Long})
 	} else if command.Short != "" {
 		helpEntries = append(helpEntries, helpEntry{"", command.Short})
 	}
 	helpEntries = append(helpEntries, helpEntry{"USAGE", command.UseLine()})
+	if len(command.Aliases) > 0 {
+		helpEntries = append(helpEntries, helpEntry{"ALIASES", dedent(strings.Join(command.Aliases, ", "))})
+	}
 	if len(coreCommands) > 0 {
 		helpEntries = append(helpEntries, helpEntry{"CORE COMMANDS", strings.Join(coreCommands, "\n")})
 	}

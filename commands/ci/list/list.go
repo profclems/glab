@@ -3,8 +3,8 @@ package list
 import (
 	"fmt"
 
+	"github.com/profclems/glab/commands/ci/ciutils"
 	"github.com/profclems/glab/commands/cmdutils"
-	"github.com/profclems/glab/commands/pipeline/pipelineutils"
 	"github.com/profclems/glab/internal/utils"
 	"github.com/profclems/glab/pkg/api"
 
@@ -16,10 +16,10 @@ import (
 func NewCmdList(f *cmdutils.Factory) *cobra.Command {
 	var pipelineListCmd = &cobra.Command{
 		Use:   "list [flags]",
-		Short: `Get the list of pipelines`,
+		Short: `Get the list of CI pipelines`,
 		Example: heredoc.Doc(`
-	$ glab pipeline list
-	$ glab pipeline list --state=failed
+	$ glab ci list
+	$ glab ci list --state=failed
 	`),
 		Long: ``,
 		Args: cobra.ExactArgs(0),
@@ -68,7 +68,7 @@ func NewCmdList(f *cmdutils.Factory) *cobra.Command {
 			title.Page = l.Page
 			title.CurrentPageTotal = len(pipes)
 
-			fmt.Fprintf(f.IO.StdOut, "%s\n%s\n", title.Describe(), pipelineutils.DisplayMultiplePipelines(pipes, repo.FullName()))
+			fmt.Fprintf(f.IO.StdOut, "%s\n%s\n", title.Describe(), ciutils.DisplayMultiplePipelines(pipes, repo.FullName()))
 			return nil
 		},
 	}
