@@ -76,7 +76,11 @@ func NewCmdMerge(f *cmdutils.Factory) *cobra.Command {
 				return err
 			}
 
-			fmt.Fprintln(f.IO.StdOut, utils.GreenCheck(), "Merged")
+			if m, _ := cmd.Flags().GetBool("when-pipeline-succeeds"); m {
+				fmt.Fprintln(f.IO.StdOut, utils.GreenCheck(), "Will merge when pipeline succeeds")
+			} else {
+				fmt.Fprintln(f.IO.StdOut, utils.GreenCheck(), "Merged")
+			}
 			fmt.Fprintln(f.IO.StdOut, mrutils.DisplayMR(mr))
 
 			return nil
