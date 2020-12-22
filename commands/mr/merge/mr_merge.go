@@ -85,7 +85,7 @@ func NewCmdMerge(f *cmdutils.Factory) *cobra.Command {
 
 	mrMergeCmd.Flags().StringP("sha", "", "", "Merge Commit sha")
 	mrMergeCmd.Flags().BoolP("remove-source-branch", "d", false, "Remove source branch on merge")
-	mrMergeCmd.Flags().BoolP("when-pipeline-succeeds", "", true, "Merge only when pipeline succeeds. Default to true")
+	mrMergeCmd.Flags().BoolP("when-pipeline-succeeds", "", true, "Merge only when pipeline succeeds")
 	mrMergeCmd.Flags().StringP("message", "m", "", "Custom merge commit message")
 	mrMergeCmd.Flags().StringP("squash-message", "", "", "Custom Squash commit message")
 	mrMergeCmd.Flags().BoolP("squash", "s", false, "Squash commits on merge")
