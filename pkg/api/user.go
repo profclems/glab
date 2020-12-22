@@ -8,7 +8,7 @@ import (
 
 var CurrentUser = func(client *gitlab.Client) (*gitlab.User, error) {
 	if client == nil {
-		client = apiClient
+		client = apiClient.Lab()
 	}
 	u, _, err := client.Users.CurrentUser()
 	if err != nil {
@@ -20,11 +20,15 @@ var CurrentUser = func(client *gitlab.Client) (*gitlab.User, error) {
 var UserByName = func(client *gitlab.Client, name string) (*gitlab.User, error) {
 	opts := &gitlab.ListUsersOptions{Username: gitlab.String(name)}
 
+	if client == nil {
+		client = apiClient.Lab()
+	}
+
 	if opts.PerPage == 0 {
 		opts.PerPage = DefaultListLimit
 	}
 
-	users, _, err := apiClient.Users.ListUsers(opts)
+	users, _, err := client.Users.ListUsers(opts)
 	if err != nil {
 		return nil, err
 	}

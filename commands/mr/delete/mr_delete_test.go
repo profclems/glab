@@ -5,6 +5,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/google/shlex"
+
 	"github.com/profclems/glab/internal/utils"
 
 	"github.com/profclems/glab/internal/config"
@@ -122,7 +124,12 @@ hosts:
 
 			cli := strings.Join(tt.args, " ")
 			t.Log(cli)
-			_, err := cmdtest.RunCommand(cmd, cli)
+			argv, err := shlex.Split(cli)
+			if err != nil {
+				t.Fatal(err)
+			}
+			cmd.SetArgs(argv)
+			_, err = cmd.ExecuteC()
 			if !tt.wantErr {
 				assert.Nil(t, err)
 			} else {

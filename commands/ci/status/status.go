@@ -94,7 +94,7 @@ func NewCmdStatus(f *cmdutils.Factory) *cobra.Command {
 
 					fmt.Fprintf(writer.Newline(), "\n%s\n", runningPipeline.WebURL)
 					fmt.Fprintf(writer.Newline(), "SHA: %s\n", runningPipeline.SHA)
-					fmt.Fprintf(writer.Newline(), "Pipeline State: %s\n", runningPipeline.Status)
+					fmt.Fprintf(writer.Newline(), "Pipeline State: %s\n\n", runningPipeline.Status)
 
 					if runningPipeline.Status == "running" && live {
 						pipes, err = api.GetPipelines(apiClient, l, repo.FullName())
@@ -131,8 +131,14 @@ func NewCmdStatus(f *cmdutils.Factory) *cobra.Command {
 
 					if retry == "View Logs" {
 						// ToDo: bad idea to call another sub-command. should be fixed to avoid cyclo imports
-						//    and the a shared function placed in the pipeutils sub-module
-						return ciTraceCmd.TraceCmdFunc(cmd, args, f)
+						//    and the a shared function placed in the ciutils sub-module
+						return ciTraceCmd.TraceRun(&ciTraceCmd.TraceOpts{
+							Branch:     branch,
+							JobID:      0,
+							BaseRepo:   f.BaseRepo,
+							HTTPClient: f.HttpClient,
+							IO:         f.IO,
+						})
 					}
 				}
 				return nil

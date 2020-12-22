@@ -7,7 +7,7 @@ import (
 
 var ListIssueNotes = func(client *gitlab.Client, projectID interface{}, issueID int, opts *gitlab.ListIssueNotesOptions) ([]*gitlab.Note, error) {
 	if client == nil {
-		client = apiClient
+		client = apiClient.Lab()
 	}
 	if opts.PerPage == 0 {
 		opts.PerPage = DefaultListLimit
@@ -21,7 +21,7 @@ var ListIssueNotes = func(client *gitlab.Client, projectID interface{}, issueID 
 
 var UpdateIssue = func(client *gitlab.Client, projectID interface{}, issueID int, opts *gitlab.UpdateIssueOptions) (*gitlab.Issue, error) {
 	if client == nil {
-		client = apiClient
+		client = apiClient.Lab()
 	}
 	issue, _, err := client.Issues.UpdateIssue(projectID, issueID, opts)
 	if err != nil {
@@ -33,7 +33,7 @@ var UpdateIssue = func(client *gitlab.Client, projectID interface{}, issueID int
 
 var GetIssue = func(client *gitlab.Client, projectID interface{}, issueID int) (*gitlab.Issue, error) {
 	if client == nil {
-		client = apiClient
+		client = apiClient.Lab()
 	}
 	issue, _, err := client.Issues.GetIssue(projectID, issueID)
 	if err != nil {
@@ -45,7 +45,7 @@ var GetIssue = func(client *gitlab.Client, projectID interface{}, issueID int) (
 
 var ListIssues = func(client *gitlab.Client, projectID interface{}, opts *gitlab.ListProjectIssuesOptions) ([]*gitlab.Issue, error) {
 	if client == nil {
-		client = apiClient
+		client = apiClient.Lab()
 	}
 	if opts.PerPage == 0 {
 		opts.PerPage = DefaultListLimit
@@ -60,7 +60,7 @@ var ListIssues = func(client *gitlab.Client, projectID interface{}, opts *gitlab
 
 var CreateIssue = func(client *gitlab.Client, projectID interface{}, opts *gitlab.CreateIssueOptions) (*gitlab.Issue, error) {
 	if client == nil {
-		client = apiClient
+		client = apiClient.Lab()
 	}
 	issue, _, err := client.Issues.CreateIssue(projectID, opts)
 	if err != nil {
@@ -72,7 +72,7 @@ var CreateIssue = func(client *gitlab.Client, projectID interface{}, opts *gitla
 
 var DeleteIssue = func(client *gitlab.Client, projectID interface{}, issueID int) error {
 	if client == nil {
-		client = apiClient
+		client = apiClient.Lab()
 	}
 
 	_, err := client.Issues.DeleteIssue(projectID, issueID)
@@ -85,7 +85,7 @@ var DeleteIssue = func(client *gitlab.Client, projectID interface{}, issueID int
 
 var CreateIssueNote = func(client *gitlab.Client, projectID interface{}, mrID int, opts *gitlab.CreateIssueNoteOptions) (*gitlab.Note, error) {
 	if client == nil {
-		client = apiClient
+		client = apiClient.Lab()
 	}
 
 	note, _, err := client.Notes.CreateIssueNote(projectID, mrID, opts)
@@ -98,7 +98,7 @@ var CreateIssueNote = func(client *gitlab.Client, projectID interface{}, mrID in
 
 var SubscribeToIssue = func(client *gitlab.Client, projectID interface{}, issueID int, opts gitlab.RequestOptionFunc) (*gitlab.Issue, error) {
 	if client == nil {
-		client = apiClient
+		client = apiClient.Lab()
 	}
 
 	issue, _, err := client.Issues.SubscribeToIssue(projectID, issueID, opts)
@@ -111,7 +111,7 @@ var SubscribeToIssue = func(client *gitlab.Client, projectID interface{}, issueI
 
 var UnsubscribeFromIssue = func(client *gitlab.Client, projectID interface{}, issueID int, opts gitlab.RequestOptionFunc) (*gitlab.Issue, error) {
 	if client == nil {
-		client = apiClient
+		client = apiClient.Lab()
 	}
 
 	issue, _, err := client.Issues.UnsubscribeFromIssue(projectID, issueID, opts)

@@ -4,7 +4,7 @@ import "github.com/xanzy/go-gitlab"
 
 var GetRelease = func(client *gitlab.Client, projectID interface{}, tag string) (*gitlab.Release, error) {
 	if client == nil {
-		client = apiClient
+		client = apiClient.Lab()
 	}
 
 	release, _, err := client.Releases.GetRelease(projectID, tag)
@@ -16,7 +16,7 @@ var GetRelease = func(client *gitlab.Client, projectID interface{}, tag string) 
 }
 var ListReleases = func(client *gitlab.Client, projectID interface{}, opts *gitlab.ListReleasesOptions) ([]*gitlab.Release, error) {
 	if client == nil {
-		client = apiClient
+		client = apiClient.Lab()
 	}
 
 	if opts.PerPage == 0 {

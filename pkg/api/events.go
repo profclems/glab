@@ -6,7 +6,7 @@ import (
 
 var CurrentUserEvents = func(client *gitlab.Client) ([]*gitlab.ContributionEvent, error) {
 	if client == nil {
-		client = apiClient
+		client = apiClient.Lab()
 	}
 
 	events, _, err := client.Events.ListCurrentUserContributionEvents(&gitlab.ListContributionEventsOptions{})

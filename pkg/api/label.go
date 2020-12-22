@@ -4,7 +4,7 @@ import "github.com/xanzy/go-gitlab"
 
 var CreateLabel = func(client *gitlab.Client, projectID interface{}, opts *gitlab.CreateLabelOptions) (*gitlab.Label, error) {
 	if client == nil {
-		client = apiClient
+		client = apiClient.Lab()
 	}
 	label, _, err := client.Labels.CreateLabel(projectID, opts)
 	if err != nil {
@@ -15,7 +15,7 @@ var CreateLabel = func(client *gitlab.Client, projectID interface{}, opts *gitla
 
 var ListLabels = func(client *gitlab.Client, projectID interface{}, opts *gitlab.ListLabelsOptions) ([]*gitlab.Label, error) {
 	if client == nil {
-		client = apiClient
+		client = apiClient.Lab()
 	}
 
 	if opts.PerPage == 0 {

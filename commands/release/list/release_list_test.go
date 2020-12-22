@@ -6,6 +6,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/google/shlex"
+
 	"github.com/profclems/glab/internal/utils"
 
 	cmdTestUtils "github.com/profclems/glab/commands/cmdtest"
@@ -120,12 +122,19 @@ func TestNewCmdReleaseList(t *testing.T) {
 			cmd := NewCmdReleaseList(f)
 			cmdutils.EnableRepoOverride(cmd, f)
 
-			_, err := cmdTestUtils.RunCommand(cmd, tt.args)
-			if tt.wantErr {
-				require.Error(t, err)
-				return
-			} else {
-				require.Nil(t, err)
+			argv, err := shlex.Split(tt.args)
+			if err != nil {
+				t.Fatal(err)
+			}
+			cmd.SetArgs(argv)
+			_, err = cmd.ExecuteC()
+			if err != nil {
+				if tt.wantErr {
+					require.Error(t, err)
+					return
+				} else {
+					t.Fatal(err)
+				}
 			}
 
 			out := stripansi.Strip(stdout.String())

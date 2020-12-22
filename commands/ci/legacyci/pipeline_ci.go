@@ -22,7 +22,7 @@ func NewCmdCI(f *cmdutils.Factory) *cobra.Command {
 	`),
 	}
 
-	pipelineCICmd.AddCommand(ciTraceCmd.NewCmdTrace(f))
+	pipelineCICmd.AddCommand(ciTraceCmd.NewCmdTrace(f, nil))
 	pipelineCICmd.AddCommand(ciViewCmd.NewCmdView(f))
 	pipelineCICmd.AddCommand(ciLintCmd.NewCmdLint(f))
 	pipelineCICmd.Deprecated = "This command is deprecated. All the commands under it has been moved to `ci` or `pipeline` command. See https://github.com/profclems/glab/issues/372 for more info."
