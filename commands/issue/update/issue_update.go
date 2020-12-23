@@ -55,7 +55,7 @@ func NewCmdUpdate(f *cmdutils.Factory) *cobra.Command {
 				l.RemoveLabels = gitlab.Labels(m)
 			}
 
-			fmt.Fprintf(out, "- Updating issue #%d", issueID)
+			fmt.Fprintf(out, "- Updating issue #%d\n", issueID)
 
 			issue, err := api.UpdateIssue(apiClient, repo.FullName(), issueID, l)
 			if err != nil {
