@@ -1,6 +1,7 @@
 package update
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/profclems/glab/commands/cmdutils"
@@ -55,6 +56,16 @@ func NewCmdUpdate(f *cmdutils.Factory) *cobra.Command {
 				l.RemoveLabels = gitlab.Labels(m)
 			}
 
+			if cmd.Flags().Changed("confidential") && cmd.Flags().Changed("public") {
+				return &cmdutils.FlagError{Err: errors.New("--public and --confidential can't be used together")}
+			}
+			if m, _ := cmd.Flags().GetBool("public"); m {
+				l.Confidential = gitlab.Bool(false)
+			}
+			if m, _ := cmd.Flags().GetBool("confidential"); m {
+				l.Confidential = gitlab.Bool(true)
+			}
+
 			fmt.Fprintf(out, "- Updating issue #%d\n", issueID)
 
 			issue, err := api.UpdateIssue(apiClient, repo.FullName(), issueID, l)
@@ -74,6 +85,8 @@ func NewCmdUpdate(f *cmdutils.Factory) *cobra.Command {
 	issueUpdateCmd.Flags().StringP("description", "d", "", "Issue description")
 	issueUpdateCmd.Flags().StringArrayP("label", "l", []string{}, "add labels")
 	issueUpdateCmd.Flags().StringArrayP("unlabel", "u", []string{}, "remove labels")
+	issueUpdateCmd.Flags().BoolP("public", "p", false, "Make issue public")
+	issueUpdateCmd.Flags().BoolP("confidential", "c", false, "Make issue confidential")
 
 	return issueUpdateCmd
 }
