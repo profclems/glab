@@ -1,6 +1,7 @@
 package update
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 
@@ -26,6 +27,10 @@ func NewCmdUpdate(f *cmdutils.Factory) *cobra.Command {
 		Args: cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var err error
+
+			if cmd.Flags().Changed("lock-discussion") && cmd.Flags().Changed("unlock-discussion") {
+				return &cmdutils.FlagError{Err: errors.New("--lock-discussion and --unlock-discussion can't be used together")}
+			}
 
 			apiClient, err := f.HttpClient()
 			if err != nil {
@@ -73,6 +78,9 @@ func NewCmdUpdate(f *cmdutils.Factory) *cobra.Command {
 			if m, _ := cmd.Flags().GetBool("lock-discussion"); m {
 				l.DiscussionLocked = gitlab.Bool(m)
 			}
+			if m, _ := cmd.Flags().GetBool("unlock-discussion"); m {
+				l.DiscussionLocked = gitlab.Bool(false)
+			}
 
 			if m, _ := cmd.Flags().GetString("description"); m != "" {
 				l.Description = gitlab.String(m)
@@ -105,6 +113,7 @@ func NewCmdUpdate(f *cmdutils.Factory) *cobra.Command {
 	mrUpdateCmd.Flags().BoolP("wip", "", false, "Mark merge request as a work in progress. Alternative to --draft")
 	mrUpdateCmd.Flags().StringP("title", "t", "", "Title of merge request")
 	mrUpdateCmd.Flags().BoolP("lock-discussion", "", false, "Lock discussion on merge request")
+	mrUpdateCmd.Flags().BoolP("unlock-discussion", "", false, "Unlock discussion on merge request")
 	mrUpdateCmd.Flags().StringP("description", "d", "", "merge request description")
 	mrUpdateCmd.Flags().StringSliceP("assignees", "a", []string{}, "Assign merge request to people by their `usernames`")
 	mrUpdateCmd.Flags().BoolP("remove-source-branch", "", false, "Remove Source Branch on merge")
