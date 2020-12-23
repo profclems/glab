@@ -28,6 +28,10 @@ func NewCmdUpdate(f *cmdutils.Factory) *cobra.Command {
 			var err error
 			out := f.IO.StdOut
 
+			if cmd.Flags().Changed("lock-discussion") && cmd.Flags().Changed("unlock-discussion") {
+				return &cmdutils.FlagError{Err: errors.New("--lock-discussion and --unlock-discussion can't be used together")}
+			}
+
 			apiClient, err := f.HttpClient()
 			if err != nil {
 				return err
@@ -46,6 +50,10 @@ func NewCmdUpdate(f *cmdutils.Factory) *cobra.Command {
 			if m, _ := cmd.Flags().GetBool("lock-discussion"); m {
 				l.DiscussionLocked = gitlab.Bool(m)
 			}
+			if m, _ := cmd.Flags().GetBool("unlock-discussion"); m {
+				l.DiscussionLocked = gitlab.Bool(false)
+			}
+
 			if m, _ := cmd.Flags().GetString("description"); m != "" {
 				l.Description = gitlab.String(m)
 			}
@@ -82,6 +90,7 @@ func NewCmdUpdate(f *cmdutils.Factory) *cobra.Command {
 
 	issueUpdateCmd.Flags().StringP("title", "t", "", "Title of issue")
 	issueUpdateCmd.Flags().BoolP("lock-discussion", "", false, "Lock discussion on issue")
+	issueUpdateCmd.Flags().BoolP("unlock-discussion", "", false, "Unlock discussion on issue")
 	issueUpdateCmd.Flags().StringP("description", "d", "", "Issue description")
 	issueUpdateCmd.Flags().StringArrayP("label", "l", []string{}, "add labels")
 	issueUpdateCmd.Flags().StringArrayP("unlabel", "u", []string{}, "remove labels")
