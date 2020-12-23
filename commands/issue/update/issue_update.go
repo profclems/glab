@@ -31,6 +31,9 @@ func NewCmdUpdate(f *cmdutils.Factory) *cobra.Command {
 			if cmd.Flags().Changed("lock-discussion") && cmd.Flags().Changed("unlock-discussion") {
 				return &cmdutils.FlagError{Err: errors.New("--lock-discussion and --unlock-discussion can't be used together")}
 			}
+			if cmd.Flags().Changed("confidential") && cmd.Flags().Changed("public") {
+				return &cmdutils.FlagError{Err: errors.New("--public and --confidential can't be used together")}
+			}
 
 			apiClient, err := f.HttpClient()
 			if err != nil {
@@ -62,10 +65,6 @@ func NewCmdUpdate(f *cmdutils.Factory) *cobra.Command {
 			}
 			if m, _ := cmd.Flags().GetStringArray("unlabel"); len(m) != 0 {
 				l.RemoveLabels = gitlab.Labels(m)
-			}
-
-			if cmd.Flags().Changed("confidential") && cmd.Flags().Changed("public") {
-				return &cmdutils.FlagError{Err: errors.New("--public and --confidential can't be used together")}
 			}
 			if m, _ := cmd.Flags().GetBool("public"); m {
 				l.Confidential = gitlab.Bool(false)
