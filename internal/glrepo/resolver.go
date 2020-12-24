@@ -151,6 +151,94 @@ func (r *ResolvedRemotes) BaseRepo(prompt bool) (Interface, error) {
 	return selectedRepoInfo, err
 }
 
+func (r *ResolvedRemotes) HeadRepo(prompt bool) (Interface, error) {
+	if r.baseOverride != nil {
+		return r.baseOverride, nil
+	}
+
+	// if any of the remotes already has a resolution, respect that
+	for _, r := range r.remotes {
+		if r.Resolved == "head" {
+			return r, nil
+		} else if strings.HasPrefix(r.Resolved, "head:") {
+			repo, err := FromFullName(strings.TrimPrefix(r.Resolved, "head:"))
+			if err != nil {
+				return nil, err
+			}
+			return NewWithHost(repo.RepoOwner(), repo.RepoName(), r.RepoHost()), nil
+		}
+	}
+
+	// from here on, consult the API
+	if r.network == nil {
+		err := resolveNetwork(r)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	var repoNames []string
+	repoMap := map[string]*gitlab.Project{}
+	add := func(r *gitlab.Project) {
+		fn, _ := FullNameFromURL(r.HTTPURLToRepo)
+		if _, ok := repoMap[fn]; !ok {
+			repoMap[fn] = r
+			repoNames = append(repoNames, fn)
+		}
+	}
+
+	for i := range r.network {
+		if r.network[i].ForkedFromProject != nil {
+			fProject, _ := api.GetProject(r.apiClient, r.network[i].ForkedFromProject.PathWithNamespace)
+			add(fProject)
+		}
+		add(&r.network[i])
+	}
+
+	if len(repoNames) == 0 {
+		return r.remotes[0], nil
+	}
+
+	headName := repoNames[0]
+	if len(repoNames) > 1 {
+		if !prompt {
+			// We cannot prompt so get the first repo that is a fork
+			for _, repo := range repoNames {
+				if repoMap[repo].ForkedFromProject != nil {
+					selectedRepoInfo, _ := FromFullName((repoMap[repo].HTTPURLToRepo))
+					remote, _ := r.RemoteForRepo(selectedRepoInfo)
+					return remote, nil
+				}
+			}
+			// There are no forked repos so return the first repo
+			return r.remotes[0], nil
+		}
+
+		err := survey.AskOne(&survey.Select{
+			Message: "Which should be the head repository (where branches are pushed) for this directory?",
+			Options: repoNames,
+		}, &headName)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	// determine corresponding git remote
+	selectedRepo := repoMap[headName]
+	selectedRepoInfo, _ := FromFullName(selectedRepo.HTTPURLToRepo)
+	resolution := "head"
+	remote, _ := r.RemoteForRepo(selectedRepoInfo)
+	if remote == nil {
+		remote = r.remotes[0]
+		resolution, _ = FullNameFromURL(selectedRepo.HTTPURLToRepo)
+		resolution = "head:" + resolution
+	}
+
+	// cache the result to git config
+	err := git.SetRemoteResolution(remote.Name, resolution)
+	return selectedRepoInfo, err
+}
+
 func (r *ResolvedRemotes) HeadRepos() ([]*gitlab.Project, error) {
 	if r.network == nil {
 		err := resolveNetwork(r)
