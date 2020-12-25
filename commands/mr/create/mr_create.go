@@ -3,11 +3,10 @@ package create
 import (
 	"errors"
 	"fmt"
-	"strconv"
-	"strings"
-
 	"github.com/profclems/glab/internal/config"
 	"github.com/profclems/glab/internal/glrepo"
+	"strconv"
+	"strings"
 
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/profclems/glab/commands/cmdutils"
@@ -142,15 +141,8 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 					return fmt.Errorf("target branch %s does not exist on remote. Specify target branch with --target-branch flag",
 						opts.TargetBranch)
 				}
-				if c, err := git.UncommittedChangeCount(); c != 0 {
-					if err != nil {
-						return err
-					}
-					fmt.Fprintf(opts.IO.StdErr, "\nwarning: you have %s\n", utils.Pluralize(c, "uncommitted change"))
-				}
 
-				err = git.Push(repoRemote.PushURL.String(), opts.SourceBranch)
-				if err != nil {
+				if err := handlePush(opts, repoRemote); err != nil {
 					return err
 				}
 			} else if opts.IsInteractive {
@@ -278,8 +270,7 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 			}
 
 			if opts.ShouldPush {
-				err = git.Push(repoRemote.PushURL.String(), opts.SourceBranch)
-				if err != nil {
+				if err := handlePush(opts, repoRemote); err != nil {
 					return err
 				}
 			}
@@ -342,5 +333,72 @@ func mrBodyAndTitle(opts *CreateOpts) error {
 		}
 		opts.Description = body.String()
 	}
+	return nil
+}
+
+func handlePush(opts *CreateOpts, remote *glrepo.Remote) error {
+	var sourceRemote = remote
+
+	remotes, _ := opts.Remotes()
+	sourceBranch := opts.SourceBranch
+
+	if sourceBranch != "" {
+		if idx := strings.IndexRune(sourceBranch, ':'); idx >= 0 {
+			sourceBranch = sourceBranch[idx+1:]
+		}
+	}
+
+	if c, err := git.UncommittedChangeCount(); c != 0 {
+		if err != nil {
+			return err
+		}
+		fmt.Fprintf(opts.IO.StdErr, "\nwarning: you have %s\n", utils.Pluralize(c, "uncommitted change"))
+	}
+	if trackingRef := determineTrackingBranch(remotes, opts.SourceBranch); trackingRef != nil {
+		if r, err := remotes.FindByName(trackingRef.RemoteName); err == nil {
+			sourceRemote = r
+		}
+	}
+	return git.Push(sourceRemote.Name, fmt.Sprintf("HEAD:%s", sourceBranch), opts.IO.StdOut, opts.IO.StdErr)
+}
+
+func determineTrackingBranch(remotes glrepo.Remotes, headBranch string) *git.TrackingRef {
+	refsForLookup := []string{"HEAD"}
+	var trackingRefs []git.TrackingRef
+
+	headBranchConfig := git.ReadBranchConfig(headBranch)
+	if headBranchConfig.RemoteName != "" {
+		tr := git.TrackingRef{
+			RemoteName: headBranchConfig.RemoteName,
+			BranchName: strings.TrimPrefix(headBranchConfig.MergeRef, "refs/heads/"),
+		}
+		trackingRefs = append(trackingRefs, tr)
+		refsForLookup = append(refsForLookup, tr.String())
+	}
+
+	for _, remote := range remotes {
+		tr := git.TrackingRef{
+			RemoteName: remote.Name,
+			BranchName: headBranch,
+		}
+		trackingRefs = append(trackingRefs, tr)
+		refsForLookup = append(refsForLookup, tr.String())
+	}
+
+	resolvedRefs, _ := git.ShowRefs(refsForLookup...)
+	if len(resolvedRefs) > 1 {
+		for _, r := range resolvedRefs[1:] {
+			if r.Hash != resolvedRefs[0].Hash {
+				continue
+			}
+			for _, tr := range trackingRefs {
+				if tr.String() != r.Name {
+					continue
+				}
+				return &tr
+			}
+		}
+	}
+
 	return nil
 }
