@@ -3,12 +3,13 @@ package create
 import (
 	"bytes"
 	"fmt"
-	"github.com/profclems/glab/internal/git"
-	"github.com/profclems/glab/internal/glrepo"
 	"os/exec"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/profclems/glab/internal/git"
+	"github.com/profclems/glab/internal/glrepo"
 
 	"github.com/google/shlex"
 	"github.com/profclems/glab/test"

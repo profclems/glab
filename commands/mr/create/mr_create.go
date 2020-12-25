@@ -3,10 +3,11 @@ package create
 import (
 	"errors"
 	"fmt"
-	"github.com/profclems/glab/internal/config"
-	"github.com/profclems/glab/internal/glrepo"
 	"strconv"
 	"strings"
+
+	"github.com/profclems/glab/internal/config"
+	"github.com/profclems/glab/internal/glrepo"
 
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/profclems/glab/commands/cmdutils"
