@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
+	"os"
 	"strings"
 
 	"github.com/profclems/glab/internal/config"
@@ -72,6 +73,15 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 		Long:    ``,
 		Aliases: []string{"new"},
 		Args:    cobra.ExactArgs(0),
+		PreRun: func(cmd *cobra.Command, args []string) {
+			repoOverride, _ := cmd.Flags().GetString("head")
+			if repoFromEnv := os.Getenv("GITLAB_HEAD_REPO"); repoOverride == "" && repoFromEnv != "" {
+				repoOverride = repoFromEnv
+			}
+			if repoOverride != "" {
+				_ = headRepoOverride(opts, repoOverride)
+			}
+		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var err error
 
@@ -349,6 +359,7 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 	mrCreateCmd.Flags().BoolVarP(&opts.AllowCollaboration, "allow-collaboration", "", false, "Allow commits from other members")
 	mrCreateCmd.Flags().BoolVarP(&opts.RemoveSourceBranch, "remove-source-branch", "", false, "Remove Source Branch on merge")
 	mrCreateCmd.Flags().BoolVarP(&opts.NoEditor, "no-editor", "", false, "Don't open editor to enter description. If set to true, uses prompt. Default is false")
+	mrCreateCmd.Flags().StringP("head", "H", "", "Select another head repository using the `OWNER/REPO` or `GROUP/NAMESPACE/REPO` format or the project ID or full URL")
 
 	return mrCreateCmd
 }
