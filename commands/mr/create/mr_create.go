@@ -106,12 +106,17 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 				return err
 			}
 
-			repo, err := opts.BaseRepo()
+			baseRepo, err := opts.BaseRepo()
 			if err != nil {
 				return err
 			}
 
-			opts.BaseProject, err = api.GetProject(labClient, repo.FullName())
+			headRepo, err := opts.HeadRepo()
+			if err != nil {
+				return err
+			}
+
+			opts.BaseProject, err = api.GetProject(labClient, baseRepo.FullName())
 			if err != nil {
 				return err
 			}
@@ -136,7 +141,7 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 			if err != nil {
 				return err
 			}
-			repoRemote, err := remotes.FindByRepo(repo.RepoOwner(), repo.RepoName())
+			repoRemote, err := remotes.FindByRepo(headRepo.RepoOwner(), headRepo.RepoName())
 			if err != nil {
 				return err
 			}
@@ -164,7 +169,7 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 				if err = mrBodyAndTitle(opts); err != nil {
 					return err
 				}
-				_, err = api.GetCommit(labClient, repo.FullName(), opts.TargetBranch)
+				_, err = api.GetCommit(labClient, headRepo.FullName(), opts.TargetBranch)
 				if err != nil {
 					return fmt.Errorf("target branch %s does not exist on remote. Specify target branch with --target-branch flag",
 						opts.TargetBranch)
@@ -287,7 +292,7 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 					Ref:    gitlab.String(opts.TargetBranch),
 				}
 				fmt.Fprintln(opts.IO.StdErr, "\nCreating related branch...")
-				branch, err := api.CreateBranch(labClient, repo.FullName(), lb)
+				branch, err := api.CreateBranch(labClient, headRepo.FullName(), lb)
 				if err == nil {
 					fmt.Fprintln(opts.IO.StdErr, "Branch created: ", branch.WebURL)
 				} else {
@@ -329,9 +334,9 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 					message = "\nCreating draft merge request for %s into %s in %s\n\n"
 				}
 
-				fmt.Fprintf(opts.IO.StdErr, message, utils.Cyan(opts.SourceBranch), utils.Cyan(opts.TargetBranch), repo.FullName())
+				fmt.Fprintf(opts.IO.StdErr, message, utils.Cyan(opts.SourceBranch), utils.Cyan(opts.TargetBranch), baseRepo.FullName())
 
-				mr, err := api.CreateMR(labClient, repo.FullName(), mrCreateOpts)
+				mr, err := api.CreateMR(labClient, headRepo.FullName(), mrCreateOpts)
 				if err != nil {
 					return err
 				}
