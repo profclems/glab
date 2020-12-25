@@ -47,6 +47,7 @@ type CreateOpts struct {
 	Lab      func() (*gitlab.Client, error)
 	Config   func() (config.Config, error)
 	BaseRepo func() (glrepo.Interface, error)
+	HeadRepo func() (glrepo.Interface, error)
 
 	BaseProject   *gitlab.Project
 	TargetProject *gitlab.Project
@@ -62,6 +63,7 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 		Lab:      f.HttpClient,
 		Config:   f.Config,
 		BaseRepo: f.BaseRepo,
+		HeadRepo: resolvedHeadRepo(f),
 	}
 
 	var mrCreateCmd = &cobra.Command{
