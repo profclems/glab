@@ -509,3 +509,33 @@ func generateMRCompareURL(opts *CreateOpts, repo glrepo.Interface) (string, erro
 		targetProjectID)
 	return u.String(), nil
 }
+
+func resolvedHeadRepo(f *cmdutils.Factory) func() (glrepo.Interface, error) {
+	return func() (glrepo.Interface, error) {
+		httpClient, err := f.HttpClient()
+		if err != nil {
+			return nil, err
+		}
+		remotes, err := f.Remotes()
+		if err != nil {
+			return nil, err
+		}
+		repoContext, err := glrepo.ResolveRemotesToRepos(remotes, httpClient, "")
+		if err != nil {
+			return nil, err
+		}
+		headRepo, err := repoContext.HeadRepo(true)
+		if err != nil {
+			return nil, err
+		}
+
+		return headRepo, nil
+	}
+}
+
+func headRepoOverride(opts *CreateOpts, repo string) error {
+	opts.HeadRepo = func() (glrepo.Interface, error) {
+		return glrepo.FromFullName(repo)
+	}
+	return nil
+}
