@@ -117,12 +117,12 @@ func (r *ResolvedRemotes) BaseRepo(prompt bool) (Interface, error) {
 		}
 	}
 
-	for _, repo := range r.network {
-		if repo.ForkedFromProject != nil {
-			fProject, _ := api.GetProject(r.apiClient, repo.ForkedFromProject.PathWithNamespace)
+	for i := range r.network {
+		if r.network[i].ForkedFromProject != nil {
+			fProject, _ := api.GetProject(r.apiClient, r.network[i].ForkedFromProject.PathWithNamespace)
 			add(fProject)
 		}
-		add(&repo)
+		add(&r.network[i])
 	}
 
 	if len(repoNames) == 0 {
