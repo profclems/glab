@@ -116,7 +116,7 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 			}
 
 			if !opts.TargetProject.MergeRequestsEnabled {
-				fmt.Fprintln(opts.IO.StdErr, "Merge requests are disabled for this project")
+				fmt.Fprintf(opts.IO.StdErr, "Merge requests are disabled for %q\n", opts.TargetProject.PathWithNamespace)
 				return cmdutils.SilentError
 			}
 
@@ -249,7 +249,7 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 			mrCreateOpts.Labels = opts.Labels
 			mrCreateOpts.SourceBranch = gitlab.String(opts.SourceBranch)
 			mrCreateOpts.TargetBranch = gitlab.String(opts.TargetBranch)
-			if opts.MileStone != -1 {
+			if opts.MileStone != 0 {
 				mrCreateOpts.MilestoneID = gitlab.Int(opts.MileStone)
 			}
 			if opts.AllowCollaboration {
@@ -325,9 +325,10 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 				}
 
 				fmt.Fprintln(out, mrutils.DisplayMR(mr))
+				return nil
 			}
 
-			return errors.New("expected to cancel, preview, or submit")
+			return errors.New("expected to cancel, preview in browser, or submit")
 		},
 	}
 	mrCreateCmd.Flags().BoolVarP(&opts.Autofill, "fill", "f", false, "Do not prompt for title/description and just use commit info")
@@ -342,7 +343,7 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 	mrCreateCmd.Flags().StringVarP(&opts.TargetBranch, "target-branch", "b", "", "The target or base branch into which you want your code merged")
 	mrCreateCmd.Flags().StringVarP(&mrCreateTargetProject, "target-project", "", "", "Add target project by id or OWNER/REPO or GROUP/NAMESPACE/REPO")
 	mrCreateCmd.Flags().BoolVarP(&opts.CreateSourceBranch, "create-source-branch", "", false, "Create source branch if it does not exist")
-	mrCreateCmd.Flags().IntVarP(&opts.MileStone, "milestone", "m", -1, "add milestone by <id> for merge request")
+	mrCreateCmd.Flags().IntVarP(&opts.MileStone, "milestone", "m", 0, "add milestone by <id> for merge request")
 	mrCreateCmd.Flags().BoolVarP(&opts.AllowCollaboration, "allow-collaboration", "", false, "Allow commits from other members")
 	mrCreateCmd.Flags().BoolVarP(&opts.RemoveSourceBranch, "remove-source-branch", "", false, "Remove Source Branch on merge")
 	mrCreateCmd.Flags().BoolVarP(&opts.NoEditor, "no-editor", "", false, "Don't open editor to enter description. If set to true, uses prompt. Default is false")
@@ -491,10 +492,11 @@ func generateMRCompareURL(opts *CreateOpts, repo glrepo.Interface) (string, erro
 		description += fmt.Sprintf("\n/milestone %%%d", opts.MileStone)
 	}
 
-	u := url.URL{}
-	u.Scheme = "http"
-	u.Host = repo.RepoHost()
-	u.Path = repo.FullName() + "/-/merge_requests/new"
+	u, err := url.Parse(opts.BaseProject.WebURL)
+	if err != nil {
+		return "", err
+	}
+	u.Path += "/-/merge_requests/new"
 	u.RawQuery = fmt.Sprintf(
 		"utf8=✓&merge_request[title]=%s&merge_request[description]=%s&merge_request[source_branch]=%s&merge_request[target_branch]=%s&merge_request[source_project_id]=%d&merge_request[target_project_id]=%d",
 		opts.Title,
