@@ -129,7 +129,7 @@ func DescriptionPrompt(response *string, templateContent, editorCommand string) 
 	return nil
 }
 
-func LabelsPrompt(response *string, apiClient *gitlab.Client, repoRemote *glrepo.Remote) (err error) {
+func LabelsPrompt(response *[]string, apiClient *gitlab.Client, repoRemote *glrepo.Remote) (err error) {
 	var addLabels bool
 	err = prompt.Confirm(&addLabels, "Do you want to add labels?", true)
 	if err != nil {
@@ -160,17 +160,69 @@ func LabelsPrompt(response *string, apiClient *gitlab.Client, repoRemote *glrepo
 			if err != nil {
 				return err
 			}
-			if len(selectedLabels) > 0 {
-				*response = strings.Join(selectedLabels, ",")
-			}
+			*response = selectedLabels
+
 		} else {
-			err = prompt.AskQuestionWithInput(response, "Label(s) [Comma Separated]", "", false)
+			var responseString string
+			err = prompt.AskQuestionWithInput(&responseString, "Label(s) [Comma Separated]", "", false)
 			if err != nil {
 				return err
 			}
+			*response = strings.Split(responseString, ",")
 		}
 	}
 	return nil
+}
+
+type Action int
+
+const (
+	SubmitAction Action = iota
+	PreviewAction
+	CancelAction
+)
+
+func ConfirmSubmission(allowPreview bool) (Action, error) {
+	const (
+		submitLabel  = "Submit"
+		previewLabel = "Continue in browser"
+		cancelLabel  = "Cancel"
+	)
+
+	options := []string{submitLabel}
+	if allowPreview {
+		options = append(options, previewLabel)
+	}
+	options = append(options, cancelLabel)
+
+	confirmAnswers := struct {
+		Confirmation int
+	}{}
+	confirmQs := []*survey.Question{
+		{
+			Name: "confirmation",
+			Prompt: &survey.Select{
+				Message: "What's next?",
+				Options: options,
+			},
+		},
+	}
+
+	err := prompt.Ask(confirmQs, &confirmAnswers)
+	if err != nil {
+		return -1, fmt.Errorf("could not prompt: %w", err)
+	}
+
+	switch options[confirmAnswers.Confirmation] {
+	case submitLabel:
+		return SubmitAction, nil
+	case previewLabel:
+		return PreviewAction, nil
+	case cancelLabel:
+		return CancelAction, nil
+	default:
+		return -1, fmt.Errorf("invalid index: %d", confirmAnswers.Confirmation)
+	}
 }
 
 //IDsFromUsers collects all user IDs from a slice of users
