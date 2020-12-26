@@ -141,15 +141,19 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 			if err != nil {
 				return err
 			}
-			repoRemote, err := remotes.FindByRepo(headRepo.RepoOwner(), headRepo.RepoName())
+			headRepoRemote, err := remotes.FindByRepo(headRepo.RepoOwner(), headRepo.RepoName())
+			if err != nil {
+				return err
+			}
+			baseRepoRemote, err := remotes.FindByRepo(baseRepo.RepoOwner(), baseRepo.RepoName())
 			if err != nil {
 				return err
 			}
 
 			if opts.TargetBranch == "" {
-				opts.TargetBranch, _ = git.GetDefaultBranch(repoRemote.PushURL.String())
+				opts.TargetBranch, _ = git.GetDefaultBranch(baseRepoRemote.PushURL.String())
 			}
-			opts.TargetTrackingBranch = fmt.Sprintf("%s/%s", repoRemote.Name, opts.TargetBranch)
+			opts.TargetTrackingBranch = fmt.Sprintf("%s/%s", baseRepoRemote.Name, opts.TargetBranch)
 
 			if opts.CreateSourceBranch && opts.SourceBranch == "" {
 				opts.SourceBranch = utils.ReplaceNonAlphaNumericChars(opts.Title, "-")
@@ -243,7 +247,7 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 					}
 				}
 				if len(opts.Labels) == 0 {
-					err = cmdutils.LabelsPrompt(&opts.Labels, labClient, repoRemote)
+					err = cmdutils.LabelsPrompt(&opts.Labels, labClient, baseRepoRemote)
 					if err != nil {
 						return err
 					}
@@ -319,7 +323,7 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 				return nil
 			}
 
-			if err := handlePush(opts, repoRemote); err != nil {
+			if err := handlePush(opts, headRepoRemote); err != nil {
 				return err
 			}
 
