@@ -3,6 +3,7 @@ package glrepo
 import (
 	"errors"
 	"sort"
+	"strings"
 
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/profclems/glab/internal/git"
@@ -66,7 +67,7 @@ func (r *ResolvedRemotes) BaseRepo(prompt bool) (Interface, error) {
 	for _, r := range r.remotes {
 		if r.Resolved == "base" {
 			return r, nil
-		} else if r.Resolved != "" {
+		} else if strings.HasPrefix(r.Resolved, "base:") {
 			repo, err := FromFullName(r.Resolved)
 			if err != nil {
 				return nil, err
