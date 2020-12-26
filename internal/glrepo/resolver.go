@@ -148,6 +148,7 @@ func (r *ResolvedRemotes) BaseRepo(prompt bool) (Interface, error) {
 	if remote == nil {
 		remote = r.remotes[0]
 		resolution, _ = FullNameFromURL(selectedRepo.HTTPURLToRepo)
+		resolution = "base:" + resolution
 	}
 
 	// cache the result to git config
