@@ -122,7 +122,6 @@ winget install glab
 
 #### Scoop
 ```sh
-scoop bucket add profclems-bucket https://github.com/profclems/scoop-bucket.git
 scoop install glab
 ```
 Updating:

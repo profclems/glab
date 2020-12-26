@@ -6,6 +6,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/profclems/glab/pkg/prompt"
+
 	"github.com/profclems/glab/internal/utils"
 
 	"github.com/acarl005/stripansi"
@@ -16,6 +18,16 @@ import (
 )
 
 func Test_IssueCreate(t *testing.T) {
+	ask, teardown := prompt.InitAskStubber()
+	defer teardown()
+
+	ask.Stub([]*prompt.QuestionStub{
+		{
+			Name:  "confirmation",
+			Value: 0,
+		},
+	})
+
 	oldCreateIssue := api.CreateIssue
 	timer, _ := time.Parse(time.RFC3339, "2014-11-12T11:45:26.371Z")
 	api.CreateIssue = func(client *gitlab.Client, projectID interface{}, opts *gitlab.CreateIssueOptions) (*gitlab.Issue, error) {

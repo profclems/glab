@@ -8,6 +8,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/profclems/glab/pkg/prompt"
+
 	"github.com/profclems/glab/internal/git"
 	"github.com/profclems/glab/internal/glrepo"
 
@@ -97,6 +99,15 @@ hosts:
 }
 
 func TestMrCmd(t *testing.T) {
+	ask, teardown := prompt.InitAskStubber()
+	defer teardown()
+
+	ask.Stub([]*prompt.QuestionStub{
+		{
+			Name:  "confirmation",
+			Value: 0,
+		},
+	})
 
 	cliStr := []string{"-t", "myMRtitle",
 		"-d", "myMRbody",
@@ -121,7 +132,6 @@ func TestMrCmd(t *testing.T) {
 	stderr.Reset()
 
 	assert.Contains(t, cmdtest.FirstLine([]byte(out)), `!1 myMRtitle (test-cli)`)
-	// TODO: fix creating mr for default branch
 	assert.Contains(t, outErr, "\nCreating merge request for test-cli into master in glab-cli/test\n\n")
 	assert.Contains(t, out, "https://gitlab.com/glab-cli/test/-/merge_requests/1")
 	stdout.Reset()
@@ -129,11 +139,21 @@ func TestMrCmd(t *testing.T) {
 }
 
 func TestNewCmdCreate_autofill(t *testing.T) {
+	ask, teardown := prompt.InitAskStubber()
+	defer teardown()
+
+	ask.Stub([]*prompt.QuestionStub{
+		{
+			Name:  "confirmation",
+			Value: 0,
+		},
+	})
+
 	t.Run("create_autofill", func(t *testing.T) {
 		testRepo := cmdtest.CopyTestRepo(t, "mr_cmd_autofill")
-		git := exec.Command("git", "checkout", "mr-autofill-test-br")
-		git.Dir = testRepo
-		b, err := git.CombinedOutput()
+		gitCmd := exec.Command("git", "checkout", "mr-autofill-test-br")
+		gitCmd.Dir = testRepo
+		b, err := gitCmd.CombinedOutput()
 		if err != nil {
 			t.Log(string(b))
 			t.Fatal(err)
@@ -173,9 +193,9 @@ func TestMRCreate_nontty_insufficient_flags(t *testing.T) {
 
 func TestMrBodyAndTitle(t *testing.T) {
 	testRepo := cmdtest.CopyTestRepo(t, "mr_cmd_autofill")
-	git := exec.Command("git", "checkout", "mr-autofill-test-br")
-	git.Dir = testRepo
-	b, err := git.CombinedOutput()
+	gitCmd := exec.Command("git", "checkout", "mr-autofill-test-br")
+	gitCmd.Dir = testRepo
+	b, err := gitCmd.CombinedOutput()
 	if err != nil {
 		t.Log(string(b))
 		t.Fatal(err)
