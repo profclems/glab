@@ -107,12 +107,7 @@ func (r *ResolvedRemotes) BaseRepo(prompt bool) (Interface, error) {
 	add := func(r *gitlab.Project) {
 		fn, _ := FullNameFromURL(r.HTTPURLToRepo)
 		if _, ok := repoMap[fn]; !ok {
-			// This is run inside a for-loop, create a local copy and use its address
-			// instead of the one given to us, otherwise the value in repoMap will be
-			// overwriten in the next iteration of the loop
-			// See: #395, #384
-			localCopy := *r
-			repoMap[fn] = &localCopy
+			repoMap[fn] = r
 			repoNames = append(repoNames, fn)
 		}
 	}
