@@ -173,7 +173,7 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 				if err = mrBodyAndTitle(opts); err != nil {
 					return err
 				}
-				_, err = api.GetCommit(labClient, headRepo.FullName(), opts.TargetBranch)
+				_, err = api.GetCommit(labClient, baseRepo.FullName(), opts.TargetBranch)
 				if err != nil {
 					return fmt.Errorf("target branch %s does not exist on remote. Specify target branch with --target-branch flag",
 						opts.TargetBranch)
