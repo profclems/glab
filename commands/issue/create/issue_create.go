@@ -16,7 +16,7 @@ import (
 type CreateOpts struct {
 	Title       string
 	Description string
-	Labels      string
+	Labels      []string
 	Assignees   []string
 
 	Weight    int
@@ -126,7 +126,7 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 						}
 					}
 				}
-				if opts.Labels == "" {
+				if len(opts.Labels) == 0 {
 					remotes, err := f.Remotes()
 					if err != nil {
 						return err
@@ -147,7 +147,7 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 			}
 
 			issueCreateOpts.Title = gitlab.String(opts.Title)
-			issueCreateOpts.Labels = gitlab.Labels{opts.Labels}
+			issueCreateOpts.Labels = opts.Labels
 			issueCreateOpts.Description = &opts.Description
 			if opts.IsConfidential {
 				issueCreateOpts.Confidential = gitlab.Bool(opts.IsConfidential)
@@ -179,7 +179,7 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 	}
 	issueCreateCmd.Flags().StringVarP(&opts.Title, "title", "t", "", "Supply a title for issue")
 	issueCreateCmd.Flags().StringVarP(&opts.Description, "description", "d", "", "Supply a description for issue")
-	issueCreateCmd.Flags().StringVarP(&opts.Labels, "label", "l", "", "Add label by name. Multiple labels should be comma separated")
+	issueCreateCmd.Flags().StringSliceVarP(&opts.Labels, "label", "l", []string{}, "Add label by name. Multiple labels should be comma separated")
 	issueCreateCmd.Flags().StringSliceVarP(&opts.Assignees, "assignee", "a", []string{}, "Assign issue to people by their `usernames`")
 	issueCreateCmd.Flags().IntVarP(&opts.MileStone, "milestone", "m", -1, "The global ID of a milestone to assign issue")
 	issueCreateCmd.Flags().BoolVarP(&opts.IsConfidential, "confidential", "c", false, "Set an issue to be confidential. Default is false")
