@@ -200,10 +200,8 @@ func createRun(opts *CreateOpts) error {
 				return err
 			}
 		}
-	} else {
-		if opts.Title == "" {
-			return fmt.Errorf("title can't be blank")
-		}
+	} else if opts.Title == "" {
+		return fmt.Errorf("title can't be blank")
 	}
 
 	var action cmdutils.Action
