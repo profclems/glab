@@ -357,7 +357,9 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 
 				fmt.Fprintf(opts.IO.StdErr, message, utils.Cyan(opts.SourceBranch), utils.Cyan(opts.TargetBranch), baseRepo.FullName())
 
-				mr, err := api.CreateMR(labClient, baseRepo.FullName(), mrCreateOpts)
+				// It is intentional that we create against the head repo, it is necessary
+				// for cross-repository merge requests
+				mr, err := api.CreateMR(labClient, headRepo.FullName(), mrCreateOpts)
 				if err != nil {
 					return err
 				}
