@@ -45,8 +45,7 @@ func httpRequest(client *api.Client, config config.Config, hostname string, meth
 			}
 		} else {
 			for key, value := range pp {
-				switch vv := value.(type) {
-				case []byte:
+				if vv, ok := value.([]byte); ok {
 					pp[key] = string(vv)
 				}
 			}
