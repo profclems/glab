@@ -1,6 +1,7 @@
 # Binaries for glab
 cmd/glab/bin
 bin
+/CHANGELOG.md
 
 # Test binary, built with `go test -c`
 *.test
