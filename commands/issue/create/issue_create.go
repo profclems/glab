@@ -33,6 +33,7 @@ type CreateOpts struct {
 	IsConfidential bool
 	IsInteractive  bool
 	OpenInWeb      bool
+	Yes            bool
 
 	IO         *utils.IOStreams
 	BaseRepo   func() (glrepo.Interface, error)
@@ -102,6 +103,7 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 	issueCreateCmd.Flags().IntVarP(&opts.LinkedMR, "linked-mr", "", 0, "The IID of a merge request in which to resolve all issues")
 	issueCreateCmd.Flags().IntVarP(&opts.Weight, "weight", "w", 0, "The weight of the issue. Valid values are greater than or equal to 0.")
 	issueCreateCmd.Flags().BoolVarP(&opts.NoEditor, "no-editor", "", false, "Don't open editor to enter description. If set to true, uses prompt. Default is false")
+	issueCreateCmd.Flags().BoolVarP(&opts.Yes, "yes", "y", false, "Don't prompt for confirmation to submit the issue")
 
 	return issueCreateCmd
 }
@@ -207,11 +209,11 @@ func createRun(opts *CreateOpts) error {
 	var action cmdutils.Action
 
 	// submit without prompting for non interactive mode
-	if !opts.IsInteractive {
+	if !opts.IsInteractive || opts.Yes {
 		action = cmdutils.SubmitAction
 	}
 
-	if action == 0 {
+	if action == cmdutils.NoAction {
 		action, err = cmdutils.ConfirmSubmission(true)
 		if err != nil {
 			return fmt.Errorf("unable to confirm: %w", err)
