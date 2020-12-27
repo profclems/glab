@@ -380,7 +380,6 @@ func handlePush(opts *CreateOpts, remote *glrepo.Remote) error {
 	if opts.ShouldPush {
 		var sourceRemote = remote
 
-		remotes, _ := opts.Remotes()
 		sourceBranch := opts.SourceBranch
 
 		if sourceBranch != "" {
@@ -397,7 +396,8 @@ func handlePush(opts *CreateOpts, remote *glrepo.Remote) error {
 		}
 		err := git.Push(sourceRemote.Name, fmt.Sprintf("HEAD:%s", sourceBranch), opts.IO.StdOut, opts.IO.StdErr)
 		if err == nil {
-			if trackingRef := determineTrackingBranch(remotes, opts.SourceBranch); trackingRef == nil {
+			branchConfig := git.ReadBranchConfig(sourceBranch)
+			if branchConfig.RemoteName == "" && (branchConfig.MergeRef == "" || branchConfig.RemoteURL == nil) {
 				// No remote is set so set it
 				_ = git.SetUpstream(sourceRemote.Name, sourceBranch, opts.IO.StdOut, opts.IO.StdErr)
 			}
