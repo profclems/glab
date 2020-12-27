@@ -153,7 +153,7 @@ func (e *GLabEditor) prompt(initialValue string, config *survey.PromptConfig) (i
 	}
 
 	// check length, return default value on empty
-	if len(text) == 0 && !e.AppendDefault {
+	if text == "" && !e.AppendDefault {
 		return e.Default, nil
 	}
 
