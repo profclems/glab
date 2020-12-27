@@ -51,45 +51,6 @@ archives:
       windows: Windows
       <<: *arch_replacemens
 
-scoop:
-  url_template: "http://github.com/profclems/glab/releases/download/{{ .Tag }}/{{ .ArtifactName }}"
-  # Repository to push the app manifest to.
-  bucket:
-    owner: profclems
-    name: scoop-glab
-  commit_author:
-    name: Clement Sam
-    email: clementsam75@gmail.com
-  commit_msg_template: "Scoop update for {{ .ProjectName }} version {{ .Tag }}"
-  homepage: "https://github.com/profclems/glab"
-  description: "An open source gitlab cli tool"
-  license: MIT
-  persist:
-    - ".glab-cli"
-    - ".env"
-
-brews:
-  - name: glab
-    ids:
-      - nix
-    description: "An open source GitLab CLI tool"
-    commit_author:
-      name: Clement Sam
-      email: clementsam75@gmail.com
-    folder: Formula
-    goarm: 6
-    tap:
-      owner: profclems
-      name: homebrew-tap
-    url_template: "http://github.com/profclems/glab/releases/download/{{ .Tag }}/{{ .ArtifactName }}"
-    # Packages your package depends on.
-    homepage: "https://github.com/profclems/glab"
-    dependencies:
-      - name: git
-    install: bin.install "bin/glab"
-    test: |
-      system "#{bin}/glab version"
-      
 nfpms:
   -
     id: foo
