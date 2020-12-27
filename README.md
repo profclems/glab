@@ -62,7 +62,7 @@ Table of Contents
   issue:       Work with GitLab issues
   label:       Manage labels on remote
   mr:          Create, view and manage merge requests
-  pipeline:    Manage pipelines
+  ci:          Work with GitLab CI pipelines and jobs
   release:     Manage GitLab releases
   repo:        Work with GitLab repositories and projects
   
@@ -82,8 +82,8 @@ Table of Contents
   ```bash
   $ glab issue create --title="This is an issue title" --description="This is a really long description"
   $ glab issue list --closed
-  $ glab pipeline ci view -b master    # to watch the latest pipeline on master
-  $ glab pipeline status    # classic ci view
+  $ glab ci view -b master    # to watch the latest pipeline on master
+  $ glab ci status    # classic ci view
   ```
   
 ## Demo
