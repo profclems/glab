@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
+	"os"
 	"strings"
 
 	"github.com/profclems/glab/internal/config"
@@ -47,8 +48,13 @@ type CreateOpts struct {
 	Lab      func() (*gitlab.Client, error)
 	Config   func() (config.Config, error)
 	BaseRepo func() (glrepo.Interface, error)
+	HeadRepo func() (glrepo.Interface, error)
 
-	BaseProject   *gitlab.Project
+	// SourceProject is the Project we create the merge request in and where we push our branch
+	// it is the project we have permission to push so most likely one's fork
+	SourceProject *gitlab.Project
+	// TargetProject is the one we query for changes between our branch and the target branch
+	// it is the one we merge request will appear in
 	TargetProject *gitlab.Project
 }
 
@@ -62,6 +68,7 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 		Lab:      f.HttpClient,
 		Config:   f.Config,
 		BaseRepo: f.BaseRepo,
+		HeadRepo: resolvedHeadRepo(f),
 	}
 
 	var mrCreateCmd = &cobra.Command{
@@ -70,6 +77,15 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 		Long:    ``,
 		Aliases: []string{"new"},
 		Args:    cobra.ExactArgs(0),
+		PreRun: func(cmd *cobra.Command, args []string) {
+			repoOverride, _ := cmd.Flags().GetString("head")
+			if repoFromEnv := os.Getenv("GITLAB_HEAD_REPO"); repoOverride == "" && repoFromEnv != "" {
+				repoOverride = repoFromEnv
+			}
+			if repoOverride != "" {
+				_ = headRepoOverride(opts, repoOverride)
+			}
+		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var err error
 
@@ -94,12 +110,17 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 				return err
 			}
 
-			repo, err := opts.BaseRepo()
+			baseRepo, err := opts.BaseRepo()
 			if err != nil {
 				return err
 			}
 
-			opts.BaseProject, err = api.GetProject(labClient, repo.FullName())
+			headRepo, err := opts.HeadRepo()
+			if err != nil {
+				return err
+			}
+
+			opts.SourceProject, err = api.GetProject(labClient, headRepo.FullName())
 			if err != nil {
 				return err
 			}
@@ -111,8 +132,17 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 					return err
 				}
 			} else {
-				// assume the target project is the base project
-				opts.TargetProject = opts.BaseProject
+				// If both the baseRepo and headRepo are the same then re-use the SourceProject
+				if baseRepo.FullName() == headRepo.FullName() {
+					opts.TargetProject = opts.SourceProject
+				} else {
+					// Otherwise assume the user wants to create the merge request against the
+					// baseRepo
+					opts.TargetProject, err = api.GetProject(labClient, baseRepo.FullName())
+					if err != nil {
+						return err
+					}
+				}
 			}
 
 			if !opts.TargetProject.MergeRequestsEnabled {
@@ -120,19 +150,27 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 				return cmdutils.SilentError
 			}
 
-			remotes, err := opts.Remotes()
+			headRepoRemote, err := repoRemote(labClient, opts, headRepo, opts.SourceProject, "glab-head")
 			if err != nil {
-				return err
+				return nil
 			}
-			repoRemote, err := remotes.FindByRepo(repo.RepoOwner(), repo.RepoName())
-			if err != nil {
-				return err
+
+			var baseRepoRemote *glrepo.Remote
+
+			// check if baseRepo is the same as the headRepo and set the remote
+			if glrepo.IsSame(baseRepo, headRepo) {
+				baseRepoRemote = headRepoRemote
+			} else {
+				baseRepoRemote, err = repoRemote(labClient, opts, baseRepo, opts.TargetProject, "glab-base")
+				if err != nil {
+					return nil
+				}
 			}
 
 			if opts.TargetBranch == "" {
-				opts.TargetBranch, _ = git.GetDefaultBranch(repoRemote.PushURL.String())
+				opts.TargetBranch, _ = git.GetDefaultBranch(baseRepoRemote.PushURL.String())
 			}
-			opts.TargetTrackingBranch = fmt.Sprintf("%s/%s", repoRemote.Name, opts.TargetBranch)
+			opts.TargetTrackingBranch = fmt.Sprintf("%s/%s", baseRepoRemote.Name, opts.TargetBranch)
 
 			if opts.CreateSourceBranch && opts.SourceBranch == "" {
 				opts.SourceBranch = utils.ReplaceNonAlphaNumericChars(opts.Title, "-")
@@ -143,7 +181,7 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 				}
 			}
 
-			if opts.SourceBranch == opts.TargetBranch {
+			if opts.SourceBranch == opts.TargetBranch && glrepo.IsSame(baseRepo, headRepo) {
 				fmt.Fprintf(opts.IO.StdErr, "You must be on a different branch other than %q\n", opts.TargetBranch)
 				return cmdutils.SilentError
 			}
@@ -152,7 +190,7 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 				if err = mrBodyAndTitle(opts); err != nil {
 					return err
 				}
-				_, err = api.GetCommit(labClient, repo.FullName(), opts.TargetBranch)
+				_, err = api.GetCommit(labClient, baseRepo.FullName(), opts.TargetBranch)
 				if err != nil {
 					return fmt.Errorf("target branch %s does not exist on remote. Specify target branch with --target-branch flag",
 						opts.TargetBranch)
@@ -226,7 +264,7 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 					}
 				}
 				if len(opts.Labels) == 0 {
-					err = cmdutils.LabelsPrompt(&opts.Labels, labClient, repoRemote)
+					err = cmdutils.LabelsPrompt(&opts.Labels, labClient, baseRepoRemote)
 					if err != nil {
 						return err
 					}
@@ -275,7 +313,7 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 					Ref:    gitlab.String(opts.TargetBranch),
 				}
 				fmt.Fprintln(opts.IO.StdErr, "\nCreating related branch...")
-				branch, err := api.CreateBranch(labClient, repo.FullName(), lb)
+				branch, err := api.CreateBranch(labClient, headRepo.FullName(), lb)
 				if err == nil {
 					fmt.Fprintln(opts.IO.StdErr, "Branch created: ", branch.WebURL)
 				} else {
@@ -302,7 +340,7 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 				return nil
 			}
 
-			if err := handlePush(opts, repoRemote); err != nil {
+			if err := handlePush(opts, headRepoRemote); err != nil {
 				return err
 			}
 
@@ -317,9 +355,9 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 					message = "\nCreating draft merge request for %s into %s in %s\n\n"
 				}
 
-				fmt.Fprintf(opts.IO.StdErr, message, utils.Cyan(opts.SourceBranch), utils.Cyan(opts.TargetBranch), repo.FullName())
+				fmt.Fprintf(opts.IO.StdErr, message, utils.Cyan(opts.SourceBranch), utils.Cyan(opts.TargetBranch), baseRepo.FullName())
 
-				mr, err := api.CreateMR(labClient, repo.FullName(), mrCreateOpts)
+				mr, err := api.CreateMR(labClient, baseRepo.FullName(), mrCreateOpts)
 				if err != nil {
 					return err
 				}
@@ -341,12 +379,16 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 	mrCreateCmd.Flags().StringSliceVarP(&opts.Assignees, "assignee", "a", []string{}, "Assign merge request to people by their `usernames`")
 	mrCreateCmd.Flags().StringVarP(&opts.SourceBranch, "source-branch", "s", "", "The Branch you are creating the merge request. Default is the current branch.")
 	mrCreateCmd.Flags().StringVarP(&opts.TargetBranch, "target-branch", "b", "", "The target or base branch into which you want your code merged")
-	mrCreateCmd.Flags().StringVarP(&mrCreateTargetProject, "target-project", "", "", "Add target project by id or OWNER/REPO or GROUP/NAMESPACE/REPO")
 	mrCreateCmd.Flags().BoolVarP(&opts.CreateSourceBranch, "create-source-branch", "", false, "Create source branch if it does not exist")
 	mrCreateCmd.Flags().IntVarP(&opts.MileStone, "milestone", "m", 0, "add milestone by <id> for merge request")
 	mrCreateCmd.Flags().BoolVarP(&opts.AllowCollaboration, "allow-collaboration", "", false, "Allow commits from other members")
 	mrCreateCmd.Flags().BoolVarP(&opts.RemoveSourceBranch, "remove-source-branch", "", false, "Remove Source Branch on merge")
 	mrCreateCmd.Flags().BoolVarP(&opts.NoEditor, "no-editor", "", false, "Don't open editor to enter description. If set to true, uses prompt. Default is false")
+	mrCreateCmd.Flags().StringP("head", "H", "", "Select another head repository using the `OWNER/REPO` or `GROUP/NAMESPACE/REPO` format or the project ID or full URL")
+
+	mrCreateCmd.Flags().StringVarP(&mrCreateTargetProject, "target-project", "", "", "Add target project by id or OWNER/REPO or GROUP/NAMESPACE/REPO")
+	mrCreateCmd.Flags().MarkHidden("target-project")
+	mrCreateCmd.Flags().MarkDeprecated("target-project", "Use --repo instead")
 
 	return mrCreateCmd
 }
@@ -419,7 +461,7 @@ func previewMR(opts *CreateOpts) error {
 		return err
 	}
 
-	openURL, err := generateMRCompareURL(opts, repo)
+	openURL, err := generateMRCompareURL(opts)
 	if err != nil {
 		return err
 	}
@@ -431,12 +473,8 @@ func previewMR(opts *CreateOpts) error {
 	return utils.OpenInBrowser(openURL, browser)
 }
 
-func generateMRCompareURL(opts *CreateOpts, repo glrepo.Interface) (string, error) {
+func generateMRCompareURL(opts *CreateOpts) (string, error) {
 	description := opts.Description
-	targetProjectID := opts.BaseProject.ID
-	if opts.TargetProject != nil {
-		targetProjectID = opts.TargetProject.ID
-	}
 
 	if len(opts.Labels) > 0 {
 		// this uses the slash commands to add labels to the description
@@ -453,7 +491,8 @@ func generateMRCompareURL(opts *CreateOpts, repo glrepo.Interface) (string, erro
 		description += fmt.Sprintf("\n/milestone %%%d", opts.MileStone)
 	}
 
-	u, err := url.Parse(opts.BaseProject.WebURL)
+	// The merge request **must** be opened against the head repo
+	u, err := url.Parse(opts.SourceProject.WebURL)
 	if err != nil {
 		return "", err
 	}
@@ -464,7 +503,81 @@ func generateMRCompareURL(opts *CreateOpts, repo glrepo.Interface) (string, erro
 		description,
 		opts.SourceBranch,
 		opts.TargetBranch,
-		opts.BaseProject.ID,
-		targetProjectID)
+		opts.SourceProject.ID,
+		opts.TargetProject.ID)
 	return u.String(), nil
+}
+
+func resolvedHeadRepo(f *cmdutils.Factory) func() (glrepo.Interface, error) {
+	return func() (glrepo.Interface, error) {
+		httpClient, err := f.HttpClient()
+		if err != nil {
+			return nil, err
+		}
+		remotes, err := f.Remotes()
+		if err != nil {
+			return nil, err
+		}
+		repoContext, err := glrepo.ResolveRemotesToRepos(remotes, httpClient, "")
+		if err != nil {
+			return nil, err
+		}
+		headRepo, err := repoContext.HeadRepo(true)
+		if err != nil {
+			return nil, err
+		}
+
+		return headRepo, nil
+	}
+}
+
+func headRepoOverride(opts *CreateOpts, repo string) error {
+	opts.HeadRepo = func() (glrepo.Interface, error) {
+		return glrepo.FromFullName(repo)
+	}
+	return nil
+}
+
+func repoRemote(labClient *gitlab.Client, opts *CreateOpts, repo glrepo.Interface, project *gitlab.Project, remoteName string) (*glrepo.Remote, error) {
+	remotes, err := opts.Remotes()
+	if err != nil {
+		return nil, err
+	}
+	repoRemote, _ := remotes.FindByRepo(repo.RepoOwner(), repo.RepoName())
+	if repoRemote == nil {
+		cfg, err := opts.Config()
+		if err != nil {
+			return nil, err
+		}
+		gitProtocol, _ := cfg.Get(repo.RepoHost(), "git_protocol")
+		token, _ := cfg.Get(repo.RepoHost(), "token")
+		repoURL := project.SSHURLToRepo
+
+		if gitProtocol != "ssh" {
+			u, err := api.CurrentUser(labClient)
+			if err != nil {
+				return nil, fmt.Errorf("failed to get current user info: %q", err)
+			}
+			remoteArgs := &glrepo.RemoteArgs{
+				Protocol: gitProtocol,
+				Token:    token,
+				Url:      repo.RepoHost(),
+				Username: u.Username,
+			}
+
+			repoURL, _ = glrepo.RemoteURL(project, remoteArgs)
+
+		}
+
+		gitRemote, err := git.AddRemote(remoteName, repoURL)
+		if err != nil {
+			return nil, fmt.Errorf("error adding remote: %w", err)
+		}
+		repoRemote = &glrepo.Remote{
+			Remote: gitRemote,
+			Repo:   repo,
+		}
+	}
+
+	return repoRemote, nil
 }
