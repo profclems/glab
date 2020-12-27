@@ -37,18 +37,18 @@ jobs:
           $srcDir = Convert-Path .
           Rename-Item -Path $srcDir/bin/glab -NewName glab.exe
           Copy-Item -Path $srcDir/scripts/setup_windows.iss -Destination $srcDir
-          iscc "setup_windows.iss" /DVersion=${{steps.buildwin.outputs.tag}}
+          iscc "setup_windows.iss" /DVersion=1.13.0
 
       - name: Generate Hash
         env:
           GITHUB_TOKEN: ${{secrets.BOT_TOKEN}}
         run:
           gh release download -p "checksums.txt"; 
-          echo "$(Get-FileHash ./bin/glab_${{ steps.buildwin.outputs.tag }}_Windows_x86_64_installer.exe -Algorithm SHA256 | Select-Object "Hash" | ForEach-Object {$_.Hash})  glab_${{ steps.buildwin.outputs.tag }}_Windows_x86_64_installer.exe" >> checksums.txt
+          echo "$(Get-FileHash ./bin/glab_1.13.0_Windows_x86_64_installer.exe -Algorithm SHA256 | Select-Object "Hash" | ForEach-Object {$_.Hash})  glab_1.13.0_Windows_x86_64_installer.exe" >> checksums.txt
 
       - name: Upload Installer to Release
         continue-on-error: true
         env:
           GITHUB_TOKEN: ${{secrets.BOT_TOKEN}}
         run: |
-          gh release upload "${{ steps.buildwin.outputs.vtag }}" ./bin/glab_${{ steps.buildwin.outputs.tag }}_Windows_x86_64_installer.exe checksums.txt --clobber
+          gh release upload "v1.13.0" ./bin/glab_1.13.0_Windows_x86_64_installer.exe checksums.txt --clobber
