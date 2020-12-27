@@ -50,7 +50,11 @@ type CreateOpts struct {
 	BaseRepo func() (glrepo.Interface, error)
 	HeadRepo func() (glrepo.Interface, error)
 
-	BaseProject   *gitlab.Project
+	// SourceProject is the Project we create the merge request in and where we push our branch
+	// it is the project we have permission to push so most likely one's fork
+	SourceProject *gitlab.Project
+	// TargetProject is the one we query for changes between our branch and the target branch
+	// it is the one we merge request will appear in
 	TargetProject *gitlab.Project
 }
 
@@ -116,7 +120,7 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 				return err
 			}
 
-			opts.BaseProject, err = api.GetProject(labClient, baseRepo.FullName())
+			opts.SourceProject, err = api.GetProject(labClient, headRepo.FullName())
 			if err != nil {
 				return err
 			}
@@ -128,8 +132,17 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 					return err
 				}
 			} else {
-				// assume the target project is the base project
-				opts.TargetProject = opts.BaseProject
+				// If both the baseRepo and headRepo are the same then re-use the SourceProject
+				if baseRepo.FullName() == headRepo.FullName() {
+					opts.TargetProject = opts.SourceProject
+				} else {
+					// Otherwise assume the user wants to create the merge request against the
+					// baseRepo
+					opts.TargetProject, err = api.GetProject(labClient, baseRepo.FullName())
+					if err != nil {
+						return err
+					}
+				}
 			}
 
 			if !opts.TargetProject.MergeRequestsEnabled {
@@ -485,7 +498,7 @@ func previewMR(opts *CreateOpts) error {
 		return err
 	}
 
-	openURL, err := generateMRCompareURL(opts, repo)
+	openURL, err := generateMRCompareURL(opts)
 	if err != nil {
 		return err
 	}
@@ -497,12 +510,8 @@ func previewMR(opts *CreateOpts) error {
 	return utils.OpenInBrowser(openURL, browser)
 }
 
-func generateMRCompareURL(opts *CreateOpts, repo glrepo.Interface) (string, error) {
+func generateMRCompareURL(opts *CreateOpts) (string, error) {
 	description := opts.Description
-	targetProjectID := opts.BaseProject.ID
-	if opts.TargetProject != nil {
-		targetProjectID = opts.TargetProject.ID
-	}
 
 	if len(opts.Labels) > 0 {
 		// this uses the slash commands to add labels to the description
@@ -519,7 +528,8 @@ func generateMRCompareURL(opts *CreateOpts, repo glrepo.Interface) (string, erro
 		description += fmt.Sprintf("\n/milestone %%%d", opts.MileStone)
 	}
 
-	u, err := url.Parse(opts.BaseProject.WebURL)
+	// The merge request **must** be opened against the head repo
+	u, err := url.Parse(opts.SourceProject.WebURL)
 	if err != nil {
 		return "", err
 	}
@@ -530,8 +540,8 @@ func generateMRCompareURL(opts *CreateOpts, repo glrepo.Interface) (string, erro
 		description,
 		opts.SourceBranch,
 		opts.TargetBranch,
-		opts.BaseProject.ID,
-		targetProjectID)
+		opts.SourceProject.ID,
+		opts.TargetProject.ID)
 	return u.String(), nil
 }
 
