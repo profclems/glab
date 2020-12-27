@@ -47,7 +47,7 @@ func DisplayMultiplePipelines(p []*gitlab.PipelineInfo, projectID string) string
 	return "No Pipelines available on " + projectID
 }
 
-func RunTrace(apiClient *gitlab.Client, ctx context.Context, w io.Writer, pid interface{}, sha, name string) error {
+func RunTrace(ctx context.Context, apiClient *gitlab.Client, w io.Writer, pid interface{}, sha, name string) error {
 	fmt.Fprintln(w, "Getting job trace...")
 	for range time.NewTicker(time.Second * 3).C {
 		if ctx.Err() == context.Canceled {
