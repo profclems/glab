@@ -408,47 +408,6 @@ func handlePush(opts *CreateOpts, remote *glrepo.Remote) error {
 	return nil
 }
 
-func determineTrackingBranch(remotes glrepo.Remotes, headBranch string) *git.TrackingRef {
-	refsForLookup := []string{"HEAD"}
-	var trackingRefs []git.TrackingRef
-
-	headBranchConfig := git.ReadBranchConfig(headBranch)
-	if headBranchConfig.RemoteName != "" {
-		tr := git.TrackingRef{
-			RemoteName: headBranchConfig.RemoteName,
-			BranchName: strings.TrimPrefix(headBranchConfig.MergeRef, "refs/heads/"),
-		}
-		trackingRefs = append(trackingRefs, tr)
-		refsForLookup = append(refsForLookup, tr.String())
-	}
-
-	for _, remote := range remotes {
-		tr := git.TrackingRef{
-			RemoteName: remote.Name,
-			BranchName: headBranch,
-		}
-		trackingRefs = append(trackingRefs, tr)
-		refsForLookup = append(refsForLookup, tr.String())
-	}
-
-	resolvedRefs, _ := git.ShowRefs(refsForLookup...)
-	if len(resolvedRefs) > 1 {
-		for _, r := range resolvedRefs[1:] {
-			if r.Hash != resolvedRefs[0].Hash {
-				continue
-			}
-			for _, tr := range trackingRefs {
-				if tr.String() != r.Name {
-					continue
-				}
-				return &tr
-			}
-		}
-	}
-
-	return nil
-}
-
 func previewMR(opts *CreateOpts) error {
 	repo, err := opts.BaseRepo()
 	if err != nil {
