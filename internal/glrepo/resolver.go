@@ -3,6 +3,7 @@ package glrepo
 import (
 	"errors"
 	"sort"
+	"strings"
 
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/profclems/glab/internal/git"
@@ -66,11 +67,24 @@ func (r *ResolvedRemotes) BaseRepo(prompt bool) (Interface, error) {
 	for _, r := range r.remotes {
 		if r.Resolved == "base" {
 			return r, nil
-		} else if r.Resolved != "" {
+		} else if strings.HasPrefix(r.Resolved, "base:") {
+			repo, err := FromFullName(strings.TrimPrefix(r.Resolved, "base:"))
+			if err != nil {
+				return nil, err
+			}
+			return NewWithHost(repo.RepoOwner(), repo.RepoName(), r.RepoHost()), nil
+		} else if r.Resolved != "" && !strings.HasPrefix(r.Resolved, "head:") {
+			// Backward compatibility kludge for remoteless resolutions created before
+			// BaseRepo started creeating resolutions prefixed with `base:`
 			repo, err := FromFullName(r.Resolved)
 			if err != nil {
 				return nil, err
 			}
+			// Rewrite resolution, ignore the error as this will keep working
+			// in the future we might add a warning that we couldn't rewrite
+			// it for compatiblity
+			_ = git.SetRemoteResolution(r.Name, "base:"+r.Resolved)
+
 			return NewWithHost(repo.RepoOwner(), repo.RepoName(), r.RepoHost()), nil
 		}
 	}
@@ -93,22 +107,17 @@ func (r *ResolvedRemotes) BaseRepo(prompt bool) (Interface, error) {
 	add := func(r *gitlab.Project) {
 		fn, _ := FullNameFromURL(r.HTTPURLToRepo)
 		if _, ok := repoMap[fn]; !ok {
-			// This is run inside a for-loop, create a local copy and use its address
-			// instead of the one given to us, otherwise the value in repoMap will be
-			// overwriten in the next iteration of the loop
-			// See: #395, #384
-			localCopy := *r
-			repoMap[fn] = &localCopy
+			repoMap[fn] = r
 			repoNames = append(repoNames, fn)
 		}
 	}
 
-	for _, repo := range r.network {
-		if repo.ForkedFromProject != nil {
-			fProject, _ := api.GetProject(r.apiClient, repo.ForkedFromProject.PathWithNamespace)
+	for i := range r.network {
+		if r.network[i].ForkedFromProject != nil {
+			fProject, _ := api.GetProject(r.apiClient, r.network[i].ForkedFromProject.PathWithNamespace)
 			add(fProject)
 		}
-		add(&repo)
+		add(&r.network[i])
 	}
 
 	if len(repoNames) == 0 {
@@ -134,6 +143,7 @@ func (r *ResolvedRemotes) BaseRepo(prompt bool) (Interface, error) {
 	if remote == nil {
 		remote = r.remotes[0]
 		resolution, _ = FullNameFromURL(selectedRepo.HTTPURLToRepo)
+		resolution = "base:" + resolution
 	}
 
 	// cache the result to git config
