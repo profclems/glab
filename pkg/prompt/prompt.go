@@ -45,13 +45,9 @@ func AskMultiline(response interface{}, question string, defaultVal string) erro
 	return nil
 }
 
-var AskOne = func(p survey.Prompt, response interface{}, opts ...survey.AskOpt) error {
-	return survey.AskOne(p, response, opts...)
-}
+var AskOne = survey.AskOne
 
-var Ask = func(qs []*survey.Question, response interface{}, opts ...survey.AskOpt) error {
-	return survey.Ask(qs, response, opts...)
-}
+var Ask = survey.Ask
 
 var Confirm = func(result *bool, prompt string, defaultVal bool) error {
 	p := &survey.Confirm{
