@@ -137,7 +137,7 @@ func GenReSTCustom(cmd *cobra.Command, w io.Writer) error {
 	if long == "" {
 		long = short
 	}
-	ref := strings.Replace(name, " ", "_", -1)
+	ref := strings.ReplaceAll(name, " ", "_")
 
 	buf.WriteString(".. _" + ref + ":\n\n")
 	buf.WriteString(name + "\n")
