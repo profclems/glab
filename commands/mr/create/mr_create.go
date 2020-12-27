@@ -150,17 +150,21 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 				return cmdutils.SilentError
 			}
 
-			remotes, err := opts.Remotes()
+			headRepoRemote, err := repoRemote(labClient, opts, headRepo, opts.SourceProject, "glab-head")
 			if err != nil {
-				return err
+				return nil
 			}
-			headRepoRemote, err := remotes.FindByRepo(headRepo.RepoOwner(), headRepo.RepoName())
-			if err != nil {
-				return err
-			}
-			baseRepoRemote, err := remotes.FindByRepo(baseRepo.RepoOwner(), baseRepo.RepoName())
-			if err != nil {
-				return err
+
+			var baseRepoRemote *glrepo.Remote
+
+			// check if baseRepo is the same as the headRepo and set the remote
+			if glrepo.IsSame(baseRepo, headRepo) {
+				baseRepoRemote = headRepoRemote
+			} else {
+				baseRepoRemote, err = repoRemote(labClient, opts, baseRepo, opts.TargetProject, "glab-base")
+				if err != nil {
+					return nil
+				}
 			}
 
 			if opts.TargetBranch == "" {
@@ -177,7 +181,7 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 				}
 			}
 
-			if opts.SourceBranch == opts.TargetBranch {
+			if opts.SourceBranch == opts.TargetBranch && glrepo.IsSame(baseRepo, headRepo) {
 				fmt.Fprintf(opts.IO.StdErr, "You must be on a different branch other than %q\n", opts.TargetBranch)
 				return cmdutils.SilentError
 			}
@@ -353,7 +357,7 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 
 				fmt.Fprintf(opts.IO.StdErr, message, utils.Cyan(opts.SourceBranch), utils.Cyan(opts.TargetBranch), baseRepo.FullName())
 
-				mr, err := api.CreateMR(labClient, headRepo.FullName(), mrCreateOpts)
+				mr, err := api.CreateMR(labClient, baseRepo.FullName(), mrCreateOpts)
 				if err != nil {
 					return err
 				}
@@ -573,4 +577,48 @@ func headRepoOverride(opts *CreateOpts, repo string) error {
 		return glrepo.FromFullName(repo)
 	}
 	return nil
+}
+
+func repoRemote(labClient *gitlab.Client, opts *CreateOpts, repo glrepo.Interface, project *gitlab.Project, remoteName string) (*glrepo.Remote, error) {
+	remotes, err := opts.Remotes()
+	if err != nil {
+		return nil, err
+	}
+	repoRemote, _ := remotes.FindByRepo(repo.RepoOwner(), repo.RepoName())
+	if repoRemote == nil {
+		cfg, err := opts.Config()
+		if err != nil {
+			return nil, err
+		}
+		gitProtocol, _ := cfg.Get(repo.RepoHost(), "git_protocol")
+		token, _ := cfg.Get(repo.RepoHost(), "token")
+		repoURL := project.SSHURLToRepo
+
+		if gitProtocol != "ssh" {
+			u, err := api.CurrentUser(labClient)
+			if err != nil {
+				return nil, fmt.Errorf("failed to get current user info: %q", err)
+			}
+			remoteArgs := &glrepo.RemoteArgs{
+				Protocol: gitProtocol,
+				Token:    token,
+				Url:      repo.RepoHost(),
+				Username: u.Username,
+			}
+
+			repoURL, _ = glrepo.RemoteURL(project, remoteArgs)
+
+		}
+
+		gitRemote, err := git.AddRemote(remoteName, repoURL)
+		if err != nil {
+			return nil, fmt.Errorf("error adding remote: %w", err)
+		}
+		repoRemote = &glrepo.Remote{
+			Remote: gitRemote,
+			Repo:   repo,
+		}
+	}
+
+	return repoRemote, nil
 }
