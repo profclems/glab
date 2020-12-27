@@ -41,6 +41,7 @@ type CreateOpts struct {
 	ShouldPush    bool
 	NoEditor      bool
 	IsInteractive bool
+	Yes           bool
 
 	IO       *utils.IOStreams
 	Branch   func() (string, error)
@@ -324,11 +325,11 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 			var action cmdutils.Action
 
 			// submit without prompting for non interactive mode
-			if !opts.IsInteractive {
+			if !opts.IsInteractive || opts.Yes {
 				action = cmdutils.SubmitAction
 			}
 
-			if action == 0 {
+			if action == cmdutils.NoAction {
 				action, err = cmdutils.ConfirmSubmission(true)
 				if err != nil {
 					return fmt.Errorf("unable to confirm: %w", err)
@@ -387,6 +388,7 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 	mrCreateCmd.Flags().BoolVarP(&opts.RemoveSourceBranch, "remove-source-branch", "", false, "Remove Source Branch on merge")
 	mrCreateCmd.Flags().BoolVarP(&opts.NoEditor, "no-editor", "", false, "Don't open editor to enter description. If set to true, uses prompt. Default is false")
 	mrCreateCmd.Flags().StringP("head", "H", "", "Select another head repository using the `OWNER/REPO` or `GROUP/NAMESPACE/REPO` format or the project ID or full URL")
+	mrCreateCmd.Flags().BoolVarP(&opts.Yes, "yes", "y", false, "Do not prompt for confirmation to submit the merge request")
 
 	mrCreateCmd.Flags().StringVarP(&mrCreateTargetProject, "target-project", "", "", "Add target project by id or OWNER/REPO or GROUP/NAMESPACE/REPO")
 	mrCreateCmd.Flags().MarkHidden("target-project")
