@@ -29,6 +29,7 @@ Subcommands
    contributors <contributors>
    create <create>
    delete <delete>
+   fork <fork>
    search <search>
    
 

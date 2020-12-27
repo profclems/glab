@@ -30,13 +30,14 @@ Options
 
 ::
 
-  -a, --assignee string        merge request assignee
+  -a, --assignees usernames    Assign merge request to people by their usernames
   -d, --description string     merge request description
       --draft                  Mark merge request as a draft
       --lock-discussion        Lock discussion on merge request
   -r, --ready                  Mark merge request as ready to be reviewed and merged
       --remove-source-branch   Remove Source Branch on merge
   -t, --title string           Title of merge request
+      --unlock-discussion      Unlock discussion on merge request
       --wip                    Mark merge request as a work in progress. Alternative to --draft
 
 Options inherited from parent commands

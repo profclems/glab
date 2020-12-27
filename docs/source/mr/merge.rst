@@ -34,7 +34,7 @@ Options
       --sha string               Merge Commit sha
   -s, --squash                   Squash commits on merge
       --squash-message string    Custom Squash commit message
-      --when-pipeline-succeeds   Merge only when pipeline succeeds. Default to true (default true)
+      --when-pipeline-succeeds   Merge only when pipeline succeeds (default true)
 
 Options inherited from parent commands
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
