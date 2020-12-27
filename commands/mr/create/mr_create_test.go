@@ -10,9 +10,6 @@ import (
 
 	"github.com/profclems/glab/pkg/prompt"
 
-	"github.com/profclems/glab/internal/git"
-	"github.com/profclems/glab/internal/glrepo"
-
 	"github.com/google/shlex"
 	"github.com/profclems/glab/test"
 
@@ -217,99 +214,4 @@ Little longer
 Resolves #1
 `, opts.Description)
 	})
-}
-
-func Test_determineTrackingBranch_empty(t *testing.T) {
-	cs, cmdTeardown := test.InitCmdStubber()
-	defer cmdTeardown()
-
-	remotes := glrepo.Remotes{}
-
-	cs.Stub("")              // git config --get-regexp (ReadBranchConfig)
-	cs.Stub("deadbeef HEAD") // git show-ref --verify   (ShowRefs)
-
-	ref := determineTrackingBranch(remotes, "feature")
-	if ref != nil {
-		t.Errorf("expected nil result, got %v", ref)
-	}
-}
-
-func Test_determineTrackingBranch_noMatch(t *testing.T) {
-	cs, cmdTeardown := test.InitCmdStubber()
-	defer cmdTeardown()
-
-	remotes := glrepo.Remotes{
-		&glrepo.Remote{
-			Remote: &git.Remote{Name: "origin"},
-			Repo:   glrepo.New("hubot", "Spoon-Knife"),
-		},
-		&glrepo.Remote{
-			Remote: &git.Remote{Name: "upstream"},
-			Repo:   glrepo.New("octocat", "Spoon-Knife"),
-		},
-	}
-
-	cs.Stub("") // git config --get-regexp (ReadBranchConfig)
-	cs.Stub(`deadbeef HEAD
-deadb00f refs/remotes/origin/feature`) // git show-ref --verify (ShowRefs)
-
-	ref := determineTrackingBranch(remotes, "feature")
-	if ref != nil {
-		t.Errorf("expected nil result, got %v", ref)
-	}
-}
-
-func Test_determineTrackingBranch_hasMatch(t *testing.T) {
-	cs, cmdTeardown := test.InitCmdStubber()
-	defer cmdTeardown()
-
-	remotes := glrepo.Remotes{
-		&glrepo.Remote{
-			Remote: &git.Remote{Name: "origin"},
-			Repo:   glrepo.New("hubot", "Spoon-Knife"),
-		},
-		&glrepo.Remote{
-			Remote: &git.Remote{Name: "upstream"},
-			Repo:   glrepo.New("octocat", "Spoon-Knife"),
-		},
-	}
-
-	cs.Stub("") // git config --get-regexp (ReadBranchConfig)
-	cs.Stub(`deadbeef HEAD
-deadb00f refs/remotes/origin/feature
-deadbeef refs/remotes/upstream/feature`) // git show-ref --verify (ShowRefs)
-
-	ref := determineTrackingBranch(remotes, "feature")
-	if ref == nil {
-		t.Fatal("expected result, got nil")
-	}
-
-	cmdtest.Eq(t, cs.Calls[1].Args, []string{"git", "show-ref", "--verify", "--", "HEAD", "refs/remotes/origin/feature", "refs/remotes/upstream/feature"})
-
-	cmdtest.Eq(t, ref.RemoteName, "upstream")
-	cmdtest.Eq(t, ref.BranchName, "feature")
-}
-
-func Test_determineTrackingBranch_respectTrackingConfig(t *testing.T) {
-	cs, cmdTeardown := test.InitCmdStubber()
-	defer cmdTeardown()
-
-	remotes := glrepo.Remotes{
-		&glrepo.Remote{
-			Remote: &git.Remote{Name: "origin"},
-			Repo:   glrepo.New("hubot", "Spoon-Knife"),
-		},
-	}
-
-	cs.Stub(`branch.feature.remote origin
-branch.feature.merge refs/heads/great-feat`) // git config --get-regexp (ReadBranchConfig)
-	cs.Stub(`deadbeef HEAD
-deadb00f refs/remotes/origin/feature`) // git show-ref --verify (ShowRefs)
-
-	ref := determineTrackingBranch(remotes, "feature")
-	if ref != nil {
-		t.Errorf("expected nil result, got %v", ref)
-	}
-
-	cmdtest.Eq(t, cs.Calls[1].Args, []string{"git", "show-ref", "--verify", "--", "HEAD", "refs/remotes/origin/great-feat", "refs/remotes/origin/feature"})
 }
