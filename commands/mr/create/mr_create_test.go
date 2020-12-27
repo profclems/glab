@@ -167,8 +167,7 @@ func TestNewCmdCreate_autofill(t *testing.T) {
 		out := stripansi.Strip(stdout.String())
 		outErr := stripansi.Strip(stderr.String())
 
-		assert.Equal(t, `Branch 'mr-autofill-test-br' set up to track remote branch 'mr-autofill-test-br' from 'origin'.
-!1 docs: add some changes to txt file (mr-autofill-test-br)
+		assert.Equal(t, `!1 docs: add some changes to txt file (mr-autofill-test-br)
  https://gitlab.com/glab-cli/test/-/merge_requests/1
 
 `, out)

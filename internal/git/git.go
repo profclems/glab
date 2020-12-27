@@ -208,12 +208,20 @@ func CommitBody(sha string) (string, error) {
 	return string(output), nil
 }
 
-// Push publishes a git ref to a remote and sets up upstream configuration
+// Push publishes a git ref to a remote
 func Push(remote string, ref string, cmdOut, cmdErr io.Writer) error {
-	pushCmd := GitCommand("push", "--set-upstream", remote, ref)
+	pushCmd := GitCommand("push", remote, ref)
 	pushCmd.Stdout = cmdOut
 	pushCmd.Stderr = cmdErr
 	return run.PrepareCmd(pushCmd).Run()
+}
+
+// SetUpstream sets the upstream (tracking) of a branch
+func SetUpstream(remote string, branch string, cmdOut, cmdErr io.Writer) error {
+	setCmd := GitCommand("branch", "--set-upstream-to", fmt.Sprintf("%s/%s", remote, branch))
+	setCmd.Stdout = cmdOut
+	setCmd.Stderr = cmdErr
+	return run.PrepareCmd(setCmd).Run()
 }
 
 type BranchConfig struct {

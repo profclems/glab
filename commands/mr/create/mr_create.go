@@ -395,12 +395,14 @@ func handlePush(opts *CreateOpts, remote *glrepo.Remote) error {
 			}
 			fmt.Fprintf(opts.IO.StdErr, "\nwarning: you have %s\n", utils.Pluralize(c, "uncommitted change"))
 		}
-		if trackingRef := determineTrackingBranch(remotes, opts.SourceBranch); trackingRef != nil {
-			if r, err := remotes.FindByName(trackingRef.RemoteName); err == nil {
-				sourceRemote = r
+		err := git.Push(sourceRemote.Name, fmt.Sprintf("HEAD:%s", sourceBranch), opts.IO.StdOut, opts.IO.StdErr)
+		if err == nil {
+			if trackingRef := determineTrackingBranch(remotes, opts.SourceBranch); trackingRef == nil {
+				// No remote is set so set it
+				_ = git.SetUpstream(sourceRemote.Name, sourceBranch, opts.IO.StdOut, opts.IO.StdErr)
 			}
 		}
-		return git.Push(sourceRemote.Name, fmt.Sprintf("HEAD:%s", sourceBranch), opts.IO.StdOut, opts.IO.StdErr)
+		return err
 	}
 
 	return nil
