@@ -40,7 +40,7 @@ func main() {
 	for _, cmd := range cmds {
 		fmt.Println("Generating docs for " + cmd.Name())
 		// create directories for parent commands
-		err = os.MkdirAll(docLoc+cmd.Name(), 0755)
+		_ = os.MkdirAll(docLoc+cmd.Name(), 0750)
 
 		// Generate parent command
 		out := new(bytes.Buffer)
