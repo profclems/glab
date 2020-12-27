@@ -39,7 +39,7 @@ func NewCmdClose(f *cmdutils.Factory) *cobra.Command {
 				}); err != nil {
 					return err
 				}
-				fmt.Fprintf(f.IO.StdOut, "- Closing Merge request...")
+				fmt.Fprintf(f.IO.StdOut, "- Closing Merge request...\n")
 				_, err := api.UpdateMR(apiClient, repo.FullName(), mr.IID, l)
 				if err != nil {
 					return err
