@@ -28,6 +28,11 @@ var UserByName = func(client *gitlab.Client, name string) (*gitlab.User, error) 
 		opts.PerPage = DefaultListLimit
 	}
 
+	// Handle special case of '@me' which maps to the currently authenticated user
+	if name == "@me" {
+		return CurrentUser(client)
+	}
+
 	users, _, err := client.Users.ListUsers(opts)
 	if err != nil {
 		return nil, err

@@ -41,6 +41,7 @@ type CreateOpts struct {
 	ShouldPush    bool
 	NoEditor      bool
 	IsInteractive bool
+	Yes           bool
 
 	IO       *utils.IOStreams
 	Branch   func() (string, error)
@@ -269,10 +270,8 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 						return err
 					}
 				}
-			} else {
-				if opts.Title == "" {
-					return fmt.Errorf("title can't be blank")
-				}
+			} else if opts.Title == "" {
+				return fmt.Errorf("title can't be blank")
 			}
 
 			if opts.IsDraft || opts.IsWIP {
@@ -324,11 +323,11 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 			var action cmdutils.Action
 
 			// submit without prompting for non interactive mode
-			if !opts.IsInteractive {
+			if !opts.IsInteractive || opts.Yes {
 				action = cmdutils.SubmitAction
 			}
 
-			if action == 0 {
+			if action == cmdutils.NoAction {
 				action, err = cmdutils.ConfirmSubmission(true)
 				if err != nil {
 					return fmt.Errorf("unable to confirm: %w", err)
@@ -387,6 +386,7 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 	mrCreateCmd.Flags().BoolVarP(&opts.RemoveSourceBranch, "remove-source-branch", "", false, "Remove Source Branch on merge")
 	mrCreateCmd.Flags().BoolVarP(&opts.NoEditor, "no-editor", "", false, "Don't open editor to enter description. If set to true, uses prompt. Default is false")
 	mrCreateCmd.Flags().StringP("head", "H", "", "Select another head repository using the `OWNER/REPO` or `GROUP/NAMESPACE/REPO` format or the project ID or full URL")
+	mrCreateCmd.Flags().BoolVarP(&opts.Yes, "yes", "y", false, "Do not prompt for confirmation to submit the merge request")
 
 	mrCreateCmd.Flags().StringVarP(&mrCreateTargetProject, "target-project", "", "", "Add target project by id or OWNER/REPO or GROUP/NAMESPACE/REPO")
 	mrCreateCmd.Flags().MarkHidden("target-project")
@@ -482,7 +482,10 @@ func generateMRCompareURL(opts *CreateOpts) (string, error) {
 		// this uses the slash commands to add labels to the description
 		// See https://docs.gitlab.com/ee/user/project/quick_actions.html
 		// See also https://gitlab.com/gitlab-org/gitlab-foss/-/issues/19731#note_32550046
-		description += fmt.Sprintf("\n/label ~%s", strings.Join(opts.Labels, " ~"))
+		description += "\n/label "
+		for _, label := range opts.Labels {
+			description += fmt.Sprintf("~%q", label)
+		}
 	}
 	if len(opts.Assignees) > 0 {
 		// this uses the slash commands to add assignees to the description
@@ -502,7 +505,7 @@ func generateMRCompareURL(opts *CreateOpts) (string, error) {
 	u.RawQuery = fmt.Sprintf(
 		"utf8=✓&merge_request[title]=%s&merge_request[description]=%s&merge_request[source_branch]=%s&merge_request[target_branch]=%s&merge_request[source_project_id]=%d&merge_request[target_project_id]=%d",
 		opts.Title,
-		description,
+		url.QueryEscape(description),
 		opts.SourceBranch,
 		opts.TargetBranch,
 		opts.SourceProject.ID,

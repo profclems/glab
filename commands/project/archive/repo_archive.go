@@ -70,7 +70,7 @@ func NewCmdArchive(f *cmdutils.Factory) *cobra.Command {
 				l.SHA = gitlab.String(sha)
 			}
 			ext := *l.Format
-			archiveName := strings.Replace(repo.FullName(), "/", "-", -1) + "." + ext
+			archiveName := strings.ReplaceAll(repo.FullName(), "/", "-") + "." + ext
 			if strings.TrimSpace(name) != "" {
 				archiveName = name + "." + ext
 			}
