@@ -73,7 +73,7 @@ func (r *ResolvedRemotes) BaseRepo(prompt bool) (Interface, error) {
 				return nil, err
 			}
 			return NewWithHost(repo.RepoOwner(), repo.RepoName(), r.RepoHost()), nil
-		} else if r.Resolved != "" && !strings.HasPrefix(r.Resolved, "head:") {
+		} else if r.Resolved != "" && !strings.HasPrefix(r.Resolved, "head") {
 			// Backward compatibility kludge for remoteless resolutions created before
 			// BaseRepo started creeating resolutions prefixed with `base:`
 			repo, err := FromFullName(r.Resolved)
