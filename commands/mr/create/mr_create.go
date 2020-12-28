@@ -482,7 +482,10 @@ func generateMRCompareURL(opts *CreateOpts) (string, error) {
 		// this uses the slash commands to add labels to the description
 		// See https://docs.gitlab.com/ee/user/project/quick_actions.html
 		// See also https://gitlab.com/gitlab-org/gitlab-foss/-/issues/19731#note_32550046
-		description += fmt.Sprintf("\n/label ~%s", strings.Join(opts.Labels, " ~"))
+		description += "\n/label "
+		for _, label := range opts.Labels {
+			description += fmt.Sprintf("~%q", label)
+		}
 	}
 	if len(opts.Assignees) > 0 {
 		// this uses the slash commands to add assignees to the description
@@ -502,7 +505,7 @@ func generateMRCompareURL(opts *CreateOpts) (string, error) {
 	u.RawQuery = fmt.Sprintf(
 		"utf8=✓&merge_request[title]=%s&merge_request[description]=%s&merge_request[source_branch]=%s&merge_request[target_branch]=%s&merge_request[source_project_id]=%d&merge_request[target_project_id]=%d",
 		opts.Title,
-		description,
+		url.QueryEscape(description),
 		opts.SourceBranch,
 		opts.TargetBranch,
 		opts.SourceProject.ID,
