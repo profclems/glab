@@ -254,6 +254,16 @@ func createRun(opts *CreateOpts) error {
 	}
 
 	if opts.Autofill {
+		branchConfig := git.ReadBranchConfig(opts.SourceBranch)
+
+		// If there is branch information then rebase it before pushing
+		if branchConfig.RemoteName != "" && (branchConfig.MergeRef != "" || branchConfig.RemoteURL != nil) {
+			err := git.Rebase(opts.IO.StdOut, opts.IO.StdErr)
+			if err != nil {
+				return fmt.Errorf("rebase failed: %s", err)
+			}
+		}
+
 		if err = mrBodyAndTitle(opts); err != nil {
 			return err
 		}
