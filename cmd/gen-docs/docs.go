@@ -40,7 +40,7 @@ func main() {
 	for _, cmd := range cmds {
 		fmt.Println("Generating docs for " + cmd.Name())
 		// create directories for parent commands
-		err = os.MkdirAll(docLoc+cmd.Name(), 0755)
+		_ = os.MkdirAll(docLoc+cmd.Name(), 0750)
 
 		// Generate parent command
 		out := new(bytes.Buffer)
@@ -134,10 +134,10 @@ func GenReSTCustom(cmd *cobra.Command, w io.Writer) error {
 
 	short := cmd.Short
 	long := cmd.Long
-	if len(long) == 0 {
+	if long == "" {
 		long = short
 	}
-	ref := strings.Replace(name, " ", "_", -1)
+	ref := strings.ReplaceAll(name, " ", "_")
 
 	buf.WriteString(".. _" + ref + ":\n\n")
 	buf.WriteString(name + "\n")

@@ -269,10 +269,8 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 						return err
 					}
 				}
-			} else {
-				if opts.Title == "" {
-					return fmt.Errorf("title can't be blank")
-				}
+			} else if opts.Title == "" {
+				return fmt.Errorf("title can't be blank")
 			}
 
 			if opts.IsDraft || opts.IsWIP {

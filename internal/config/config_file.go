@@ -65,7 +65,7 @@ var ReadConfigFile = func(filename string) ([]byte, error) {
 }
 
 var WriteConfigFile = func(filename string, data []byte) error {
-	err := os.MkdirAll(path.Dir(filename), 0771)
+	err := os.MkdirAll(path.Dir(filename), 0750)
 	if err != nil {
 		return pathError(err)
 	}

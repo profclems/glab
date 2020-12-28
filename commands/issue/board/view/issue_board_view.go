@@ -16,7 +16,6 @@ import (
 )
 
 var (
-	command       *cobra.Command
 	apiClient     *gitlab.Client
 	project       *gitlab.Project
 	repo          glrepo.Interface
@@ -30,7 +29,6 @@ func NewCmdView(f *cmdutils.Factory) *cobra.Command {
 		Long:  ``,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var err error
-			command = cmd
 
 			a := tview.NewApplication()
 			defer recoverPanic(a)

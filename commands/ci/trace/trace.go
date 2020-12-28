@@ -144,7 +144,7 @@ func TraceRun(opts *TraceOpts) error {
 	}
 	fmt.Fprintln(opts.IO.StdOut)
 
-	err = ciutils.RunTrace(apiClient, context.Background(), opts.IO.StdOut, repo.FullName(), job.Pipeline.Sha, job.Name)
+	err = ciutils.RunTrace(context.Background(), apiClient, opts.IO.StdOut, repo.FullName(), job.Pipeline.Sha, job.Name)
 	if err != nil {
 		return err
 	}

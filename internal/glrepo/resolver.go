@@ -248,8 +248,8 @@ func (r *ResolvedRemotes) HeadRepos() ([]*gitlab.Project, error) {
 	}
 
 	var results []*gitlab.Project
-	for _, repo := range r.network {
-		results = append(results, &repo)
+	for i := range r.network {
+		results = append(results, &r.network[i])
 	}
 	return results, nil
 }
