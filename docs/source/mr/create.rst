@@ -36,6 +36,7 @@ Options
   -b, --target-branch string   The target or base branch into which you want your code merged
   -t, --title string           Supply a title for merge request
       --wip                    Mark merge request as a work in progress. Alternative to --draft
+  -y, --yes                    Do not prompt for confirmation to submit the merge request
 
 Options inherited from parent commands
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

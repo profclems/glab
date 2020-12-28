@@ -29,6 +29,7 @@ Options
       --no-editor            Don't open editor to enter description. If set to true, uses prompt. Default is false
   -t, --title string         Supply a title for issue
   -w, --weight int           The weight of the issue. Valid values are greater than or equal to 0.
+  -y, --yes                  Don't prompt for confirmation to submit the issue
 
 Options inherited from parent commands
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
