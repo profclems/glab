@@ -95,7 +95,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{secrets.BOT_TOKEN}}
         run:
-          gh release download -p "checksums.txt"
+          gh release download -p "checksums.txt";
           echo "$(Get-FileHash ./bin/glab_${{ steps.buildwin.outputs.tag }}_Windows_x86_64_installer.exe -Algorithm SHA256 | Select-Object "Hash" | ForEach-Object {$_.Hash})  glab_${{ steps.buildwin.outputs.tag }}_Windows_x86_64_installer.exe" >> checksums.txt
 
       - name: Upload Installer to Release
