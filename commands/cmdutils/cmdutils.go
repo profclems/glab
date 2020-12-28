@@ -177,7 +177,8 @@ func LabelsPrompt(response *[]string, apiClient *gitlab.Client, repoRemote *glre
 type Action int
 
 const (
-	SubmitAction Action = iota
+	NoAction Action = iota
+	SubmitAction
 	PreviewAction
 	CancelAction
 )
