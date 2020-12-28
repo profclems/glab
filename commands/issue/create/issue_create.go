@@ -322,6 +322,6 @@ func generateIssueWebURL(opts *CreateOpts, repo glrepo.Interface) (string, error
 	u.RawQuery = fmt.Sprintf(
 		"utf8=✓&issue[title]=%s&issue[description]=%s",
 		opts.Title,
-		description)
+		url.QueryEscape(description))
 	return u.String(), nil
 }
