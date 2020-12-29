@@ -6,10 +6,12 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/AlecAivazis/survey/v2"
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/internal/glrepo"
 	"github.com/profclems/glab/internal/utils"
 	"github.com/profclems/glab/pkg/api"
+	"github.com/profclems/glab/pkg/prompt"
 	"github.com/profclems/glab/pkg/tableprinter"
 	"github.com/xanzy/go-gitlab"
 	"golang.org/x/sync/errgroup"
@@ -215,18 +217,64 @@ func MRsFromArgs(f *cmdutils.Factory, args []string) ([]*gitlab.MergeRequest, gl
 
 }
 
-func GetOpenMRForBranch(apiClient *gitlab.Client, baseRepo glrepo.Interface, currentBranch string) (*gitlab.MergeRequest, error) {
+func GetOpenMRForBranch(apiClient *gitlab.Client, baseRepo glrepo.Interface, arg string) (*gitlab.MergeRequest, error) {
+	currentBranch := arg // Assume the user is using only 'branch', not 'OWNER:branch'
+	var owner string
+
+	// If the string contains a ':' then it is using the OWNER:branch format, split it and
+	// assign them to the appropriate values, do note that we do not expect multiple ':' as
+	// git does not allow ':' to be used on branch names
+	if strings.Contains(arg, ":") {
+		t := strings.Split(arg, ":")
+		owner = t[0]
+		currentBranch = t[1]
+	}
+
 	mrs, err := api.ListMRs(apiClient, baseRepo.FullName(), &gitlab.ListProjectMergeRequestsOptions{
 		SourceBranch: gitlab.String(currentBranch),
 		State:        gitlab.String("opened"),
 	})
-
 	if err != nil {
 		return nil, fmt.Errorf("failed to get open merge request for %q: %w", currentBranch, err)
 	}
+
 	if len(mrs) == 0 {
 		return nil, fmt.Errorf("no open merge request available for %q", currentBranch)
 	}
-	// A single result is expected since gitlab does not allow multiple merge requests for a single source branch
-	return mrs[0], nil
+
+	// The user gave us an 'OWNER:' so try to match the merge request with it
+	if owner != "" {
+		for i := range mrs {
+			// We found a match!
+			if mrs[i].Author.Username == owner {
+				return mrs[i], nil
+			}
+		}
+		// No match, error out, tell the user which branch and which username we looked for
+		return nil, fmt.Errorf("no open merge request available for %q owned by @%s", currentBranch, owner)
+	}
+
+	// This is done after the 'OWNER:' check because we don't want to give the wrong MR
+	// to someone that **explicitly** asked for a OWNER.
+	if len(mrs) == 1 {
+		return mrs[0], nil
+	}
+
+	// No 'OWNER:' prompt the user to pick a merge request
+	mrMap := map[string]*gitlab.MergeRequest{}
+	var mrNames []string
+	for i := range mrs {
+		t := fmt.Sprintf("!%d (%s) by @%s", mrs[i].IID, currentBranch, mrs[i].Author.Username)
+		mrMap[t] = mrs[i]
+		mrNames = append(mrNames, t)
+	}
+	pickedMR := mrNames[0]
+	err = prompt.AskOne(&survey.Select{
+		Message: "There are multiple merge requests matching the requested branch, pick one",
+		Options: mrNames,
+	}, &pickedMR)
+	if err != nil {
+		return nil, fmt.Errorf("a merge request must be picked: %w", err)
+	}
+	return mrMap[pickedMR], nil
 }
