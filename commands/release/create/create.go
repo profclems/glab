@@ -69,15 +69,20 @@ You need push access to the repository to create a Release.`,
 			}
 
 			if opts.NotesFile != "" {
+				var b []byte
+				var err error
 				if opts.NotesFile == "-" {
-					b, err := ioutil.ReadAll(opts.IO.In)
+					b, err = ioutil.ReadAll(opts.IO.In)
 					_ = opts.IO.In.Close()
-					if err != nil {
-						return err
-					}
-
-					opts.Notes = string(b)
+				} else {
+					b, err = ioutil.ReadFile(opts.NotesFile)
 				}
+
+				if err != nil {
+					return err
+				}
+
+				opts.Notes = string(b)
 			}
 
 			if runE != nil {
