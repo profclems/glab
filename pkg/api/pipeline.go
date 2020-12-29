@@ -3,6 +3,7 @@ package api
 import (
 	"errors"
 	"io"
+	"sort"
 
 	"github.com/profclems/glab/internal/git"
 	"github.com/xanzy/go-gitlab"
@@ -246,8 +247,18 @@ var PipelineJobTraceWithSha = func(client *gitlab.Client, pid interface{}, sha, 
 	return r, job, err
 }
 
-// PipelineJobsWithSha returns a list of jobs in a pipeline for a given sha. The jobs are
-// returned sorted by their CreatedAt time
+type JobSort struct {
+	Jobs []*gitlab.Job
+}
+
+func (s JobSort) Len() int      { return len(s.Jobs) }
+func (s JobSort) Swap(i, j int) { s.Jobs[i], s.Jobs[j] = s.Jobs[j], s.Jobs[i] }
+func (s JobSort) Less(i, j int) bool {
+	return (*s.Jobs[i].CreatedAt).Before(*s.Jobs[j].CreatedAt)
+}
+
+// PipelineJobsWithSha returns a list of jobs in a pipeline for a given commit sha.
+// The jobs are returned in the order in which they were created
 var PipelineJobsWithSha = func(client *gitlab.Client, pid interface{}, sha string) ([]*gitlab.Job, error) {
 	if client == nil {
 		client = apiClient.Lab()
@@ -264,26 +275,22 @@ var PipelineJobsWithSha = func(client *gitlab.Client, pid interface{}, sha strin
 			PerPage: 500,
 		},
 	}
-	list, resp, err := client.Jobs.ListPipelineJobs(pid, target, opts)
-	if err != nil {
-		return nil, err
-	}
-	if resp.CurrentPage == resp.TotalPages {
-		return list, nil
-	}
-	opts.Page = resp.NextPage
+	jobsList := make([]*gitlab.Job, 0)
 	for {
 		jobs, resp, err := client.Jobs.ListPipelineJobs(pid, target, opts)
 		if err != nil {
 			return nil, err
 		}
 		opts.Page = resp.NextPage
-		list = append(list, jobs...)
+		jobsList = append(jobsList, jobs...)
 		if resp.CurrentPage == resp.TotalPages {
 			break
 		}
 	}
-	return list, nil
+	// ListPipelineJobs returns jobs sorted by ID in descending order instead of returning
+	// them in the order they were created, so we restore the order using the createdAt
+	sort.Sort(JobSort{Jobs: jobsList})
+	return jobsList, nil
 }
 
 var PipelineCILint = func(client *gitlab.Client, content string) (*gitlab.LintResult, error) {
