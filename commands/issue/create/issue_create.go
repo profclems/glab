@@ -188,7 +188,7 @@ func createRun(opts *CreateOpts) error {
 				}
 			}
 		}
-		if len(opts.Labels) == 0 {
+		if len(opts.Labels) == 0 || opts.MileStone == 0 {
 			remotes, err := opts.Remotes()
 			if err != nil {
 				return err
@@ -197,9 +197,17 @@ func createRun(opts *CreateOpts) error {
 			if err != nil {
 				return err
 			}
-			err = cmdutils.LabelsPrompt(&opts.Labels, apiClient, repoRemote)
-			if err != nil {
-				return err
+			if len(opts.Labels) == 0 {
+				err = cmdutils.LabelsPrompt(&opts.Labels, apiClient, repoRemote)
+				if err != nil {
+					return err
+				}
+			}
+			if opts.MileStone == 0 {
+				err = cmdutils.MilestonesPrompt(&opts.MileStone, apiClient, repoRemote, opts.IO)
+				if err != nil {
+					return err
+				}
 			}
 		}
 	} else if opts.Title == "" {
