@@ -7,7 +7,6 @@
 <!--- If fixing a bug, there should be an issue describing it with steps to reproduce -->
 Resolves #[issue_number]
 
-
 **How Has This Been Tested?**
 <!--- Please describe in detail how you tested your changes. -->
 <!--- Include details of your testing environment, and the tests you ran to -->
