@@ -264,26 +264,19 @@ var PipelineJobsWithSha = func(client *gitlab.Client, pid interface{}, sha strin
 			PerPage: 500,
 		},
 	}
-	list, resp, err := client.Jobs.ListPipelineJobs(pid, target, opts)
-	if err != nil {
-		return nil, err
-	}
-	if resp.CurrentPage == resp.TotalPages {
-		return list, nil
-	}
-	opts.Page = resp.NextPage
+	jobsList := make([]*gitlab.Job, 0)
 	for {
 		jobs, resp, err := client.Jobs.ListPipelineJobs(pid, target, opts)
 		if err != nil {
 			return nil, err
 		}
 		opts.Page = resp.NextPage
-		list = append(list, jobs...)
+		jobsList = append(jobsList, jobs...)
 		if resp.CurrentPage == resp.TotalPages {
 			break
 		}
 	}
-	return list, nil
+	return jobsList, nil
 }
 
 var PipelineCILint = func(client *gitlab.Client, content string) (*gitlab.LintResult, error) {
