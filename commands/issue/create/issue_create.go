@@ -48,11 +48,9 @@ type CreateOpts struct {
 
 func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 	opts := &CreateOpts{
-		IO:         f.IO,
-		BaseRepo:   f.BaseRepo,
-		HTTPClient: f.HttpClient,
-		Remotes:    f.Remotes,
-		Config:     f.Config,
+		IO:      f.IO,
+		Remotes: f.Remotes,
+		Config:  f.Config,
 	}
 	var issueCreateCmd = &cobra.Command{
 		Use:     "create [flags]",
@@ -62,6 +60,14 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 		Args:    cobra.ExactArgs(0),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var err error
+
+			// support `-R, --repo` override
+			//
+			// NOTE: it is important to assign the BaseRepo and HTTPClient in RunE because
+			// they are overridden in a PersistentRun hook (when `-R, --repo` is specified)
+			// which runs before RunE is executed
+			opts.BaseRepo = f.BaseRepo
+			opts.HTTPClient = f.HttpClient
 
 			apiClient, err := opts.HTTPClient()
 			if err != nil {
