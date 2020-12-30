@@ -212,7 +212,7 @@ func MilestonesPrompt(response *int, apiClient *gitlab.Client, repoRemote *glrep
 		if err != nil {
 			return err
 		}
-		*response = milestoneMap[selectedMilestone].IID
+		*response = milestoneMap[selectedMilestone].ID
 	}
 	return nil
 }
