@@ -27,16 +27,16 @@ func NewCmdRepo(f *cmdutils.Factory) *cobra.Command {
 		Short:   `Work with GitLab repositories and projects`,
 		Long:    ``,
 		Aliases: []string{"project"},
-		RunE: func(cmd *cobra.Command, args []string) error {
-			cfg, err := f.Config()
-			if err != nil {
-				return err
-			}
-			baseRepo, err := f.BaseRepo()
-			if err != nil {
-				return err
-			}
+		PreRunE: func(cmd *cobra.Command, args []string) error {
 			if opts.OpenInBrowser {
+				cfg, err := f.Config()
+				if err != nil {
+					return err
+				}
+				baseRepo, err := f.BaseRepo()
+				if err != nil {
+					return err
+				}
 				browser, err := cfg.Get(baseRepo.RepoHost(), "browser")
 				if err != nil {
 					return err
