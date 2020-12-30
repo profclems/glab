@@ -275,6 +275,14 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 						return err
 					}
 				}
+				if opts.MileStone == 0 {
+					err = cmdutils.MilestonesPrompt(&opts.MileStone, labClient, baseRepoRemote, opts.IO)
+					if err != nil {
+						return err
+					}
+				}
+			} else if opts.Title == "" {
+				return fmt.Errorf("title can't be blank")
 			}
 
 			if opts.IsDraft || opts.IsWIP {
