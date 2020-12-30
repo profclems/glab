@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 
 	"github.com/profclems/glab/internal/glrepo"
@@ -275,4 +276,17 @@ func IDsFromUsers(users []*gitlab.User) []int {
 		ids[i] = user.ID
 	}
 	return ids
+}
+
+func ParseMilestone(apiClient *gitlab.Client, repoRemote *glrepo.Remote, milestoneTitle string) (int, error) {
+	if milestoneID, err := strconv.Atoi(milestoneTitle); err == nil {
+		return milestoneID, nil
+	}
+
+	milestone, err := api.MilestoneByTitle(apiClient, repoRemote.FullName(), milestoneTitle)
+	if err != nil {
+		return 0, err
+	}
+
+	return milestone.ID, nil
 }
