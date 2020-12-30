@@ -32,9 +32,7 @@ type TraceOpts struct {
 
 func NewCmdTrace(f *cmdutils.Factory, runE func(traceOpts *TraceOpts) error) *cobra.Command {
 	opts := &TraceOpts{
-		BaseRepo:   f.BaseRepo,
-		HTTPClient: f.HttpClient,
-		IO:         f.IO,
+		IO: f.IO,
 	}
 	var pipelineCITraceCmd = &cobra.Command{
 		Use:   "trace [<job-id>] [flags]",
@@ -48,6 +46,14 @@ func NewCmdTrace(f *cmdutils.Factory, runE func(traceOpts *TraceOpts) error) *co
 	`),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var err error
+
+			// support `-R, --repo` override
+			//
+			// NOTE: it is important to assign the BaseRepo and HTTPClient in RunE because
+			// they are overridden in a PersistentRun hook (when `-R, --repo` is specified)
+			// which runs before RunE is executed
+			opts.BaseRepo = f.BaseRepo
+			opts.HTTPClient = f.HttpClient
 
 			if len(args) != 0 {
 				opts.JobID = utils.StringToInt(args[0])

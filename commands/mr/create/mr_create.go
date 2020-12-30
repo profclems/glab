@@ -67,9 +67,7 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 		IO:       f.IO,
 		Branch:   f.Branch,
 		Remotes:  f.Remotes,
-		Lab:      f.HttpClient,
 		Config:   f.Config,
-		BaseRepo: f.BaseRepo,
 		HeadRepo: resolvedHeadRepo(f),
 	}
 
@@ -90,6 +88,14 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var err error
+
+			// support `-R, --repo` override
+			//
+			// NOTE: it is important to assign the BaseRepo and HTTPClient in RunE because
+			// they are overridden in a PersistentRun hook (when `-R, --repo` is specified)
+			// which runs before RunE is executed
+			opts.BaseRepo = f.BaseRepo
+			opts.Lab = f.HttpClient
 
 			out := opts.IO.StdOut
 			mrCreateOpts := &gitlab.CreateMergeRequestOptions{}
