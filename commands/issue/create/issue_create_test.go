@@ -18,6 +18,7 @@ import (
 )
 
 func Test_IssueCreate(t *testing.T) {
+	cmdtest.CopyTestRepo(t, "issue_create")
 	ask, teardown := prompt.InitAskStubber()
 	defer teardown()
 

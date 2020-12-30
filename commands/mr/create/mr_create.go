@@ -170,7 +170,7 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 			}
 
 			if opts.MilestoneFlag != "" {
-				opts.MileStone, err = cmdutils.ParseMilestone(labClient, baseRepoRemote, opts.MilestoneFlag)
+				opts.MileStone, err = cmdutils.ParseMilestone(labClient, baseRepo, opts.MilestoneFlag)
 				if err != nil {
 					return err
 				}
