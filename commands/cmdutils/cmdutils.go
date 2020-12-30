@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/profclems/glab/internal/glrepo"
+	"github.com/profclems/glab/internal/utils"
 	"github.com/profclems/glab/pkg/api"
 	"github.com/xanzy/go-gitlab"
 
@@ -170,6 +171,47 @@ func LabelsPrompt(response *[]string, apiClient *gitlab.Client, repoRemote *glre
 			}
 			*response = strings.Split(responseString, ",")
 		}
+	}
+	return nil
+}
+
+func MilestonesPrompt(response *int, apiClient *gitlab.Client, repoRemote *glrepo.Remote, io *utils.IOStreams) (err error) {
+	var addMilestones bool
+	err = prompt.Confirm(&addMilestones, "Do you wish to attach a milestone?", true)
+	if err != nil {
+		return err
+	}
+	if addMilestones {
+		var milestoneOptions []string
+		milestoneMap := map[string]*gitlab.Milestone{}
+
+		lOpts := &gitlab.ListMilestonesOptions{
+			State: gitlab.String("active"),
+		}
+		lOpts.PerPage = 100
+		milestones, err := api.ListMilestones(apiClient, repoRemote.FullName(), lOpts)
+		if err != nil {
+			return err
+		}
+		if len(milestones) == 0 {
+			fmt.Fprintln(io.StdErr, "There are no active milestones in this project")
+			return nil
+		}
+
+		for i := range milestones {
+			milestoneOptions = append(milestoneOptions, milestones[i].Title)
+			milestoneMap[milestones[i].Title] = milestones[i]
+		}
+
+		var selectedMilestone string
+		err = prompt.AskOne(&survey.Select{
+			Message: "Select Milestone",
+			Options: milestoneOptions,
+		}, &selectedMilestone)
+		if err != nil {
+			return err
+		}
+		*response = milestoneMap[selectedMilestone].IID
 	}
 	return nil
 }
