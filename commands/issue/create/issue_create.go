@@ -72,7 +72,6 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 			if err != nil {
 				return err
 			}
-
 			hasTitle := cmd.Flags().Changed("title")
 			hasDescription := cmd.Flags().Changed("description")
 
@@ -121,22 +120,13 @@ func createRun(opts *CreateOpts) error {
 		return err
 	}
 
-	remotes, err := opts.Remotes()
-	if err != nil {
-		return err
-	}
-	repoRemote, err := remotes.FindByRepo(repo.RepoOwner(), repo.RepoName())
-	if err != nil {
-		return err
-	}
-
 	var templateName string
 	var templateContents string
 
 	issueCreateOpts := &gitlab.CreateIssueOptions{}
 
 	if opts.MilestoneFlag != "" {
-		opts.MileStone, err = cmdutils.ParseMilestone(apiClient, repoRemote, opts.MilestoneFlag)
+		opts.MileStone, err = cmdutils.ParseMilestone(apiClient, repo, opts.MilestoneFlag)
 		if err != nil {
 			return err
 		}
@@ -206,16 +196,30 @@ func createRun(opts *CreateOpts) error {
 				}
 			}
 		}
-		if len(opts.Labels) == 0 {
-			err = cmdutils.LabelsPrompt(&opts.Labels, apiClient, repoRemote)
+		if len(opts.Labels) == 0 || opts.MileStone == 0 {
+			remotes, err := opts.Remotes()
 			if err != nil {
 				return err
 			}
-		}
-		if opts.MileStone == 0 {
-			err = cmdutils.MilestonesPrompt(&opts.MileStone, apiClient, repoRemote, opts.IO)
+			repoRemote, err := remotes.FindByRepo(repo.RepoOwner(), repo.RepoName())
 			if err != nil {
-				return err
+				// when the base repo is overridden with --repo flag, it is likely it has no
+				// remote set for the current working git dir which will error.
+				// We use the repo instead but cast it
+				repoRemote = repo.(*glrepo.Remote)
+			}
+			if len(opts.Labels) == 0 {
+				err = cmdutils.LabelsPrompt(&opts.Labels, apiClient, repoRemote)
+				if err != nil {
+					return err
+				}
+			}
+
+			if opts.MileStone == 0 {
+				err = cmdutils.MilestonesPrompt(&opts.MileStone, apiClient, repoRemote, opts.IO)
+				if err != nil {
+					return err
+				}
 			}
 		}
 

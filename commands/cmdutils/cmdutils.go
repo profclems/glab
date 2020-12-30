@@ -138,7 +138,10 @@ func LabelsPrompt(response *[]string, apiClient *gitlab.Client, repoRemote *glre
 		return
 	}
 	if addLabels {
-		labelOptions, _ := git.Config("remote." + repoRemote.Name + ".glab-cached-labels")
+		var labelOptions string
+		if repoRemote.Name != "" {
+			labelOptions, _ = git.Config("remote." + repoRemote.Name + ".glab-cached-labels")
+		}
 		if labelOptions == "" {
 			lOpts := &gitlab.ListLabelsOptions{}
 			lOpts.PerPage = 100
@@ -150,7 +153,7 @@ func LabelsPrompt(response *[]string, apiClient *gitlab.Client, repoRemote *glre
 					}
 					labelOptions += label.Name
 				}
-				if labelOptions != "" {
+				if labelOptions != "" && repoRemote.Name != "" {
 					// silently fails if not a git repo
 					_ = git.SetConfig(repoRemote.Name, "glab-cached-labels", labelOptions)
 				}
@@ -278,12 +281,12 @@ func IDsFromUsers(users []*gitlab.User) []int {
 	return ids
 }
 
-func ParseMilestone(apiClient *gitlab.Client, repoRemote *glrepo.Remote, milestoneTitle string) (int, error) {
+func ParseMilestone(apiClient *gitlab.Client, repo glrepo.Interface, milestoneTitle string) (int, error) {
 	if milestoneID, err := strconv.Atoi(milestoneTitle); err == nil {
 		return milestoneID, nil
 	}
 
-	milestone, err := api.MilestoneByTitle(apiClient, repoRemote.FullName(), milestoneTitle)
+	milestone, err := api.MilestoneByTitle(apiClient, repo.FullName(), milestoneTitle)
 	if err != nil {
 		return 0, err
 	}
