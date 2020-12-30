@@ -29,6 +29,8 @@ type CreateOpts struct {
 	MileStone int
 	LinkedMR  int
 
+	MilestoneFlag string
+
 	NoEditor       bool
 	IsConfidential bool
 	IsInteractive  bool
@@ -98,7 +100,7 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 	issueCreateCmd.Flags().StringVarP(&opts.Description, "description", "d", "", "Supply a description for issue")
 	issueCreateCmd.Flags().StringSliceVarP(&opts.Labels, "label", "l", []string{}, "Add label by name. Multiple labels should be comma separated")
 	issueCreateCmd.Flags().StringSliceVarP(&opts.Assignees, "assignee", "a", []string{}, "Assign issue to people by their `usernames`")
-	issueCreateCmd.Flags().IntVarP(&opts.MileStone, "milestone", "m", 0, "The global ID of a milestone to assign issue")
+	issueCreateCmd.Flags().StringVarP(&opts.MilestoneFlag, "milestone", "m", "", "The global ID or title of a milestone to assign")
 	issueCreateCmd.Flags().BoolVarP(&opts.IsConfidential, "confidential", "c", false, "Set an issue to be confidential. Default is false")
 	issueCreateCmd.Flags().IntVarP(&opts.LinkedMR, "linked-mr", "", 0, "The IID of a merge request in which to resolve all issues")
 	issueCreateCmd.Flags().IntVarP(&opts.Weight, "weight", "w", 0, "The weight of the issue. Valid values are greater than or equal to 0.")
@@ -119,10 +121,26 @@ func createRun(opts *CreateOpts) error {
 		return err
 	}
 
+	remotes, err := opts.Remotes()
+	if err != nil {
+		return err
+	}
+	repoRemote, err := remotes.FindByRepo(repo.RepoOwner(), repo.RepoName())
+	if err != nil {
+		return err
+	}
+
 	var templateName string
 	var templateContents string
 
 	issueCreateOpts := &gitlab.CreateIssueOptions{}
+
+	if opts.MilestoneFlag != "" {
+		opts.MileStone, err = cmdutils.ParseMilestone(apiClient, repoRemote, opts.MilestoneFlag)
+		if err != nil {
+			return err
+		}
+	}
 
 	if opts.IsInteractive {
 		if opts.Description == "" {
@@ -188,28 +206,19 @@ func createRun(opts *CreateOpts) error {
 				}
 			}
 		}
-		if len(opts.Labels) == 0 || opts.MileStone == 0 {
-			remotes, err := opts.Remotes()
+		if len(opts.Labels) == 0 {
+			err = cmdutils.LabelsPrompt(&opts.Labels, apiClient, repoRemote)
 			if err != nil {
 				return err
-			}
-			repoRemote, err := remotes.FindByRepo(repo.RepoOwner(), repo.RepoName())
-			if err != nil {
-				return err
-			}
-			if len(opts.Labels) == 0 {
-				err = cmdutils.LabelsPrompt(&opts.Labels, apiClient, repoRemote)
-				if err != nil {
-					return err
-				}
-			}
-			if opts.MileStone == 0 {
-				err = cmdutils.MilestonesPrompt(&opts.MileStone, apiClient, repoRemote, opts.IO)
-				if err != nil {
-					return err
-				}
 			}
 		}
+		if opts.MileStone == 0 {
+			err = cmdutils.MilestonesPrompt(&opts.MileStone, apiClient, repoRemote, opts.IO)
+			if err != nil {
+				return err
+			}
+		}
+
 	} else if opts.Title == "" {
 		return fmt.Errorf("title can't be blank")
 	}
