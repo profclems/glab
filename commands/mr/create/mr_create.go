@@ -283,6 +283,12 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 						return err
 					}
 				}
+				if len(opts.Assignees) == 0 {
+					err = cmdutils.AssigneesPrompt(&opts.Assignees)
+					if err != nil {
+						return err
+					}
+				}
 				if opts.MileStone == 0 {
 					err = cmdutils.MilestonesPrompt(&opts.MileStone, labClient, baseRepoRemote, opts.IO)
 					if err != nil {

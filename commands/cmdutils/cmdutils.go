@@ -220,6 +220,23 @@ func MilestonesPrompt(response *int, apiClient *gitlab.Client, repoRemote *glrep
 	return nil
 }
 
+func AssigneesPrompt(response *[]string) (err error) {
+	var addAssignees bool
+	err = prompt.Confirm(&addAssignees, "Do you wish to assign users?", true)
+	if err != nil {
+		return err
+	}
+	if addAssignees {
+		var responseString string
+		err = prompt.AskQuestionWithInput(&responseString, "Username(s) [Comma Separated]", "", false)
+		if err != nil {
+			return err
+		}
+		*response = strings.Split(responseString, ",")
+	}
+	return nil
+}
+
 type Action int
 
 const (

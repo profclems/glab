@@ -214,12 +214,17 @@ func createRun(opts *CreateOpts) error {
 					return err
 				}
 			}
-
 			if opts.MileStone == 0 {
 				err = cmdutils.MilestonesPrompt(&opts.MileStone, apiClient, repoRemote, opts.IO)
 				if err != nil {
 					return err
 				}
+			}
+		}
+		if len(opts.Assignees) == 0 {
+			err = cmdutils.AssigneesPrompt(&opts.Assignees)
+			if err != nil {
+				return err
 			}
 		}
 
