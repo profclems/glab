@@ -30,6 +30,7 @@ type CreateOpts struct {
 	Labels               []string
 	Assignees            []string
 	MileStone            int
+	MilestoneFlag        string
 
 	CreateSourceBranch bool
 	RemoveSourceBranch bool
@@ -165,6 +166,13 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 				baseRepoRemote, err = repoRemote(labClient, opts, baseRepo, opts.TargetProject, "glab-base")
 				if err != nil {
 					return nil
+				}
+			}
+
+			if opts.MilestoneFlag != "" {
+				opts.MileStone, err = cmdutils.ParseMilestone(labClient, baseRepoRemote, opts.MilestoneFlag)
+				if err != nil {
+					return err
 				}
 			}
 
@@ -392,7 +400,7 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 	mrCreateCmd.Flags().StringVarP(&opts.SourceBranch, "source-branch", "s", "", "The Branch you are creating the merge request. Default is the current branch.")
 	mrCreateCmd.Flags().StringVarP(&opts.TargetBranch, "target-branch", "b", "", "The target or base branch into which you want your code merged")
 	mrCreateCmd.Flags().BoolVarP(&opts.CreateSourceBranch, "create-source-branch", "", false, "Create source branch if it does not exist")
-	mrCreateCmd.Flags().IntVarP(&opts.MileStone, "milestone", "m", 0, "add milestone by <id> for merge request")
+	mrCreateCmd.Flags().StringVarP(&opts.MilestoneFlag, "milestone", "m", "", "The global ID or title of a milestone to assign")
 	mrCreateCmd.Flags().BoolVarP(&opts.AllowCollaboration, "allow-collaboration", "", false, "Allow commits from other members")
 	mrCreateCmd.Flags().BoolVarP(&opts.RemoveSourceBranch, "remove-source-branch", "", false, "Remove Source Branch on merge")
 	mrCreateCmd.Flags().BoolVarP(&opts.NoEditor, "no-editor", "", false, "Don't open editor to enter description. If set to true, uses prompt. Default is false")
