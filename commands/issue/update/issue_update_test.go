@@ -60,14 +60,28 @@ func TestNewCmdUpdate(t *testing.T) {
 		wantErr     bool
 	}{
 		{
-			Name:        "Issue Exists",
-			Issue:       `1 -t "New Title" -d "A new description" --lock-discussion -l newLabel --unlabel bug`,
-			ExpectedMsg: []string{"- Updating issue #1", "✓ Updated", "#1 New Title"},
+			Name:  "Issue Exists",
+			Issue: `1 -t "New Title" -d "A new description" --lock-discussion -l newLabel --unlabel bug`,
+			ExpectedMsg: []string{
+				"- Updating issue #1",
+				"✓ updated title to \"New Title\"",
+				"✓ locked discussion",
+				"✓ added labels newLabel",
+				"✓ removed labels bug",
+				"#1 New Title",
+			},
 		},
 		{
-			Name:        "Issue Exists on different repo",
-			Issue:       `1 -R glab_cli/test`,
-			ExpectedMsg: []string{"- Updating issue #1", "✓ Updated"},
+			Name:  "Issue Exists on different repo",
+			Issue: `1 -R glab_cli/test`,
+			ExpectedMsg: []string{
+				"- Updating issue #1",
+				"✓ updated title to \"New Title\"",
+				"✓ locked discussion",
+				"✓ added labels newLabel",
+				"✓ removed labels bug",
+				"#1 New Title",
+			},
 		},
 		{
 			Name:        "Issue Does Not Exist",
