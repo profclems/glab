@@ -48,7 +48,7 @@ func Test_issueClose(t *testing.T) {
 		{
 			Name:        "Issue Exists",
 			Issue:       "1",
-			ExpectedMsg: []string{"Closing Issue...", "Issue #1 closed"},
+			ExpectedMsg: []string{"Closing Issue...", "Closed Issue #1"},
 		},
 		{
 			Name:        "Issue Does Not Exist",
