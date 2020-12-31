@@ -28,7 +28,32 @@ func NewCmdUpdate(f *cmdutils.Factory) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var err error
 			var actions []string
+			var assigneesToAdd, assigneesToRemove, assigneesToReplace []string
 			out := f.IO.StdOut
+
+			// Parse assignees Early so we can fail early in case of conflicts
+			if cmd.Flags().Changed("assignee") {
+				givenAssignees, err := cmd.Flags().GetStringSlice("assignee")
+				if err != nil {
+					return err
+				}
+				assigneesToAdd, assigneesToRemove, assigneesToReplace = cmdutils.ParseAssignees(givenAssignees)
+
+				// Fail if relative and absolute assignees were given, there is no reason to mix them.
+				if len(assigneesToReplace) != 0 && (len(assigneesToAdd) != 0 || len(assigneesToRemove) != 0) {
+					return &cmdutils.FlagError{
+						Err: errors.New("--assignee doesn't allow mixing relative (+,!,-) and absolute assignments"),
+					}
+				}
+
+				if m := utils.CommonElementsInStringSlice(assigneesToAdd, assigneesToRemove); len(m) != 0 {
+					return &cmdutils.FlagError{
+						Err: fmt.Errorf("--assignee has %s %q that are present in both add and remove",
+							utils.Pluralize(len(m), "element"),
+							strings.Join(m, " ")),
+					}
+				}
+			}
 
 			if cmd.Flags().Changed("lock-discussion") && cmd.Flags().Changed("unlock-discussion") {
 				return &cmdutils.FlagError{Err: errors.New("--lock-discussion and --unlock-discussion can't be used together")}
@@ -96,6 +121,51 @@ func NewCmdUpdate(f *cmdutils.Factory) *cobra.Command {
 					l.MilestoneID = gitlab.Int(0)
 				}
 			}
+			if len(assigneesToReplace) != 0 {
+				users, err := api.UsersByNames(apiClient, assigneesToReplace)
+				if err != nil {
+					return err
+				}
+				l.AssigneeIDs = cmdutils.IDsFromUsers(users)
+				var usernames []string
+				for i := range users {
+					usernames = append(usernames, fmt.Sprintf("@%s", users[i].Username))
+				}
+				actions = append(actions, fmt.Sprintf("assigned to %s", strings.Join(usernames, " ")))
+			} else if len(assigneesToAdd) != 0 || len(assigneesToRemove) != 0 {
+				// Get List of assignees and store all of their IDs except for the ones
+				// that have their `Username` match one of the usernames present in
+				// `assigneesToRemove`
+				issue, err := api.GetIssue(apiClient, repo.FullName(), issueID)
+				if err != nil {
+					return err
+				}
+				var assignedIDs []int
+				for i := range issue.Assignees {
+					// Only store them in assigneedIDs if they are not marked for removal
+					if !utils.PresentInStringSlice(assigneesToRemove, issue.Assignees[i].Username) {
+						assignedIDs = append(assignedIDs, issue.Assignees[i].ID)
+					}
+				}
+				if len(assigneesToRemove) != 0 {
+					actions = append(actions, fmt.Sprintf("unassigned %s", strings.Join(assigneesToRemove, "@ ")))
+				}
+
+				if len(assigneesToAdd) != 0 {
+					users, err := api.UsersByNames(apiClient, assigneesToAdd)
+					if err != nil {
+						return err
+					}
+					assignedIDs = append(assignedIDs, cmdutils.IDsFromUsers(users)...)
+					actions = append(actions, fmt.Sprintf("assigned %s", strings.Join(assigneesToAdd, "@ ")))
+				}
+
+				if len(assignedIDs) == 0 {
+					l.AssigneeIDs = []int{0}
+				} else {
+					l.AssigneeIDs = assignedIDs
+				}
+			}
 
 			fmt.Fprintf(out, "- Updating issue #%d\n", issueID)
 
@@ -122,6 +192,7 @@ func NewCmdUpdate(f *cmdutils.Factory) *cobra.Command {
 	issueUpdateCmd.Flags().BoolP("public", "p", false, "Make issue public")
 	issueUpdateCmd.Flags().BoolP("confidential", "c", false, "Make issue confidential")
 	issueUpdateCmd.Flags().StringP("milestone", "m", "", "title of the milestone to assign, pass \"\" or 0 to unassign")
+	issueUpdateCmd.Flags().StringSliceP("assignee", "a", []string{}, "assign users via username, prefix with '!' or '-' to remove from existing assignees, '+' to add, otherwise replace existing assignees with given users")
 
 	return issueUpdateCmd
 }
