@@ -243,19 +243,24 @@ const (
 	NoAction Action = iota
 	SubmitAction
 	PreviewAction
+	AddMetadataAction
 	CancelAction
 )
 
-func ConfirmSubmission(allowPreview bool) (Action, error) {
+func ConfirmSubmission(allowPreview bool, allowAddMetadata bool) (Action, error) {
 	const (
-		submitLabel  = "Submit"
-		previewLabel = "Continue in browser"
-		cancelLabel  = "Cancel"
+		submitLabel      = "Submit"
+		previewLabel     = "Continue in browser"
+		addMetadataLabel = "Add metadata"
+		cancelLabel      = "Cancel"
 	)
 
 	options := []string{submitLabel}
 	if allowPreview {
 		options = append(options, previewLabel)
+	}
+	if allowAddMetadata {
+		options = append(options, addMetadataLabel)
 	}
 	options = append(options, cancelLabel)
 
@@ -282,6 +287,8 @@ func ConfirmSubmission(allowPreview bool) (Action, error) {
 		return SubmitAction, nil
 	case previewLabel:
 		return PreviewAction, nil
+	case addMetadataLabel:
+		return AddMetadataAction, nil
 	case cancelLabel:
 		return CancelAction, nil
 	default:
