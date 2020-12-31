@@ -94,6 +94,15 @@ func NewCmdUpdate(f *cmdutils.Factory) *cobra.Command {
 				actions = append(actions, "updated description")
 				l.Description = gitlab.String(m)
 			}
+
+			if m, _ := cmd.Flags().GetStringArray("label"); len(m) != 0 {
+				actions = append(actions, fmt.Sprintf("added labels %s", strings.Join(m, " ")))
+				l.AddLabels = gitlab.Labels(m)
+			}
+			if m, _ := cmd.Flags().GetStringArray("unlabel"); len(m) != 0 {
+				actions = append(actions, fmt.Sprintf("removed labels %s", strings.Join(m, " ")))
+				l.RemoveLabels = gitlab.Labels(m)
+			}
 			if ok := cmd.Flags().Changed("milestone"); ok {
 				if m, _ := cmd.Flags().GetString("milestone"); m != "" || m == "0" {
 					mID, err := cmdutils.ParseMilestone(apiClient, repo, m)
@@ -150,6 +159,8 @@ func NewCmdUpdate(f *cmdutils.Factory) *cobra.Command {
 	mrUpdateCmd.Flags().BoolP("lock-discussion", "", false, "Lock discussion on merge request")
 	mrUpdateCmd.Flags().BoolP("unlock-discussion", "", false, "Unlock discussion on merge request")
 	mrUpdateCmd.Flags().StringP("description", "d", "", "merge request description")
+	mrUpdateCmd.Flags().StringSliceP("label", "l", []string{}, "add labels")
+	mrUpdateCmd.Flags().StringSliceP("unlabel", "u", []string{}, "remove labels")
 	mrUpdateCmd.Flags().StringSliceP("assignees", "a", []string{}, "Assign merge request to people by their `usernames`")
 	mrUpdateCmd.Flags().BoolP("remove-source-branch", "", false, "Remove Source Branch on merge")
 	mrUpdateCmd.Flags().StringP("milestone", "m", "", "title of the milestone to assign, pass \"\" or 0 to unassign")
