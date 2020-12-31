@@ -210,7 +210,7 @@ func MilestonesPrompt(response *int, apiClient *gitlab.Client, repoRemote *glrep
 
 func AssigneesPrompt(response *[]string) (err error) {
 	var responseString string
-	err = prompt.AskQuestionWithInput(&responseString, "Username(s) [Comma Separated]", "", false)
+	err = prompt.AskQuestionWithInput(&responseString, "Assignee(s) Username(s) [Comma Separated]", "", false)
 	if err != nil {
 		return err
 	}
