@@ -66,11 +66,11 @@ func NewCmdUpdate(f *cmdutils.Factory) *cobra.Command {
 				actions = append(actions, "updated description")
 				l.Description = gitlab.String(m)
 			}
-			if m, _ := cmd.Flags().GetStringArray("label"); len(m) != 0 {
+			if m, _ := cmd.Flags().GetStringSlice("label"); len(m) != 0 {
 				actions = append(actions, fmt.Sprintf("added labels %s", strings.Join(m, " ")))
 				l.AddLabels = gitlab.Labels(m)
 			}
-			if m, _ := cmd.Flags().GetStringArray("unlabel"); len(m) != 0 {
+			if m, _ := cmd.Flags().GetStringSlice("unlabel"); len(m) != 0 {
 				actions = append(actions, fmt.Sprintf("removed labels %s", strings.Join(m, " ")))
 				l.RemoveLabels = gitlab.Labels(m)
 			}
@@ -117,8 +117,8 @@ func NewCmdUpdate(f *cmdutils.Factory) *cobra.Command {
 	issueUpdateCmd.Flags().BoolP("lock-discussion", "", false, "Lock discussion on issue")
 	issueUpdateCmd.Flags().BoolP("unlock-discussion", "", false, "Unlock discussion on issue")
 	issueUpdateCmd.Flags().StringP("description", "d", "", "Issue description")
-	issueUpdateCmd.Flags().StringArrayP("label", "l", []string{}, "add labels")
-	issueUpdateCmd.Flags().StringArrayP("unlabel", "u", []string{}, "remove labels")
+	issueUpdateCmd.Flags().StringSliceP("label", "l", []string{}, "add labels")
+	issueUpdateCmd.Flags().StringSliceP("unlabel", "u", []string{}, "remove labels")
 	issueUpdateCmd.Flags().BoolP("public", "p", false, "Make issue public")
 	issueUpdateCmd.Flags().BoolP("confidential", "c", false, "Make issue confidential")
 	issueUpdateCmd.Flags().StringP("milestone", "m", "", "title of the milestone to assign, pass \"\" or 0 to unassign")
