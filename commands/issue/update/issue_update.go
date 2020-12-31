@@ -3,6 +3,7 @@ package update
 import (
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/commands/issue/issueutils"
@@ -26,6 +27,7 @@ func NewCmdUpdate(f *cmdutils.Factory) *cobra.Command {
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var err error
+			var actions []string
 			out := f.IO.StdOut
 
 			if cmd.Flags().Changed("lock-discussion") && cmd.Flags().Changed("unlock-discussion") {
@@ -48,28 +50,36 @@ func NewCmdUpdate(f *cmdutils.Factory) *cobra.Command {
 			l := &gitlab.UpdateIssueOptions{}
 
 			if m, _ := cmd.Flags().GetString("title"); m != "" {
+				actions = append(actions, fmt.Sprintf("updated title to %q", m))
 				l.Title = gitlab.String(m)
 			}
 			if m, _ := cmd.Flags().GetBool("lock-discussion"); m {
+				actions = append(actions, "locked discussion")
 				l.DiscussionLocked = gitlab.Bool(m)
 			}
 			if m, _ := cmd.Flags().GetBool("unlock-discussion"); m {
+				actions = append(actions, "unlocked dicussion")
 				l.DiscussionLocked = gitlab.Bool(false)
 			}
 
 			if m, _ := cmd.Flags().GetString("description"); m != "" {
+				actions = append(actions, "updated description")
 				l.Description = gitlab.String(m)
 			}
 			if m, _ := cmd.Flags().GetStringArray("label"); len(m) != 0 {
+				actions = append(actions, fmt.Sprintf("added labels %s", strings.Join(m, " ")))
 				l.AddLabels = gitlab.Labels(m)
 			}
 			if m, _ := cmd.Flags().GetStringArray("unlabel"); len(m) != 0 {
+				actions = append(actions, fmt.Sprintf("removed labels %s", strings.Join(m, " ")))
 				l.RemoveLabels = gitlab.Labels(m)
 			}
 			if m, _ := cmd.Flags().GetBool("public"); m {
+				actions = append(actions, "made public")
 				l.Confidential = gitlab.Bool(false)
 			}
 			if m, _ := cmd.Flags().GetBool("confidential"); m {
+				actions = append(actions, "made confidential")
 				l.Confidential = gitlab.Bool(true)
 			}
 
@@ -80,7 +90,9 @@ func NewCmdUpdate(f *cmdutils.Factory) *cobra.Command {
 				return err
 			}
 
-			fmt.Fprintln(out, utils.GreenCheck(), "Updated")
+			for _, s := range actions {
+				fmt.Fprintln(out, utils.GreenCheck(), s)
+			}
 
 			fmt.Fprintln(out, issueutils.DisplayIssue(issue))
 			return nil
