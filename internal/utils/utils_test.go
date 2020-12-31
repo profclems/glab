@@ -36,3 +36,34 @@ func Test_PrettyTimeAgo(t *testing.T) {
 		}
 	}
 }
+
+func Test_Pluralize(t *testing.T) {
+	testCases := []struct {
+		name   string
+		word   string
+		amount int
+		want   string
+	}{
+		{
+			name:   "singular",
+			word:   "label",
+			amount: 1,
+			want:   "1 label",
+		},
+		{
+			name:   "plural",
+			word:   "label",
+			amount: 3,
+			want:   "3 labels",
+		},
+	}
+	for _, tC := range testCases {
+		t.Run(tC.name, func(t *testing.T) {
+			got := Pluralize(tC.amount, tC.word)
+			if got != tC.want {
+				t.Errorf("Pluralize() got = %s, want = %s", got, tC.want)
+			}
+		})
+	}
+
+}
