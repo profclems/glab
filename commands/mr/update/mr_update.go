@@ -95,11 +95,11 @@ func NewCmdUpdate(f *cmdutils.Factory) *cobra.Command {
 				l.Description = gitlab.String(m)
 			}
 
-			if m, _ := cmd.Flags().GetStringArray("label"); len(m) != 0 {
+			if m, _ := cmd.Flags().GetStringSlice("label"); len(m) != 0 {
 				actions = append(actions, fmt.Sprintf("added labels %s", strings.Join(m, " ")))
 				l.AddLabels = gitlab.Labels(m)
 			}
-			if m, _ := cmd.Flags().GetStringArray("unlabel"); len(m) != 0 {
+			if m, _ := cmd.Flags().GetStringSlice("unlabel"); len(m) != 0 {
 				actions = append(actions, fmt.Sprintf("removed labels %s", strings.Join(m, " ")))
 				l.RemoveLabels = gitlab.Labels(m)
 			}
