@@ -284,6 +284,40 @@ const (
 	AddMilestoneAction
 )
 
+func PickMetadata() ([]Action, error) {
+	const (
+		labelsLabel    = "labels"
+		assigneeLabel  = "assignees"
+		milestoneLabel = "milestones"
+	)
+
+	options := []string{
+		labelsLabel,
+		assigneeLabel,
+		milestoneLabel,
+	}
+
+	var confirmAnswers []string
+	err := prompt.MultiSelect(&confirmAnswers, "Which metadata types to add?", options)
+	if err != nil {
+		return nil, fmt.Errorf("could not prompt: %w", err)
+	}
+
+	var pickedActions []Action
+
+	for _, x := range confirmAnswers {
+		switch x {
+		case labelsLabel:
+			pickedActions = append(pickedActions, AddLabelAction)
+		case assigneeLabel:
+			pickedActions = append(pickedActions, AddAssigneeAction)
+		case milestoneLabel:
+			pickedActions = append(pickedActions, AddMilestoneAction)
+		}
+	}
+	return pickedActions, nil
+}
+
 //IDsFromUsers collects all user IDs from a slice of users
 func IDsFromUsers(users []*gitlab.User) []int {
 	ids := make([]int, len(users))
