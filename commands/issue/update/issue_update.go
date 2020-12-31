@@ -82,6 +82,20 @@ func NewCmdUpdate(f *cmdutils.Factory) *cobra.Command {
 				actions = append(actions, "made confidential")
 				l.Confidential = gitlab.Bool(true)
 			}
+			if ok := cmd.Flags().Changed("milestone"); ok {
+				if m, _ := cmd.Flags().GetString("milestone"); m != "" || m == "0" {
+					mID, err := cmdutils.ParseMilestone(apiClient, repo, m)
+					if err != nil {
+						return err
+					}
+					actions = append(actions, fmt.Sprintf("added milestone %q", m))
+					l.MilestoneID = gitlab.Int(mID)
+				} else {
+					// Unassign the Milestone
+					actions = append(actions, "unassigned milestone")
+					l.MilestoneID = gitlab.Int(0)
+				}
+			}
 
 			fmt.Fprintf(out, "- Updating issue #%d\n", issueID)
 
@@ -107,6 +121,7 @@ func NewCmdUpdate(f *cmdutils.Factory) *cobra.Command {
 	issueUpdateCmd.Flags().StringArrayP("unlabel", "u", []string{}, "remove labels")
 	issueUpdateCmd.Flags().BoolP("public", "p", false, "Make issue public")
 	issueUpdateCmd.Flags().BoolP("confidential", "c", false, "Make issue confidential")
+	issueUpdateCmd.Flags().StringP("milestone", "m", "", "title of the milestone to assign, pass \"\" or 0 to unassign")
 
 	return issueUpdateCmd
 }
