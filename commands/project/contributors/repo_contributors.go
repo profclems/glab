@@ -3,65 +3,105 @@ package contributors
 import (
 	"fmt"
 
-	"github.com/profclems/glab/commands/cmdutils"
-	"github.com/profclems/glab/internal/utils"
-
 	"github.com/MakeNowJust/heredoc"
+	"github.com/profclems/glab/commands/cmdutils"
+	"github.com/profclems/glab/internal/glrepo"
+	"github.com/profclems/glab/internal/utils"
+	"github.com/profclems/glab/pkg/tableprinter"
 	"github.com/spf13/cobra"
 	"github.com/xanzy/go-gitlab"
 )
 
+type Options struct {
+	OrderBy string
+	Sort    string
+	PerPage int
+	Page    int
+
+	BaseRepo   func() (glrepo.Interface, error)
+	HTTPClient func() (*gitlab.Client, error)
+	IO         *utils.IOStreams
+}
+
 func NewCmdContributors(f *cmdutils.Factory) *cobra.Command {
+	opts := &Options{
+		IO: f.IO,
+	}
 	var repoContributorsCmd = &cobra.Command{
-		Use:   "contributors [flags]",
-		Short: `Get contributors of the repository.`,
+		Use:   "contributors",
+		Short: `Get repository contributors list.`,
 		Example: heredoc.Doc(`
 	$ glab repo contributors
-	$ glab repo archive  // Downloads zip file of current repository
-	`),
-		Long: heredoc.Doc(`
-	Clone supports these shorthands
-	- repo
-	- namespace/repo
-	- namespace/group/repo
+
+	$ glab repo contributors -R gitlab-com/www-gitlab-com
+	#=> Supports repo override
 	`),
 		Args:    cobra.ExactArgs(0),
 		Aliases: []string{"users"},
 		RunE: func(cmd *cobra.Command, args []string) error {
+			// Support `-R, --repo` override
+			opts.BaseRepo = f.BaseRepo
+			opts.HTTPClient = f.HttpClient
 
-			var err error
-
-			apiClient, err := f.HttpClient()
-			if err != nil {
-				return err
-			}
-
-			repo, err := f.BaseRepo()
-			if err != nil {
-				return err
-			}
-
-			l := &gitlab.ListContributorsOptions{}
-			users, _, err := apiClient.Repositories.Contributors(repo.FullName(), l)
-			if err != nil {
-				return err
-			}
-			usersPrintDetails := fmt.Sprintf("Showing users %d of %d on %s\n\n", len(users), len(users), repo.FullName())
-			for _, user := range users {
-				usersPrintDetails += fmt.Sprintf("%s <%s> - %d commits(-%s +%s\n",
-					user.Name, utils.Gray(user.Email), user.Commits, utils.Red(string(rune(user.Deletions))),
-					utils.Green(string(rune(user.Additions))))
-			}
-
-			fmt.Fprintln(f.IO.StdOut, usersPrintDetails)
-			return err
+			return runE(opts)
 		},
 	}
 
 	cmdutils.EnableRepoOverride(repoContributorsCmd, f)
 
-	repoContributorsCmd.Flags().StringP("order", "f", "zip", "Return contributors ordered by name, email, or commits (orders by commit date) fields. Default is commits")
-	repoContributorsCmd.Flags().StringP("sort", "s", "", "Return contributors sorted in asc or desc order. Default is asc")
-
+	repoContributorsCmd.Flags().StringVarP(&opts.OrderBy, "order", "o", "commits", "Return contributors ordered by name, email, or commits (orders by commit date) fields")
+	repoContributorsCmd.Flags().StringVarP(&opts.Sort, "sort", "s", "", "Return contributors sorted in asc or desc order")
+	repoContributorsCmd.Flags().IntVarP(&opts.Page, "page", "p", 1, "Page number")
+	repoContributorsCmd.Flags().IntVarP(&opts.PerPage, "per-page", "P", 30, "Number of items to list per page.")
 	return repoContributorsCmd
+}
+
+func runE(opts *Options) error {
+	var err error
+
+	apiClient, err := opts.HTTPClient()
+	if err != nil {
+		return err
+	}
+
+	repo, err := opts.BaseRepo()
+	if err != nil {
+		return err
+	}
+
+	if opts.OrderBy == "commits" && opts.Sort == "" {
+		opts.Sort = "desc"
+	}
+
+	l := &gitlab.ListContributorsOptions{
+		OrderBy: gitlab.String(opts.OrderBy),
+	}
+	if opts.Sort != "" {
+		l.Sort = gitlab.String(opts.Sort)
+	}
+	l.PerPage = opts.PerPage
+	l.Page = opts.Page
+
+	users, _, err := apiClient.Repositories.Contributors(repo.FullName(), l)
+	if err != nil {
+		return err
+	}
+
+	// Title
+	title := utils.NewListTitle("contributor")
+	title.RepoName = repo.FullName()
+	title.Page = l.Page
+	title.CurrentPageTotal = len(users)
+
+	// List
+	table := tableprinter.NewTablePrinter()
+	for _, user := range users {
+		table.AddCell(user.Name)
+		table.AddCellf("%s", utils.Gray(user.Email))
+		table.AddCellf("%d commits", user.Commits)
+		table.EndRow()
+	}
+
+	fmt.Fprintf(opts.IO.StdOut, "%s\n%s\n", title.Describe(), table.String())
+	return err
 }
