@@ -143,8 +143,3 @@ func recoverPanic(app *tview.Application) {
 		log.Fatalf("%s\n%s\n", r, string(debug.Stack()))
 	}
 }
-
-func drawBIssueoards(app *tview.Application) error {
-	//flex := tview.NewFlex().
-	return nil
-}

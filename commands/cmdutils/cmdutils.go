@@ -62,6 +62,9 @@ func LoadGitLabTemplate(tmplType, tmplName string) (string, error) {
 //       For now, it returns nil and empty slice if there's an error
 func ListGitLabTemplates(tmplType string) ([]string, error) {
 	wdir, err := git.ToplevelDir()
+	if err != nil {
+		return []string{}, nil
+	}
 	tmplFolder := filepath.Join(wdir, ".gitlab", tmplType)
 	var files []string
 	f, err := os.Open(tmplFolder)

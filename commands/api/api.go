@@ -363,7 +363,7 @@ func fillPlaceholders(value string, opts *ApiOptions) (string, error) {
 		case ":group":
 			return baseRepo.RepoGroup()
 		case ":user", ":username":
-			h, e := opts.HttpClient()
+			h, _ := opts.HttpClient()
 			u, e := api.CurrentUser(h)
 			if e == nil && u != nil {
 				return u.Username
