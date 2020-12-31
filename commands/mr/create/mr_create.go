@@ -282,29 +282,6 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 				return fmt.Errorf("title can't be blank")
 			}
 
-			if opts.IsInteractive && (opts.Autofill && !opts.Yes || !opts.Autofill) {
-				if len(opts.Labels) == 0 {
-					err = cmdutils.LabelsPrompt(&opts.Labels, labClient, baseRepoRemote)
-					if err != nil {
-						return err
-					}
-				}
-				if len(opts.Assignees) == 0 {
-					err = cmdutils.AssigneesPrompt(&opts.Assignees)
-					if err != nil {
-						return err
-					}
-				}
-				if opts.MileStone == 0 {
-					err = cmdutils.MilestonesPrompt(&opts.MileStone, labClient, baseRepoRemote, opts.IO)
-					if err != nil {
-						return err
-					}
-				}
-			} else if opts.Title == "" {
-				return fmt.Errorf("title can't be blank")
-			}
-
 			if opts.IsDraft || opts.IsWIP {
 				if opts.IsDraft {
 					opts.Title = "Draft: " + opts.Title
@@ -314,12 +291,8 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 			}
 			mrCreateOpts.Title = gitlab.String(opts.Title)
 			mrCreateOpts.Description = gitlab.String(opts.Description)
-			mrCreateOpts.Labels = opts.Labels
 			mrCreateOpts.SourceBranch = gitlab.String(opts.SourceBranch)
 			mrCreateOpts.TargetBranch = gitlab.String(opts.TargetBranch)
-			if opts.MileStone != 0 {
-				mrCreateOpts.MilestoneID = gitlab.Int(opts.MileStone)
-			}
 			if opts.AllowCollaboration {
 				mrCreateOpts.AllowCollaboration = gitlab.Bool(true)
 			}
@@ -328,13 +301,6 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 			}
 			if opts.TargetProject != nil {
 				mrCreateOpts.TargetProjectID = gitlab.Int(opts.TargetProject.ID)
-			}
-			if len(opts.Assignees) > 0 {
-				users, err := api.UsersByNames(labClient, opts.Assignees)
-				if err != nil {
-					return err
-				}
-				mrCreateOpts.AssigneeIDs = cmdutils.IDsFromUsers(users)
 			}
 
 			if opts.CreateSourceBranch {
@@ -359,10 +325,62 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 			}
 
 			if action == cmdutils.NoAction {
-				action, err = cmdutils.ConfirmSubmission(true)
+				action, err = cmdutils.ConfirmSubmission(true, true)
 				if err != nil {
 					return fmt.Errorf("unable to confirm: %w", err)
 				}
+			}
+
+			if action == cmdutils.AddMetadataAction {
+				var metadataActions []cmdutils.Action
+
+				metadataActions, err = cmdutils.PickMetadata()
+				if err != nil {
+					return fmt.Errorf("failed to pick metadata to add: %w", err)
+				}
+
+				for _, x := range metadataActions {
+					if x == cmdutils.AddLabelAction {
+						err = cmdutils.LabelsPrompt(&opts.Labels, labClient, baseRepoRemote)
+						if err != nil {
+							return err
+						}
+					}
+					if x == cmdutils.AddAssigneeAction {
+						err = cmdutils.AssigneesPrompt(&opts.Assignees)
+						if err != nil {
+							return err
+						}
+					}
+					if x == cmdutils.AddMilestoneAction {
+						err = cmdutils.MilestonesPrompt(&opts.MileStone, labClient, baseRepoRemote, opts.IO)
+						if err != nil {
+							return err
+						}
+					}
+				}
+
+				// Ask the user again but don't permit AddMetadata a second time
+				action, err = cmdutils.ConfirmSubmission(true, false)
+				if err != nil {
+					return err
+				}
+			}
+
+			// These actions need to be done here, after the `Add metadata` prompt because
+			// they are metadata that can be modified by the prompt
+			mrCreateOpts.Labels = opts.Labels
+
+			if len(opts.Assignees) > 0 {
+				users, err := api.UsersByNames(labClient, opts.Assignees)
+				if err != nil {
+					return err
+				}
+				mrCreateOpts.AssigneeIDs = cmdutils.IDsFromUsers(users)
+			}
+
+			if opts.MileStone != 0 {
+				mrCreateOpts.MilestoneID = gitlab.Int(opts.MileStone)
 			}
 
 			if action == cmdutils.CancelAction {

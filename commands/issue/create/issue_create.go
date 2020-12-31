@@ -202,38 +202,6 @@ func createRun(opts *CreateOpts) error {
 				}
 			}
 		}
-		if len(opts.Labels) == 0 || opts.MileStone == 0 {
-			remotes, err := opts.Remotes()
-			if err != nil {
-				return err
-			}
-			repoRemote, err := remotes.FindByRepo(repo.RepoOwner(), repo.RepoName())
-			if err != nil {
-				// when the base repo is overridden with --repo flag, it is likely it has no
-				// remote set for the current working git dir which will error.
-				// We use the repo instead but cast it
-				repoRemote = repo.(*glrepo.Remote)
-			}
-			if len(opts.Labels) == 0 {
-				err = cmdutils.LabelsPrompt(&opts.Labels, apiClient, repoRemote)
-				if err != nil {
-					return err
-				}
-			}
-			if opts.MileStone == 0 {
-				err = cmdutils.MilestonesPrompt(&opts.MileStone, apiClient, repoRemote, opts.IO)
-				if err != nil {
-					return err
-				}
-			}
-		}
-		if len(opts.Assignees) == 0 {
-			err = cmdutils.AssigneesPrompt(&opts.Assignees)
-			if err != nil {
-				return err
-			}
-		}
-
 	} else if opts.Title == "" {
 		return fmt.Errorf("title can't be blank")
 	}
@@ -246,9 +214,59 @@ func createRun(opts *CreateOpts) error {
 	}
 
 	if action == cmdutils.NoAction {
-		action, err = cmdutils.ConfirmSubmission(true)
+		action, err = cmdutils.ConfirmSubmission(true, true)
 		if err != nil {
 			return fmt.Errorf("unable to confirm: %w", err)
+		}
+	}
+
+	if action == cmdutils.AddMetadataAction {
+		var metadataActions []cmdutils.Action
+
+		metadataActions, err = cmdutils.PickMetadata()
+		if err != nil {
+			return fmt.Errorf("failed to pick metadata to add: %w", err)
+		}
+
+		remotes, err := opts.Remotes()
+		if err != nil {
+			return err
+		}
+		repoRemote, err := remotes.FindByRepo(repo.RepoOwner(), repo.RepoName())
+		if err != nil {
+			// when the base repo is overridden with --repo flag, it is likely it has no
+			// remote set for the current working git dir which will error.
+			// We use the repo instead but cast it
+			repoRemote = repo.(*glrepo.Remote)
+		}
+
+		for _, x := range metadataActions {
+			if x == cmdutils.AddLabelAction {
+				err = cmdutils.LabelsPrompt(&opts.Labels, apiClient, repoRemote)
+				if err != nil {
+					return err
+				}
+
+			}
+			if x == cmdutils.AddAssigneeAction {
+				err = cmdutils.AssigneesPrompt(&opts.Assignees)
+				if err != nil {
+					return err
+				}
+			}
+			if x == cmdutils.AddMilestoneAction {
+				err = cmdutils.MilestonesPrompt(&opts.MileStone, apiClient, repoRemote, opts.IO)
+				if err != nil {
+					return err
+				}
+
+			}
+		}
+
+		// Ask the user again but don't permit AddMetadata a second time
+		action, err = cmdutils.ConfirmSubmission(true, false)
+		if err != nil {
+			return err
 		}
 	}
 
@@ -293,7 +311,7 @@ func createRun(opts *CreateOpts) error {
 		return nil
 	}
 
-	return errors.New("expected to cancel, preview in browser, or submit")
+	return errors.New("expected to cancel, preview in browser, add metadata, or submit")
 }
 
 func previewIssue(opts *CreateOpts) error {

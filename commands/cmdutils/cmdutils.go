@@ -132,108 +132,90 @@ func DescriptionPrompt(response *string, templateContent, editorCommand string) 
 }
 
 func LabelsPrompt(response *[]string, apiClient *gitlab.Client, repoRemote *glrepo.Remote) (err error) {
-	var addLabels bool
-	err = prompt.Confirm(&addLabels, "Do you want to add labels?", true)
-	if err != nil {
-		return
+	var labelOptions string
+	if repoRemote.Name != "" {
+		labelOptions, _ = git.Config("remote." + repoRemote.Name + ".glab-cached-labels")
 	}
-	if addLabels {
-		var labelOptions string
-		if repoRemote.Name != "" {
-			labelOptions, _ = git.Config("remote." + repoRemote.Name + ".glab-cached-labels")
-		}
-		if labelOptions == "" {
-			lOpts := &gitlab.ListLabelsOptions{}
-			lOpts.PerPage = 100
-			labels, err := api.ListLabels(apiClient, repoRemote.FullName(), lOpts)
-			if err == nil && labels != nil {
-				for i, label := range labels {
-					if i > 0 {
-						labelOptions += ","
-					}
-					labelOptions += label.Name
-				}
-				if labelOptions != "" && repoRemote.Name != "" {
-					// silently fails if not a git repo
-					_ = git.SetConfig(repoRemote.Name, "glab-cached-labels", labelOptions)
-				}
-			}
-		}
-		if labelOptions != "" {
-			var selectedLabels []string
-			err = prompt.MultiSelect(&selectedLabels, "Select Labels", strings.Split(labelOptions, ","))
-			if err != nil {
-				return err
-			}
-			*response = selectedLabels
-
-		} else {
-			var responseString string
-			err = prompt.AskQuestionWithInput(&responseString, "Label(s) [Comma Separated]", "", false)
-			if err != nil {
-				return err
-			}
-			*response = strings.Split(responseString, ",")
-		}
-	}
-	return nil
-}
-
-func MilestonesPrompt(response *int, apiClient *gitlab.Client, repoRemote *glrepo.Remote, io *utils.IOStreams) (err error) {
-	var addMilestones bool
-	err = prompt.Confirm(&addMilestones, "Do you wish to attach a milestone?", true)
-	if err != nil {
-		return err
-	}
-	if addMilestones {
-		var milestoneOptions []string
-		milestoneMap := map[string]*gitlab.Milestone{}
-
-		lOpts := &gitlab.ListMilestonesOptions{
-			State: gitlab.String("active"),
-		}
+	if labelOptions == "" {
+		lOpts := &gitlab.ListLabelsOptions{}
 		lOpts.PerPage = 100
-		milestones, err := api.ListMilestones(apiClient, repoRemote.FullName(), lOpts)
+		labels, err := api.ListLabels(apiClient, repoRemote.FullName(), lOpts)
+		if err == nil && labels != nil {
+			for i, label := range labels {
+				if i > 0 {
+					labelOptions += ","
+				}
+				labelOptions += label.Name
+			}
+			if labelOptions != "" && repoRemote.Name != "" {
+				// silently fails if not a git repo
+				_ = git.SetConfig(repoRemote.Name, "glab-cached-labels", labelOptions)
+			}
+		}
+	}
+	if labelOptions != "" {
+		var selectedLabels []string
+		err = prompt.MultiSelect(&selectedLabels, "Select Labels", strings.Split(labelOptions, ","))
 		if err != nil {
 			return err
 		}
-		if len(milestones) == 0 {
-			fmt.Fprintln(io.StdErr, "There are no active milestones in this project")
-			return nil
-		}
+		*response = selectedLabels
 
-		for i := range milestones {
-			milestoneOptions = append(milestoneOptions, milestones[i].Title)
-			milestoneMap[milestones[i].Title] = milestones[i]
-		}
-
-		var selectedMilestone string
-		err = prompt.AskOne(&survey.Select{
-			Message: "Select Milestone",
-			Options: milestoneOptions,
-		}, &selectedMilestone)
-		if err != nil {
-			return err
-		}
-		*response = milestoneMap[selectedMilestone].ID
-	}
-	return nil
-}
-
-func AssigneesPrompt(response *[]string) (err error) {
-	var addAssignees bool
-	err = prompt.Confirm(&addAssignees, "Do you wish to assign users?", true)
-	if err != nil {
-		return err
-	}
-	if addAssignees {
+	} else {
 		var responseString string
-		err = prompt.AskQuestionWithInput(&responseString, "Username(s) [Comma Separated]", "", false)
+		err = prompt.AskQuestionWithInput(&responseString, "Label(s) [Comma Separated]", "", false)
 		if err != nil {
 			return err
 		}
 		*response = strings.Split(responseString, ",")
 	}
+
+	return nil
+}
+
+func MilestonesPrompt(response *int, apiClient *gitlab.Client, repoRemote *glrepo.Remote, io *utils.IOStreams) (err error) {
+	var milestoneOptions []string
+	milestoneMap := map[string]*gitlab.Milestone{}
+
+	lOpts := &gitlab.ListMilestonesOptions{
+		State: gitlab.String("active"),
+	}
+	lOpts.PerPage = 100
+	milestones, err := api.ListMilestones(apiClient, repoRemote.FullName(), lOpts)
+	if err != nil {
+		return err
+	}
+	if len(milestones) == 0 {
+		fmt.Fprintln(io.StdErr, "There are no active milestones in this project")
+		return nil
+	}
+
+	for i := range milestones {
+		milestoneOptions = append(milestoneOptions, milestones[i].Title)
+		milestoneMap[milestones[i].Title] = milestones[i]
+	}
+
+	var selectedMilestone string
+	err = prompt.AskOne(&survey.Select{
+		Message: "Select Milestone",
+		Options: milestoneOptions,
+	}, &selectedMilestone)
+	if err != nil {
+		return err
+	}
+	*response = milestoneMap[selectedMilestone].ID
+
+	return nil
+}
+
+func AssigneesPrompt(response *[]string) (err error) {
+	var responseString string
+	err = prompt.AskQuestionWithInput(&responseString, "Assignee(s) Username(s) [Comma Separated]", "", false)
+	if err != nil {
+		return err
+	}
+	*response = strings.Split(responseString, ",")
+
 	return nil
 }
 
@@ -243,19 +225,24 @@ const (
 	NoAction Action = iota
 	SubmitAction
 	PreviewAction
+	AddMetadataAction
 	CancelAction
 )
 
-func ConfirmSubmission(allowPreview bool) (Action, error) {
+func ConfirmSubmission(allowPreview bool, allowAddMetadata bool) (Action, error) {
 	const (
-		submitLabel  = "Submit"
-		previewLabel = "Continue in browser"
-		cancelLabel  = "Cancel"
+		submitLabel      = "Submit"
+		previewLabel     = "Continue in browser"
+		addMetadataLabel = "Add metadata"
+		cancelLabel      = "Cancel"
 	)
 
 	options := []string{submitLabel}
 	if allowPreview {
 		options = append(options, previewLabel)
+	}
+	if allowAddMetadata {
+		options = append(options, addMetadataLabel)
 	}
 	options = append(options, cancelLabel)
 
@@ -282,11 +269,53 @@ func ConfirmSubmission(allowPreview bool) (Action, error) {
 		return SubmitAction, nil
 	case previewLabel:
 		return PreviewAction, nil
+	case addMetadataLabel:
+		return AddMetadataAction, nil
 	case cancelLabel:
 		return CancelAction, nil
 	default:
 		return -1, fmt.Errorf("invalid index: %d", confirmAnswers.Confirmation)
 	}
+}
+
+const (
+	AddLabelAction Action = iota
+	AddAssigneeAction
+	AddMilestoneAction
+)
+
+func PickMetadata() ([]Action, error) {
+	const (
+		labelsLabel    = "labels"
+		assigneeLabel  = "assignees"
+		milestoneLabel = "milestones"
+	)
+
+	options := []string{
+		labelsLabel,
+		assigneeLabel,
+		milestoneLabel,
+	}
+
+	var confirmAnswers []string
+	err := prompt.MultiSelect(&confirmAnswers, "Which metadata types to add?", options)
+	if err != nil {
+		return nil, fmt.Errorf("could not prompt: %w", err)
+	}
+
+	var pickedActions []Action
+
+	for _, x := range confirmAnswers {
+		switch x {
+		case labelsLabel:
+			pickedActions = append(pickedActions, AddLabelAction)
+		case assigneeLabel:
+			pickedActions = append(pickedActions, AddAssigneeAction)
+		case milestoneLabel:
+			pickedActions = append(pickedActions, AddMilestoneAction)
+		}
+	}
+	return pickedActions, nil
 }
 
 //IDsFromUsers collects all user IDs from a slice of users
