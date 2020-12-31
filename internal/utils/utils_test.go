@@ -65,5 +65,59 @@ func Test_Pluralize(t *testing.T) {
 			}
 		})
 	}
+}
 
+func Test_PresentInStringSlice(t *testing.T) {
+	testCases := []struct {
+		name   string
+		hay    []string
+		needle string
+		want   bool
+	}{
+		{"simple true", []string{"foo", "bar", "baz"}, "bar", true},
+		{"simple false", []string{"foo", "bar", "baz"}, "qux", false},
+	}
+	for _, tC := range testCases {
+		t.Run(tC.name, func(t *testing.T) {
+			got := PresentInStringSlice(tC.hay, tC.needle)
+			if got != tC.want {
+				t.Errorf("PresentInStringSlice() got = %t, want = %t", got, tC.want)
+			}
+		})
+	}
+}
+func Test_CommonElementsInStringSlice(t *testing.T) {
+	testCases := []struct {
+		name   string
+		array1 []string
+		array2 []string
+		want   []string
+	}{
+		{
+			name:   "simple no matching elements",
+			array1: []string{"foo", "bar", "baz"},
+			array2: []string{"qux", "quux", "quz"},
+			want:   []string{},
+		},
+		{
+			name:   "simple matching elements",
+			array1: []string{"foo", "quux", "baz"},
+			array2: []string{"qux", "quux", "baz"},
+			want:   []string{"quux", "baz"},
+		},
+	}
+	for _, tC := range testCases {
+		t.Run(tC.name, func(t *testing.T) {
+			got := CommonElementsInStringSlice(tC.array1, tC.array2)
+			if len(got) != len(tC.want) {
+				t.Errorf("CommonElementsInStringSlice() size of got (%d) and wanted (%d) arrays differ",
+					len(got), len(tC.want))
+			}
+			for i := range got {
+				if got[i] != tC.want[i] {
+					t.Errorf("CommonElementsInStringSlice() got = %s, want = %s", got[i], tC.want[i])
+				}
+			}
+		})
+	}
 }
