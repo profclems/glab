@@ -105,3 +105,29 @@ func GreenCheck() string {
 func RedCheck() string {
 	return Red("✔")
 }
+
+// PresentInStringSlice take a Hay (Slice of Strings) and a Needle (string)
+// and returns true based on whether or not the Needle is present in the hay.
+func PresentInStringSlice(hay []string, needle string) bool {
+	for x := range hay {
+		if hay[x] == needle {
+			return true
+		}
+	}
+	return false
+}
+
+// CommonElementsInStringSlice takes 2 Slices of Strings and returns a Third Slice
+// that is the common elements between the first 2 Slices.
+func CommonElementsInStringSlice(s1 []string, s2 []string) (arr []string) {
+	hash := make(map[string]bool)
+	for x := range s1 {
+		hash[s1[x]] = true
+	}
+	for i := range s2 {
+		if hash[s2[i]] {
+			arr = append(arr, s2[i])
+		}
+	}
+	return arr
+}
