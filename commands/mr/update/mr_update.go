@@ -86,6 +86,14 @@ func NewCmdUpdate(f *cmdutils.Factory) *cobra.Command {
 				l.Description = gitlab.String(m)
 			}
 
+			if m, _ := cmd.Flags().GetString("milestone"); m != "" {
+				mID, err := cmdutils.ParseMilestone(apiClient, repo, m)
+				if err != nil {
+					return err
+				}
+				l.MilestoneID = gitlab.Int(mID)
+			}
+
 			if assignees, _ := cmd.Flags().GetStringSlice("assignees"); len(assignees) > 0 {
 				users, err := api.UsersByNames(apiClient, assignees)
 				if err != nil {
@@ -117,6 +125,7 @@ func NewCmdUpdate(f *cmdutils.Factory) *cobra.Command {
 	mrUpdateCmd.Flags().StringP("description", "d", "", "merge request description")
 	mrUpdateCmd.Flags().StringSliceP("assignees", "a", []string{}, "Assign merge request to people by their `usernames`")
 	mrUpdateCmd.Flags().BoolP("remove-source-branch", "", false, "Remove Source Branch on merge")
+	mrUpdateCmd.Flags().StringP("milestone", "m", "", "title of the milestone to assign")
 
 	return mrUpdateCmd
 }
