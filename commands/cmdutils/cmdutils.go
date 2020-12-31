@@ -296,6 +296,12 @@ func ConfirmSubmission(allowPreview bool, allowAddMetadata bool) (Action, error)
 	}
 }
 
+const (
+	AddLabelAction Action = iota
+	AddAssigneeAction
+	AddMilestoneAction
+)
+
 //IDsFromUsers collects all user IDs from a slice of users
 func IDsFromUsers(users []*gitlab.User) []int {
 	ids := make([]int, len(users))
