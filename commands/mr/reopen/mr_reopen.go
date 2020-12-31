@@ -46,7 +46,7 @@ func NewCmdReopen(f *cmdutils.Factory) *cobra.Command {
 					return err
 				}
 
-				fmt.Fprintf(f.IO.StdOut, "%s Merge request !%d reopened\n", utils.GreenCheck(), mr.IID)
+				fmt.Fprintf(f.IO.StdOut, "%s Reopened Merge request !%d\n", utils.GreenCheck(), mr.IID)
 				fmt.Fprintln(f.IO.StdOut, mrutils.DisplayMR(mr))
 			}
 
