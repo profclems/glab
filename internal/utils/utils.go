@@ -105,3 +105,12 @@ func GreenCheck() string {
 func RedCheck() string {
 	return Red("✔")
 }
+
+func IsInSliceInt(hay []int, needle int) bool {
+	for _, x := range hay {
+		if x == needle {
+			return true
+		}
+	}
+	return false
+}
