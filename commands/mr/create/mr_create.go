@@ -217,7 +217,7 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 				var templateContents string
 				if opts.Description == "" {
 					if opts.NoEditor {
-						err = prompt.AskMultiline(&opts.Description, "Description:", "")
+						err = prompt.AskMultiline(&opts.Description, "description", "Description:", "")
 						if err != nil {
 							return err
 						}
@@ -256,14 +256,14 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 				}
 
 				if opts.Title == "" {
-					err = prompt.AskQuestionWithInput(&opts.Title, "Title:", "", true)
+					err = prompt.AskQuestionWithInput(&opts.Title, "title", "Title:", "", true)
 					if err != nil {
 						return err
 					}
 				}
 				if opts.Description == "" {
 					if opts.NoEditor {
-						err = prompt.AskMultiline(&opts.Description, "Description:", "")
+						err = prompt.AskMultiline(&opts.Description, "description", "Description:", "")
 						if err != nil {
 							return err
 						}

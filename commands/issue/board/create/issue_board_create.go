@@ -39,7 +39,7 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 			}
 
 			if boardName == "" {
-				err = prompt.AskQuestionWithInput(&boardName, "Board Name:", "", true)
+				err = prompt.AskQuestionWithInput(&boardName, "board name", "Board Name:", "", true)
 				if err != nil {
 					return err
 				}
