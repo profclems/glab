@@ -218,6 +218,11 @@ func AssigneesPrompt(response *[]string) (err error) {
 	if err != nil {
 		return err
 	}
+	// Return early on an empty string instead of doing the `strings.Split`, the difference
+	// here is that it won't fill the Slice with one `""` element.
+	if responseString == "" {
+		return nil
+	}
 	*response = strings.Split(responseString, ",")
 
 	return nil
