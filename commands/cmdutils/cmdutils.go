@@ -342,3 +342,25 @@ func ParseMilestone(apiClient *gitlab.Client, repo glrepo.Interface, milestoneTi
 
 	return milestone.ID, nil
 }
+
+// ParseAssignees takes a String Slice and splits them into 3 Slice Strings based on
+// the first character of a string.
+//
+// '+' is put in the first slice, '!' and '-' in the second slice and all other cases
+// in the third slice.
+//
+// The 3 String slices are returned regardless if anything was put it in or not the user
+// is responsible for checking the length to see if anything is in it
+func ParseAssignees(assignees []string) (toAdd, toRemove, toReplace []string) {
+	for _, assignee := range assignees {
+		switch string([]rune(assignee)[0]) {
+		case "+":
+			toAdd = append(toAdd, string([]rune(assignee)[1:]))
+		case "!", "-":
+			toRemove = append(toRemove, string([]rune(assignee)[1:]))
+		default:
+			toReplace = append(toReplace, assignee)
+		}
+	}
+	return toAdd, toRemove, toReplace
+}
