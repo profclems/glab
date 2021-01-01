@@ -158,7 +158,7 @@ func LabelsPrompt(response *[]string, apiClient *gitlab.Client, repoRemote *glre
 	}
 	if labelOptions != "" {
 		var selectedLabels []string
-		err = prompt.MultiSelect(&selectedLabels, "Select Labels", strings.Split(labelOptions, ","))
+		err = prompt.MultiSelect(&selectedLabels, "labels", "Select Labels", strings.Split(labelOptions, ","))
 		if err != nil {
 			return err
 		}
@@ -166,7 +166,7 @@ func LabelsPrompt(response *[]string, apiClient *gitlab.Client, repoRemote *glre
 
 	} else {
 		var responseString string
-		err = prompt.AskQuestionWithInput(&responseString, "Label(s) [Comma Separated]", "", false)
+		err = prompt.AskQuestionWithInput(&responseString, "labels", "Label(s) [Comma Separated]", "", false)
 		if err != nil {
 			return err
 		}
@@ -213,7 +213,7 @@ func MilestonesPrompt(response *int, apiClient *gitlab.Client, repoRemote *glrep
 
 func AssigneesPrompt(response *[]string) (err error) {
 	var responseString string
-	err = prompt.AskQuestionWithInput(&responseString, "Assignee(s) Username(s) [Comma Separated]", "", false)
+	err = prompt.AskQuestionWithInput(&responseString, "assignee", "Assignee(s) Username(s) [Comma Separated]", "", false)
 	if err != nil {
 		return err
 	}
@@ -301,7 +301,7 @@ func PickMetadata() ([]Action, error) {
 	}
 
 	var confirmAnswers []string
-	err := prompt.MultiSelect(&confirmAnswers, "Which metadata types to add?", options)
+	err := prompt.MultiSelect(&confirmAnswers, "metadata", "Which metadata types to add?", options)
 	if err != nil {
 		return nil, fmt.Errorf("could not prompt: %w", err)
 	}

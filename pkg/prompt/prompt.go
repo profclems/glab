@@ -4,16 +4,21 @@ import (
 	"github.com/AlecAivazis/survey/v2"
 )
 
-func AskQuestionWithInput(response interface{}, question, defaultVal string, isRequired bool) error {
-	prompt := &survey.Input{
-		Message: question,
-		Default: defaultVal,
+func AskQuestionWithInput(response interface{}, name, question, defaultVal string, isRequired bool) error {
+	prompt := []*survey.Question{
+		{
+			Name: name,
+			Prompt: &survey.Input{
+				Message: question,
+				Default: defaultVal,
+			},
+		},
 	}
 	var err error
 	if isRequired {
-		err = survey.AskOne(prompt, response, survey.WithValidator(survey.Required))
+		err = Ask(prompt, response, survey.WithValidator(survey.Required))
 	} else {
-		err = survey.AskOne(prompt, response)
+		err = Ask(prompt, response)
 	}
 	if err != nil {
 		return err
@@ -21,24 +26,34 @@ func AskQuestionWithInput(response interface{}, question, defaultVal string, isR
 	return nil
 }
 
-func MultiSelect(response interface{}, question string, options []string, opts ...survey.AskOpt) error {
-	prompt := &survey.MultiSelect{
-		Message: question,
-		Options: options,
+func MultiSelect(response interface{}, name, question string, options []string, opts ...survey.AskOpt) error {
+	prompt := []*survey.Question{
+		{
+			Name: name,
+			Prompt: &survey.MultiSelect{
+				Message: question,
+				Options: options,
+			},
+		},
 	}
-	err := AskOne(prompt, response, opts...)
+	err := Ask(prompt, response, opts...)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func AskMultiline(response interface{}, question string, defaultVal string) error {
-	prompt := &survey.Multiline{
-		Message: question,
-		Default: defaultVal,
+func AskMultiline(response interface{}, name, question string, defaultVal string) error {
+	prompt := []*survey.Question{
+		{
+			Name: name,
+			Prompt: &survey.Multiline{
+				Message: question,
+				Default: defaultVal,
+			},
+		},
 	}
-	err := survey.AskOne(prompt, response)
+	err := Ask(prompt, response)
 	if err != nil {
 		return err
 	}
