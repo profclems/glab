@@ -1,6 +1,7 @@
 package cmdutils
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/profclems/glab/pkg/api"
@@ -231,6 +232,35 @@ func Test_UsersFromReplaces(t *testing.T) {
 			assert.ElementsMatch(t, gotIDs, tC.expectedIDs)
 			assert.ElementsMatch(t, gotAction, tC.expectedAction)
 		})
+	}
+}
+
+func Test_UserAssignmentsAPIFailure(t *testing.T) {
+	want := "failed to get users by their names" // Error message we want
+	ua := UserAssignments{
+		ToAdd: []string{"foo"},
+	} // Fill `ToAdd` so `cmdutils.UsersFromAddRemove()` reaches the api call
+	var err error
+
+	api.UsersByNames = func(apiClient *gitlab.Client, names []string) ([]*gitlab.User, error) {
+		return nil, fmt.Errorf("failed to get users by their names")
+	}
+
+	apiClient := gitlab.Client{} // Empty Client, it won't be used, just to satisfy the function signature
+	_, _, err = ua.UsersFromReplaces(&apiClient, nil)
+	if err == nil {
+		t.Errorf("UsersFromReplaces() expected error to not be nil")
+	}
+	if want != err.Error() {
+		t.Errorf("UsersFromReplace() expected error = %s, got = %w", want, err)
+	}
+
+	_, _, err = ua.UsersFromAddRemove(nil, nil, &apiClient, nil)
+	if err == nil {
+		t.Errorf("UsersFromReplaces() expected error to not be nil")
+	}
+	if want != err.Error() {
+		t.Errorf("UsersFromReplace() expected error = %s, got = %w", want, err)
 	}
 }
 
