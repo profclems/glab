@@ -600,3 +600,45 @@ func Test_PickMetadata(t *testing.T) {
 		})
 	}
 }
+
+func Test_AssigneesPrompt(t *testing.T) {
+	testCases := []struct {
+		name   string
+		input  string
+		output []string
+	}{
+		{
+			name: "nothing",
+		},
+		{
+			name:   "Single name",
+			input:  "foo",
+			output: []string{"foo"},
+		},
+		{
+			name:   "2 or more names",
+			input:  "foo,bar",
+			output: []string{"foo", "bar"},
+		},
+	}
+	for _, tC := range testCases {
+		t.Run(tC.name, func(t *testing.T) {
+			as, restoreAsk := prompt.InitAskStubber()
+			defer restoreAsk()
+
+			as.Stub([]*prompt.QuestionStub{
+				{
+					Name:  "assignee",
+					Value: tC.input,
+				},
+			})
+
+			var got []string
+			err := AssigneesPrompt(&got)
+			if err != nil {
+				t.Errorf("AssigneesPrompt() unexpected error = %s", err)
+			}
+			assert.ElementsMatch(t, got, tC.output)
+		})
+	}
+}
