@@ -117,6 +117,17 @@ func PresentInStringSlice(hay []string, needle string) bool {
 	return false
 }
 
+// PresentInIntSlice take a Hay (Slice of Ints) and a Needle (int)
+// and returns true based on whether or not the Needle is present in the hay.
+func PresentInIntSlice(hay []int, needle int) bool {
+	for x := range hay {
+		if hay[x] == needle {
+			return true
+		}
+	}
+	return false
+}
+
 // CommonElementsInStringSlice takes 2 Slices of Strings and returns a Third Slice
 // that is the common elements between the first 2 Slices.
 func CommonElementsInStringSlice(s1 []string, s2 []string) (arr []string) {
