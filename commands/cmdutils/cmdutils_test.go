@@ -6,6 +6,7 @@ import (
 
 	"github.com/profclems/glab/internal/glrepo"
 	"github.com/profclems/glab/pkg/api"
+	"github.com/profclems/glab/pkg/prompt"
 	"github.com/stretchr/testify/assert"
 	"github.com/xanzy/go-gitlab"
 )
@@ -525,5 +526,119 @@ func Test_ParseMilestoneTitleToID(t *testing.T) {
 	}
 	if got != expectedID {
 		t.Errorf("ParseMilestone() expected = %d, got = %d", expectedID, got)
+	}
+}
+
+func Test_PickMetadata(t *testing.T) {
+	const (
+		labelsLabel    = "labels"
+		assigneeLabel  = "assignees"
+		milestoneLabel = "milestones"
+	)
+
+	testCases := []struct {
+		name     string
+		values   []string
+		expected []Action
+	}{
+		{
+			name: "nothing picked",
+		},
+		{
+			name:     "labels",
+			values:   []string{labelsLabel},
+			expected: []Action{AddLabelAction},
+		},
+		{
+			name:     "assignees",
+			values:   []string{assigneeLabel},
+			expected: []Action{AddAssigneeAction},
+		},
+		{
+			name:     "milestone",
+			values:   []string{milestoneLabel},
+			expected: []Action{AddMilestoneAction},
+		},
+		{
+			name:     "labels and assignees",
+			values:   []string{labelsLabel, assigneeLabel},
+			expected: []Action{AddLabelAction, AddAssigneeAction},
+		},
+		{
+			name:     "labels and milestone",
+			values:   []string{labelsLabel, milestoneLabel},
+			expected: []Action{AddLabelAction, AddMilestoneAction},
+		},
+		{
+			name:     "assignees and milestone",
+			values:   []string{assigneeLabel, milestoneLabel},
+			expected: []Action{AddAssigneeAction, AddMilestoneAction},
+		},
+		{
+			name:     "labels, assignees and milestone",
+			values:   []string{labelsLabel, assigneeLabel, milestoneLabel},
+			expected: []Action{AddLabelAction, AddAssigneeAction, AddMilestoneAction},
+		},
+	}
+	for _, tC := range testCases {
+		t.Run(tC.name, func(t *testing.T) {
+			as, restoreAsk := prompt.InitAskStubber()
+			defer restoreAsk()
+
+			as.Stub([]*prompt.QuestionStub{
+				{
+					Name:  "metadata",
+					Value: tC.values,
+				},
+			})
+
+			got, err := PickMetadata()
+			if err != nil {
+				t.Errorf("PickMetadata() unexpected error = %s", err)
+			}
+			assert.ElementsMatch(t, got, tC.expected)
+		})
+	}
+}
+
+func Test_AssigneesPrompt(t *testing.T) {
+	testCases := []struct {
+		name   string
+		input  string
+		output []string
+	}{
+		{
+			name: "nothing",
+		},
+		{
+			name:   "Single name",
+			input:  "foo",
+			output: []string{"foo"},
+		},
+		{
+			name:   "2 or more names",
+			input:  "foo,bar",
+			output: []string{"foo", "bar"},
+		},
+	}
+	for _, tC := range testCases {
+		t.Run(tC.name, func(t *testing.T) {
+			as, restoreAsk := prompt.InitAskStubber()
+			defer restoreAsk()
+
+			as.Stub([]*prompt.QuestionStub{
+				{
+					Name:  "assignee",
+					Value: tC.input,
+				},
+			})
+
+			var got []string
+			err := AssigneesPrompt(&got)
+			if err != nil {
+				t.Errorf("AssigneesPrompt() unexpected error = %s", err)
+			}
+			assert.ElementsMatch(t, got, tC.output)
+		})
 	}
 }
