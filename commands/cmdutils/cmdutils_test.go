@@ -22,18 +22,25 @@ func Test_ParseAssignees(t *testing.T) {
 			wantReplace: []string{"foo"},
 		},
 		{
-			name:        "simple add",
+			name:        "only add",
 			input:       []string{"+foo"},
 			wantAdd:     []string{"foo"},
 			wantRemove:  []string{},
 			wantReplace: []string{},
 		},
 		{
-			name:        "simple remove",
+			name:        "only remove",
 			input:       []string{"-foo", "!bar"},
 			wantAdd:     []string{},
 			wantRemove:  []string{"foo", "bar"},
 			wantReplace: []string{},
+		},
+		{
+			name:        "only replace",
+			input:       []string{"baz"},
+			wantAdd:     []string{},
+			wantRemove:  []string{},
+			wantReplace: []string{"baz"},
 		},
 		{
 			name:        "add and remove",
