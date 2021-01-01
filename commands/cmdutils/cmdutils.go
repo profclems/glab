@@ -1,6 +1,7 @@
 package cmdutils
 
 import (
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -343,6 +344,14 @@ func ParseMilestone(apiClient *gitlab.Client, repo glrepo.Interface, milestoneTi
 	return milestone.ID, nil
 }
 
+// UserAssignments holds 3 slice strings that represent which assignees should be added, removed, and replaced
+// helper functions are also provided
+type UserAssignments struct {
+	ToAdd     []string
+	ToRemove  []string
+	ToReplace []string
+}
+
 // ParseAssignees takes a String Slice and splits them into 3 Slice Strings based on
 // the first character of a string.
 //
@@ -351,16 +360,127 @@ func ParseMilestone(apiClient *gitlab.Client, repo glrepo.Interface, milestoneTi
 //
 // The 3 String slices are returned regardless if anything was put it in or not the user
 // is responsible for checking the length to see if anything is in it
-func ParseAssignees(assignees []string) (toAdd, toRemove, toReplace []string) {
+func ParseAssignees(assignees []string) *UserAssignments {
+	ua := UserAssignments{}
+
 	for _, assignee := range assignees {
 		switch string([]rune(assignee)[0]) {
 		case "+":
-			toAdd = append(toAdd, string([]rune(assignee)[1:]))
+			ua.ToAdd = append(ua.ToAdd, string([]rune(assignee)[1:]))
 		case "!", "-":
-			toRemove = append(toRemove, string([]rune(assignee)[1:]))
+			ua.ToRemove = append(ua.ToRemove, string([]rune(assignee)[1:]))
 		default:
-			toReplace = append(toReplace, assignee)
+			ua.ToReplace = append(ua.ToReplace, assignee)
 		}
 	}
-	return toAdd, toRemove, toReplace
+	return &ua
+}
+
+// VerifyAssignees is a method for UserAssignments that checks them for validity
+func (ua *UserAssignments) VerifyAssignees() error {
+	// Fail if relative and absolute assignees were given, there is no reason to mix them.
+	if len(ua.ToReplace) != 0 && (len(ua.ToAdd) != 0 || len(ua.ToRemove) != 0) {
+		return errors.New("mixing relative (+,!,-) and absolute assignments is forbidden")
+	}
+
+	if m := utils.CommonElementsInStringSlice(ua.ToAdd, ua.ToRemove); len(m) != 0 {
+		return fmt.Errorf("%s %q present in both add and remove which is forbidden",
+			utils.Pluralize(len(m), "element"),
+			strings.Join(m, " "))
+	}
+	return nil
+}
+
+// UsersFromReplaces converts all users from the `ToReplace` member of the struct into
+// an Slice of String representing the Users' IDs, it also takes a Slice of Strings and
+// writes a proper action message to it
+func (ua *UserAssignments) UsersFromReplaces(apiClient *gitlab.Client, actions []string) ([]int, []string, error) {
+	users, err := api.UsersByNames(apiClient, ua.ToReplace)
+	if err != nil {
+		return nil, actions, err
+	}
+	var usernames []string
+	for i := range users {
+		usernames = append(usernames, fmt.Sprintf("@%s", users[i].Username))
+	}
+	if len(usernames) != 0 {
+		actions = append(actions, fmt.Sprintf("assigned to %q", strings.Join(usernames, " ")))
+	}
+	return IDsFromUsers(users), actions, nil
+}
+
+// UsersFromAddRemove works with both `ToAdd` and `ToRemove` members to produce a Slice of Ints that
+// represents the final collection of IDs to assigned.
+//
+// It starts by getting all IDs already assigned, but ignoring ones present in `ToRemove`, it then
+// converts all `usernames` in `ToAdd` into IDs by using the `api` package and adds them to the
+// IDs to be assigned
+func (ua *UserAssignments) UsersFromAddRemove(
+	issueAssignees []*gitlab.IssueAssignee,
+	mergeRequestAssignees []*gitlab.BasicUser,
+	apiClient *gitlab.Client,
+	actions []string,
+) ([]int, []string, error) {
+
+	var assignedIDs []int
+	var usernames []string
+
+	// Only one of those is required
+	if mergeRequestAssignees != nil && issueAssignees != nil {
+		return nil, actions, fmt.Errorf("issueAssignes and mergeRequestAssignes can't both not be nil")
+	}
+
+	// Path for Issues
+	for i := range issueAssignees {
+		// Only store them in assigneedIDs if they are not marked for removal
+		if !utils.PresentInStringSlice(ua.ToRemove, issueAssignees[i].Username) {
+			assignedIDs = append(assignedIDs, issueAssignees[i].ID)
+		}
+	}
+
+	// Path for Merge Requests
+	for i := range mergeRequestAssignees {
+		// Only store them in assigneedIDs if they are not marked for removal
+		if !utils.PresentInStringSlice(ua.ToRemove, mergeRequestAssignees[i].Username) {
+			assignedIDs = append(assignedIDs, mergeRequestAssignees[i].ID)
+		}
+	}
+
+	// Add action string
+	if len(ua.ToRemove) != 0 {
+		for _, x := range ua.ToRemove {
+			usernames = append(usernames, fmt.Sprintf("@%s", x))
+		}
+		actions = append(actions, fmt.Sprintf("unassigned %q", strings.Join(usernames, " ")))
+	}
+
+	if len(ua.ToAdd) != 0 {
+		users, err := api.UsersByNames(apiClient, ua.ToAdd)
+		if err != nil {
+			return nil, nil, err
+		}
+		// Work-around GitLab (the company's own instance, not all instances have this) bug
+		// which causes a 500 Internal Error if duplicate `IDs` are used. Filter out any
+		// IDs that is already present
+		for i := range users {
+			if !utils.PresentInIntSlice(assignedIDs, users[i].ID) {
+				assignedIDs = append(assignedIDs, users[i].ID)
+			}
+		}
+
+		// Reset the usernames array because it might have been used by `unassignedUsers`
+		usernames = []string{}
+
+		for _, x := range ua.ToAdd {
+			usernames = append(usernames, fmt.Sprintf("@%s", x))
+		}
+		actions = append(actions, fmt.Sprintf("assigned %q", strings.Join(usernames, " ")))
+	}
+
+	// That means that all assignees were removed but we can't pass an empty Slice of Ints so
+	// pass the documented value of 0
+	if len(assignedIDs) == 0 {
+		assignedIDs = []int{0}
+	}
+	return assignedIDs, actions, nil
 }

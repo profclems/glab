@@ -86,6 +86,26 @@ func Test_PresentInStringSlice(t *testing.T) {
 		})
 	}
 }
+
+func Test_PresentInIntSlice(t *testing.T) {
+	testCases := []struct {
+		name   string
+		hay    []int
+		needle int
+		want   bool
+	}{
+		{"simple true", []int{1, 2, 3}, 2, true},
+		{"simple false", []int{1, 2, 3}, 4, false},
+	}
+	for _, tC := range testCases {
+		t.Run(tC.name, func(t *testing.T) {
+			got := PresentInIntSlice(tC.hay, tC.needle)
+			if got != tC.want {
+				t.Errorf("PresentInIntSlice() got = %t, want = %t", got, tC.want)
+			}
+		})
+	}
+}
 func Test_CommonElementsInStringSlice(t *testing.T) {
 	testCases := []struct {
 		name   string
