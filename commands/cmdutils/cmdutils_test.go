@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/profclems/glab/internal/glrepo"
 	"github.com/profclems/glab/pkg/api"
 	"github.com/stretchr/testify/assert"
 	"github.com/xanzy/go-gitlab"
@@ -466,5 +467,63 @@ func Test_UsersFromAddRemove(t *testing.T) {
 			assert.ElementsMatch(t, gotIDs, tC.expectedIDs)
 			assert.ElementsMatch(t, gotAction, tC.expectedAction)
 		})
+	}
+}
+
+func Test_ParseMilestoneTitleIsID(t *testing.T) {
+	title := "1"
+	expectedMilestoneID := 1
+
+	// Override function to return an error, it should never reach this
+	api.MilestoneByTitle = func(client *gitlab.Client, projectID interface{}, name string) (*gitlab.Milestone, error) {
+		return nil, fmt.Errorf("We shouldn't have reached here")
+	}
+
+	got, err := ParseMilestone(&gitlab.Client{}, glrepo.New("foo", "bar"), title)
+	if err != nil {
+		t.Errorf("ParseMilestone() unexpected error = %s", err)
+	}
+	if got != expectedMilestoneID {
+		t.Errorf("ParseMilestone() got = %d, expected = %d", got, expectedMilestoneID)
+	}
+}
+
+func Test_ParseMilestoneAPIFail(t *testing.T) {
+	title := "AsLongAsItDoesn'tConvertToInt"
+	want := "api call failed in api.MilestoneByTitle()"
+
+	// Override function to return an error simulating an API call failure
+	api.MilestoneByTitle = func(client *gitlab.Client, projectID interface{}, name string) (*gitlab.Milestone, error) {
+		return nil, fmt.Errorf("api call failed in api.MilestoneByTitle()")
+	}
+
+	_, err := ParseMilestone(&gitlab.Client{}, glrepo.New("foo", "bar"), title)
+	if err == nil {
+		t.Errorf("ParseMilestone() expected error")
+	}
+	if want != err.Error() {
+		t.Errorf("ParseMilestone() expected error = %s, got error = %s", want, err)
+	}
+}
+
+func Test_ParseMilestoneTitleToID(t *testing.T) {
+	milestoneTitle := "kind: testing"
+	expectedID := 3
+
+	// Override function so it returns the correct milestone
+	api.MilestoneByTitle = func(client *gitlab.Client, projectID interface{}, name string) (*gitlab.Milestone, error) {
+		return &gitlab.Milestone{
+				Title: "kind: testing",
+				ID:    3,
+			},
+			nil
+	}
+
+	got, err := ParseMilestone(&gitlab.Client{}, glrepo.New("foo", "bar"), milestoneTitle)
+	if err != nil {
+		t.Errorf("ParseMilestone() unexpected error = %s", err)
+	}
+	if got != expectedID {
+		t.Errorf("ParseMilestone() expected = %d, got = %d", expectedID, got)
 	}
 }
