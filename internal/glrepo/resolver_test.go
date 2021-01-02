@@ -1,9 +1,12 @@
 package glrepo
 
 import (
+	"errors"
+	"fmt"
 	"testing"
 
 	"github.com/profclems/glab/internal/git"
+	"github.com/profclems/glab/pkg/api"
 	"github.com/stretchr/testify/assert"
 	"github.com/xanzy/go-gitlab"
 )
@@ -152,5 +155,58 @@ func Test_ResolveRemotesToRepos(t *testing.T) {
 			assert.Equal(t, r.remotes[i].Repo.FullName(), rem.remotes[i].Repo.FullName())
 			assert.Equal(t, r.remotes[i].Repo.RepoHost(), rem.remotes[i].Repo.RepoHost())
 		}
+	})
+}
+
+func Test_resolveNetwork(t *testing.T) {
+	rem := &ResolvedRemotes{
+		remotes: Remotes{
+			&Remote{
+				Remote: &git.Remote{
+					Name: "origin",
+				},
+				Repo: NewWithHost("profclems", "glab", "gitlab.com"),
+			},
+		},
+		apiClient: &gitlab.Client{},
+	}
+
+	// Override api.GetProejct to not use the network
+	api.GetProject = func(_ *gitlab.Client, ProjectID interface{}) (*gitlab.Project, error) {
+		proj := &gitlab.Project{
+			PathWithNamespace: fmt.Sprint(ProjectID),
+		}
+		return proj, nil
+	}
+
+	t.Run("simple", func(t *testing.T) {
+		// Make our own copy of rem we can modify
+		rem := *rem
+
+		err := resolveNetwork(&rem)
+		if err != nil {
+			t.Errorf("resolveNetwork() unexpected error = %s", err)
+		}
+
+		assert.Len(t, rem.network, len(rem.remotes))
+		for i := range rem.network {
+			assert.Equal(t, rem.network[i].PathWithNamespace, rem.remotes[i].Repo.FullName())
+		}
+	})
+
+	t.Run("API call failed", func(t *testing.T) {
+		// Make our own copy of rem we can modify
+		rem := *rem
+
+		api.GetProject = func(_ *gitlab.Client, ProjectID interface{}) (*gitlab.Project, error) {
+			return nil, errors.New("error")
+		}
+
+		err := resolveNetwork(&rem)
+		if err != nil {
+			t.Errorf("resolveNetwork() unexpected error = %s", err)
+		}
+
+		assert.Len(t, rem.network, 0)
 	})
 }
