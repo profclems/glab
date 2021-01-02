@@ -37,18 +37,17 @@ func ResolveRemotesToRepos(remotes Remotes, client *gitlab.Client, base string) 
 	return result, nil
 }
 
-func resolveNetwork(result *ResolvedRemotes) error {
-	for _, r := range result.remotes {
-		networkResult, err := api.GetProject(result.apiClient, r.FullName())
+func resolveNetwork(result *ResolvedRemotes) {
+	// Loop over at most 5 (maxRemotesForLookup)
+	for i := 0; i < len(result.remotes) && i < maxRemotesForLookup; i++ {
+		networkResult, err := api.GetProject(result.apiClient, result.remotes[i].FullName())
 		if err == nil {
 			result.network = append(result.network, *networkResult)
 		}
-		if len(result.remotes) == maxRemotesForLookup {
+		if i == maxRemotesForLookup {
 			break
 		}
 	}
-
-	return nil
 }
 
 type ResolvedRemotes struct {
@@ -96,9 +95,9 @@ func (r *ResolvedRemotes) BaseRepo(prompt bool) (Interface, error) {
 
 	// from here on, consult the API
 	if r.network == nil {
-		err := resolveNetwork(r)
-		if err != nil {
-			return nil, err
+		resolveNetwork(r)
+		if len(r.network) == 0 {
+			return nil, errors.New("no GitLab Projects found from remotes")
 		}
 	}
 
@@ -171,9 +170,9 @@ func (r *ResolvedRemotes) HeadRepo(prompt bool) (Interface, error) {
 
 	// from here on, consult the API
 	if r.network == nil {
-		err := resolveNetwork(r)
-		if err != nil {
-			return nil, err
+		resolveNetwork(r)
+		if len(r.network) == 0 {
+			return nil, errors.New("no GitLab Projects found from remotes")
 		}
 	}
 
@@ -241,9 +240,9 @@ func (r *ResolvedRemotes) HeadRepo(prompt bool) (Interface, error) {
 
 func (r *ResolvedRemotes) HeadRepos() ([]*gitlab.Project, error) {
 	if r.network == nil {
-		err := resolveNetwork(r)
-		if err != nil {
-			return nil, err
+		resolveNetwork(r)
+		if len(r.network) == 0 {
+			return nil, errors.New("no GitLab Projects found from remotes")
 		}
 	}
 
