@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/profclems/glab/internal/git"
 	"github.com/profclems/glab/internal/glrepo"
+	"github.com/profclems/glab/internal/utils"
 	"github.com/profclems/glab/pkg/api"
 	"github.com/profclems/glab/pkg/prompt"
 	"github.com/stretchr/testify/assert"
@@ -639,6 +641,75 @@ func Test_AssigneesPrompt(t *testing.T) {
 				t.Errorf("AssigneesPrompt() unexpected error = %s", err)
 			}
 			assert.ElementsMatch(t, got, tC.output)
+		})
+	}
+}
+
+func Test_MilestonesPrompt(t *testing.T) {
+	mockMilestones := []*gitlab.Milestone{
+		{
+			Title: "New Release",
+			ID:    5,
+		},
+		{
+			Title: "Really big feature",
+			ID:    240,
+		},
+		{
+			Title: "Get rid of low quality code",
+			ID:    650,
+		},
+	}
+
+	// Override API.ListMilestones so it doesn't make any network calls
+	api.ListMilestones = func(_ *gitlab.Client, _ interface{}, _ *gitlab.ListMilestonesOptions) ([]*gitlab.Milestone, error) {
+		return mockMilestones, nil
+	}
+
+	// mock glrepo.Remote object
+	repo := glrepo.New("foo", "bar")
+	remote := &git.Remote{
+		Name:     "test",
+		Resolved: "base",
+	}
+	repoRemote := &glrepo.Remote{
+		Remote: remote,
+		Repo:   repo,
+	}
+
+	testCases := []struct {
+		name       string
+		input      string // Selected milestone
+		expectedID int    // expected global ID from the milestone
+	}{
+		{
+			name:       "match",
+			input:      "New Release",
+			expectedID: 5,
+		},
+	}
+	for _, tC := range testCases {
+		t.Run(tC.name, func(t *testing.T) {
+			as, restoreAsk := prompt.InitAskStubber()
+			defer restoreAsk()
+
+			as.Stub([]*prompt.QuestionStub{
+				{
+					Name:  "milestone",
+					Value: tC.input,
+				},
+			})
+
+			var got int
+			var io utils.IOStreams
+
+			err := MilestonesPrompt(&got, &gitlab.Client{}, repoRemote, &io)
+			if err != nil {
+				t.Errorf("MilestonesPrompt() unexpected error = %s", err)
+			}
+			if got != 0 && got != tC.expectedID {
+				t.Errorf("MilestonesPrompt() expected = %d, got = %d", got, tC.expectedID)
+			}
 		})
 	}
 }
