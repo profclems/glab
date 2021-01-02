@@ -1,10 +1,13 @@
 package cmdutils
 
 import (
+	"errors"
 	"fmt"
 	"testing"
 
+	"github.com/profclems/glab/internal/git"
 	"github.com/profclems/glab/internal/glrepo"
+	"github.com/profclems/glab/internal/utils"
 	"github.com/profclems/glab/pkg/api"
 	"github.com/profclems/glab/pkg/prompt"
 	"github.com/stretchr/testify/assert"
@@ -226,8 +229,7 @@ func Test_UsersFromReplaces(t *testing.T) {
 				return tC.users, nil
 			}
 			var gotAction []string
-			apiClient := gitlab.Client{} // Empty Client, it won't be used, just to satisfy the function signature
-			gotIDs, gotAction, err := ua.UsersFromReplaces(&apiClient, gotAction)
+			gotIDs, gotAction, err := ua.UsersFromReplaces(&gitlab.Client{}, gotAction)
 			if err != nil {
 				t.Errorf("UsersFromReplaces() unexpected error = %s", err)
 			}
@@ -456,8 +458,7 @@ func Test_UsersFromAddRemove(t *testing.T) {
 				return tC.users, nil
 			}
 			var gotAction []string
-			apiClient := gitlab.Client{} // Empty Client, it won't be used, just to satisfy the function signature
-			gotIDs, gotAction, err := tC.ua.UsersFromAddRemove(tC.issue, tC.merge, &apiClient, gotAction)
+			gotIDs, gotAction, err := tC.ua.UsersFromAddRemove(tC.issue, tC.merge, &gitlab.Client{}, gotAction)
 			if err != nil {
 				if tC.wantErr != "" && tC.wantErr != err.Error() {
 					t.Errorf("UsersFromAddRemove() expected error = %s, got = %s", tC.wantErr, err)
@@ -639,6 +640,202 @@ func Test_AssigneesPrompt(t *testing.T) {
 				t.Errorf("AssigneesPrompt() unexpected error = %s", err)
 			}
 			assert.ElementsMatch(t, got, tC.output)
+		})
+	}
+}
+
+func Test_MilestonesPrompt(t *testing.T) {
+	mockMilestones := []*gitlab.Milestone{
+		{
+			Title: "New Release",
+			ID:    5,
+		},
+		{
+			Title: "Really big feature",
+			ID:    240,
+		},
+		{
+			Title: "Get rid of low quality code",
+			ID:    650,
+		},
+	}
+
+	// Override API.ListMilestones so it doesn't make any network calls
+	api.ListMilestones = func(_ *gitlab.Client, _ interface{}, _ *gitlab.ListMilestonesOptions) ([]*gitlab.Milestone, error) {
+		return mockMilestones, nil
+	}
+
+	// mock glrepo.Remote object
+	repo := glrepo.New("foo", "bar")
+	remote := &git.Remote{
+		Name:     "test",
+		Resolved: "base",
+	}
+	repoRemote := &glrepo.Remote{
+		Remote: remote,
+		Repo:   repo,
+	}
+
+	testCases := []struct {
+		name       string
+		input      string // Selected milestone
+		expectedID int    // expected global ID from the milestone
+	}{
+		{
+			name:       "match",
+			input:      "New Release",
+			expectedID: 5,
+		},
+	}
+	for _, tC := range testCases {
+		t.Run(tC.name, func(t *testing.T) {
+			as, restoreAsk := prompt.InitAskStubber()
+			defer restoreAsk()
+
+			as.Stub([]*prompt.QuestionStub{
+				{
+					Name:  "milestone",
+					Value: tC.input,
+				},
+			})
+
+			var got int
+			var io utils.IOStreams
+
+			err := MilestonesPrompt(&got, &gitlab.Client{}, repoRemote, &io)
+			if err != nil {
+				t.Errorf("MilestonesPrompt() unexpected error = %s", err)
+			}
+			if got != 0 && got != tC.expectedID {
+				t.Errorf("MilestonesPrompt() expected = %d, got = %d", got, tC.expectedID)
+			}
+		})
+	}
+}
+
+func Test_MilestonesPromptNoPrompts(t *testing.T) {
+	// Override api.ListMilestones so it returns an empty slice, we are testing if MilestonesPrompt()
+	// will print the correct message to `stderr` when it tries to get the list of Milestones in a
+	// project but the project has no milestones
+	api.ListMilestones = func(_ *gitlab.Client, _ interface{}, _ *gitlab.ListMilestonesOptions) ([]*gitlab.Milestone, error) {
+		return []*gitlab.Milestone{}, nil
+	}
+
+	// mock glrepo.Remote object
+	repo := glrepo.New("foo", "bar")
+	remote := &git.Remote{
+		Name:     "test",
+		Resolved: "base",
+	}
+	repoRemote := &glrepo.Remote{
+		Remote: remote,
+		Repo:   repo,
+	}
+
+	var got int
+	io, _, _, stderr := utils.IOTest()
+
+	err := MilestonesPrompt(&got, &gitlab.Client{}, repoRemote, io)
+	if err != nil {
+		t.Errorf("MilestonesPrompt() unexpected error = %s", err)
+	}
+	assert.Equal(t, "There are no active milestones in this project\n", stderr.String())
+}
+
+func TestMilestonesPromptFailures(t *testing.T) {
+	// Override api.ListMilestones so it returns an error, we are testing to see if error
+	// handling from the usage of api.ListMilestones is correct
+	api.ListMilestones = func(_ *gitlab.Client, _ interface{}, _ *gitlab.ListMilestonesOptions) ([]*gitlab.Milestone, error) {
+		return nil, errors.New("api.ListMilestones() failed")
+	}
+
+	// mock glrepo.Remote object
+	repo := glrepo.New("foo", "bar")
+	remote := &git.Remote{
+		Name:     "test",
+		Resolved: "base",
+	}
+	repoRemote := &glrepo.Remote{
+		Remote: remote,
+		Repo:   repo,
+	}
+
+	var got int
+	io, _, _, _ := utils.IOTest()
+
+	err := MilestonesPrompt(&got, &gitlab.Client{}, repoRemote, io)
+	if err == nil {
+		t.Error("MilestonesPrompt() expected error")
+	}
+	assert.Equal(t, "api.ListMilestones() failed", err.Error())
+}
+
+func Test_IDsFromUsers(t *testing.T) {
+	testCases := []struct {
+		name  string
+		users []*gitlab.User // Mock of the gitlab.User object
+		IDs   []int          // IDs we expect from the users
+	}{
+		{
+			name: "no users",
+		},
+		{
+			name: "one user",
+			users: []*gitlab.User{
+				{
+					ID: 1,
+				},
+			},
+			IDs: []int{1},
+		},
+		{
+			name: "multiple users",
+			users: []*gitlab.User{
+				{
+					ID: 3,
+				},
+				{
+					ID: 6,
+				},
+				{
+					ID: 2,
+				},
+				{
+					ID: 51,
+				},
+				{
+					ID: 32,
+				},
+				{
+					ID: 87,
+				},
+				{
+					ID: 210,
+				},
+				{
+					ID: 6493,
+				},
+				{
+					ID: 50132,
+				},
+			},
+			IDs: []int{
+				50132,
+				6493,
+				210,
+				87,
+				32,
+				51,
+				2,
+				3,
+				6,
+			},
+		},
+	}
+	for _, tC := range testCases {
+		t.Run(tC.name, func(t *testing.T) {
+			got := IDsFromUsers(tC.users)
+			assert.ElementsMatch(t, got, tC.IDs)
 		})
 	}
 }
