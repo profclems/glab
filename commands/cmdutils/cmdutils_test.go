@@ -228,8 +228,7 @@ func Test_UsersFromReplaces(t *testing.T) {
 				return tC.users, nil
 			}
 			var gotAction []string
-			apiClient := gitlab.Client{} // Empty Client, it won't be used, just to satisfy the function signature
-			gotIDs, gotAction, err := ua.UsersFromReplaces(&apiClient, gotAction)
+			gotIDs, gotAction, err := ua.UsersFromReplaces(&gitlab.Client{}, gotAction)
 			if err != nil {
 				t.Errorf("UsersFromReplaces() unexpected error = %s", err)
 			}
@@ -458,8 +457,7 @@ func Test_UsersFromAddRemove(t *testing.T) {
 				return tC.users, nil
 			}
 			var gotAction []string
-			apiClient := gitlab.Client{} // Empty Client, it won't be used, just to satisfy the function signature
-			gotIDs, gotAction, err := tC.ua.UsersFromAddRemove(tC.issue, tC.merge, &apiClient, gotAction)
+			gotIDs, gotAction, err := tC.ua.UsersFromAddRemove(tC.issue, tC.merge, &gitlab.Client{}, gotAction)
 			if err != nil {
 				if tC.wantErr != "" && tC.wantErr != err.Error() {
 					t.Errorf("UsersFromAddRemove() expected error = %s, got = %s", tC.wantErr, err)
