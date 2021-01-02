@@ -711,3 +711,32 @@ func Test_MilestonesPrompt(t *testing.T) {
 		})
 	}
 }
+
+func Test_MilestonesPromptNoPrompts(t *testing.T) {
+	// Override api.ListMilestones so it returns an empty slice, we are testing if MilestonesPrompt()
+	// will print the correct message to `stderr` when it tries to get the list of Milestones in a
+	// project but the project has no milestones
+	api.ListMilestones = func(_ *gitlab.Client, _ interface{}, _ *gitlab.ListMilestonesOptions) ([]*gitlab.Milestone, error) {
+		return []*gitlab.Milestone{}, nil
+	}
+
+	// mock glrepo.Remote object
+	repo := glrepo.New("foo", "bar")
+	remote := &git.Remote{
+		Name:     "test",
+		Resolved: "base",
+	}
+	repoRemote := &glrepo.Remote{
+		Remote: remote,
+		Repo:   repo,
+	}
+
+	var got int
+	io, _, _, stderr := utils.IOTest()
+
+	err := MilestonesPrompt(&got, &gitlab.Client{}, repoRemote, io)
+	if err != nil {
+		t.Errorf("MilestonesPrompt() unexpected error = %s", err)
+	}
+	assert.Equal(t, "There are no active milestones in this project\n", stderr.String())
+}
