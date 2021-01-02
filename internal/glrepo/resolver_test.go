@@ -5,6 +5,7 @@ import (
 
 	"github.com/profclems/glab/internal/git"
 	"github.com/stretchr/testify/assert"
+	"github.com/xanzy/go-gitlab"
 )
 
 func Test_RemoteForRepo(t *testing.T) {
@@ -85,4 +86,71 @@ func Test_RemoteForRepo(t *testing.T) {
 			}
 		})
 	}
+}
+
+func Test_ResolveRemotesToRepos(t *testing.T) {
+	rem := &ResolvedRemotes{
+		remotes: Remotes{
+			&Remote{
+				Remote: &git.Remote{
+					Name: "origin",
+				},
+				Repo: NewWithHost("profclems", "glab", "gitlab.com"),
+			},
+		},
+		apiClient: &gitlab.Client{},
+	}
+
+	// Test the normal and most expected usage
+	t.Run("simple", func(t *testing.T) {
+		r, err := ResolveRemotesToRepos(rem.remotes, rem.apiClient, "")
+		assert.Nil(t, err)
+
+		assert.Equal(t, r.apiClient, rem.apiClient)
+
+		assert.Len(t, r.remotes, 1)
+
+		for i := range r.remotes {
+			assert.Equal(t, r.remotes[i].Name, rem.remotes[i].Name)
+			assert.Equal(t, r.remotes[i].Repo.FullName(), rem.remotes[i].Repo.FullName())
+			assert.Equal(t, r.remotes[i].Repo.RepoHost(), rem.remotes[i].Repo.RepoHost())
+		}
+	})
+
+	// Test the usage of baseOverride
+	t.Run("baseOverride", func(t *testing.T) {
+		expectedBaseOverride := NewWithHost("profclems", "glab", "gitlab.com")
+
+		r, err := ResolveRemotesToRepos(rem.remotes, rem.apiClient, "gitlab.com/profclems/glab")
+		assert.Nil(t, err)
+
+		assert.Equal(t, r.baseOverride.FullName(), expectedBaseOverride.FullName())
+		assert.Equal(t, r.baseOverride.RepoHost(), expectedBaseOverride.RepoHost())
+
+		assert.Equal(t, r.apiClient, rem.apiClient)
+
+		assert.Len(t, r.remotes, 1)
+
+		for i := range r.remotes {
+			assert.Equal(t, r.remotes[i].Name, rem.remotes[i].Name)
+			assert.Equal(t, r.remotes[i].Repo.FullName(), rem.remotes[i].Repo.FullName())
+			assert.Equal(t, r.remotes[i].Repo.RepoHost(), rem.remotes[i].Repo.RepoHost())
+		}
+	})
+
+	// Test the usage of baseOverride when it is passed an invalid value
+	t.Run("baseOverrideFail", func(t *testing.T) {
+		r, err := ResolveRemotesToRepos(rem.remotes, rem.apiClient, "badValue")
+		assert.EqualError(t, err, "expected the \"[HOST/]OWNER/[NAMESPACE/]REPO\" format, got \"badValue\"")
+
+		assert.Equal(t, r.apiClient, rem.apiClient)
+
+		assert.Len(t, r.remotes, 1)
+
+		for i := range r.remotes {
+			assert.Equal(t, r.remotes[i].Name, rem.remotes[i].Name)
+			assert.Equal(t, r.remotes[i].Repo.FullName(), rem.remotes[i].Repo.FullName())
+			assert.Equal(t, r.remotes[i].Repo.RepoHost(), rem.remotes[i].Repo.RepoHost())
+		}
+	})
 }
