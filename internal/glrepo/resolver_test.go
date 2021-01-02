@@ -172,7 +172,7 @@ func Test_resolveNetwork(t *testing.T) {
 	}
 
 	// Override api.GetProejct to not use the network
-	api.GetProject = func(_ *gitlab.Client, ProjectID interface{}) (*gitlab.Project, error) {
+	mockAPIGetProject := func(_ *gitlab.Client, ProjectID interface{}) (*gitlab.Project, error) {
 		proj := &gitlab.Project{
 			PathWithNamespace: fmt.Sprint(ProjectID),
 		}
@@ -183,10 +183,9 @@ func Test_resolveNetwork(t *testing.T) {
 		// Make our own copy of rem we can modify
 		rem := *rem
 
-		err := resolveNetwork(&rem)
-		if err != nil {
-			t.Errorf("resolveNetwork() unexpected error = %s", err)
-		}
+		api.GetProject = mockAPIGetProject
+
+		resolveNetwork(&rem)
 
 		assert.Len(t, rem.network, len(rem.remotes))
 		for i := range rem.network {
@@ -202,11 +201,29 @@ func Test_resolveNetwork(t *testing.T) {
 			return nil, errors.New("error")
 		}
 
-		err := resolveNetwork(&rem)
-		if err != nil {
-			t.Errorf("resolveNetwork() unexpected error = %s", err)
-		}
+		resolveNetwork(&rem)
 
 		assert.Len(t, rem.network, 0)
+	})
+
+	t.Run("MaxRemotesForLookup limit", func(t *testing.T) {
+		// Make our own copy of rem we can modify
+		rem := *rem
+
+		api.GetProject = mockAPIGetProject
+
+		for i := 0; i < maxRemotesForLookup; i++ {
+			rem.remotes = append(rem.remotes, rem.remotes[i])
+
+		}
+		// Make sure we have at least one more remote than the limit set from maxRemotesForLookup
+		assert.Len(t, rem.remotes, maxRemotesForLookup+1)
+
+		resolveNetwork(&rem)
+
+		assert.Len(t, rem.network, maxRemotesForLookup)
+		for i := range rem.network {
+			assert.Equal(t, rem.network[i].PathWithNamespace, rem.remotes[i].Repo.FullName())
+		}
 	})
 }
