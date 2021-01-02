@@ -200,10 +200,7 @@ func MilestonesPrompt(response *int, apiClient *gitlab.Client, repoRemote *glrep
 	}
 
 	var selectedMilestone string
-	err = prompt.AskOne(&survey.Select{
-		Message: "Select Milestone",
-		Options: milestoneOptions,
-	}, &selectedMilestone)
+	err = prompt.Select(&selectedMilestone, "milestone", "Select Milestone", milestoneOptions)
 	if err != nil {
 		return err
 	}
