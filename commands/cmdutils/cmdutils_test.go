@@ -769,3 +769,73 @@ func TestMilestonesPromptFailures(t *testing.T) {
 	}
 	assert.Equal(t, "api.ListMilestones() failed", err.Error())
 }
+
+func Test_IDsFromUsers(t *testing.T) {
+	testCases := []struct {
+		name  string
+		users []*gitlab.User // Mock of the gitlab.User object
+		IDs   []int          // IDs we expect from the users
+	}{
+		{
+			name: "no users",
+		},
+		{
+			name: "one user",
+			users: []*gitlab.User{
+				{
+					ID: 1,
+				},
+			},
+			IDs: []int{1},
+		},
+		{
+			name: "multiple users",
+			users: []*gitlab.User{
+				{
+					ID: 3,
+				},
+				{
+					ID: 6,
+				},
+				{
+					ID: 2,
+				},
+				{
+					ID: 51,
+				},
+				{
+					ID: 32,
+				},
+				{
+					ID: 87,
+				},
+				{
+					ID: 210,
+				},
+				{
+					ID: 6493,
+				},
+				{
+					ID: 50132,
+				},
+			},
+			IDs: []int{
+				50132,
+				6493,
+				210,
+				87,
+				32,
+				51,
+				2,
+				3,
+				6,
+			},
+		},
+	}
+	for _, tC := range testCases {
+		t.Run(tC.name, func(t *testing.T) {
+			got := IDsFromUsers(tC.users)
+			assert.ElementsMatch(t, got, tC.IDs)
+		})
+	}
+}
