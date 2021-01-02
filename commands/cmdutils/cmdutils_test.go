@@ -1,6 +1,7 @@
 package cmdutils
 
 import (
+	"errors"
 	"fmt"
 	"testing"
 
@@ -739,4 +740,32 @@ func Test_MilestonesPromptNoPrompts(t *testing.T) {
 		t.Errorf("MilestonesPrompt() unexpected error = %s", err)
 	}
 	assert.Equal(t, "There are no active milestones in this project\n", stderr.String())
+}
+
+func TestMilestonesPromptFailures(t *testing.T) {
+	// Override api.ListMilestones so it returns an error, we are testing to see if error
+	// handling from the usage of api.ListMilestones is correct
+	api.ListMilestones = func(_ *gitlab.Client, _ interface{}, _ *gitlab.ListMilestonesOptions) ([]*gitlab.Milestone, error) {
+		return nil, errors.New("api.ListMilestones() failed")
+	}
+
+	// mock glrepo.Remote object
+	repo := glrepo.New("foo", "bar")
+	remote := &git.Remote{
+		Name:     "test",
+		Resolved: "base",
+	}
+	repoRemote := &glrepo.Remote{
+		Remote: remote,
+		Repo:   repo,
+	}
+
+	var got int
+	io, _, _, _ := utils.IOTest()
+
+	err := MilestonesPrompt(&got, &gitlab.Client{}, repoRemote, io)
+	if err == nil {
+		t.Error("MilestonesPrompt() expected error")
+	}
+	assert.Equal(t, "api.ListMilestones() failed", err.Error())
 }
