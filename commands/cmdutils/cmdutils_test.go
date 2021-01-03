@@ -600,6 +600,22 @@ func Test_PickMetadata(t *testing.T) {
 			assert.ElementsMatch(t, got, tC.expected)
 		})
 	}
+
+	t.Run("Prompt fails", func(t *testing.T) {
+		as, restoreAsk := prompt.InitAskStubber()
+		defer restoreAsk()
+
+		as.Stub([]*prompt.QuestionStub{
+			{
+				Name:  "metadata",
+				Value: errors.New("meant to fail"),
+			},
+		})
+
+		got, err := PickMetadata()
+		assert.Nil(t, got)
+		assert.EqualError(t, err, "could not prompt: meant to fail")
+	})
 }
 
 func Test_AssigneesPrompt(t *testing.T) {
@@ -642,6 +658,23 @@ func Test_AssigneesPrompt(t *testing.T) {
 			assert.ElementsMatch(t, got, tC.output)
 		})
 	}
+
+	t.Run("Prompt fails", func(t *testing.T) {
+		as, restoreAsk := prompt.InitAskStubber()
+		defer restoreAsk()
+
+		as.Stub([]*prompt.QuestionStub{
+			{
+				Name:  "assignee",
+				Value: errors.New("meant to fail"),
+			},
+		})
+
+		var got []string
+		err := AssigneesPrompt(&got)
+		assert.Empty(t, got)
+		assert.EqualError(t, err, "meant to fail")
+	})
 }
 
 func Test_MilestonesPrompt(t *testing.T) {
@@ -711,6 +744,25 @@ func Test_MilestonesPrompt(t *testing.T) {
 			}
 		})
 	}
+
+	t.Run("Prompt fails", func(t *testing.T) {
+		as, restoreAsk := prompt.InitAskStubber()
+		defer restoreAsk()
+
+		as.Stub([]*prompt.QuestionStub{
+			{
+				Name:  "milestone",
+				Value: errors.New("meant to fail"),
+			},
+		})
+
+		var got int
+		var io utils.IOStreams
+
+		err := MilestonesPrompt(&got, &gitlab.Client{}, repoRemote, &io)
+		assert.Empty(t, got)
+		assert.EqualError(t, err, "meant to fail")
+	})
 }
 
 func Test_MilestonesPromptNoPrompts(t *testing.T) {
