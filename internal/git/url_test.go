@@ -61,7 +61,7 @@ func TestParseURL(t *testing.T) {
 		name    string
 		url     string
 		want    url
-		wantErr bool
+		wantErr string
 	}{
 		{
 			name: "HTTPS",
@@ -173,24 +173,35 @@ func TestParseURL(t *testing.T) {
 				Path:   "",
 			},
 		},
+		{
+			name:    "Invalid URL",
+			url:     `git@example.com/%/url`,
+			wantErr: `parse "git@example.com/%/url": invalid URL escape "%/u"`,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			u, err := ParseURL(tt.url)
-			if (err != nil) != tt.wantErr {
-				t.Fatalf("got error: %v", err)
-			}
-			if u.Scheme != tt.want.Scheme {
-				t.Errorf("expected scheme %q, got %q", tt.want.Scheme, u.Scheme)
-			}
-			if u.User.Username() != tt.want.User {
-				t.Errorf("expected user %q, got %q", tt.want.User, u.User.Username())
-			}
-			if u.Host != tt.want.Host {
-				t.Errorf("expected host %q, got %q", tt.want.Host, u.Host)
-			}
-			if u.Path != tt.want.Path {
-				t.Errorf("expected path %q, got %q", tt.want.Path, u.Path)
+			if tt.wantErr != "" {
+				if err.Error() != tt.wantErr {
+					t.Errorf("expected error %s, got %s", tt.wantErr, err.Error())
+				}
+			} else {
+				if err != nil {
+					t.Errorf("unexpcted error %s", err)
+				}
+				if u.Scheme != tt.want.Scheme {
+					t.Errorf("expected scheme %q, got %q", tt.want.Scheme, u.Scheme)
+				}
+				if u.User.Username() != tt.want.User {
+					t.Errorf("expected user %q, got %q", tt.want.User, u.User.Username())
+				}
+				if u.Host != tt.want.Host {
+					t.Errorf("expected host %q, got %q", tt.want.Host, u.Host)
+				}
+				if u.Path != tt.want.Path {
+					t.Errorf("expected path %q, got %q", tt.want.Path, u.Path)
+				}
 			}
 		})
 	}
