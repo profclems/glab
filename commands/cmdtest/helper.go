@@ -32,8 +32,7 @@ type fatalLogger interface {
 }
 
 func init() {
-	path, _ := os.Getwd()
-	projectPath = strings.SplitN(path, "/glab/", 2)[0] + "/glab/"
+	projectPath, _ = os.Getwd()
 }
 
 func InitTest(m *testing.M, suffix string) {
