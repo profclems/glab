@@ -5,6 +5,7 @@ import (
 	"net/url"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/xanzy/go-gitlab"
 )
 
@@ -324,6 +325,62 @@ func TestFullNameFromURL(t *testing.T) {
 			}
 			if got != tt.want {
 				t.Errorf("FullNameFromURL() got = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_NewWitHost(t *testing.T) {
+	testCases := []struct {
+		name          string
+		input         []string
+		wantHostname  string
+		wantOwner     string
+		wantGroup     string
+		wantNamespace string
+		wantName      string
+		wantFullname  string
+	}{
+		{
+			name:          "Simple",
+			input:         []string{"profclems", "glab", "gitlab.com"},
+			wantHostname:  "gitlab.com",
+			wantNamespace: "profclems",
+			wantOwner:     "profclems",
+			wantName:      "glab",
+			wantFullname:  "profclems/glab",
+		},
+		{
+			name:          "group",
+			input:         []string{"company/profclems", "glab", "gitlab.com"},
+			wantHostname:  "gitlab.com",
+			wantNamespace: "profclems",
+			wantOwner:     "company/profclems",
+			wantGroup:     "company",
+			wantName:      "glab",
+			wantFullname:  "company/profclems/glab",
+		},
+	}
+	for _, tC := range testCases {
+		t.Run(tC.name, func(t *testing.T) {
+			got := NewWithHost(tC.input[0], tC.input[1], tC.input[2])
+			if tC.wantHostname != "" {
+				assert.Equal(t, tC.wantHostname, got.RepoHost())
+			}
+			if tC.wantOwner != "" {
+				assert.Equal(t, tC.wantOwner, got.RepoOwner())
+			}
+			if tC.wantGroup != "" {
+				assert.Equal(t, tC.wantGroup, got.RepoGroup())
+			}
+			if tC.wantNamespace != "" {
+				assert.Equal(t, tC.wantNamespace, got.RepoNamespace())
+			}
+			if tC.wantName != "" {
+				assert.Equal(t, tC.wantName, got.RepoName())
+			}
+			if tC.wantFullname != "" {
+				assert.Equal(t, tC.wantFullname, got.FullName())
 			}
 		})
 	}
