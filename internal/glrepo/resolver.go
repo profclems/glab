@@ -235,21 +235,6 @@ func (r *ResolvedRemotes) HeadRepo(prompt bool) (Interface, error) {
 	return selectedRepoInfo, err
 }
 
-func (r *ResolvedRemotes) HeadRepos() ([]*gitlab.Project, error) {
-	if r.network == nil {
-		resolveNetwork(r)
-		if len(r.network) == 0 {
-			return nil, errors.New("no GitLab Projects found from remotes")
-		}
-	}
-
-	var results []*gitlab.Project
-	for i := range r.network {
-		results = append(results, &r.network[i])
-	}
-	return results, nil
-}
-
 // RemoteForRepo finds the git remote that points to a repository
 func (r *ResolvedRemotes) RemoteForRepo(repo Interface) (*Remote, error) {
 	for _, remote := range r.remotes {
