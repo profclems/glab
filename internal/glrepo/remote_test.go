@@ -101,3 +101,171 @@ func Test_remoteNameSortingScore(t *testing.T) {
 		})
 	}
 }
+
+func Test_FindByRepo(t *testing.T) {
+	r := Remotes{
+		&Remote{
+			Remote: &git.Remote{
+				Name: "origin",
+			},
+			Repo: NewWithHost("profclems", "glab", "gitlab.com"),
+		},
+	}
+
+	t.Run("success", func(t *testing.T) {
+		got, err := r.FindByRepo("profclems", "glab")
+		assert.NoError(t, err)
+
+		assert.Equal(t, r[0].FullName(), got.FullName())
+	})
+
+	t.Run("fail/owner", func(t *testing.T) {
+		got, err := r.FindByRepo("maxice8", "glab")
+		assert.Nil(t, got)
+		assert.EqualError(t, err, "no matching remote found")
+	})
+
+	t.Run("fail/project", func(t *testing.T) {
+		got, err := r.FindByRepo("profclems", "balg")
+		assert.Nil(t, got)
+		assert.EqualError(t, err, "no matching remote found")
+	})
+
+	t.Run("fail/owner and project", func(t *testing.T) {
+		got, err := r.FindByRepo("maxice8", "balg")
+		assert.Nil(t, got)
+		assert.EqualError(t, err, "no matching remote found")
+	})
+}
+
+func Test_RepoFuncs(t *testing.T) {
+	testCases := []struct {
+		name          string
+		input         []string
+		wantHostname  string
+		wantOwner     string
+		wantGroup     string
+		wantNamespace string
+		wantName      string
+		wantFullname  string
+	}{
+		{
+			name:          "Simple",
+			input:         []string{"profclems", "glab", "gitlab.com"},
+			wantHostname:  "gitlab.com",
+			wantNamespace: "profclems",
+			wantOwner:     "profclems",
+			wantName:      "glab",
+			wantFullname:  "profclems/glab",
+		},
+		{
+			name:          "group",
+			input:         []string{"company/profclems", "glab", "gitlab.com"},
+			wantHostname:  "gitlab.com",
+			wantNamespace: "profclems",
+			wantOwner:     "company/profclems",
+			wantGroup:     "company",
+			wantName:      "glab",
+			wantFullname:  "company/profclems/glab",
+		},
+	}
+	for _, tC := range testCases {
+		t.Run(tC.name, func(t *testing.T) {
+			got := Remote{
+				Repo: NewWithHost(tC.input[0], tC.input[1], tC.input[2]),
+			}
+			if tC.wantHostname != "" {
+				assert.Equal(t, tC.wantHostname, got.RepoHost())
+			}
+			if tC.wantOwner != "" {
+				assert.Equal(t, tC.wantOwner, got.RepoOwner())
+			}
+			if tC.wantGroup != "" {
+				assert.Equal(t, tC.wantGroup, got.RepoGroup())
+			}
+			if tC.wantNamespace != "" {
+				assert.Equal(t, tC.wantNamespace, got.RepoNamespace())
+			}
+			if tC.wantName != "" {
+				assert.Equal(t, tC.wantName, got.RepoName())
+			}
+			if tC.wantFullname != "" {
+				assert.Equal(t, tC.wantFullname, got.FullName())
+			}
+		})
+	}
+}
+
+func Test_Swap(t *testing.T) {
+	r := Remotes{
+		&Remote{
+			Remote: &git.Remote{
+				Name: "origin",
+			},
+			Repo: NewWithHost("maxice8", "glab", "gitlab.com"),
+		},
+		&Remote{
+			Remote: &git.Remote{
+				Name: "upstream",
+			},
+			Repo: NewWithHost("profclems", "glab", "gitlab.com"),
+		},
+	}
+
+	assert.Equal(t, "origin", r[0].Remote.Name)
+	assert.Equal(t, "upstream", r[1].Remote.Name)
+
+	assert.Equal(t, "maxice8/glab", r[0].Repo.FullName())
+	assert.Equal(t, "profclems/glab", r[1].Repo.FullName())
+
+	r.Swap(0, 1)
+
+	assert.Equal(t, "upstream", r[0].Remote.Name)
+	assert.Equal(t, "origin", r[1].Remote.Name)
+
+	assert.Equal(t, "profclems/glab", r[0].Repo.FullName())
+	assert.Equal(t, "maxice8/glab", r[1].Repo.FullName())
+}
+
+func Test_Less(t *testing.T) {
+	r := Remotes{
+		&Remote{
+			Remote: &git.Remote{
+				Name: "else",
+			},
+			Repo: NewWithHost("somebody", "glab", "gitlab.com"),
+		},
+		&Remote{
+			Remote: &git.Remote{
+				Name: "origin",
+			},
+			Repo: NewWithHost("maxice8", "glab", "gitlab.com"),
+		},
+		&Remote{
+			Remote: &git.Remote{
+				Name: "gitlab",
+			},
+			Repo: NewWithHost("profclems", "glab", "gitlab.com"),
+		},
+		&Remote{
+			Remote: &git.Remote{
+				Name: "upstream",
+			},
+			Repo: NewWithHost("profclems", "glab", "gitlab.com"),
+		},
+	}
+
+	assert.True(t, r.Less(3, 2))
+	assert.True(t, r.Less(3, 1))
+	assert.True(t, r.Less(3, 0))
+	assert.True(t, r.Less(2, 1))
+	assert.True(t, r.Less(2, 0))
+	assert.True(t, r.Less(1, 0))
+
+	assert.False(t, r.Less(0, 1))
+	assert.False(t, r.Less(0, 2))
+	assert.False(t, r.Less(0, 3))
+	assert.False(t, r.Less(1, 2))
+	assert.False(t, r.Less(1, 3))
+	assert.False(t, r.Less(2, 3))
+}
