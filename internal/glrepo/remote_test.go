@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/profclems/glab/internal/git"
+	"github.com/stretchr/testify/assert"
 )
 
 func eq(t *testing.T, got interface{}, expected interface{}) {
@@ -63,5 +64,40 @@ func TestTranslateRemotes(t *testing.T) {
 	}
 	if result[0].RepoName() != "hello" {
 		t.Errorf("got %q", result[0].RepoName())
+	}
+}
+
+func Test_remoteNameSortingScore(t *testing.T) {
+	testCases := []struct {
+		name   string
+		input  string
+		output int
+	}{
+		{
+			name:   "upstream",
+			input:  "upstream",
+			output: 3,
+		},
+		{
+			name:   "gitlab",
+			input:  "gitlab",
+			output: 2,
+		},
+		{
+			name:   "origin",
+			input:  "origin",
+			output: 1,
+		},
+		{
+			name:   "else",
+			input:  "anyOtherName",
+			output: 0,
+		},
+	}
+	for _, tC := range testCases {
+		t.Run(tC.name, func(t *testing.T) {
+			got := remoteNameSortScore(tC.input)
+			assert.Equal(t, tC.output, got)
+		})
 	}
 }
