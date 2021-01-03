@@ -67,6 +67,22 @@ func Test_RemoteURL(t *testing.T) {
 			},
 			want: "git@gitlab.com:profclems/glab.git",
 		},
+		{
+			name: "no username means oauth2",
+			args: args{
+				project: &gitlab.Project{
+					SSHURLToRepo:      "git@gitlab.com:profclems/glab.git",
+					HTTPURLToRepo:     "https://gitlab.com/profclems/glab.git",
+					PathWithNamespace: "profclems/glab",
+				},
+				args: &RemoteArgs{
+					Protocol: "https",
+					Token:    "token",
+					Url:      "https://gitlab.com",
+				},
+			},
+			want: "https://oauth2:token@gitlab.com/profclems/glab.git",
+		},
 	} {
 		t.Run(tt.name, func(t *testing.T) {
 			got, err := RemoteURL(tt.args.project, tt.args.args)
