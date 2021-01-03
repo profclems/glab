@@ -287,7 +287,6 @@ func TestFromFullName(t *testing.T) {
 func TestFullNameFromURL(t *testing.T) {
 
 	tests := []struct {
-		name      string
 		remoteURL string
 		want      string
 		wantErr   error
@@ -295,6 +294,10 @@ func TestFullNameFromURL(t *testing.T) {
 		{
 			remoteURL: "gitlab.com/profclems/glab.git",
 			wantErr:   errors.New("cannot parse remote: gitlab.com/profclems/glab.git"),
+		},
+		{
+			remoteURL: "ssh://https://gitlab.com/owner/repo",
+			wantErr:   errors.New(`cannot parse remote: ssh://https://gitlab.com/owner/repo`),
 		},
 		{
 			remoteURL: "https://gitlab.com/profclems/glab.git",
@@ -313,7 +316,7 @@ func TestFullNameFromURL(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+		t.Run(tt.remoteURL, func(t *testing.T) {
 			got, err := FullNameFromURL(tt.remoteURL)
 			if tt.wantErr != nil {
 				if err == nil {
