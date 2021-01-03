@@ -63,7 +63,7 @@ func (opts *ListTitleOptions) Describe() string {
 				opts.RepoName, pageInfo)
 		}
 
-		return fmt.Sprintf("No %s match your search in %s", opts.Name, opts.RepoName)
+		return fmt.Sprintf("No %s match your search in %s\n", opts.Name, opts.RepoName)
 	}
 
 	if opts.CurrentPageTotal > 0 {
