@@ -13,6 +13,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/profclems/glab/internal/git"
+
 	"github.com/google/shlex"
 	"github.com/otiai10/copy"
 	"github.com/profclems/glab/commands/cmdutils"
@@ -32,7 +34,18 @@ type fatalLogger interface {
 }
 
 func init() {
-	projectPath, _ = os.Getwd()
+	path := &bytes.Buffer{}
+	// get root dir via git
+	gitCmd := git.GitCommand("rev-parse", "--show-toplevel")
+	gitCmd.Stdout = path
+	err := gitCmd.Run()
+	if err != nil {
+		log.Fatalln("Failed to get root directory: ", err)
+	}
+	projectPath = strings.TrimSuffix(path.String(), "\n")
+	if !strings.HasSuffix(projectPath, "/") {
+		projectPath += "/"
+	}
 }
 
 func InitTest(m *testing.M, suffix string) {
