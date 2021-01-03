@@ -44,9 +44,6 @@ func resolveNetwork(result *ResolvedRemotes) {
 		if err == nil {
 			result.network = append(result.network, *networkResult)
 		}
-		if i == maxRemotesForLookup {
-			break
-		}
 	}
 }
 
@@ -236,21 +233,6 @@ func (r *ResolvedRemotes) HeadRepo(prompt bool) (Interface, error) {
 	// cache the result to git config
 	err := git.SetRemoteResolution(remote.Name, resolution)
 	return selectedRepoInfo, err
-}
-
-func (r *ResolvedRemotes) HeadRepos() ([]*gitlab.Project, error) {
-	if r.network == nil {
-		resolveNetwork(r)
-		if len(r.network) == 0 {
-			return nil, errors.New("no GitLab Projects found from remotes")
-		}
-	}
-
-	var results []*gitlab.Project
-	for i := range r.network {
-		results = append(results, &r.network[i])
-	}
-	return results, nil
 }
 
 // RemoteForRepo finds the git remote that points to a repository
