@@ -3,6 +3,7 @@ package cmdutils
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/profclems/glab/internal/config"
 	"github.com/profclems/glab/internal/git"
@@ -55,11 +56,15 @@ func LabClientFunc(repoHost string, cfg config.Config, isGraphQL bool) (*gitlab.
 }
 
 func remotesFunc() (glrepo.Remotes, error) {
+	hostOverride := ""
+	if !strings.EqualFold(glinstance.Default(), glinstance.OverridableDefault()) {
+		hostOverride = glinstance.OverridableDefault()
+	}
 	rr := &remoteResolver{
 		readRemotes: git.Remotes,
 		getConfig:   configFunc,
 	}
-	fn := rr.Resolver()
+	fn := rr.Resolver(hostOverride)
 	return fn()
 }
 
