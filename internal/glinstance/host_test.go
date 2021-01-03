@@ -2,6 +2,8 @@ package glinstance
 
 import (
 	"testing"
+
+	"github.com/alecthomas/assert"
 )
 
 func TestIsSelfHosted(t *testing.T) {
@@ -193,6 +195,49 @@ func TestStripHostProtocol(t *testing.T) {
 			}
 			if gotProtocol != tt.wantProtocol {
 				t.Errorf("StripHostProtocol() gotProtocol = %v, want %v", gotProtocol, tt.wantProtocol)
+			}
+		})
+	}
+}
+
+func Test(t *testing.T) {
+	testCases := []struct {
+		name     string
+		hostname interface{}
+		expected string
+	}{
+		{
+			name:     "valid",
+			hostname: "localhost",
+		},
+		{
+			name:     "invalid/not-string",
+			hostname: 1,
+			expected: "hostname is not a string",
+		},
+		{
+			name:     "invalid/empty-string",
+			hostname: "",
+			expected: "a value is required",
+		},
+		{
+			name:     "invalid/has-foward-slash",
+			hostname: "local/host",
+			expected: "invalid hostname",
+		},
+		{
+			name:     "invalid/has-colon",
+			hostname: "local:host",
+			expected: "invalid hostname",
+		},
+	}
+	for _, tC := range testCases {
+		t.Run(tC.name, func(t *testing.T) {
+			err := HostnameValidator(tC.hostname)
+			if tC.expected == "" {
+				assert.NoError(t, err)
+			} else {
+				assert.Error(t, err, tC.expected)
 			}
 		})
 	}
