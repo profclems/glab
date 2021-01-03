@@ -44,9 +44,6 @@ func resolveNetwork(result *ResolvedRemotes) {
 		if err == nil {
 			result.network = append(result.network, *networkResult)
 		}
-		if i == maxRemotesForLookup {
-			break
-		}
 	}
 }
 
