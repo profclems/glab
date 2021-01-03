@@ -39,6 +39,7 @@ func TestFindByName(t *testing.T) {
 func TestTranslateRemotes(t *testing.T) {
 	publicURL, _ := url.Parse("https://gitlab.com/monalisa/hello")
 	originURL, _ := url.Parse("http://example.com/repo")
+	upstreamURL, _ := url.Parse("https://gitlab.com/profclems/glab")
 
 	gitRemotes := git.RemoteSet{
 		&git.Remote{
@@ -49,6 +50,10 @@ func TestTranslateRemotes(t *testing.T) {
 			Name:     "public",
 			FetchURL: publicURL,
 		},
+		&git.Remote{
+			Name:    "upstream",
+			PushURL: upstreamURL,
+		},
 	}
 
 	identityURL := func(u *url.URL) *url.URL {
@@ -56,7 +61,7 @@ func TestTranslateRemotes(t *testing.T) {
 	}
 	result := TranslateRemotes(gitRemotes, identityURL)
 
-	if len(result) != 1 {
+	if len(result) != 2 {
 		t.Errorf("got %d results", len(result))
 	}
 	if result[0].Name != "public" {
@@ -64,6 +69,12 @@ func TestTranslateRemotes(t *testing.T) {
 	}
 	if result[0].RepoName() != "hello" {
 		t.Errorf("got %q", result[0].RepoName())
+	}
+	if result[1].Name != "upstream" {
+		t.Errorf("got %q", result[1].Name)
+	}
+	if result[1].RepoName() != "glab" {
+		t.Errorf("got %q", result[1].Name)
 	}
 }
 
