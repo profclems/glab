@@ -57,11 +57,12 @@ func makeColorFunc(color string) func(string) string {
 
 func isColorEnabled() bool {
 	if !checkedNoColor {
-		_isColorEnabled = os.Getenv("NO_COLOR") == "" ||
-			os.Getenv("NO_COLOR") == "0" ||
-			os.Getenv("NO_COLOR") == "false" ||
-			os.Getenv("COLOR_ENABLED") == "1" ||
-			os.Getenv("COLOR_ENABLED") == "true"
+		_, _isColorEnabled = os.LookupEnv("NO_COLOR")
+		_isColorEnabled = !_isColorEnabled // Revert the value NO_COLOR disables color
+
+		if !_isColorEnabled {
+			_isColorEnabled = os.Getenv("COLOR_ENABLED") == "1" || os.Getenv("COLOR_ENABLED") == "true"
+		}
 		checkedNoColor = true
 	}
 	return _isColorEnabled
