@@ -1,5 +1,5 @@
 name: Tests
-on: [push, pull_request_target]
+on: [push, pull_request]
 jobs:
   build:
     strategy:
@@ -66,8 +66,9 @@ jobs:
 
       - name: Run tests
         env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-          GITLAB_TOKEN: ${{ secrets.GITLAB_TOKEN }}
-        run: |
-          make test
-          bash <(curl -s https://codecov.io/bash)
+          GITLAB_TOKEN: "qRC87Xg9Wd46RhB8J8sp"
+          CODECOV_TOKEN: "1597edbc-8760-42c1-ab79-c192ad151717"
+        run: make test
+
+      - name: Upload Test Result to Codecov
+        run: bash <(curl -s https://codecov.io/bash)
