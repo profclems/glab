@@ -101,3 +101,39 @@ func Test_remoteNameSortingScore(t *testing.T) {
 		})
 	}
 }
+
+func Test_FindByRepo(t *testing.T) {
+	r := Remotes{
+		&Remote{
+			Remote: &git.Remote{
+				Name: "origin",
+			},
+			Repo: NewWithHost("profclems", "glab", "gitlab.com"),
+		},
+	}
+
+	t.Run("success", func(t *testing.T) {
+		got, err := r.FindByRepo("profclems", "glab")
+		assert.NoError(t, err)
+
+		assert.Equal(t, r[0].FullName(), got.FullName())
+	})
+
+	t.Run("fail/owner", func(t *testing.T) {
+		got, err := r.FindByRepo("maxice8", "glab")
+		assert.Nil(t, got)
+		assert.EqualError(t, err, "no matching remote found")
+	})
+
+	t.Run("fail/project", func(t *testing.T) {
+		got, err := r.FindByRepo("profclems", "balg")
+		assert.Nil(t, got)
+		assert.EqualError(t, err, "no matching remote found")
+	})
+
+	t.Run("fail/owner and project", func(t *testing.T) {
+		got, err := r.FindByRepo("maxice8", "balg")
+		assert.Nil(t, got)
+		assert.EqualError(t, err, "no matching remote found")
+	})
+}
