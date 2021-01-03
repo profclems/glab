@@ -49,6 +49,7 @@ jobs:
 
       - name: Check out code
         uses: actions/checkout@v2
+        fetch-depth: 0
 
       - name: Setup SSH Key
         run: |
