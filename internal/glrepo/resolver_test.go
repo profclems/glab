@@ -7,6 +7,7 @@ import (
 
 	"github.com/profclems/glab/internal/git"
 	"github.com/profclems/glab/pkg/api"
+	"github.com/profclems/glab/pkg/prompt"
 	"github.com/stretchr/testify/assert"
 	"github.com/xanzy/go-gitlab"
 )
@@ -225,5 +226,574 @@ func Test_resolveNetwork(t *testing.T) {
 		for i := range rem.network {
 			assert.Equal(t, rem.network[i].PathWithNamespace, rem.remotes[i].Repo.FullName())
 		}
+	})
+}
+
+func Test_BaseRepo(t *testing.T) {
+	// Make it a function that must be called by each test so none of them overlap
+	rem := func() ResolvedRemotes {
+		rem := &ResolvedRemotes{
+			remotes: Remotes{
+				&Remote{
+					Remote: &git.Remote{
+						Name: "upstream",
+					},
+					Repo: NewWithHost("profclems", "glab", "gitlab.com"),
+				},
+			},
+			apiClient: &gitlab.Client{},
+			network: []gitlab.Project{
+				{
+					ID:                1,
+					PathWithNamespace: "profclems/glab",
+					HTTPURLToRepo:     "https://gitlab.com/profclems/glab",
+				},
+			},
+		}
+		return *rem
+	}
+
+	mockGitlabProject := func(i interface{}) gitlab.Project {
+		p := &gitlab.Project{
+			PathWithNamespace: fmt.Sprint(i),
+			HTTPURLToRepo:     fmt.Sprintf("https://gitlab.com/%s", i),
+		}
+		return *p
+	}
+
+	// Override git.SetRemoteResolution so it doesn't mess with the user configs
+	git.SetRemoteResolution = func(_, _ string) error {
+		return nil
+	}
+
+	api.GetProject = func(_ *gitlab.Client, projectID interface{}) (*gitlab.Project, error) {
+		p := mockGitlabProject(projectID)
+		return &p, nil
+	}
+
+	t.Run("baseOverride", func(t *testing.T) {
+		localRem := rem()
+		localRem.baseOverride = NewWithHost("profclems", "glab", "gitlab.com")
+
+		got, err := localRem.BaseRepo(false)
+		assert.NoError(t, err)
+
+		assert.Equal(t, got.FullName(), localRem.baseOverride.FullName())
+		assert.Equal(t, got.RepoHost(), localRem.baseOverride.RepoHost())
+	})
+
+	t.Run("Resolved->base", func(t *testing.T) {
+		localRem := rem()
+
+		// Set a base resolution
+		localRem.remotes[0].Resolved = "base"
+
+		got, err := localRem.BaseRepo(false)
+		assert.NoError(t, err)
+
+		assert.Equal(t, got.FullName(), localRem.remotes[0].FullName())
+		assert.Equal(t, got.RepoHost(), localRem.remotes[0].RepoHost())
+	})
+
+	t.Run("Resolved->base:", func(t *testing.T) {
+		localRem := rem()
+
+		expectedResolution := NewWithHost("maxice8", "glab", "gitlab.com")
+
+		// Set a base resolution
+		localRem.remotes[0].Resolved = "base: gitlab.com/maxice8/glab"
+
+		got, err := localRem.BaseRepo(false)
+		assert.NoError(t, err)
+
+		assert.Equal(t, got.FullName(), expectedResolution.FullName())
+		assert.Equal(t, got.RepoHost(), expectedResolution.RepoHost())
+	})
+
+	t.Run("Resolved->backwards-compaitibility", func(t *testing.T) {
+		localRem := rem()
+
+		expectedResolution := NewWithHost("maxice8", "glab", "gitlab.com")
+
+		// Set a base resolution
+		localRem.remotes[0].Resolved = "gitlab.com/maxice8/glab"
+
+		got, err := localRem.BaseRepo(false)
+		assert.NoError(t, err)
+
+		assert.Equal(t, got.FullName(), expectedResolution.FullName())
+		assert.Equal(t, got.RepoHost(), expectedResolution.RepoHost())
+	})
+
+	t.Run("Prompt==false", func(t *testing.T) {
+		localRem := rem()
+
+		got, err := localRem.BaseRepo(false)
+		assert.NoError(t, err)
+
+		assert.Equal(t, got.FullName(), localRem.remotes[0].FullName())
+		assert.Equal(t, got.RepoHost(), localRem.remotes[0].RepoHost())
+	})
+
+	t.Run("Consult the network 1 repo", func(t *testing.T) {
+		localRem := rem()
+
+		// Prompt must be true otherwise we won't reach the code we want to test
+		got, err := localRem.BaseRepo(true)
+		assert.NoError(t, err)
+
+		assert.Equal(t, got.FullName(), localRem.remotes[0].FullName())
+		assert.Equal(t, got.RepoHost(), localRem.remotes[0].RepoHost())
+	})
+
+	t.Run("Consult the network, no remotes", func(t *testing.T) {
+		localRem := rem()
+
+		// Wipe out all remotes
+		localRem.remotes = Remotes{}
+		localRem.network = nil
+
+		_, err := localRem.BaseRepo(true)
+		assert.Error(t, err, "no GitLab Projects found from remotes")
+	})
+
+	t.Run("Consult the network, multiple projects, pick origin", func(t *testing.T) {
+		localRem := rem()
+
+		originRemote := &Remote{
+			Remote: &git.Remote{Name: "origin"},
+			Repo:   NewWithHost("maxice8", "glab", "gitlab.com"),
+		}
+
+		originNetwork := gitlab.Project{
+			ID:                2,
+			PathWithNamespace: "maxice8/glab",
+			HTTPURLToRepo:     "https://gitlab.com/maxice8/glab",
+		}
+
+		localRem.remotes = append(localRem.remotes, originRemote)
+		localRem.network = append(localRem.network, originNetwork)
+
+		// Mock the prompt
+		as, restoreAsk := prompt.InitAskStubber()
+		defer restoreAsk()
+
+		as.Stub([]*prompt.QuestionStub{
+			{
+				Name:  "base",
+				Value: "maxice8/glab", // We expect to get `origin`
+			},
+		})
+
+		got, err := localRem.BaseRepo(true)
+		assert.NoError(t, err)
+
+		assert.Equal(t, got.FullName(), originRemote.Repo.FullName())
+		assert.Equal(t, got.RepoHost(), originRemote.Repo.RepoHost())
+	})
+
+	t.Run("Consult the network, multiple projects, pick upstream", func(t *testing.T) {
+		localRem := rem()
+
+		originRemote := &Remote{
+			Remote: &git.Remote{Name: "origin"},
+			Repo:   NewWithHost("maxice8", "glab", "gitlab.com"),
+		}
+
+		originNetwork := gitlab.Project{
+			ID:                2,
+			PathWithNamespace: "maxice8/glab",
+			HTTPURLToRepo:     "https://gitlab.com/maxice8/glab",
+		}
+
+		localRem.remotes = append(localRem.remotes, originRemote)
+		localRem.network = append(localRem.network, originNetwork)
+
+		// Mock the prompt
+		as, restoreAsk := prompt.InitAskStubber()
+		defer restoreAsk()
+
+		as.Stub([]*prompt.QuestionStub{
+			{
+				Name:  "base",
+				Value: "profclems/glab", // We expect to get `origin`
+			},
+		})
+
+		got, err := localRem.BaseRepo(true)
+		assert.NoError(t, err)
+
+		assert.Equal(t, got.FullName(), localRem.remotes[0].Repo.FullName())
+		assert.Equal(t, got.RepoHost(), localRem.remotes[0].Repo.RepoHost())
+	})
+
+	t.Run("Consult the network, one forked project, get fork", func(t *testing.T) {
+		localRem := rem()
+
+		originRemote := &Remote{
+			Remote: &git.Remote{Name: "origin"},
+			Repo:   NewWithHost("maxice8", "glab", "gitlab.com"),
+		}
+
+		originNetwork := gitlab.Project{
+			ID:                2,
+			PathWithNamespace: "maxice8/glab",
+			HTTPURLToRepo:     "https://gitlab.com/maxice8/glab",
+			ForkedFromProject: &gitlab.ForkParent{
+				ID:                1,
+				HTTPURLToRepo:     "https://gitlab.com/profclems/glab",
+				PathWithNamespace: "profclems/glab",
+			},
+		}
+
+		localRem.remotes = Remotes{originRemote}
+		localRem.network = []gitlab.Project{originNetwork}
+
+		// Mock the prompt
+		as, restoreAsk := prompt.InitAskStubber()
+		defer restoreAsk()
+
+		as.Stub([]*prompt.QuestionStub{
+			{
+				Name:  "base",
+				Value: "maxice8/glab", // We expect to get `origin`
+			},
+		})
+
+		got, err := localRem.BaseRepo(true)
+		assert.NoError(t, err)
+
+		assert.Equal(t, got.FullName(), originRemote.Repo.FullName())
+		assert.Equal(t, got.RepoHost(), originRemote.Repo.RepoHost())
+	})
+
+	t.Run("Consult the network, one forked project, get upstream", func(t *testing.T) {
+		localRem := rem()
+
+		originRemote := &Remote{
+			Remote: &git.Remote{Name: "origin"},
+			Repo:   NewWithHost("maxice8", "glab", "gitlab.com"),
+		}
+
+		originNetwork := gitlab.Project{
+			ID:                2,
+			PathWithNamespace: "maxice8/glab",
+			HTTPURLToRepo:     "https://gitlab.com/maxice8/glab",
+			ForkedFromProject: &gitlab.ForkParent{
+				ID:                1,
+				HTTPURLToRepo:     "https://gitlab.com/profclems/glab",
+				PathWithNamespace: "profclems/glab",
+			},
+		}
+
+		localRem.remotes = Remotes{originRemote}
+		localRem.network = []gitlab.Project{originNetwork}
+
+		// Mock the prompt
+		as, restoreAsk := prompt.InitAskStubber()
+		defer restoreAsk()
+
+		as.Stub([]*prompt.QuestionStub{
+			{
+				Name:  "base",
+				Value: "profclems/glab", // We expect to get `origin`
+			},
+		})
+
+		got, err := localRem.BaseRepo(true)
+		assert.NoError(t, err)
+
+		assert.Equal(t, got.FullName(), "profclems/glab")
+		assert.Equal(t, got.RepoHost(), "gitlab.com")
+	})
+}
+
+func Test_HeadRepo(t *testing.T) {
+	// Make it a function that must be called by each test so none of them overlap
+	rem := func() ResolvedRemotes {
+		rem := &ResolvedRemotes{
+			remotes: Remotes{
+				&Remote{
+					Remote: &git.Remote{
+						Name: "upstream",
+					},
+					Repo: NewWithHost("profclems", "glab", "gitlab.com"),
+				},
+			},
+			apiClient: &gitlab.Client{},
+			network: []gitlab.Project{
+				{
+					ID:                1,
+					PathWithNamespace: "profclems/glab",
+					HTTPURLToRepo:     "https://gitlab.com/profclems/glab",
+				},
+			},
+		}
+		return *rem
+	}
+
+	mockGitlabProject := func(i interface{}) gitlab.Project {
+		p := &gitlab.Project{
+			PathWithNamespace: fmt.Sprint(i),
+			HTTPURLToRepo:     fmt.Sprintf("https://gitlab.com/%s", i),
+		}
+		return *p
+	}
+
+	// Override git.SetRemoteResolution so it doesn't mess with the user configs
+	git.SetRemoteResolution = func(_, _ string) error {
+		return nil
+	}
+
+	api.GetProject = func(_ *gitlab.Client, projectID interface{}) (*gitlab.Project, error) {
+		p := mockGitlabProject(projectID)
+		return &p, nil
+	}
+
+	t.Run("baseOverride", func(t *testing.T) {
+		localRem := rem()
+		localRem.baseOverride = NewWithHost("profclems", "glab", "gitlab.com")
+
+		got, err := localRem.HeadRepo(false)
+		assert.NoError(t, err)
+
+		assert.Equal(t, localRem.baseOverride.FullName(), got.FullName())
+		assert.Equal(t, localRem.baseOverride.RepoHost(), got.RepoHost())
+	})
+
+	t.Run("Resolved->head", func(t *testing.T) {
+		localRem := rem()
+
+		// Set a head resolution
+		localRem.remotes[0].Resolved = "head"
+
+		got, err := localRem.HeadRepo(false)
+		assert.NoError(t, err)
+
+		assert.Equal(t, localRem.remotes[0].FullName(), got.FullName())
+		assert.Equal(t, localRem.remotes[0].RepoHost(), got.RepoHost())
+	})
+
+	t.Run("Resolved->head:", func(t *testing.T) {
+		localRem := rem()
+
+		expectedResolution := NewWithHost("maxice8", "glab", "gitlab.com")
+
+		// Set a base resolution
+		localRem.remotes[0].Resolved = "head: gitlab.com/maxice8/glab"
+
+		got, err := localRem.HeadRepo(false)
+		assert.NoError(t, err)
+
+		assert.Equal(t, expectedResolution.FullName(), got.FullName())
+		assert.Equal(t, expectedResolution.RepoHost(), got.RepoHost())
+	})
+
+	t.Run("Prompt==false", func(t *testing.T) {
+		localRem := rem()
+
+		got, err := localRem.HeadRepo(false)
+		assert.NoError(t, err)
+
+		assert.Equal(t, localRem.remotes[0].FullName(), got.FullName())
+	})
+
+	t.Run("Consult the network 1 repo", func(t *testing.T) {
+		localRem := rem()
+
+		// Prompt must be true otherwise we won't reach the code we want to test
+		got, err := localRem.HeadRepo(false)
+		assert.NoError(t, err)
+
+		assert.Equal(t, got.FullName(), localRem.remotes[0].FullName())
+	})
+
+	t.Run("Consult the network, more than 1 forked repo, pick the fork", func(t *testing.T) {
+		localRem := rem()
+
+		originRemote := &Remote{
+			Remote: &git.Remote{Name: "origin"},
+			Repo:   NewWithHost("maxice8", "glab", "gitlab.com"),
+		}
+
+		originNetwork := gitlab.Project{
+			ID:                2,
+			PathWithNamespace: "maxice8/glab",
+			HTTPURLToRepo:     "https://gitlab.com/maxice8/glab",
+			ForkedFromProject: &gitlab.ForkParent{
+				ID:                1,
+				HTTPURLToRepo:     "https://gitlab.com/profclems/glab",
+				PathWithNamespace: "profclems/glab",
+			},
+		}
+
+		localRem.remotes = Remotes{originRemote}
+		localRem.network = []gitlab.Project{originNetwork}
+
+		got, err := localRem.HeadRepo(false)
+		assert.NoError(t, err)
+
+		assert.Equal(t, "maxice8/glab", got.FullName())
+	})
+
+	t.Run("Consult the network, no remotes", func(t *testing.T) {
+		localRem := rem()
+
+		// Wipe out all remotes
+		localRem.remotes = Remotes{}
+		localRem.network = nil
+
+		_, err := localRem.HeadRepo(true)
+		assert.Error(t, err, "no GitLab Projects found from remotes")
+	})
+
+	t.Run("Consult the network, multiple projects, pick origin", func(t *testing.T) {
+		localRem := rem()
+
+		originRemote := &Remote{
+			Remote: &git.Remote{Name: "origin"},
+			Repo:   NewWithHost("maxice8", "glab", "gitlab.com"),
+		}
+
+		originNetwork := gitlab.Project{
+			ID:                2,
+			PathWithNamespace: "maxice8/glab",
+			HTTPURLToRepo:     "https://gitlab.com/maxice8/glab",
+		}
+
+		localRem.remotes = append(localRem.remotes, originRemote)
+		localRem.network = append(localRem.network, originNetwork)
+
+		// Mock the prompt
+		as, restoreAsk := prompt.InitAskStubber()
+		defer restoreAsk()
+
+		as.Stub([]*prompt.QuestionStub{
+			{
+				Name:  "head",
+				Value: "maxice8/glab", // We expect to get `origin`
+			},
+		})
+
+		got, err := localRem.HeadRepo(true)
+		assert.NoError(t, err)
+
+		assert.Equal(t, originRemote.Repo.FullName(), got.FullName())
+		assert.Equal(t, originRemote.Repo.RepoHost(), got.RepoHost())
+	})
+
+	t.Run("Consult the network, multiple projects, pick upstream", func(t *testing.T) {
+		localRem := rem()
+
+		originRemote := &Remote{
+			Remote: &git.Remote{Name: "origin"},
+			Repo:   NewWithHost("maxice8", "glab", "gitlab.com"),
+		}
+
+		originNetwork := gitlab.Project{
+			ID:                2,
+			PathWithNamespace: "maxice8/glab",
+			HTTPURLToRepo:     "https://gitlab.com/maxice8/glab",
+		}
+
+		localRem.remotes = append(localRem.remotes, originRemote)
+		localRem.network = append(localRem.network, originNetwork)
+
+		// Mock the prompt
+		as, restoreAsk := prompt.InitAskStubber()
+		defer restoreAsk()
+
+		as.Stub([]*prompt.QuestionStub{
+			{
+				Name:  "head",
+				Value: "profclems/glab", // We expect to get `origin`
+			},
+		})
+
+		got, err := localRem.HeadRepo(true)
+		assert.NoError(t, err)
+
+		assert.Equal(t, localRem.remotes[0].Repo.FullName(), got.FullName())
+		assert.Equal(t, localRem.remotes[0].Repo.RepoHost(), got.RepoHost())
+	})
+
+	t.Run("Consult the network, one forked project, get fork", func(t *testing.T) {
+		localRem := rem()
+
+		originRemote := &Remote{
+			Remote: &git.Remote{Name: "origin"},
+			Repo:   NewWithHost("maxice8", "glab", "gitlab.com"),
+		}
+
+		originNetwork := gitlab.Project{
+			ID:                2,
+			PathWithNamespace: "maxice8/glab",
+			HTTPURLToRepo:     "https://gitlab.com/maxice8/glab",
+			ForkedFromProject: &gitlab.ForkParent{
+				ID:                1,
+				HTTPURLToRepo:     "https://gitlab.com/profclems/glab",
+				PathWithNamespace: "profclems/glab",
+			},
+		}
+
+		localRem.remotes = Remotes{originRemote}
+		localRem.network = []gitlab.Project{originNetwork}
+
+		// Mock the prompt
+		as, restoreAsk := prompt.InitAskStubber()
+		defer restoreAsk()
+
+		as.Stub([]*prompt.QuestionStub{
+			{
+				Name:  "head",
+				Value: "maxice8/glab", // We expect to get `origin`
+			},
+		})
+
+		got, err := localRem.HeadRepo(true)
+		assert.NoError(t, err)
+
+		assert.Equal(t, originRemote.Repo.FullName(), got.FullName())
+		assert.Equal(t, originRemote.Repo.RepoHost(), got.RepoHost())
+	})
+
+	t.Run("Consult the network, one forked project, get upstream", func(t *testing.T) {
+		localRem := rem()
+
+		originRemote := &Remote{
+			Remote: &git.Remote{Name: "origin"},
+			Repo:   NewWithHost("maxice8", "glab", "gitlab.com"),
+		}
+
+		originNetwork := gitlab.Project{
+			ID:                2,
+			PathWithNamespace: "maxice8/glab",
+			HTTPURLToRepo:     "https://gitlab.com/maxice8/glab",
+			ForkedFromProject: &gitlab.ForkParent{
+				ID:                1,
+				HTTPURLToRepo:     "https://gitlab.com/profclems/glab",
+				PathWithNamespace: "profclems/glab",
+			},
+		}
+
+		localRem.remotes = Remotes{originRemote}
+		localRem.network = []gitlab.Project{originNetwork}
+
+		// Mock the prompt
+		as, restoreAsk := prompt.InitAskStubber()
+		defer restoreAsk()
+
+		as.Stub([]*prompt.QuestionStub{
+			{
+				Name:  "head",
+				Value: "profclems/glab", // We expect to get `origin`
+			},
+		})
+
+		got, err := localRem.HeadRepo(true)
+		assert.NoError(t, err)
+
+		assert.Equal(t, "profclems/glab", got.FullName())
+		assert.Equal(t, "gitlab.com", got.RepoHost())
 	})
 }
