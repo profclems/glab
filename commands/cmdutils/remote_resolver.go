@@ -4,6 +4,7 @@ import (
 	"errors"
 	"net/url"
 	"sort"
+	"strings"
 
 	"github.com/profclems/glab/internal/config"
 	"github.com/profclems/glab/internal/git"
@@ -17,7 +18,7 @@ type remoteResolver struct {
 	urlTranslator func(*url.URL) *url.URL
 }
 
-func (rr *remoteResolver) Resolver() func() (glrepo.Remotes, error) {
+func (rr *remoteResolver) Resolver(hostOverride string) func() (glrepo.Remotes, error) {
 	var cachedRemotes glrepo.Remotes
 	var remotesError error
 
@@ -59,6 +60,22 @@ func (rr *remoteResolver) Resolver() func() (glrepo.Remotes, error) {
 		var hostname string
 		cachedRemotes = glrepo.Remotes{}
 		sort.Sort(resolvedRemotes)
+
+		if hostOverride != "" {
+			for _, r := range resolvedRemotes {
+				if strings.EqualFold(r.RepoHost(), hostOverride) {
+					cachedRemotes = append(cachedRemotes, r)
+				}
+			}
+
+			if len(cachedRemotes) == 0 {
+				remotesError = errors.New("none of the git remotes configured for this repository correspond to the GITLAB_HOST environment variable. Try adding a matching remote or unsetting the variable")
+				return nil, remotesError
+			}
+
+			return cachedRemotes, nil
+		}
+
 		for _, r := range resolvedRemotes {
 			if hostname == "" {
 				if !knownHosts[r.RepoHost()] {
