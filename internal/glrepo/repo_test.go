@@ -272,6 +272,11 @@ func TestFromFullName(t *testing.T) {
 			wantName:  "REPO",
 			wantErr:   nil,
 		},
+		{
+			name:    "invalid URL",
+			input:   "git@example.com/%/url",
+			wantErr: errors.New(`parse "git@example.com/%/url": invalid URL escape "%/u"`),
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
