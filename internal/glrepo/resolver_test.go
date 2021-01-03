@@ -340,7 +340,7 @@ func Test_BaseRepo(t *testing.T) {
 		localRem := rem()
 
 		// Set a base resolution
-		localRem.remotes[0].Resolved = "base: NotAnActualValidValue"
+		localRem.remotes[0].Resolved = "NotAnActualValidValue"
 
 		got, err := localRem.BaseRepo(false)
 		assert.Nil(t, got)
