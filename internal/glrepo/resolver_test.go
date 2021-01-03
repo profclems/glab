@@ -310,7 +310,18 @@ func Test_BaseRepo(t *testing.T) {
 		assert.Equal(t, expectedResolution.RepoHost(), got.RepoHost())
 	})
 
-	t.Run("Resolved->backwards-compaitibility", func(t *testing.T) {
+	t.Run("Resolved->base: (invalid)", func(t *testing.T) {
+		localRem := rem()
+
+		// Set a base resolution
+		localRem.remotes[0].Resolved = "base: NotAnActualValidValue"
+
+		got, err := localRem.BaseRepo(false)
+		assert.Nil(t, got)
+		assert.EqualError(t, err, "expected the \"[HOST/]OWNER/[NAMESPACE/]REPO\" format, got \" NotAnActualValidValue\"")
+	})
+
+	t.Run("Resolved->backwards-compatibility", func(t *testing.T) {
 		localRem := rem()
 
 		expectedResolution := NewWithHost("maxice8", "glab", "gitlab.com")
@@ -323,6 +334,17 @@ func Test_BaseRepo(t *testing.T) {
 
 		assert.Equal(t, expectedResolution.FullName(), got.FullName())
 		assert.Equal(t, expectedResolution.RepoHost(), got.RepoHost())
+	})
+
+	t.Run("Resolved->backwards-compatibility: (invalid)", func(t *testing.T) {
+		localRem := rem()
+
+		// Set a base resolution
+		localRem.remotes[0].Resolved = "base: NotAnActualValidValue"
+
+		got, err := localRem.BaseRepo(false)
+		assert.Nil(t, got)
+		assert.EqualError(t, err, "expected the \"[HOST/]OWNER/[NAMESPACE/]REPO\" format, got \" NotAnActualValidValue\"")
 	})
 
 	t.Run("Prompt==false", func(t *testing.T) {
@@ -506,6 +528,39 @@ func Test_BaseRepo(t *testing.T) {
 		assert.Equal(t, "profclems/glab", got.FullName())
 		assert.Equal(t, "gitlab.com", got.RepoHost())
 	})
+
+	t.Run("Consult the network, multiple projects, prompt fails", func(t *testing.T) {
+		localRem := rem()
+
+		originRemote := &Remote{
+			Remote: &git.Remote{Name: "origin"},
+			Repo:   NewWithHost("maxice8", "glab", "gitlab.com"),
+		}
+
+		originNetwork := gitlab.Project{
+			ID:                2,
+			PathWithNamespace: "maxice8/glab",
+			HTTPURLToRepo:     "https://gitlab.com/maxice8/glab",
+		}
+
+		localRem.remotes = append(localRem.remotes, originRemote)
+		localRem.network = append(localRem.network, originNetwork)
+
+		// Mock the prompt
+		as, restoreAsk := prompt.InitAskStubber()
+		defer restoreAsk()
+
+		as.Stub([]*prompt.QuestionStub{
+			{
+				Name:  "base",
+				Value: errors.New("could not prompt"),
+			},
+		})
+
+		got, err := localRem.BaseRepo(true)
+		assert.Nil(t, got)
+		assert.EqualError(t, err, "could not prompt")
+	})
 }
 
 func Test_HeadRepo(t *testing.T) {
@@ -589,6 +644,17 @@ func Test_HeadRepo(t *testing.T) {
 		assert.Equal(t, expectedResolution.RepoHost(), got.RepoHost())
 	})
 
+	t.Run("Resolved->head: (invalid)", func(t *testing.T) {
+		localRem := rem()
+
+		// Set a base resolution
+		localRem.remotes[0].Resolved = "head: NotAnActualValidValue"
+
+		got, err := localRem.HeadRepo(false)
+		assert.Nil(t, got)
+		assert.EqualError(t, err, "expected the \"[HOST/]OWNER/[NAMESPACE/]REPO\" format, got \" NotAnActualValidValue\"")
+	})
+
 	t.Run("Prompt==false", func(t *testing.T) {
 		localRem := rem()
 
@@ -634,6 +700,29 @@ func Test_HeadRepo(t *testing.T) {
 		assert.NoError(t, err)
 
 		assert.Equal(t, "maxice8/glab", got.FullName())
+	})
+
+	t.Run("Consult the network, more than 1 repo, pick the first", func(t *testing.T) {
+		localRem := rem()
+
+		originRemote := &Remote{
+			Remote: &git.Remote{Name: "origin"},
+			Repo:   NewWithHost("maxice8", "glab", "gitlab.com"),
+		}
+
+		originNetwork := gitlab.Project{
+			ID:                2,
+			PathWithNamespace: "maxice8/glab",
+			HTTPURLToRepo:     "https://gitlab.com/maxice8/glab",
+		}
+
+		localRem.remotes = append(localRem.remotes, originRemote)
+		localRem.network = append(localRem.network, originNetwork)
+
+		got, err := localRem.HeadRepo(false)
+		assert.NoError(t, err)
+
+		assert.Equal(t, "profclems/glab", got.FullName())
 	})
 
 	t.Run("Consult the network, no remotes", func(t *testing.T) {
@@ -795,5 +884,38 @@ func Test_HeadRepo(t *testing.T) {
 
 		assert.Equal(t, "profclems/glab", got.FullName())
 		assert.Equal(t, "gitlab.com", got.RepoHost())
+	})
+
+	t.Run("Consult the network, multiple projects, prompt fails", func(t *testing.T) {
+		localRem := rem()
+
+		originRemote := &Remote{
+			Remote: &git.Remote{Name: "origin"},
+			Repo:   NewWithHost("maxice8", "glab", "gitlab.com"),
+		}
+
+		originNetwork := gitlab.Project{
+			ID:                2,
+			PathWithNamespace: "maxice8/glab",
+			HTTPURLToRepo:     "https://gitlab.com/maxice8/glab",
+		}
+
+		localRem.remotes = append(localRem.remotes, originRemote)
+		localRem.network = append(localRem.network, originNetwork)
+
+		// Mock the prompt
+		as, restoreAsk := prompt.InitAskStubber()
+		defer restoreAsk()
+
+		as.Stub([]*prompt.QuestionStub{
+			{
+				Name:  "head",
+				Value: errors.New("could not prompt"),
+			},
+		})
+
+		got, err := localRem.HeadRepo(true)
+		assert.Nil(t, got)
+		assert.EqualError(t, err, "could not prompt")
 	})
 }
