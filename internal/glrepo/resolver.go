@@ -5,9 +5,9 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/AlecAivazis/survey/v2"
 	"github.com/profclems/glab/internal/git"
 	"github.com/profclems/glab/pkg/api"
+	"github.com/profclems/glab/pkg/prompt"
 
 	"github.com/xanzy/go-gitlab"
 )
@@ -54,7 +54,7 @@ type ResolvedRemotes struct {
 	apiClient    *gitlab.Client
 }
 
-func (r *ResolvedRemotes) BaseRepo(prompt bool) (Interface, error) {
+func (r *ResolvedRemotes) BaseRepo(interactive bool) (Interface, error) {
 	if r.baseOverride != nil {
 		return r.baseOverride, nil
 	}
@@ -85,7 +85,7 @@ func (r *ResolvedRemotes) BaseRepo(prompt bool) (Interface, error) {
 		}
 	}
 
-	if !prompt {
+	if !interactive {
 		// we cannot prompt, so just resort to the 1st remote
 		return r.remotes[0], nil
 	}
@@ -122,10 +122,12 @@ func (r *ResolvedRemotes) BaseRepo(prompt bool) (Interface, error) {
 
 	baseName := repoNames[0]
 	if len(repoNames) > 1 {
-		err := survey.AskOne(&survey.Select{
-			Message: "Which should be the base repository (used for e.g. querying issues) for this directory?",
-			Options: repoNames,
-		}, &baseName)
+		err := prompt.Select(
+			&baseName,
+			"base",
+			"Which should be the base repository (used for e.g. querying issues) for this directory?",
+			repoNames,
+		)
 		if err != nil {
 			return nil, err
 		}
@@ -147,7 +149,7 @@ func (r *ResolvedRemotes) BaseRepo(prompt bool) (Interface, error) {
 	return selectedRepoInfo, err
 }
 
-func (r *ResolvedRemotes) HeadRepo(prompt bool) (Interface, error) {
+func (r *ResolvedRemotes) HeadRepo(interactive bool) (Interface, error) {
 	if r.baseOverride != nil {
 		return r.baseOverride, nil
 	}
@@ -197,7 +199,7 @@ func (r *ResolvedRemotes) HeadRepo(prompt bool) (Interface, error) {
 
 	headName := repoNames[0]
 	if len(repoNames) > 1 {
-		if !prompt {
+		if !interactive {
 			// We cannot prompt so get the first repo that is a fork
 			for _, repo := range repoNames {
 				if repoMap[repo].ForkedFromProject != nil {
@@ -210,10 +212,12 @@ func (r *ResolvedRemotes) HeadRepo(prompt bool) (Interface, error) {
 			return r.remotes[0], nil
 		}
 
-		err := survey.AskOne(&survey.Select{
-			Message: "Which should be the head repository (where branches are pushed) for this directory?",
-			Options: repoNames,
-		}, &headName)
+		err := prompt.Select(
+			&headName,
+			"head",
+			"Which should be the head repository (where branches are pushed) for this directory?",
+			repoNames,
+		)
 		if err != nil {
 			return nil, err
 		}
