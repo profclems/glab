@@ -354,7 +354,7 @@ func Test_BaseRepo(t *testing.T) {
 		localRem.network = nil
 
 		_, err := localRem.BaseRepo(true)
-		assert.Error(t, err, "no GitLab Projects found from remotes")
+		assert.EqualError(t, err, "no GitLab Projects found from remotes")
 	})
 
 	t.Run("Consult the network, multiple projects, pick origin", func(t *testing.T) {
@@ -644,7 +644,7 @@ func Test_HeadRepo(t *testing.T) {
 		localRem.network = nil
 
 		_, err := localRem.HeadRepo(true)
-		assert.Error(t, err, "no GitLab Projects found from remotes")
+		assert.EqualError(t, err, "no GitLab Projects found from remotes")
 	})
 
 	t.Run("Consult the network, multiple projects, pick origin", func(t *testing.T) {
