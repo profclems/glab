@@ -83,10 +83,10 @@ func Test_RemoteForRepo(t *testing.T) {
 				}
 			} else {
 				// Make sure both return all the exact same thing
-				assert.Equal(t, got.Name, tC.output.Name)
-				assert.Equal(t, got.Remote.Name, tC.output.Remote.Name)
-				assert.Equal(t, got.Repo.FullName(), tC.output.Repo.FullName())
-				assert.Equal(t, got.Repo.RepoHost(), tC.output.Repo.RepoHost())
+				assert.Equal(t, tC.output.Name, got.Name)
+				assert.Equal(t, tC.output.Remote.Name, got.Remote.Name)
+				assert.Equal(t, tC.output.Repo.FullName(), got.Repo.FullName())
+				assert.Equal(t, tC.output.Repo.RepoHost(), got.Repo.RepoHost())
 			}
 		})
 	}
@@ -110,7 +110,7 @@ func Test_ResolveRemotesToRepos(t *testing.T) {
 		r, err := ResolveRemotesToRepos(rem.remotes, rem.apiClient, "")
 		assert.Nil(t, err)
 
-		assert.Equal(t, r.apiClient, rem.apiClient)
+		assert.Equal(t, rem.apiClient, r.apiClient)
 
 		assert.Len(t, r.remotes, 1)
 
@@ -128,10 +128,10 @@ func Test_ResolveRemotesToRepos(t *testing.T) {
 		r, err := ResolveRemotesToRepos(rem.remotes, rem.apiClient, "gitlab.com/profclems/glab")
 		assert.Nil(t, err)
 
-		assert.Equal(t, r.baseOverride.FullName(), expectedBaseOverride.FullName())
-		assert.Equal(t, r.baseOverride.RepoHost(), expectedBaseOverride.RepoHost())
+		assert.Equal(t, expectedBaseOverride.FullName(), r.baseOverride.FullName())
+		assert.Equal(t, expectedBaseOverride.RepoHost(), r.baseOverride.RepoHost())
 
-		assert.Equal(t, r.apiClient, rem.apiClient)
+		assert.Equal(t, rem.apiClient, r.apiClient)
 
 		assert.Len(t, r.remotes, 1)
 
@@ -147,7 +147,7 @@ func Test_ResolveRemotesToRepos(t *testing.T) {
 		r, err := ResolveRemotesToRepos(rem.remotes, rem.apiClient, "badValue")
 		assert.EqualError(t, err, "expected the \"[HOST/]OWNER/[NAMESPACE/]REPO\" format, got \"badValue\"")
 
-		assert.Equal(t, r.apiClient, rem.apiClient)
+		assert.Equal(t, rem.apiClient, r.apiClient)
 
 		assert.Len(t, r.remotes, 1)
 
@@ -190,7 +190,7 @@ func Test_resolveNetwork(t *testing.T) {
 
 		assert.Len(t, rem.network, len(rem.remotes))
 		for i := range rem.network {
-			assert.Equal(t, rem.network[i].PathWithNamespace, rem.remotes[i].Repo.FullName())
+			assert.Equal(t, rem.remotes[i].Repo.FullName(), rem.network[i].PathWithNamespace)
 		}
 	})
 
@@ -224,7 +224,7 @@ func Test_resolveNetwork(t *testing.T) {
 
 		assert.Len(t, rem.network, maxRemotesForLookup)
 		for i := range rem.network {
-			assert.Equal(t, rem.network[i].PathWithNamespace, rem.remotes[i].Repo.FullName())
+			assert.Equal(t, rem.remotes[i].Repo.FullName(), rem.network[i].PathWithNamespace)
 		}
 	})
 }
@@ -278,8 +278,8 @@ func Test_BaseRepo(t *testing.T) {
 		got, err := localRem.BaseRepo(false)
 		assert.NoError(t, err)
 
-		assert.Equal(t, got.FullName(), localRem.baseOverride.FullName())
-		assert.Equal(t, got.RepoHost(), localRem.baseOverride.RepoHost())
+		assert.Equal(t, localRem.baseOverride.FullName(), got.FullName())
+		assert.Equal(t, localRem.baseOverride.RepoHost(), got.RepoHost())
 	})
 
 	t.Run("Resolved->base", func(t *testing.T) {
@@ -291,8 +291,8 @@ func Test_BaseRepo(t *testing.T) {
 		got, err := localRem.BaseRepo(false)
 		assert.NoError(t, err)
 
-		assert.Equal(t, got.FullName(), localRem.remotes[0].FullName())
-		assert.Equal(t, got.RepoHost(), localRem.remotes[0].RepoHost())
+		assert.Equal(t, localRem.remotes[0].FullName(), got.FullName())
+		assert.Equal(t, localRem.remotes[0].RepoHost(), got.RepoHost())
 	})
 
 	t.Run("Resolved->base:", func(t *testing.T) {
@@ -306,8 +306,8 @@ func Test_BaseRepo(t *testing.T) {
 		got, err := localRem.BaseRepo(false)
 		assert.NoError(t, err)
 
-		assert.Equal(t, got.FullName(), expectedResolution.FullName())
-		assert.Equal(t, got.RepoHost(), expectedResolution.RepoHost())
+		assert.Equal(t, expectedResolution.FullName(), got.FullName())
+		assert.Equal(t, expectedResolution.RepoHost(), got.RepoHost())
 	})
 
 	t.Run("Resolved->backwards-compaitibility", func(t *testing.T) {
@@ -321,8 +321,8 @@ func Test_BaseRepo(t *testing.T) {
 		got, err := localRem.BaseRepo(false)
 		assert.NoError(t, err)
 
-		assert.Equal(t, got.FullName(), expectedResolution.FullName())
-		assert.Equal(t, got.RepoHost(), expectedResolution.RepoHost())
+		assert.Equal(t, expectedResolution.FullName(), got.FullName())
+		assert.Equal(t, expectedResolution.RepoHost(), got.RepoHost())
 	})
 
 	t.Run("Prompt==false", func(t *testing.T) {
@@ -331,8 +331,8 @@ func Test_BaseRepo(t *testing.T) {
 		got, err := localRem.BaseRepo(false)
 		assert.NoError(t, err)
 
-		assert.Equal(t, got.FullName(), localRem.remotes[0].FullName())
-		assert.Equal(t, got.RepoHost(), localRem.remotes[0].RepoHost())
+		assert.Equal(t, localRem.remotes[0].FullName(), got.FullName())
+		assert.Equal(t, localRem.remotes[0].RepoHost(), got.RepoHost())
 	})
 
 	t.Run("Consult the network 1 repo", func(t *testing.T) {
@@ -342,8 +342,8 @@ func Test_BaseRepo(t *testing.T) {
 		got, err := localRem.BaseRepo(true)
 		assert.NoError(t, err)
 
-		assert.Equal(t, got.FullName(), localRem.remotes[0].FullName())
-		assert.Equal(t, got.RepoHost(), localRem.remotes[0].RepoHost())
+		assert.Equal(t, localRem.remotes[0].FullName(), got.FullName())
+		assert.Equal(t, localRem.remotes[0].RepoHost(), got.RepoHost())
 	})
 
 	t.Run("Consult the network, no remotes", func(t *testing.T) {
@@ -388,8 +388,8 @@ func Test_BaseRepo(t *testing.T) {
 		got, err := localRem.BaseRepo(true)
 		assert.NoError(t, err)
 
-		assert.Equal(t, got.FullName(), originRemote.Repo.FullName())
-		assert.Equal(t, got.RepoHost(), originRemote.Repo.RepoHost())
+		assert.Equal(t, originRemote.Repo.FullName(), got.FullName())
+		assert.Equal(t, originRemote.Repo.RepoHost(), got.RepoHost())
 	})
 
 	t.Run("Consult the network, multiple projects, pick upstream", func(t *testing.T) {
@@ -423,8 +423,8 @@ func Test_BaseRepo(t *testing.T) {
 		got, err := localRem.BaseRepo(true)
 		assert.NoError(t, err)
 
-		assert.Equal(t, got.FullName(), localRem.remotes[0].Repo.FullName())
-		assert.Equal(t, got.RepoHost(), localRem.remotes[0].Repo.RepoHost())
+		assert.Equal(t, localRem.remotes[0].Repo.FullName(), got.FullName())
+		assert.Equal(t, localRem.remotes[0].Repo.RepoHost(), got.RepoHost())
 	})
 
 	t.Run("Consult the network, one forked project, get fork", func(t *testing.T) {
@@ -463,8 +463,8 @@ func Test_BaseRepo(t *testing.T) {
 		got, err := localRem.BaseRepo(true)
 		assert.NoError(t, err)
 
-		assert.Equal(t, got.FullName(), originRemote.Repo.FullName())
-		assert.Equal(t, got.RepoHost(), originRemote.Repo.RepoHost())
+		assert.Equal(t, originRemote.Repo.FullName(), got.FullName())
+		assert.Equal(t, originRemote.Repo.RepoHost(), got.RepoHost())
 	})
 
 	t.Run("Consult the network, one forked project, get upstream", func(t *testing.T) {
@@ -503,8 +503,8 @@ func Test_BaseRepo(t *testing.T) {
 		got, err := localRem.BaseRepo(true)
 		assert.NoError(t, err)
 
-		assert.Equal(t, got.FullName(), "profclems/glab")
-		assert.Equal(t, got.RepoHost(), "gitlab.com")
+		assert.Equal(t, "profclems/glab", got.FullName())
+		assert.Equal(t, "gitlab.com", got.RepoHost())
 	})
 }
 
