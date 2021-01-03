@@ -242,3 +242,55 @@ func Test(t *testing.T) {
 		})
 	}
 }
+
+func Test_GraphQLEndpoint(t *testing.T) {
+	testCases := []struct {
+		name     string
+		protocol string
+		hostname string
+		output   string
+	}{
+		{
+			name:     "OfficialInstance/https",
+			protocol: "https",
+			hostname: "gitlab.com",
+			output:   "https://gitlab.com/api/graphql/",
+		},
+		{
+			name:     "OfficialInstance/any-protocol-is-https",
+			protocol: "NoExistProtocol",
+			hostname: "gitlab.com",
+			output:   "https://gitlab.com/api/graphql/",
+		},
+		{
+			name:     "OfficialInstance/no-protocol-default-to-https",
+			protocol: "",
+			hostname: "gitlab.com",
+			output:   "https://gitlab.com/api/graphql/",
+		},
+		{
+			name:     "SelfHosted/https",
+			protocol: "https",
+			hostname: "gitlab.alpinelinux.org",
+			output:   "https://gitlab.alpinelinux.org/api/graphql/",
+		},
+		{
+			name:     "SelfHost/http",
+			protocol: "http",
+			hostname: "gitlab.alpinelinux.org",
+			output:   "http://gitlab.alpinelinux.org/api/graphql/",
+		},
+		{
+			name:     "SelfHosted/no-protocol-default-to-https",
+			protocol: "",
+			hostname: "gitlab.alpinelinux.org",
+			output:   "https://gitlab.alpinelinux.org/api/graphql/",
+		},
+	}
+	for _, tC := range testCases {
+		t.Run(tC.name, func(t *testing.T) {
+			got := GraphQLEndpoint(tC.hostname, tC.protocol)
+			assert.Equal(t, tC.output, got)
+		})
+	}
+}
