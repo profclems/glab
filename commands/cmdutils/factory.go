@@ -76,7 +76,7 @@ func baseRepoFunc() (glrepo.Interface, error) {
 	if err != nil {
 		return nil, err
 	}
-	return glrepo.FromURL(remotes[0].FetchURL)
+	return remotes[0], nil
 }
 
 // OverrideAPIProtocol sets api protocol for host to initialize http client
