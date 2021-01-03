@@ -477,7 +477,7 @@ func AddRemote(name, u string) (*Remote, error) {
 	}, nil
 }
 
-func SetRemoteResolution(name, resolution string) error {
+var SetRemoteResolution = func(name, resolution string) error {
 	return SetConfig(name, "glab-resolved", resolution)
 }
 
