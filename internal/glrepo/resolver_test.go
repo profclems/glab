@@ -318,7 +318,7 @@ func Test_BaseRepo(t *testing.T) {
 
 		got, err := localRem.BaseRepo(false)
 		assert.Nil(t, got)
-		assert.EqualError(t, err, "expected the \"[HOST/]OWNER/[NAMESPACE/]REPO\" format, got \" NotAnActualValidValue\"")
+		assert.EqualError(t, err, "expected the \"[HOST/]OWNER/[NAMESPACE/]REPO\" format, got \"NotAnActualValidValue\"")
 	})
 
 	t.Run("Resolved->backwards-compatibility", func(t *testing.T) {
@@ -344,7 +344,7 @@ func Test_BaseRepo(t *testing.T) {
 
 		got, err := localRem.BaseRepo(false)
 		assert.Nil(t, got)
-		assert.EqualError(t, err, "expected the \"[HOST/]OWNER/[NAMESPACE/]REPO\" format, got \" NotAnActualValidValue\"")
+		assert.EqualError(t, err, "expected the \"[HOST/]OWNER/[NAMESPACE/]REPO\" format, got \"NotAnActualValidValue\"")
 	})
 
 	t.Run("Prompt==false", func(t *testing.T) {
@@ -652,7 +652,7 @@ func Test_HeadRepo(t *testing.T) {
 
 		got, err := localRem.HeadRepo(false)
 		assert.Nil(t, got)
-		assert.EqualError(t, err, "expected the \"[HOST/]OWNER/[NAMESPACE/]REPO\" format, got \" NotAnActualValidValue\"")
+		assert.EqualError(t, err, "expected the \"[HOST/]OWNER/[NAMESPACE/]REPO\" format, got \"NotAnActualValidValue\"")
 	})
 
 	t.Run("Prompt==false", func(t *testing.T) {
