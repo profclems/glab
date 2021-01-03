@@ -195,3 +195,77 @@ func Test_RepoFuncs(t *testing.T) {
 		})
 	}
 }
+
+func Test_Swap(t *testing.T) {
+	r := Remotes{
+		&Remote{
+			Remote: &git.Remote{
+				Name: "origin",
+			},
+			Repo: NewWithHost("maxice8", "glab", "gitlab.com"),
+		},
+		&Remote{
+			Remote: &git.Remote{
+				Name: "upstream",
+			},
+			Repo: NewWithHost("profclems", "glab", "gitlab.com"),
+		},
+	}
+
+	assert.Equal(t, "origin", r[0].Remote.Name)
+	assert.Equal(t, "upstream", r[1].Remote.Name)
+
+	assert.Equal(t, "maxice8/glab", r[0].Repo.FullName())
+	assert.Equal(t, "profclems/glab", r[1].Repo.FullName())
+
+	r.Swap(0, 1)
+
+	assert.Equal(t, "upstream", r[0].Remote.Name)
+	assert.Equal(t, "origin", r[1].Remote.Name)
+
+	assert.Equal(t, "profclems/glab", r[0].Repo.FullName())
+	assert.Equal(t, "maxice8/glab", r[1].Repo.FullName())
+}
+
+func Test_Less(t *testing.T) {
+	r := Remotes{
+		&Remote{
+			Remote: &git.Remote{
+				Name: "else",
+			},
+			Repo: NewWithHost("somebody", "glab", "gitlab.com"),
+		},
+		&Remote{
+			Remote: &git.Remote{
+				Name: "origin",
+			},
+			Repo: NewWithHost("maxice8", "glab", "gitlab.com"),
+		},
+		&Remote{
+			Remote: &git.Remote{
+				Name: "gitlab",
+			},
+			Repo: NewWithHost("profclems", "glab", "gitlab.com"),
+		},
+		&Remote{
+			Remote: &git.Remote{
+				Name: "upstream",
+			},
+			Repo: NewWithHost("profclems", "glab", "gitlab.com"),
+		},
+	}
+
+	assert.True(t, r.Less(3, 2))
+	assert.True(t, r.Less(3, 1))
+	assert.True(t, r.Less(3, 0))
+	assert.True(t, r.Less(2, 1))
+	assert.True(t, r.Less(2, 0))
+	assert.True(t, r.Less(1, 0))
+
+	assert.False(t, r.Less(0, 1))
+	assert.False(t, r.Less(0, 2))
+	assert.False(t, r.Less(0, 3))
+	assert.False(t, r.Less(1, 2))
+	assert.False(t, r.Less(1, 3))
+	assert.False(t, r.Less(2, 3))
+}
