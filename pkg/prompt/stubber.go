@@ -44,8 +44,19 @@ func InitAskStubber() (*AskStubber, func()) {
 		if stubbedPrompt.Default {
 			// TODO this is failing for basic AskOne invocations with a string result.
 			defaultValue := reflect.ValueOf(p).Elem().FieldByName("Default")
+
+			// If the user passed us an error, return it
+			if err, ok := defaultValue.Interface().(error); ok {
+				return err
+			}
+
 			_ = core.WriteAnswer(response, "", defaultValue)
 		} else {
+			// If the user passed us an error, return it
+			if err, ok := stubbedPrompt.Value.(error); ok {
+				return err
+			}
+
 			_ = core.WriteAnswer(response, "", stubbedPrompt.Value)
 		}
 
@@ -69,8 +80,19 @@ func InitAskStubber() (*AskStubber, func()) {
 			}
 			if sq.Default {
 				defaultValue := reflect.ValueOf(q.Prompt).Elem().FieldByName("Default")
+
+				// If the user passed us an error, return it
+				if err, ok := defaultValue.Interface().(error); ok {
+					return err
+				}
+
 				_ = core.WriteAnswer(response, q.Name, defaultValue)
 			} else {
+				// If the user passed us an error, return it
+				if err, ok := sq.Value.(error); ok {
+					return err
+				}
+
 				_ = core.WriteAnswer(response, q.Name, sq.Value)
 			}
 		}
