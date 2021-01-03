@@ -116,10 +116,6 @@ func (r *ResolvedRemotes) BaseRepo(interactive bool) (Interface, error) {
 		add(&r.network[i])
 	}
 
-	if len(repoNames) == 0 {
-		return r.remotes[0], nil
-	}
-
 	baseName := repoNames[0]
 	if len(repoNames) > 1 {
 		err := prompt.Select(
@@ -191,10 +187,6 @@ func (r *ResolvedRemotes) HeadRepo(interactive bool) (Interface, error) {
 			add(fProject)
 		}
 		add(&r.network[i])
-	}
-
-	if len(repoNames) == 0 {
-		return r.remotes[0], nil
 	}
 
 	headName := repoNames[0]
