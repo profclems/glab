@@ -314,7 +314,7 @@ func Test_BaseRepo(t *testing.T) {
 		localRem := rem()
 
 		// Set a base resolution
-		localRem.remotes[0].Resolved = "base: NotAnActualValidValue"
+		localRem.remotes[0].Resolved = "base:NotAnActualValidValue"
 
 		got, err := localRem.BaseRepo(false)
 		assert.Nil(t, got)
@@ -648,7 +648,7 @@ func Test_HeadRepo(t *testing.T) {
 		localRem := rem()
 
 		// Set a base resolution
-		localRem.remotes[0].Resolved = "head: NotAnActualValidValue"
+		localRem.remotes[0].Resolved = "head:NotAnActualValidValue"
 
 		got, err := localRem.HeadRepo(false)
 		assert.Nil(t, got)
