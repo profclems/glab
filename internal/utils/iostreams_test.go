@@ -25,14 +25,30 @@ func Test_HelperFunctions(t *testing.T) {
 	}
 
 	t.Run("InitIOStream()", func(t *testing.T) {
-		got := InitIOStream()
+		t.Run("PAGER=", func(t *testing.T) {
+			os.Unsetenv("PAGER")
 
-		assert.Equal(t, ios.In, got.In)
-		assert.Equal(t, ios.IsaTTY, got.IsaTTY)
-		assert.Equal(t, ios.IsErrTTY, got.IsErrTTY)
-		assert.Equal(t, ios.IsInTTY, got.IsInTTY)
-		assert.Equal(t, ios.promptDisabled, got.promptDisabled)
-		assert.Equal(t, ios.pagerCommand, got.pagerCommand)
+			got := InitIOStream()
+
+			assert.Equal(t, ios.In, got.In)
+			assert.Equal(t, ios.IsaTTY, got.IsaTTY)
+			assert.Equal(t, ios.IsErrTTY, got.IsErrTTY)
+			assert.Equal(t, ios.IsInTTY, got.IsInTTY)
+			assert.Equal(t, ios.promptDisabled, got.promptDisabled)
+			assert.Equal(t, ios.pagerCommand, got.pagerCommand)
+		})
+		t.Run("GLAB_PAGER=", func(t *testing.T) {
+			os.Setenv("GLAB_PAGER", "more")
+
+			got := InitIOStream()
+
+			assert.Equal(t, ios.In, got.In)
+			assert.Equal(t, ios.IsaTTY, got.IsaTTY)
+			assert.Equal(t, ios.IsErrTTY, got.IsErrTTY)
+			assert.Equal(t, ios.IsInTTY, got.IsInTTY)
+			assert.Equal(t, ios.promptDisabled, got.promptDisabled)
+			assert.Equal(t, "more", got.pagerCommand)
+		})
 	})
 
 	t.Run("IsOutputTTY()", func(t *testing.T) {
