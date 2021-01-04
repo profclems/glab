@@ -2,7 +2,6 @@ package config
 
 import (
 	"bufio"
-	"log"
 	"os"
 )
 
@@ -44,18 +43,19 @@ func CheckFileHasLine(filePath, line string) bool {
 }
 
 // ReadAndAppend : appends string to file
-func ReadAndAppend(file, text string) {
+func ReadAndAppend(file, text string) error {
 	// If the file doesn't exist, create it, or append to the file
 	f, err := os.OpenFile(file, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	if _, err := f.Write([]byte(text)); err != nil {
-		log.Fatal(err)
+		return err
 	}
 	if err := f.Close(); err != nil {
-		log.Fatal(err)
+		return err
 	}
+	return nil
 }
 
 // BackupConfigFile creates a backup of the provided config file
