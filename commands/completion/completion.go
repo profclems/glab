@@ -1,10 +1,7 @@
 package completion
 
 import (
-	"errors"
 	"fmt"
-
-	"github.com/profclems/glab/commands/cmdutils"
 
 	"github.com/profclems/glab/internal/utils"
 	"github.com/spf13/cobra"
@@ -30,13 +27,6 @@ no additional shell configuration is necessary to gain completion support.
 For Homebrew, see <https://docs.brew.sh/Shell-Completion>
 `,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if shellType == "" {
-				if io.IsaTTY && io.IsErrTTY {
-					return &cmdutils.FlagError{Err: errors.New("error: the value for `--shell` is required")}
-				}
-				shellType = "bash"
-			}
-
 			out := io.StdOut
 			rootCmd := cmd.Parent()
 
@@ -55,6 +45,6 @@ For Homebrew, see <https://docs.brew.sh/Shell-Completion>
 		},
 	}
 
-	completionCmd.Flags().StringVarP(&shellType, "shell", "s", "", "Shell type: {bash|zsh|fish|powershell}")
+	completionCmd.Flags().StringVarP(&shellType, "shell", "s", "bash", "Shell type: {bash|zsh|fish|powershell}")
 	return completionCmd
 }
