@@ -74,7 +74,10 @@ func (a *LocalConfig) Write() error {
 
 	// Append local config dir if not already ignored in the .gitignore file
 	if !CheckFileHasLine(".gitignore", LocalConfigDir()[0]) {
-		ReadAndAppend(".gitignore", LocalConfigDir()[0]+"\n")
+		err := ReadAndAppend(".gitignore", LocalConfigDir()[0]+"\n")
+		if err != nil {
+			return fmt.Errorf("failed to write file to .gitignore: %w", err)
+		}
 	}
 
 	return nil
