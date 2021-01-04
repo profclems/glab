@@ -126,6 +126,7 @@ func Test_HelperFunctions(t *testing.T) {
 
 			ios.IsaTTY = true
 			ios.IsErrTTY = true
+			checkedNoColor = false
 			got := ios.ColorEnabled()
 			assert.True(t, got)
 		})
@@ -135,6 +136,7 @@ func Test_HelperFunctions(t *testing.T) {
 
 				ios.IsaTTY = false
 				ios.IsErrTTY = true
+				checkedNoColor = false
 				got := ios.ColorEnabled()
 				assert.False(t, got)
 			})
@@ -143,6 +145,7 @@ func Test_HelperFunctions(t *testing.T) {
 
 				ios.IsaTTY = true
 				ios.IsErrTTY = false
+				checkedNoColor = false
 				got := ios.ColorEnabled()
 				assert.False(t, got)
 			})
