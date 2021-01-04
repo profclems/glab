@@ -1,0 +1,26 @@
+[
+  {
+    "state" : "opened",
+    "description" : "a description here",
+    "project_id" : 1,
+    "updated_at" : "2016-01-04T15:31:51.081Z",
+    "id" : 76,
+    "title" : "Issue one",
+    "created_at" : "2016-01-04T15:31:51.081Z",
+    "iid" : 6,
+    "labels" : ["foo", "bar"],
+    "web_url": "http://gitlab.com/OWNER/REPO/issues/6"
+  },
+  {
+    "state" : "opened",
+    "description" : "description two here",
+    "project_id" : 1,
+    "updated_at" : "2016-01-04T15:31:51.081Z",
+    "id" : 77,
+    "title" : "Issue two",
+    "created_at" : "2016-01-04T15:31:51.081Z",
+    "iid" : 7,
+    "labels" : ["fooz", "baz"],
+    "web_url": "http://gitlab.com/OWNER/REPO/issues/6"
+  }
+]

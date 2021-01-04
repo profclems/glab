@@ -53,6 +53,7 @@ func NewCmdList(f *cmdutils.Factory, runE func(opts *ListOptions) error) *cobra.
 		Aliases: []string{"ls"},
 		Args:    cobra.ExactArgs(0),
 		RunE: func(cmd *cobra.Command, args []string) error {
+			// support repo override
 			opts.BaseRepo = f.BaseRepo
 			opts.HTTPClient = f.HttpClient
 
@@ -73,14 +74,14 @@ func NewCmdList(f *cmdutils.Factory, runE func(opts *ListOptions) error) *cobra.
 			return listRun(opts)
 		},
 	}
-	issueListCmd.Flags().StringVarP(&opts.Assignee, "assignee", "", "", "Filter issue by assignee <username>")
+	issueListCmd.Flags().StringVarP(&opts.Assignee, "assignee", "a", "", "Filter issue by assignee <username>")
 	issueListCmd.Flags().StringVarP(&opts.Labels, "label", "l", "", "Filter issue by label <name>")
-	issueListCmd.Flags().StringVarP(&opts.Milestone, "milestone", "", "", "Filter issue by milestone <id>")
-	issueListCmd.Flags().BoolVarP(&opts.Mine, "mine", "", false, "Filter only issues issues assigned to me")
-	issueListCmd.Flags().BoolVarP(&opts.All, "all", "a", false, "Get all issues")
+	issueListCmd.Flags().StringVarP(&opts.Milestone, "milestone", "m", "", "Filter issue by milestone <id>")
+	issueListCmd.Flags().BoolVarP(&opts.Mine, "mine", "M", false, "Filter only issues issues assigned to me")
+	issueListCmd.Flags().BoolVarP(&opts.All, "all", "A", false, "Get all issues")
 	issueListCmd.Flags().BoolVarP(&opts.Opened, "closed", "c", false, "Get only closed issues")
 	issueListCmd.Flags().BoolVarP(&opts.Opened, "opened", "o", false, "Get only opened issues")
-	issueListCmd.Flags().BoolVarP(&opts.Confidential, "confidential", "", false, "Filter by confidential issues")
+	issueListCmd.Flags().BoolVarP(&opts.Confidential, "confidential", "C", false, "Filter by confidential issues")
 	issueListCmd.Flags().IntVarP(&opts.Page, "page", "p", 1, "Page number")
 	issueListCmd.Flags().IntVarP(&opts.PerPage, "per-page", "P", 30, "Number of items to list per page. (default 30)")
 

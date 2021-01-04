@@ -85,6 +85,8 @@ func (c *Client) HTTPClient() *http.Client {
 	return c.httpClient
 }
 
+// OverrideHTTPClient overrides the default http client
+func OverrideHTTPClient(client *http.Client) { apiClient.OverrideHTTPClient(client) }
 func (c *Client) OverrideHTTPClient(client *http.Client) {
 	c.httpClientOverride = client
 }
@@ -107,7 +109,7 @@ func NewClient(host, token string, allowInsecure bool, isGraphQL bool) (*Client,
 	apiClient.allowInsecure = allowInsecure
 	apiClient.isGraphQL = isGraphQL
 
-	if apiClient.httpClientOverride != nil {
+	if apiClient.httpClientOverride == nil {
 		apiClient.httpClient = &http.Client{
 			Transport: &http.Transport{
 				Proxy: http.ProxyFromEnvironment,
@@ -138,7 +140,7 @@ func NewClientWithCustomCA(host, token, caFile string, isGraphQL bool) (*Client,
 	apiClient.caFile = caFile
 	apiClient.isGraphQL = isGraphQL
 
-	if apiClient.httpClientOverride != nil {
+	if apiClient.httpClientOverride == nil {
 		caCert, err := ioutil.ReadFile(apiClient.caFile)
 		if err != nil {
 			return nil, fmt.Errorf("error reading cert file: %w", err)
@@ -249,8 +251,9 @@ func TestClient(httpClient *http.Client, token, host string, isGraphQL bool) (*C
 	}
 	testClient.SetProtocol("https")
 	testClient.OverrideHTTPClient(httpClient)
+	testClient.refreshLabInstance = true
 	if token != "" {
-		apiClient.AuthType = PrivateToken
+		testClient.AuthType = PrivateToken
 	}
 	return testClient, nil
 }
