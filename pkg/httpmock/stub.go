@@ -35,6 +35,12 @@ func newRequest(method, path string) Matcher {
 	}
 }
 
+func NewStringResponse(status int, body string) Responder {
+	return func(req *http.Request) (*http.Response, error) {
+		return httpResponse(status, req, bytes.NewBufferString(body)), nil
+	}
+}
+
 func NewJSONResponse(status int, body interface{}) Responder {
 	return func(req *http.Request) (*http.Response, error) {
 		b, _ := json.Marshal(body)

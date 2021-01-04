@@ -7,6 +7,8 @@ import (
 	"regexp"
 	"testing"
 
+	"github.com/profclems/glab/commands/cmdtest"
+
 	"github.com/MakeNowJust/heredoc"
 
 	"github.com/alecthomas/assert"
@@ -124,10 +126,69 @@ func TestIssueList_tty(t *testing.T) {
 	out = timeRE.ReplaceAllString(out, "X years")
 
 	assert.Equal(t, heredoc.Doc(`
-		Showing 1 open issue in OWNER/REPO that match your search (Page 1)
+		Showing 2 open issues in OWNER/REPO that match your search (Page 1)
 
-		#6	Consequatur vero maxime deserun...	(foo, bar)	about X years ago
+		#6	Issue one	(foo, bar) 	about X years ago
+		#7	Issue two	(fooz, baz)	about X years ago
 
 	`), out)
 	assert.Equal(t, ``, output.Stderr())
+}
+
+func TestIssueList_tty_withFlags(t *testing.T) {
+	fakeHTTP := httpmock.New()
+	defer fakeHTTP.Verify(t)
+
+	fakeHTTP.RegisterResponder("GET", "/projects/OWNER/REPO/issues",
+		httpmock.NewStringResponse(200, `[]`))
+
+	output, err := runCommand(fakeHTTP, true, "--opened -P1 -p100 --confidential -a someuser -l bug -m1", nil)
+	if err != nil {
+		t.Errorf("error running command `issue list`: %v", err)
+	}
+
+	cmdtest.Eq(t, output.Stderr(), "")
+	cmdtest.Eq(t, output.String(), `No open issues match your search in OWNER/REPO
+
+
+`)
+}
+
+func TestIssueList_tty_mine(t *testing.T) {
+	t.Run("mine with all flag and user exists", func(t *testing.T) {
+
+		fakeHTTP := httpmock.New()
+		defer fakeHTTP.Verify(t)
+
+		fakeHTTP.RegisterResponder("GET", "/projects/OWNER/REPO/issues",
+			httpmock.NewStringResponse(200, `[]`))
+
+		fakeHTTP.RegisterResponder("GET", "/user",
+			httpmock.NewStringResponse(200, `{"username": "john_smith"}`))
+
+		output, err := runCommand(fakeHTTP, true, "--mine -A", nil)
+		if err != nil {
+			t.Errorf("error running command `issue list`: %v", err)
+		}
+
+		cmdtest.Eq(t, output.Stderr(), "")
+		cmdtest.Eq(t, output.String(), `No issues match your search in OWNER/REPO
+
+
+`)
+	})
+	t.Run("user does not exists", func(t *testing.T) {
+
+		fakeHTTP := httpmock.New()
+		defer fakeHTTP.Verify(t)
+
+		fakeHTTP.RegisterResponder("GET", "/user",
+			httpmock.NewStringResponse(404, `{message: 404 Not found}`))
+
+		output, err := runCommand(fakeHTTP, true, "--mine -A", nil)
+		assert.NotNil(t, err)
+
+		cmdtest.Eq(t, output.Stderr(), "")
+		cmdtest.Eq(t, output.String(), "")
+	})
 }
