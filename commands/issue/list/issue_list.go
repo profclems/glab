@@ -53,6 +53,7 @@ func NewCmdList(f *cmdutils.Factory, runE func(opts *ListOptions) error) *cobra.
 		Aliases: []string{"ls"},
 		Args:    cobra.ExactArgs(0),
 		RunE: func(cmd *cobra.Command, args []string) error {
+			// support repo override
 			opts.BaseRepo = f.BaseRepo
 			opts.HTTPClient = f.HttpClient
 
