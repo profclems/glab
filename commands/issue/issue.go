@@ -30,7 +30,7 @@ func NewCmdIssue(f *cmdutils.Factory) *cobra.Command {
 	issueCmd.AddCommand(issueBoardCmd.NewCmdBoard(f))
 	issueCmd.AddCommand(issueCreateCmd.NewCmdCreate(f))
 	issueCmd.AddCommand(issueDeleteCmd.NewCmdDelete(f))
-	issueCmd.AddCommand(issueListCmd.NewCmdList(f))
+	issueCmd.AddCommand(issueListCmd.NewCmdList(f, nil))
 	issueCmd.AddCommand(issueNoteCmd.NewCmdNote(f))
 	issueCmd.AddCommand(issueReopenCmd.NewCmdReopen(f))
 	issueCmd.AddCommand(issueViewCmd.NewCmdView(f))
