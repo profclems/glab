@@ -44,7 +44,7 @@ func NewCmdMR(f *cmdutils.Factory) *cobra.Command {
 	mrCmd.AddCommand(mrDiffCmd.NewCmdDiff(f, nil))
 	mrCmd.AddCommand(mrForCmd.NewCmdFor(f))
 	mrCmd.AddCommand(mrIssuesCmd.NewCmdIssues(f))
-	mrCmd.AddCommand(mrListCmd.NewCmdList(f))
+	mrCmd.AddCommand(mrListCmd.NewCmdList(f, nil))
 	mrCmd.AddCommand(mrMergeCmd.NewCmdMerge(f))
 	mrCmd.AddCommand(mrNoteCmd.NewCmdNote(f))
 	mrCmd.AddCommand(mrRebaseCmd.NewCmdRebase(f))
