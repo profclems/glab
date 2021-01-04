@@ -3,6 +3,8 @@ package list
 import (
 	"fmt"
 
+	"github.com/profclems/glab/internal/glrepo"
+
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/commands/issue/issueutils"
 	"github.com/profclems/glab/internal/utils"
@@ -12,7 +14,38 @@ import (
 	"github.com/xanzy/go-gitlab"
 )
 
-func NewCmdList(f *cmdutils.Factory) *cobra.Command {
+type ListOptions struct {
+	// metadata
+	Assignee  string
+	Labels    string
+	Milestone string
+	Mine      bool
+
+	// issue states
+	State        string
+	Closed       bool
+	Opened       bool
+	All          bool
+	Confidential bool
+
+	// Pagination
+	Page    int
+	PerPage int
+
+	// display opts
+	ListType       string
+	TitleQualifier string
+
+	IO         *utils.IOStreams
+	BaseRepo   func() (glrepo.Interface, error)
+	HTTPClient func() (*gitlab.Client, error)
+}
+
+func NewCmdList(f *cmdutils.Factory, runE func(opts *ListOptions) error) *cobra.Command {
+	var opts = &ListOptions{
+		IO: f.IO,
+	}
+
 	var issueListCmd = &cobra.Command{
 		Use:     "list [flags]",
 		Short:   `List project issues`,
@@ -20,106 +53,108 @@ func NewCmdList(f *cmdutils.Factory) *cobra.Command {
 		Aliases: []string{"ls"},
 		Args:    cobra.ExactArgs(0),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			var (
-				state          string
-				err            error
-				listType       string
-				titleQualifier string
-			)
+			opts.BaseRepo = f.BaseRepo
+			opts.HTTPClient = f.HttpClient
 
-			apiClient, err := f.HttpClient()
-			if err != nil {
-				return err
-			}
-
-			repo, err := f.BaseRepo()
-			if err != nil {
-				return err
-			}
-
-			if lb, _ := cmd.Flags().GetBool("all"); lb {
-				state = "all"
-			} else if lb, _ := cmd.Flags().GetBool("closed"); lb {
-				state = "closed"
-				titleQualifier = "closed"
+			if opts.All {
+				opts.State = "all"
+			} else if opts.Closed {
+				opts.State = "closed"
+				opts.TitleQualifier = "closed"
 			} else {
-				state = "opened"
-				titleQualifier = "open"
+				opts.State = "opened"
+				opts.TitleQualifier = "open"
 			}
 
-			opts := &gitlab.ListProjectIssuesOptions{
-				State: gitlab.String(state),
-			}
-			opts.Page = 1
-			opts.PerPage = 30
-
-			if lb, _ := cmd.Flags().GetString("assignee"); lb != "" {
-				opts.AssigneeUsername = gitlab.String(lb)
-			}
-			if lb, _ := cmd.Flags().GetString("label"); lb != "" {
-				label := gitlab.Labels{
-					lb,
-				}
-				opts.Labels = label
-				listType = "search"
-			}
-			if lb, _ := cmd.Flags().GetString("milestone"); lb != "" {
-				opts.Milestone = gitlab.String(lb)
-				listType = "search"
-			}
-			if lb, _ := cmd.Flags().GetBool("confidential"); lb {
-				opts.Confidential = gitlab.Bool(lb)
-				listType = "search"
-			}
-			if p, _ := cmd.Flags().GetInt("page"); p != 0 {
-				opts.Page = p
-				listType = "search"
-			}
-			if p, _ := cmd.Flags().GetInt("per-page"); p != 0 {
-				opts.PerPage = p
-				listType = "search"
+			if runE != nil {
+				return runE(opts)
 			}
 
-			if lb, _ := cmd.Flags().GetBool("mine"); lb {
-				u, err := api.CurrentUser(nil)
-				if err != nil {
-					return err
-				}
-				opts.AssigneeUsername = gitlab.String(u.Username)
-				listType = "search"
-			}
-			issues, err := api.ListIssues(apiClient, repo.FullName(), opts)
-			if err != nil {
-				return err
-			}
-
-			title := utils.NewListTitle(titleQualifier + " issue")
-			title.RepoName = repo.FullName()
-			title.Page = opts.Page
-			title.ListActionType = listType
-			title.CurrentPageTotal = len(issues)
-
-			if f.IO.StartPager() != nil {
-				return fmt.Errorf("failed to start pager: %q", err)
-			}
-			defer f.IO.StopPager()
-
-			fmt.Fprintf(f.IO.StdOut, "%s\n%s\n", title.Describe(), issueutils.DisplayIssueList(issues, repo.FullName()))
-
-			return nil
-
+			return listRun(opts)
 		},
 	}
-	issueListCmd.Flags().StringP("assignee", "", "", "Filter issue by assignee <username>")
-	issueListCmd.Flags().StringP("label", "l", "", "Filter issue by label <name>")
-	issueListCmd.Flags().StringP("milestone", "", "", "Filter issue by milestone <id>")
-	issueListCmd.Flags().BoolP("mine", "", false, "Filter only issues issues assigned to me")
-	issueListCmd.Flags().BoolP("all", "a", false, "Get all issues")
-	issueListCmd.Flags().BoolP("closed", "c", false, "Get only closed issues")
-	issueListCmd.Flags().BoolP("opened", "o", false, "Get only opened issues")
-	issueListCmd.Flags().BoolP("confidential", "", false, "Filter by confidential issues")
-	issueListCmd.Flags().IntP("page", "p", 1, "Page number")
-	issueListCmd.Flags().IntP("per-page", "P", 30, "Number of items to list per page. (default 30)")
+	issueListCmd.Flags().StringVarP(&opts.Assignee, "assignee", "", "", "Filter issue by assignee <username>")
+	issueListCmd.Flags().StringVarP(&opts.Labels, "label", "l", "", "Filter issue by label <name>")
+	issueListCmd.Flags().StringVarP(&opts.Milestone, "milestone", "", "", "Filter issue by milestone <id>")
+	issueListCmd.Flags().BoolVarP(&opts.Mine, "mine", "", false, "Filter only issues issues assigned to me")
+	issueListCmd.Flags().BoolVarP(&opts.All, "all", "a", false, "Get all issues")
+	issueListCmd.Flags().BoolVarP(&opts.Opened, "closed", "c", false, "Get only closed issues")
+	issueListCmd.Flags().BoolVarP(&opts.Opened, "opened", "o", false, "Get only opened issues")
+	issueListCmd.Flags().BoolVarP(&opts.Confidential, "confidential", "", false, "Filter by confidential issues")
+	issueListCmd.Flags().IntVarP(&opts.Page, "page", "p", 1, "Page number")
+	issueListCmd.Flags().IntVarP(&opts.PerPage, "per-page", "P", 30, "Number of items to list per page. (default 30)")
 
 	return issueListCmd
+}
+
+func listRun(opts *ListOptions) error {
+	apiClient, err := opts.HTTPClient()
+	if err != nil {
+		return err
+	}
+
+	repo, err := opts.BaseRepo()
+	if err != nil {
+		return err
+	}
+
+	listOpts := &gitlab.ListProjectIssuesOptions{
+		State: gitlab.String(opts.State),
+	}
+	listOpts.Page = 1
+	listOpts.PerPage = 30
+
+	if opts.Assignee != "" {
+		listOpts.AssigneeUsername = gitlab.String(opts.Assignee)
+	}
+	if opts.Labels != "" {
+		label := gitlab.Labels{
+			opts.Labels,
+		}
+		listOpts.Labels = label
+		opts.ListType = "search"
+	}
+	if opts.Milestone != "" {
+		listOpts.Milestone = gitlab.String(opts.Milestone)
+		opts.ListType = "search"
+	}
+	if opts.Confidential {
+		listOpts.Confidential = gitlab.Bool(opts.Confidential)
+		opts.ListType = "search"
+	}
+	if opts.Page != 0 {
+		listOpts.Page = opts.Page
+		opts.ListType = "search"
+	}
+	if opts.PerPage != 0 {
+		listOpts.PerPage = opts.PerPage
+		opts.ListType = "search"
+	}
+
+	if opts.Mine {
+		u, err := api.CurrentUser(nil)
+		if err != nil {
+			return err
+		}
+		listOpts.AssigneeUsername = gitlab.String(u.Username)
+		opts.ListType = "search"
+	}
+	issues, err := api.ListIssues(apiClient, repo.FullName(), listOpts)
+	if err != nil {
+		return err
+	}
+
+	title := utils.NewListTitle(opts.TitleQualifier + " issue")
+	title.RepoName = repo.FullName()
+	title.Page = listOpts.Page
+	title.ListActionType = opts.ListType
+	title.CurrentPageTotal = len(issues)
+
+	if opts.IO.StartPager() != nil {
+		return fmt.Errorf("failed to start pager: %q", err)
+	}
+	defer opts.IO.StopPager()
+
+	fmt.Fprintf(opts.IO.StdOut, "%s\n%s\n", title.Describe(), issueutils.DisplayIssueList(issues, repo.FullName()))
+	return nil
 }
