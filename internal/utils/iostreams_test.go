@@ -82,7 +82,7 @@ func Test_HelperFunctions(t *testing.T) {
 			ios := *ios
 
 			ios.promptDisabled = false
-			ios.IsInTTY = true
+			ios.IsaTTY = true
 			ios.IsErrTTY = true
 
 			got = ios.PromptEnabled()
