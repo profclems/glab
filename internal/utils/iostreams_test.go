@@ -16,13 +16,24 @@ func Test_HelperFunctions(t *testing.T) {
 		StdOut: NewColorable(os.Stdout),
 		StdErr: NewColorable(os.Stderr),
 
-		IsaTTY:         true,
-		IsErrTTY:       true,
-		IsInTTY:        true,
+		IsaTTY:         IsTerminal(os.Stdout),
+		IsErrTTY:       IsTerminal(os.Stderr),
+		IsInTTY:        IsTerminal(os.Stdin),
 		promptDisabled: false,
 
-		pagerCommand: "less",
+		pagerCommand: os.Getenv("PAGER"),
 	}
+
+	t.Run("InitIOStream()", func(t *testing.T) {
+		got := InitIOStream()
+
+		assert.Equal(t, ios.In, got.In)
+		assert.Equal(t, ios.IsaTTY, got.IsaTTY)
+		assert.Equal(t, ios.IsErrTTY, got.IsErrTTY)
+		assert.Equal(t, ios.IsInTTY, got.IsInTTY)
+		assert.Equal(t, ios.promptDisabled, got.promptDisabled)
+		assert.Equal(t, ios.pagerCommand, got.pagerCommand)
+	})
 
 	t.Run("IsOutputTTY()", func(t *testing.T) {
 		t.Run("true", func(t *testing.T) {
