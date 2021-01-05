@@ -31,6 +31,15 @@ func NewCmdUpdate(f *cmdutils.Factory) *cobra.Command {
 			var ua *cmdutils.UserAssignments
 			out := f.IO.StdOut
 
+			if cmd.Flags().Changed("unassign") {
+				if cmd.Flags().Changed("assignee") {
+					return &cmdutils.FlagError{Err: fmt.Errorf("--assignee and --unassign are mutually exclusive")}
+				}
+				ua = &cmdutils.UserAssignments{
+					ToReplace: []string{"0"},
+				}
+			}
+
 			// Parse assignees Early so we can fail early in case of conflicts
 			if cmd.Flags().Changed("assignee") {
 				givenAssignees, err := cmd.Flags().GetStringSlice("assignee")
@@ -155,6 +164,7 @@ func NewCmdUpdate(f *cmdutils.Factory) *cobra.Command {
 	issueUpdateCmd.Flags().BoolP("confidential", "c", false, "Make issue confidential")
 	issueUpdateCmd.Flags().StringP("milestone", "m", "", "title of the milestone to assign, pass \"\" or 0 to unassign")
 	issueUpdateCmd.Flags().StringSliceP("assignee", "a", []string{}, "assign users via username, prefix with '!' or '-' to remove from existing assignees, '+' to add, otherwise replace existing assignees with given users")
+	issueUpdateCmd.Flags().Bool("unassign", false, "unassign all users")
 
 	return issueUpdateCmd
 }
