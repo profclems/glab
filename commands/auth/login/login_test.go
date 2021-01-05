@@ -164,12 +164,12 @@ func Test_hostnameValidator(t *testing.T) {
 		{
 			name:     "invalid-hostname-slash",
 			hostname: "local/host",
-			expected: "invalid hostname",
+			expected: `invalid hostname "local/host"`,
 		},
 		{
 			name:     "invalid-hostname-colon",
 			hostname: "local:host",
-			expected: "invalid hostname",
+			expected: `invalid hostname "local:host"`,
 		},
 		{
 			name:     "valid-with-int-type",
@@ -178,11 +178,12 @@ func Test_hostnameValidator(t *testing.T) {
 		{
 			name:     "valid-with-slice-string-type",
 			hostname: []string{"local", "host"},
+			expected: `invalid hostname "[local host]"`,
 		},
 		{
 			name:     "invalid-with-map-type",
 			hostname: testMap,
-			expected: "invalid hostname",
+			expected: `invalid hostname "map[profclems:glab]"`,
 		},
 	}
 	for _, tC := range testCases {
