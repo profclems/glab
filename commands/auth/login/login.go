@@ -251,7 +251,7 @@ func loginRun() error {
 }
 
 func hostnameValidator(v interface{}) error {
-	val := v.(string)
+	val := fmt.Sprint(v)
 	if len(strings.TrimSpace(val)) < 1 {
 		return errors.New("a value is required")
 	}
