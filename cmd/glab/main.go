@@ -130,7 +130,6 @@ func main() {
 			printError(os.Stderr, err, rootCmd, debug)
 		}
 	}
-	cmd.Print("\n")
 }
 
 func printError(out io.Writer, err error, cmd *cobra.Command, debug bool) {
