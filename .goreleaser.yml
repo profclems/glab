@@ -76,7 +76,8 @@ nfpms:
     dependencies:
       - git
     # Override default /usr/local/bin destination for binaries
-    bindir: /usr/local/bin
+    # Since glab is already archived in the bin directory it would install in /usr/bin/glab
+    bindir: /usr
 
 checksum:
   name_template: 'checksums.txt'
