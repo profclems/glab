@@ -142,3 +142,57 @@ func Test_NewCmdLogin(t *testing.T) {
 		})
 	}
 }
+
+func Test_hostnameValidator(t *testing.T) {
+	testMap := make(map[string]string)
+	testMap["profclems"] = "glab"
+
+	testCases := []struct {
+		name     string
+		hostname interface{}
+		expected string
+	}{
+		{
+			name:     "valid",
+			hostname: "localhost",
+		},
+		{
+			name:     "empty",
+			hostname: "",
+			expected: "a value is required",
+		},
+		{
+			name:     "invalid-hostname-slash",
+			hostname: "local/host",
+			expected: "invalid hostname",
+		},
+		{
+			name:     "invalid-hostname-colon",
+			hostname: "local:host",
+			expected: "invalid hostname",
+		},
+		{
+			name:     "valid-with-int-type",
+			hostname: 10,
+		},
+		{
+			name:     "valid-with-slice-string-type",
+			hostname: []string{"local", "host"},
+		},
+		{
+			name:     "invalid-with-map-type",
+			hostname: testMap,
+			expected: "invalid hostname",
+		},
+	}
+	for _, tC := range testCases {
+		t.Run(tC.name, func(t *testing.T) {
+			err := hostnameValidator(tC.hostname)
+			if tC.expected == "" {
+				assert.NoError(t, err)
+			} else {
+				assert.EqualError(t, err, tC.expected)
+			}
+		})
+	}
+}
