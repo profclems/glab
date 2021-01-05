@@ -98,7 +98,7 @@ hosts:
 	}{
 		{
 			name: "Has -m flag",
-			args: "223 -m \"Some test note\"",
+			args: `223 -m "Some test note"`,
 			assertionFunc: func(t *testing.T, out, outErr string, err error) {
 				require.Contains(t, out, "https://gitlab.com/glab-cli/test/-/merge_requests/223#note_1")
 			},
@@ -113,7 +113,7 @@ hosts:
 		},
 		{
 			name: "With --repo flag",
-			args: "225 -m \"Some test note\" -R profclems/test",
+			args: `225 -m "Some test note" -R profclems/test`,
 			assertionFunc: func(t *testing.T, out, outErr string, err error) {
 				require.Contains(t, out, "https://gitlab.com/profclems/test/-/merge_requests/225#note_1")
 			},
