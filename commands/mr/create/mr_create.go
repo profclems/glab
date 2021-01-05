@@ -347,7 +347,9 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 						}
 					}
 					if x == cmdutils.AddAssigneeAction {
-						err = cmdutils.AssigneesPrompt(&opts.Assignees)
+						// Use minimum permission level 30 (Maintainer) as it is the minimum level
+						// to accept a merge request
+						err = cmdutils.AssigneesPrompt(&opts.Assignees, labClient, baseRepoRemote, opts.IO, 30)
 						if err != nil {
 							return err
 						}
