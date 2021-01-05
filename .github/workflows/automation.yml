@@ -1,0 +1,13 @@
+name: "Automation"
+on:
+  pull_request: # will be changed to pull_request_type
+    types: [opened, synchronize, reopened, edited]
+
+jobs:
+  pr-labeler:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Label PR
+      uses: gerrymanoim/pr-prefix-labeler@v3
+      env:
+        GITHUB_TOKEN: ${{ secrets.BOT_TOKEN }}
