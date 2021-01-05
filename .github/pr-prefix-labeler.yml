@@ -1,0 +1,7 @@
+"test": "kind: test"
+"chore": "area: automation"
+"feat": "kind: enhancement"
+"fix": "kind: fix"
+"refactor": "kind: refactoring"
+"style": "kind: cleanup"
+"perf": "kind: fix"
