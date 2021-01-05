@@ -21,8 +21,6 @@ func NewCmdNote(f *cmdutils.Factory) *cobra.Command {
 		Long:    ``,
 		Args:    cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			var err error
-
 			apiClient, err := f.HttpClient()
 			if err != nil {
 				return err
@@ -33,15 +31,8 @@ func NewCmdNote(f *cmdutils.Factory) *cobra.Command {
 				return err
 			}
 
-			body, err := cmd.Flags().GetString("message")
-			if err != nil {
-				return err
-			}
+			body, _ := cmd.Flags().GetString("message")
 
-			mr, err = api.GetMR(apiClient, repo.FullName(), mr.IID, &gitlab.GetMergeRequestsOptions{})
-			if err != nil {
-				return err
-			}
 			if body == "" {
 				body = utils.Editor(utils.EditorOptions{
 					Label:    "Note Message:",

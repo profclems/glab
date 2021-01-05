@@ -145,7 +145,7 @@ func Test_ResolveRemotesToRepos(t *testing.T) {
 	// Test the usage of baseOverride when it is passed an invalid value
 	t.Run("baseOverrideFail", func(t *testing.T) {
 		r, err := ResolveRemotesToRepos(rem.remotes, rem.apiClient, "badValue")
-		assert.EqualError(t, err, "expected the \"[HOST/]OWNER/[NAMESPACE/]REPO\" format, got \"badValue\"")
+		assert.EqualError(t, err, `expected the "[HOST/]OWNER/[NAMESPACE/]REPO" format, got "badValue"`)
 
 		assert.Equal(t, rem.apiClient, r.apiClient)
 
@@ -318,7 +318,7 @@ func Test_BaseRepo(t *testing.T) {
 
 		got, err := localRem.BaseRepo(false)
 		assert.Nil(t, got)
-		assert.EqualError(t, err, "expected the \"[HOST/]OWNER/[NAMESPACE/]REPO\" format, got \"NotAnActualValidValue\"")
+		assert.EqualError(t, err, `expected the "[HOST/]OWNER/[NAMESPACE/]REPO" format, got "NotAnActualValidValue"`)
 	})
 
 	t.Run("Resolved->backwards-compatibility", func(t *testing.T) {
@@ -344,7 +344,7 @@ func Test_BaseRepo(t *testing.T) {
 
 		got, err := localRem.BaseRepo(false)
 		assert.Nil(t, got)
-		assert.EqualError(t, err, "expected the \"[HOST/]OWNER/[NAMESPACE/]REPO\" format, got \"NotAnActualValidValue\"")
+		assert.EqualError(t, err, `expected the "[HOST/]OWNER/[NAMESPACE/]REPO" format, got "NotAnActualValidValue"`)
 	})
 
 	t.Run("Prompt==false", func(t *testing.T) {
@@ -652,7 +652,7 @@ func Test_HeadRepo(t *testing.T) {
 
 		got, err := localRem.HeadRepo(false)
 		assert.Nil(t, got)
-		assert.EqualError(t, err, "expected the \"[HOST/]OWNER/[NAMESPACE/]REPO\" format, got \"NotAnActualValidValue\"")
+		assert.EqualError(t, err, `expected the "[HOST/]OWNER/[NAMESPACE/]REPO" format, got "NotAnActualValidValue"`)
 	})
 
 	t.Run("Prompt==false", func(t *testing.T) {

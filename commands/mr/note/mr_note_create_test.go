@@ -1,18 +1,23 @@
 package note
 
 import (
-	"fmt"
+	"bytes"
+	"io/ioutil"
+	"net/http"
 	"testing"
-	"time"
 
-	"github.com/profclems/glab/internal/utils"
-
-	"github.com/acarl005/stripansi"
+	"github.com/alecthomas/assert"
+	"github.com/google/shlex"
 	"github.com/profclems/glab/commands/cmdtest"
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/internal/config"
+	"github.com/profclems/glab/internal/git"
+	"github.com/profclems/glab/internal/glrepo"
+	"github.com/profclems/glab/internal/utils"
 	"github.com/profclems/glab/pkg/api"
-	"github.com/stretchr/testify/require"
+	"github.com/profclems/glab/pkg/httpmock"
+	"github.com/profclems/glab/pkg/prompt"
+	"github.com/profclems/glab/test"
 	"github.com/xanzy/go-gitlab"
 )
 
@@ -20,117 +25,195 @@ func TestMain(m *testing.M) {
 	cmdtest.InitTest(m, "mr_note_create_test")
 }
 
-type author struct {
-	ID        int    `json:"id"`
-	Username  string `json:"username"`
-	Email     string `json:"email"`
-	Name      string `json:"name"`
-	State     string `json:"state"`
-	AvatarURL string `json:"avatar_url"`
-	WebURL    string `json:"web_url"`
+func runCommand(rt http.RoundTripper, isTTY bool, cli string) (*test.CmdOut, error) {
+	io, _, stdout, stderr := utils.IOTest()
+	io.IsaTTY = isTTY
+	io.IsInTTY = isTTY
+	io.IsErrTTY = isTTY
+
+	factory := &cmdutils.Factory{
+		IO: io,
+		HttpClient: func() (*gitlab.Client, error) {
+			a, err := api.TestClient(&http.Client{Transport: rt}, "", "", false)
+			if err != nil {
+				return nil, err
+			}
+			return a.Lab(), err
+		},
+		Config: func() (config.Config, error) {
+			return config.NewBlankConfig(), nil
+		},
+		BaseRepo: func() (glrepo.Interface, error) {
+			return glrepo.New("OWNER", "REPO"), nil
+		},
+		Branch: git.CurrentBranch,
+	}
+
+	// TODO: shouldn't be there but the stub doesn't work without it
+	_, _ = factory.HttpClient()
+
+	cmd := NewCmdNote(factory)
+
+	argv, err := shlex.Split(cli)
+	if err != nil {
+		return nil, err
+	}
+	cmd.SetArgs(argv)
+
+	cmd.SetIn(&bytes.Buffer{})
+	cmd.SetOut(ioutil.Discard)
+	cmd.SetErr(ioutil.Discard)
+
+	_, err = cmd.ExecuteC()
+	return &test.CmdOut{
+		OutBuf: stdout,
+		ErrBuf: stderr,
+	}, err
 }
 
-func Test_mrNoteCreate(t *testing.T) {
-	defer config.StubConfig(`---
-hosts:
-  gitlab.com:
-    username: monalisa
-    token: OTOKEN
-`, "")()
+func Test_NewCmdNote(t *testing.T) {
+	fakeHTTP := httpmock.New()
+	defer fakeHTTP.Verify(t)
 
-	io, _, stdout, stderr := utils.IOTest()
-	stubFactory, _ := cmdtest.StubFactoryWithConfig("")
-	stubFactory.IO = io
-	stubFactory.IO.IsaTTY = true
-	stubFactory.IO.IsErrTTY = true
+	t.Run("--message flag specified", func(t *testing.T) {
 
-	timer, _ := time.Parse(time.RFC3339, "2014-11-12T11:45:26.371Z")
-	api.CreateMRNote = func(client *gitlab.Client, projectID interface{}, mrID int, opts *gitlab.CreateMergeRequestNoteOptions) (*gitlab.Note, error) {
-		if projectID == "PROJECT_MR_WITH_EMPTY_NOTE" {
-			return &gitlab.Note{}, nil
+		fakeHTTP.RegisterResponder("POST", "/projects/OWNER/REPO/merge_requests/1/notes",
+			httpmock.NewStringResponse(201, `
+		{
+			"id": 301,
+  			"created_at": "2013-10-02T08:57:14Z",
+  			"updated_at": "2013-10-02T08:57:14Z",
+  			"system": false,
+  			"noteable_id": 1,
+  			"noteable_type": "MergeRequest",
+  			"noteable_iid": 1
 		}
-		return &gitlab.Note{
-			ID:    1,
-			Body:  *opts.Body,
-			Title: *opts.Body,
-			Author: author{
-				ID:       1,
-				Username: "johnwick",
-				Name:     "John Wick",
-			},
-			System:     false,
-			CreatedAt:  &timer,
-			NoteableID: 0,
-		}, nil
-	}
-	api.GetMR = func(client *gitlab.Client, projectID interface{}, mrID int, opts *gitlab.GetMergeRequestsOptions) (*gitlab.MergeRequest, error) {
-		if projectID == "" || projectID == "WRONG_REPO" || projectID == "expected_err" {
-			return nil, fmt.Errorf("error expected")
+	`))
+
+		fakeHTTP.RegisterResponder("GET", "/projects/OWNER/REPO/merge_requests/1",
+			httpmock.NewStringResponse(200, `
+		{
+  			"id": 1,
+  			"iid": 1,
+			"web_url": "https://gitlab.com/OWNER/REPO/merge_requests/1"
 		}
-		repo, err := stubFactory.BaseRepo()
+	`))
+
+		// glab mr note 1 --message "Here is my note"
+		output, err := runCommand(fakeHTTP, true, `1 --message "Here is my note"`)
 		if err != nil {
-			return nil, err
+			t.Error(err)
+			return
 		}
-		return &gitlab.MergeRequest{
-			ID:          mrID,
-			IID:         mrID,
-			Title:       "mrTitle",
-			Labels:      gitlab.Labels{"test", "bug"},
-			State:       "opened",
-			Description: "mrBody",
-			Author: &gitlab.BasicUser{
-				ID:       mrID,
-				Name:     "John Dev Wick",
-				Username: "jdwick",
-			},
-			WebURL:    fmt.Sprintf("https://%s/%s/-/merge_requests/%d", repo.RepoHost(), repo.FullName(), mrID),
-			CreatedAt: &timer,
-		}, nil
-	}
-	cmd := NewCmdNote(stubFactory)
-	cmdutils.EnableRepoOverride(cmd, stubFactory)
+		assert.Equal(t, output.Stderr(), "")
+		assert.Equal(t, output.String(), "https://gitlab.com/OWNER/REPO/merge_requests/1#note_301\n")
+	})
 
-	tests := []struct {
-		name          string
-		args          string
-		want          bool
-		assertionFunc func(*testing.T, string, string, error)
-	}{
+	t.Run("merge request not found", func(t *testing.T) {
+		fakeHTTP.RegisterResponder("GET", "/projects/OWNER/REPO/merge_requests/122",
+			httpmock.NewStringResponse(404, `
 		{
-			name: "Has -m flag",
-			args: "223 -m \"Some test note\"",
-			assertionFunc: func(t *testing.T, out, outErr string, err error) {
-				require.Contains(t, out, "https://gitlab.com/glab-cli/test/-/merge_requests/223#note_1")
-			},
-		},
-		{
-			name: "Has no flag",
-			args: "11",
-			assertionFunc: func(t *testing.T, out, outErr string, err error) {
-				// TODO: better test survey package
-				//require.Equal(t, "aborted... Note has an empty message", err.Error())
-			},
-		},
-		{
-			name: "With --repo flag",
-			args: "225 -m \"Some test note\" -R profclems/test",
-			assertionFunc: func(t *testing.T, out, outErr string, err error) {
-				require.Contains(t, out, "https://gitlab.com/profclems/test/-/merge_requests/225#note_1")
-			},
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			_, err := cmdtest.RunCommand(cmd, tt.args)
-			if err != nil {
-				t.Error(err)
-				return
-			}
+  			"message" : "merge request not found"
+		}
+	`))
 
-			out := stripansi.Strip(stdout.String())
-			outErr := stripansi.Strip(stderr.String())
+		// glab mr note 1 --message "Here is my note"
+		_, err := runCommand(fakeHTTP, true, `122`)
+		assert.NotNil(t, err)
+		assert.Equal(t, "failed to get merge request 122: GET https://gitlab.com/api/v4/projects/OWNER/REPO/merge_requests/122: 404 {message: merge request not found}", err.Error())
+	})
+}
 
-			tt.assertionFunc(t, out, outErr, err)
-		})
-	}
+func Test_NewCmdNote_error(t *testing.T) {
+	fakeHTTP := httpmock.New()
+	defer fakeHTTP.Verify(t)
+
+	t.Run("note could not be created", func(t *testing.T) {
+		fakeHTTP.RegisterResponder("POST", "/projects/OWNER/REPO/merge_requests/1/notes",
+			httpmock.NewStringResponse(401, `
+		{
+			"message" : "Unauthorized"
+		}
+	`))
+
+		fakeHTTP.RegisterResponder("GET", "/projects/OWNER/REPO/merge_requests/1",
+			httpmock.NewStringResponse(200, `
+		{
+  			"id": 1,
+  			"iid": 1,
+			"web_url": "https://gitlab.com/OWNER/REPO/merge_requests/1"
+		}
+	`))
+
+		// glab mr note 1 --message "Here is my note"
+		_, err := runCommand(fakeHTTP, true, `1 -m "Some message"`)
+		assert.NotNil(t, err)
+		assert.Equal(t, "POST https://gitlab.com/api/v4/projects/OWNER/REPO/merge_requests/1/notes: 401 {message: Unauthorized}", err.Error())
+	})
+}
+
+func Test_mrNoteCreate_prompt(t *testing.T) {
+	fakeHTTP := httpmock.New()
+	defer fakeHTTP.Verify(t)
+
+	t.Run("message provided", func(t *testing.T) {
+
+		fakeHTTP.RegisterResponder("POST", "/projects/OWNER/REPO/merge_requests/1/notes",
+			httpmock.NewStringResponse(201, `
+		{
+			"id": 301,
+  			"created_at": "2013-10-02T08:57:14Z",
+  			"updated_at": "2013-10-02T08:57:14Z",
+  			"system": false,
+  			"noteable_id": 1,
+  			"noteable_type": "MergeRequest",
+  			"noteable_iid": 1
+		}
+	`))
+
+		fakeHTTP.RegisterResponder("GET", "/projects/OWNER/REPO/merge_requests/1",
+			httpmock.NewStringResponse(200, `
+		{
+  			"id": 1,
+  			"iid": 1,
+			"web_url": "https://gitlab.com/OWNER/REPO/merge_requests/1"
+		}
+	`))
+		as, teardown := prompt.InitAskStubber()
+		defer teardown()
+		as.StubOne("some note message")
+
+		// glab mr note 1
+		output, err := runCommand(fakeHTTP, true, `1`)
+		if err != nil {
+			t.Error(err)
+			return
+		}
+		assert.Equal(t, output.Stderr(), "")
+		assert.Equal(t, output.String(), "https://gitlab.com/OWNER/REPO/merge_requests/1#note_301\n")
+	})
+
+	t.Run("message is empty", func(t *testing.T) {
+
+		fakeHTTP.RegisterResponder("GET", "/projects/OWNER/REPO/merge_requests/1",
+			httpmock.NewStringResponse(200, `
+		{
+  			"id": 1,
+  			"iid": 1,
+			"web_url": "https://gitlab.com/OWNER/REPO/merge_requests/1"
+		}
+	`))
+
+		as, teardown := prompt.InitAskStubber()
+		defer teardown()
+		as.StubOne("")
+
+		// glab mr note 1
+		_, err := runCommand(fakeHTTP, true, `1`)
+		if err == nil {
+			t.Error("expected error")
+			return
+		}
+		assert.Equal(t, err.Error(), "aborted... Note has an empty message")
+	})
 }

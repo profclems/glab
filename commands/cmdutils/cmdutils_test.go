@@ -162,7 +162,7 @@ func Test_VerifyAssignees(t *testing.T) {
 				ToRemove:  []string{"foo"},
 				ToReplace: []string{},
 			},
-			want: "1 element \"foo\" present in both add and remove which is forbidden",
+			want: `1 element "foo" present in both add and remove which is forbidden`,
 		},
 		{
 			name: "overlapping add and removal elements, error",
@@ -171,7 +171,7 @@ func Test_VerifyAssignees(t *testing.T) {
 				ToRemove:  []string{"foo", "baz"},
 				ToReplace: []string{},
 			},
-			want: "2 elements \"foo baz\" present in both add and remove which is forbidden",
+			want: `2 elements "foo baz" present in both add and remove which is forbidden`,
 		},
 	}
 	for _, tC := range testCases {
@@ -209,7 +209,7 @@ func Test_UsersFromReplaces(t *testing.T) {
 				{ID: 1, Username: "foo"},
 			},
 			expectedIDs:    []int{1},
-			expectedAction: []string{"assigned to \"@foo\""},
+			expectedAction: []string{`assigned to "@foo"`},
 		},
 		{
 			name: "multiple users named foo, bar and baz",
@@ -219,7 +219,7 @@ func Test_UsersFromReplaces(t *testing.T) {
 				{ID: 7, Username: "baz"},
 			},
 			expectedIDs:    []int{1, 3, 7},
-			expectedAction: []string{"assigned to \"@foo @bar @baz\""},
+			expectedAction: []string{`assigned to "@foo @bar @baz"`},
 		},
 	}
 	for _, tC := range testCases {
@@ -288,7 +288,7 @@ func Test_UsersFromAddRemove(t *testing.T) {
 				},
 			},
 			expectedIDs:    []int{1},
-			expectedAction: []string{"assigned \"@foo\""},
+			expectedAction: []string{`assigned "@foo"`},
 			ua:             UserAssignments{ToAdd: []string{"foo"}},
 		},
 		{
@@ -308,7 +308,7 @@ func Test_UsersFromAddRemove(t *testing.T) {
 				},
 			},
 			expectedIDs:    []int{1, 235, 1500},
-			expectedAction: []string{"assigned \"@foo @bar @baz\""},
+			expectedAction: []string{`assigned "@foo @bar @baz"`},
 			ua:             UserAssignments{ToAdd: []string{"foo", "bar", "baz"}},
 		},
 		{
@@ -321,7 +321,7 @@ func Test_UsersFromAddRemove(t *testing.T) {
 				},
 			},
 			expectedIDs:    []int{0},
-			expectedAction: []string{"unassigned \"@foo\""},
+			expectedAction: []string{`unassigned "@foo"`},
 			ua:             UserAssignments{ToRemove: []string{"foo"}},
 		},
 		{
@@ -342,7 +342,7 @@ func Test_UsersFromAddRemove(t *testing.T) {
 				},
 			},
 			expectedIDs:    []int{2},
-			expectedAction: []string{"unassigned \"@foo @baz\""},
+			expectedAction: []string{`unassigned "@foo @baz"`},
 			ua:             UserAssignments{ToRemove: []string{"foo", "baz"}},
 		},
 		{
@@ -365,8 +365,8 @@ func Test_UsersFromAddRemove(t *testing.T) {
 			},
 			expectedIDs: []int{500, 100},
 			expectedAction: []string{
-				"unassigned \"@foo\"",
-				"assigned \"@bar\"",
+				`unassigned "@foo"`,
+				`assigned "@bar"`,
 			},
 			ua: UserAssignments{
 				ToAdd:    []string{"bar"},
@@ -383,7 +383,7 @@ func Test_UsersFromAddRemove(t *testing.T) {
 				},
 			},
 			expectedIDs:    []int{0},
-			expectedAction: []string{"unassigned \"@foo\""},
+			expectedAction: []string{`unassigned "@foo"`},
 			ua:             UserAssignments{ToRemove: []string{"foo"}},
 		},
 		{
@@ -404,7 +404,7 @@ func Test_UsersFromAddRemove(t *testing.T) {
 				},
 			},
 			expectedIDs:    []int{2},
-			expectedAction: []string{"unassigned \"@foo @baz\""},
+			expectedAction: []string{`unassigned "@foo @baz"`},
 			ua:             UserAssignments{ToRemove: []string{"foo", "baz"}},
 		},
 		{
@@ -427,8 +427,8 @@ func Test_UsersFromAddRemove(t *testing.T) {
 			},
 			expectedIDs: []int{500, 100},
 			expectedAction: []string{
-				"unassigned \"@foo\"",
-				"assigned \"@bar\"",
+				`unassigned "@foo"`,
+				`assigned "@bar"`,
 			},
 			ua: UserAssignments{
 				ToAdd:    []string{"bar"},

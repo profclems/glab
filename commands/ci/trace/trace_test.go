@@ -135,8 +135,8 @@ func TestTraceRun(t *testing.T) {
 			assertContains: func(t *testing.T, out string) {
 				assert.Contains(t, out, "Getting job trace...")
 				assert.Contains(t, out, "Showing logs for ")
-				assert.Contains(t, out, "Preparing the \"docker+machine\"")
-				assert.Contains(t, out, "$ echo \"After script section\"")
+				assert.Contains(t, out, `Preparing the "docker+machine"`)
+				assert.Contains(t, out, `$ echo "After script section"`)
 				assert.Contains(t, out, "Job succeeded")
 			},
 		},
