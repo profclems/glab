@@ -47,6 +47,21 @@ check your internet connection or status.gitlab.com or 'Run sudo gitlab-ctl stat
 `,
 		},
 		{
+			name: "DNS error with debug",
+			args: args{
+				err: fmt.Errorf("DNS oopsie: %w", &net.DNSError{
+					Name: "https://gitlab.com/api/v4",
+				}),
+				cmd:   nil,
+				debug: true,
+			},
+
+			wantOut: `error connecting to https://gitlab.com/api/v4
+lookup https://gitlab.com/api/v4: 
+check your internet connection or status.gitlab.com or 'Run sudo gitlab-ctl status' on your server if self-hosted
+`,
+		},
+		{
 			name: "Cobra flag error",
 			args: args{
 				err:   &cmdutils.FlagError{Err: errors.New("unknown flag --foo")},
