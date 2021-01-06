@@ -26,15 +26,18 @@ import (
 	"github.com/xanzy/go-gitlab"
 )
 
-var (
-	projectID string
-	refName   string
+type ViewOpts struct {
+	RefName string
+
+	ProjectID string
+	Commit    *gitlab.Commit
 	CommitSHA string
-	apiClient *gitlab.Client
-	cOut      io.Writer
-)
+	ApiClient *gitlab.Client
+	Output    io.Writer
+}
 
 func NewCmdView(f *cmdutils.Factory) *cobra.Command {
+	opts := ViewOpts{}
 	var pipelineCIView = &cobra.Command{
 		Use:   "view [branch/tag]",
 		Short: "View, run, trace/logs, and cancel CI jobs current pipeline",
@@ -57,13 +60,10 @@ func NewCmdView(f *cmdutils.Factory) *cobra.Command {
 	`),
 		Args: cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			a := tview.NewApplication()
-			defer recoverPanic(a)
+			opts.Output = f.IO.StdOut
+
 			var err error
-
-			cOut = f.IO.StdOut
-
-			apiClient, err = f.HttpClient()
+			opts.ApiClient, err = f.HttpClient()
 			if err != nil {
 				return err
 			}
@@ -73,64 +73,72 @@ func NewCmdView(f *cmdutils.Factory) *cobra.Command {
 				return err
 			}
 
-			projectID = repo.FullName()
+			opts.ProjectID = repo.FullName()
 
-			refName, _ = cmd.Flags().GetString("branch")
-			if refName == "" {
+			if opts.RefName == "" {
 				if len(args) == 1 {
-					refName = args[0]
+					opts.RefName = args[0]
 				} else {
-					refName, err = git.CurrentBranch()
+					opts.RefName, err = git.CurrentBranch()
 					if err != nil {
 						return err
 					}
 				}
 			}
 
-			commit, err := api.GetCommit(apiClient, projectID, refName)
+			opts.Commit, err = api.GetCommit(opts.ApiClient, opts.ProjectID, opts.RefName)
 			if err != nil {
 				return err
 			}
-			CommitSHA = commit.ID
-			if commit.LastPipeline == nil {
-				return fmt.Errorf("Can't find pipeline for commit : %s", CommitSHA)
+			opts.CommitSHA = opts.Commit.ID
+			if opts.Commit.LastPipeline == nil {
+				return fmt.Errorf("Can't find pipeline for commit : %s", opts.CommitSHA)
 			}
-			root := tview.NewPages()
-			root.SetBorderPadding(1, 1, 2, 2).SetBorder(true).SetTitle(fmt.Sprintf(" Pipeline #%d triggered %s by %s ", commit.LastPipeline.ID, utils.TimeToPrettyTimeAgo(*commit.AuthoredDate), commit.AuthorName))
 
-			boxes = make(map[string]*tview.TextView)
-			jobsCh := make(chan []*gitlab.Job)
-			inputCh := make(chan struct{})
-
-			screen, err := tcell.NewScreen()
-			if err != nil {
-				return err
-			}
-			_ = screen.Init()
-
-			var navi navigator
-			a.SetInputCapture(inputCapture(a, root, navi, inputCh))
-			go updateJobs(a, jobsCh)
-			go func() {
-				defer recoverPanic(a)
-				for {
-					a.SetFocus(root)
-					jobsView(a, jobsCh, inputCh, root)
-					a.Draw()
-				}
-			}()
-			if err := a.SetScreen(screen).SetRoot(root, true).SetAfterDrawFunc(linkJobsView(a)).Run(); err != nil {
-				return err
-			}
-			return nil
+			return drawView(opts)
 		},
 	}
 
-	pipelineCIView.Flags().StringP("branch", "b", "", "Check pipeline status for a branch/tag. (Default is the current branch)")
+	pipelineCIView.Flags().StringVarP(&opts.RefName, "branch", "b", "", "Check pipeline status for a branch/tag. (Default is the current branch)")
 	return pipelineCIView
 }
 
-func inputCapture(a *tview.Application, root *tview.Pages, navi navigator, inputCh chan struct{}) func(event *tcell.EventKey) *tcell.EventKey {
+func drawView(opts ViewOpts) error {
+	root := tview.NewPages()
+	root.SetBorderPadding(1, 1, 2, 2).
+		SetBorder(true).
+		SetTitle(fmt.Sprintf(" Pipeline #%d triggered %s by %s ", opts.Commit.LastPipeline.ID, utils.TimeToPrettyTimeAgo(*opts.Commit.AuthoredDate), opts.Commit.AuthorName))
+
+	boxes = make(map[string]*tview.TextView)
+	jobsCh := make(chan []*gitlab.Job)
+	inputCh := make(chan struct{})
+
+	screen, err := tcell.NewScreen()
+	if err != nil {
+		return err
+	}
+	_ = screen.Init()
+	app := tview.NewApplication()
+	defer recoverPanic(app)
+
+	var navi navigator
+	app.SetInputCapture(inputCapture(app, root, navi, inputCh, opts))
+	go updateJobs(app, jobsCh, opts)
+	go func() {
+		defer recoverPanic(app)
+		for {
+			app.SetFocus(root)
+			jobsView(app, jobsCh, inputCh, root, opts)
+			app.Draw()
+		}
+	}()
+	if err := app.SetScreen(screen).SetRoot(root, true).SetAfterDrawFunc(linkJobsView(app)).Run(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func inputCapture(app *tview.Application, root *tview.Pages, navi navigator, inputCh chan struct{}, opts ViewOpts) func(event *tcell.EventKey) *tcell.EventKey {
 	return func(event *tcell.EventKey) *tcell.EventKey {
 		if event.Rune() == 'q' || event.Key() == tcell.KeyEscape {
 			switch {
@@ -146,9 +154,9 @@ func inputCapture(a *tview.Application, root *tview.Pages, navi navigator, input
 				if inputCh == nil {
 					inputCh <- struct{}{}
 				}
-				a.ForceDraw()
+				app.ForceDraw()
 			default:
-				a.Stop()
+				app.Stop()
 				return nil
 			}
 		}
@@ -161,7 +169,7 @@ func inputCapture(a *tview.Application, root *tview.Pages, navi navigator, input
 		}
 		switch event.Key() {
 		case tcell.KeyCtrlQ:
-			a.Stop()
+			app.Stop()
 			return nil
 		case tcell.KeyCtrlC:
 			if curJob.Status == "pending" || curJob.Status == "running" {
@@ -173,24 +181,24 @@ func inputCapture(a *tview.Application, root *tview.Pages, navi navigator, input
 						modalVisible = false
 						root.RemovePage("yesno")
 						if buttonLabel == "✘ No" {
-							a.ForceDraw()
+							app.ForceDraw()
 							return
 						}
 						root.RemovePage("logs-" + curJob.Name)
-						a.ForceDraw()
-						job, err := api.CancelPipelineJob(apiClient, projectID, curJob.ID)
+						app.ForceDraw()
+						job, err := api.CancelPipelineJob(opts.ApiClient, opts.ProjectID, curJob.ID)
 						if err != nil {
-							a.Stop()
+							app.Stop()
 							log.Fatal(err)
 						}
 						if job != nil {
 							curJob = job
-							a.ForceDraw()
+							app.ForceDraw()
 						}
 					})
 				root.AddAndSwitchToPage("yesno", modal, false)
 				inputCh <- struct{}{}
-				a.ForceDraw()
+				app.ForceDraw()
 				return nil
 			}
 		case tcell.KeyCtrlP, tcell.KeyCtrlR:
@@ -205,25 +213,25 @@ func inputCapture(a *tview.Application, root *tview.Pages, navi navigator, input
 					modalVisible = false
 					root.RemovePage("yesno")
 					if buttonLabel == "✘ No" {
-						a.ForceDraw()
+						app.ForceDraw()
 						return
 					}
 					root.RemovePage("logs-" + curJob.Name)
-					a.ForceDraw()
+					app.ForceDraw()
 
-					job, err := api.PlayOrRetryJobs(apiClient, projectID, curJob.ID, curJob.Status)
+					job, err := api.PlayOrRetryJobs(opts.ApiClient, opts.ProjectID, curJob.ID, curJob.Status)
 					if err != nil {
-						a.Stop()
+						app.Stop()
 						log.Fatal(err)
 					}
 					if job != nil {
 						curJob = job
-						a.ForceDraw()
+						app.ForceDraw()
 					}
 				})
 			root.AddAndSwitchToPage("yesno", modal, false)
 			inputCh <- struct{}{}
-			a.ForceDraw()
+			app.ForceDraw()
 			return nil
 		case tcell.KeyEnter:
 			if !modalVisible {
@@ -232,16 +240,16 @@ func inputCapture(a *tview.Application, root *tview.Pages, navi navigator, input
 					root.HidePage("logs-" + curJob.Name)
 				}
 				inputCh <- struct{}{}
-				a.ForceDraw()
+				app.ForceDraw()
 				return nil
 			}
 		case tcell.KeyCtrlSpace:
-			a.Suspend(func() {
+			app.Suspend(func() {
 				ctx, cancel := context.WithCancel(context.Background())
 				go func() {
-					err := ciutils.RunTrace(ctx, apiClient, cOut, projectID, CommitSHA, curJob.Name)
+					err := ciutils.RunTrace(ctx, opts.ApiClient, opts.Output, opts.ProjectID, opts.CommitSHA, curJob.Name)
 					if err != nil {
-						a.Stop()
+						app.Stop()
 						log.Fatal(err)
 					}
 					if ctx.Err() == nil {
@@ -252,7 +260,7 @@ func inputCapture(a *tview.Application, root *tview.Pages, navi navigator, input
 				for {
 					r, _, err := reader.ReadRune()
 					if err != io.EOF && err != nil {
-						a.Stop()
+						app.Stop()
 						log.Fatal(err)
 					}
 					if r == '\n' {
@@ -379,7 +387,7 @@ func adjacentStages(jobs []*gitlab.Job, s string) (p, n string) {
 	return
 }
 
-func jobsView(app *tview.Application, jobsCh chan []*gitlab.Job, inputCh chan struct{}, root *tview.Pages) {
+func jobsView(app *tview.Application, jobsCh chan []*gitlab.Job, inputCh chan struct{}, root *tview.Pages, opts ViewOpts) {
 	select {
 	case jobs = <-jobsCh:
 	case <-inputCh:
@@ -402,7 +410,7 @@ func jobsView(app *tview.Application, jobsCh chan []*gitlab.Job, inputCh chan st
 			tv.SetBorderPadding(0, 0, 1, 1).SetBorder(true)
 
 			go func() {
-				err := ciutils.RunTrace(context.Background(), apiClient, vtclean.NewWriter(tview.ANSIWriter(tv), true), projectID, CommitSHA, curJob.Name)
+				err := ciutils.RunTrace(context.Background(), opts.ApiClient, vtclean.NewWriter(tview.ANSIWriter(tv), true), opts.ProjectID, opts.CommitSHA, curJob.Name)
 				if err != nil {
 					app.Stop()
 					log.Fatal(err)
@@ -542,14 +550,14 @@ func recoverPanic(app *tview.Application) {
 	}
 }
 
-func updateJobs(app *tview.Application, jobsCh chan []*gitlab.Job) {
+func updateJobs(app *tview.Application, jobsCh chan []*gitlab.Job, opts ViewOpts) {
 	defer recoverPanic(app)
 	for {
 		if modalVisible {
 			time.Sleep(time.Second * 1)
 			continue
 		}
-		jobs, err := api.PipelineJobsWithSha(apiClient, projectID, CommitSHA)
+		jobs, err := api.PipelineJobsWithSha(opts.ApiClient, opts.ProjectID, opts.CommitSHA)
 		if len(jobs) == 0 || err != nil {
 			app.Stop()
 			log.Fatal(errors.Wrap(err, "failed to find ci jobs"))
