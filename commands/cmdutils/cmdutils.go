@@ -163,7 +163,11 @@ func LabelsPrompt(response *[]string, apiClient *gitlab.Client, repoRemote *glre
 		if err != nil {
 			return err
 		}
-		*response = selectedLabels
+		// Add each element to the array instead of just assigning it so we respect values already
+		// present, given from the `--label` flag
+		for _, x := range selectedLabels {
+			*response = append(*response, x)
+		}
 
 	} else {
 		var responseString string
@@ -171,7 +175,9 @@ func LabelsPrompt(response *[]string, apiClient *gitlab.Client, repoRemote *glre
 		if err != nil {
 			return err
 		}
-		*response = strings.Split(responseString, ",")
+		for _, x := range strings.Split(responseString, ",") {
+			*response = append(*response, x)
+		}
 	}
 
 	return nil
