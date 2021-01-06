@@ -157,6 +157,26 @@ func Test_hostnameValidator(t *testing.T) {
 			hostname: "localhost",
 		},
 		{
+			name:     "valid-default-value",
+			hostname: "gitlab.com",
+		},
+		{
+			name:     "valid-external-instance-alpine",
+			hostname: "gitlab.alpinelinux.org",
+		},
+		{
+			name:     "valid-external-instance-freedesktop",
+			hostname: "gitlab.freedesktop.org",
+		},
+		{
+			name:     "valid-external-instance-gnome",
+			hostname: "gitlab.gnome.org",
+		},
+		{
+			name:     "valid-external-instance-debian",
+			hostname: "salsa.debian.org",
+		},
+		{
 			name:     "empty",
 			hostname: "",
 			expected: "a value is required",
