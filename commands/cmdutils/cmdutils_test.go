@@ -770,6 +770,37 @@ func Test_AssigneesPrompt(t *testing.T) {
 		assert.Empty(t, got)
 		assert.EqualError(t, err, "meant to fail")
 	})
+
+	t.Run("respect-flags", func(t *testing.T) {
+		got := []string{"foo"}
+
+		api.ListProjectMembers = func(client *gitlab.Client, projectID interface{}, opts *gitlab.ListProjectMembersOptions) ([]*gitlab.ProjectMember, error) {
+			return []*gitlab.ProjectMember{
+				{
+					Username:    "foo",
+					AccessLevel: gitlab.AccessLevelValue(20),
+				},
+				{
+					Username:    "bar",
+					AccessLevel: gitlab.AccessLevelValue(30),
+				},
+			}, nil
+		}
+
+		as, restoreAsk := prompt.InitAskStubber()
+		defer restoreAsk()
+
+		as.Stub([]*prompt.QuestionStub{
+			{
+				Name:  "assignees",
+				Value: []string{"bar (developer)"},
+			},
+		})
+
+		err := AssigneesPrompt(&got, &gitlab.Client{}, repoRemote, nil, 20)
+		assert.NoError(t, err)
+		assert.ElementsMatch(t, []string{"foo", "bar"}, got)
+	})
 }
 
 func Test_MilestonesPrompt(t *testing.T) {
