@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"regexp"
 	"strings"
 
 	"github.com/AlecAivazis/survey/v2"
@@ -251,12 +252,13 @@ func loginRun() error {
 }
 
 func hostnameValidator(v interface{}) error {
-	val := v.(string)
+	val := fmt.Sprint(v)
 	if len(strings.TrimSpace(val)) < 1 {
 		return errors.New("a value is required")
 	}
-	if strings.ContainsRune(val, '/') || strings.ContainsRune(val, ':') {
-		return errors.New("invalid hostname")
+	re := regexp.MustCompile(`^[A-Za-z0-9][A-Za-z0-9-.]*$`)
+	if !re.MatchString(val) {
+		return fmt.Errorf("invalid hostname %q", val)
 	}
 	return nil
 }
