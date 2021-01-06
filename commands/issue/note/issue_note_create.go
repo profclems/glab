@@ -16,7 +16,7 @@ func NewCmdNote(f *cmdutils.Factory) *cobra.Command {
 	var issueNoteCreateCmd = &cobra.Command{
 		Use:     "note <issue-id>",
 		Aliases: []string{"comment"},
-		Short:   "Add a comment or note to an issue on Gitlab",
+		Short:   "Add a comment or note to an issue on GitLab",
 		Long:    ``,
 		Args:    cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -33,14 +33,11 @@ func NewCmdNote(f *cmdutils.Factory) *cobra.Command {
 				return err
 			}
 
-			mID := args[0]
+			issueID := args[0]
 
-			body, err := cmd.Flags().GetString("message")
-			if err != nil {
-				return err
-			}
+			body, _ := cmd.Flags().GetString("message")
 
-			mr, err := api.GetIssue(apiClient, repo.FullName(), utils.StringToInt(mID))
+			issue, err := api.GetIssue(apiClient, repo.FullName(), utils.StringToInt(issueID))
 			if err != nil {
 				return err
 			}
@@ -57,14 +54,14 @@ func NewCmdNote(f *cmdutils.Factory) *cobra.Command {
 				return errors.New("aborted... Note is empty")
 			}
 
-			noteInfo, err := api.CreateIssueNote(apiClient, repo.FullName(), utils.StringToInt(mID), &gitlab.CreateIssueNoteOptions{
+			noteInfo, err := api.CreateIssueNote(apiClient, repo.FullName(), utils.StringToInt(issueID), &gitlab.CreateIssueNoteOptions{
 				Body: &body,
 			})
 			if err != nil {
 				return err
 			}
 
-			fmt.Fprintf(out, "%s#note_%d\n", mr.WebURL, noteInfo.ID)
+			fmt.Fprintf(out, "%s#note_%d\n", issue.WebURL, noteInfo.ID)
 			return nil
 		},
 	}
