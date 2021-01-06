@@ -1017,3 +1017,227 @@ func Test_IDsFromUsers(t *testing.T) {
 		})
 	}
 }
+
+func Test_LabelsPromptAPIFail(t *testing.T) {
+	// mock glrepo.Remote object
+	repo := glrepo.New("foo", "bar")
+	remote := &git.Remote{
+		Name:     "test",
+		Resolved: "base",
+	}
+	repoRemote := &glrepo.Remote{
+		Remote: remote,
+		Repo:   repo,
+	}
+
+	api.ListLabels = func(_ *gitlab.Client, _ interface{}, _ *gitlab.ListLabelsOptions) ([]*gitlab.Label, error) {
+		return nil, errors.New("API call failed")
+	}
+
+	var got []string
+	err := LabelsPrompt(&got, &gitlab.Client{}, repoRemote)
+	assert.Nil(t, got)
+	assert.EqualError(t, err, "API call failed")
+}
+
+func Test_LabelsPromptPromptsFail(t *testing.T) {
+	// mock glrepo.Remote object
+	repo := glrepo.New("foo", "bar")
+	remote := &git.Remote{
+		Name:     "test",
+		Resolved: "base",
+	}
+	repoRemote := &glrepo.Remote{
+		Remote: remote,
+		Repo:   repo,
+	}
+
+	t.Run("MultiSelect", func(t *testing.T) {
+		// Return a list with at least one value so we hit the MultiSelect path
+		api.ListLabels = func(_ *gitlab.Client, _ interface{}, _ *gitlab.ListLabelsOptions) ([]*gitlab.Label, error) {
+			return []*gitlab.Label{
+				{
+					Name: "foo",
+				},
+			}, nil
+		}
+
+		as, restoreAsk := prompt.InitAskStubber()
+		defer restoreAsk()
+
+		as.Stub([]*prompt.QuestionStub{
+			{
+				Name:  "labels",
+				Value: errors.New("MultiSelect prompt failed"),
+			},
+		})
+
+		var got []string
+		err := LabelsPrompt(&got, &gitlab.Client{}, repoRemote)
+		assert.Nil(t, got)
+		assert.EqualError(t, err, "MultiSelect prompt failed")
+	})
+
+	t.Run("AskQuestionWithInput", func(t *testing.T) {
+		// Return an empty list so we hit the AskQuestionWithInput prompt path
+		api.ListLabels = func(_ *gitlab.Client, _ interface{}, _ *gitlab.ListLabelsOptions) ([]*gitlab.Label, error) {
+			return []*gitlab.Label{}, nil
+		}
+
+		as, restoreAsk := prompt.InitAskStubber()
+		defer restoreAsk()
+
+		as.Stub([]*prompt.QuestionStub{
+			{
+				Name:  "labels",
+				Value: errors.New("AskQuestionWithInput prompt failed"),
+			},
+		})
+
+		var got []string
+		err := LabelsPrompt(&got, &gitlab.Client{}, repoRemote)
+		assert.Nil(t, got)
+		assert.EqualError(t, err, "AskQuestionWithInput prompt failed")
+	})
+
+}
+func Test_LabelsPromptMultiSelect(t *testing.T) {
+	// mock glrepo.Remote object
+	repo := glrepo.New("foo", "bar")
+	remote := &git.Remote{
+		Name:     "test",
+		Resolved: "base",
+	}
+	repoRemote := &glrepo.Remote{
+		Remote: remote,
+		Repo:   repo,
+	}
+
+	api.ListLabels = func(_ *gitlab.Client, _ interface{}, _ *gitlab.ListLabelsOptions) ([]*gitlab.Label, error) {
+		return []*gitlab.Label{
+			{
+				Name: "foo",
+			},
+			{
+				Name: "bar",
+			},
+			{
+				Name: "baz",
+			},
+			{
+				Name: "qux",
+			},
+			{
+				Name: "quux",
+			},
+			{
+				Name: "quz",
+			},
+		}, nil
+	}
+
+	testCases := []struct {
+		name     string
+		input    []string
+		labels   []string // Can be set to have initial labels
+		expected []string // expected labels
+	}{
+		{
+			name:     "simple",
+			input:    []string{"foo", "bar"},
+			expected: []string{"foo", "bar"},
+		},
+		{
+			name:     "respect-defined-labels",
+			input:    []string{"foo"},
+			labels:   []string{"bar"},
+			expected: []string{"foo", "bar"},
+		},
+		{
+			name: "nothing",
+		},
+		{
+			name:     "nothing-but-respect-already-defined",
+			labels:   []string{"qux"},
+			expected: []string{"qux"},
+		},
+	}
+	for _, tC := range testCases {
+		t.Run(tC.name, func(t *testing.T) {
+			as, restoreAsk := prompt.InitAskStubber()
+			defer restoreAsk()
+
+			as.Stub([]*prompt.QuestionStub{
+				{
+					Name:  "labels",
+					Value: tC.input,
+				},
+			})
+
+			err := LabelsPrompt(&tC.labels, &gitlab.Client{}, repoRemote)
+			assert.NoError(t, err)
+			assert.ElementsMatch(t, tC.labels, tC.expected)
+		})
+	}
+}
+
+func Test_LabelsPromptAskQuestionWithInput(t *testing.T) {
+	// mock glrepo.Remote object
+	repo := glrepo.New("foo", "bar")
+	remote := &git.Remote{
+		Name:     "test",
+		Resolved: "base",
+	}
+	repoRemote := &glrepo.Remote{
+		Remote: remote,
+		Repo:   repo,
+	}
+
+	api.ListLabels = func(_ *gitlab.Client, _ interface{}, _ *gitlab.ListLabelsOptions) ([]*gitlab.Label, error) {
+		return []*gitlab.Label{}, nil
+	}
+
+	testCases := []struct {
+		name     string
+		input    string
+		labels   []string // Can be set to have initial labels
+		expected []string // expected labels
+	}{
+		{
+			name:     "simple",
+			input:    "foo,bar",
+			expected: []string{"foo", "bar"},
+		},
+		{
+			name:     "respect-defined-labels",
+			input:    "foo",
+			labels:   []string{"bar"},
+			expected: []string{"foo", "bar"},
+		},
+		{
+			name: "nothing",
+		},
+		{
+			name:     "nothing-but-respect-already-defined",
+			labels:   []string{"qux"},
+			expected: []string{"qux"},
+		},
+	}
+	for _, tC := range testCases {
+		t.Run(tC.name, func(t *testing.T) {
+			as, restoreAsk := prompt.InitAskStubber()
+			defer restoreAsk()
+
+			as.Stub([]*prompt.QuestionStub{
+				{
+					Name:  "labels",
+					Value: tC.input,
+				},
+			})
+
+			err := LabelsPrompt(&tC.labels, &gitlab.Client{}, repoRemote)
+			assert.NoError(t, err)
+			assert.ElementsMatch(t, tC.labels, tC.expected)
+		})
+	}
+}
