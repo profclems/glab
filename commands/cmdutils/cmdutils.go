@@ -136,50 +136,37 @@ func DescriptionPrompt(response *string, templateContent, editorCommand string) 
 }
 
 func LabelsPrompt(response *[]string, apiClient *gitlab.Client, repoRemote *glrepo.Remote) (err error) {
-	var labelOptions string
-	if repoRemote.Name != "" {
-		labelOptions, _ = git.Config("remote." + repoRemote.Name + ".glab-cached-labels")
+	lOpts := &gitlab.ListLabelsOptions{}
+	lOpts.PerPage = 100
+	labels, err := api.ListLabels(apiClient, repoRemote.FullName(), lOpts)
+	if err != nil {
+		return err
 	}
-	if labelOptions == "" {
-		lOpts := &gitlab.ListLabelsOptions{}
-		lOpts.PerPage = 100
-		labels, err := api.ListLabels(apiClient, repoRemote.FullName(), lOpts)
-		if err == nil && labels != nil {
-			for i, label := range labels {
-				if i > 0 {
-					labelOptions += ","
-				}
-				labelOptions += label.Name
-			}
-			if labelOptions != "" && repoRemote.Name != "" {
-				// silently fails if not a git repo
-				_ = git.SetConfig(repoRemote.Name, "glab-cached-labels", labelOptions)
-			}
+
+	if len(labels) != 0 {
+		var labelOptions []string
+
+		for i := range labels {
+			labelOptions = append(labelOptions, labels[i].Name)
 		}
-	}
-	if labelOptions != "" {
+
 		var selectedLabels []string
-		err = prompt.MultiSelect(&selectedLabels, "labels", "Select Labels", strings.Split(labelOptions, ","))
+		err = prompt.MultiSelect(&selectedLabels, "labels", "Select Labels", labelOptions)
 		if err != nil {
 			return err
 		}
-		// Add each element to the array instead of just assigning it so we respect values already
-		// present, given from the `--label` flag
-		for _, x := range selectedLabels {
-			*response = append(*response, x)
-		}
-
-	} else {
-		var responseString string
-		err = prompt.AskQuestionWithInput(&responseString, "labels", "Label(s) [Comma Separated]", "", false)
-		if err != nil {
-			return err
-		}
-		for _, x := range strings.Split(responseString, ",") {
-			*response = append(*response, x)
-		}
+		*response = append(*response, selectedLabels...)
+		return nil
 	}
 
+	var responseString string
+	err = prompt.AskQuestionWithInput(&responseString, "labels", "Label(s) [Comma Separated]", "", false)
+	if err != nil {
+		return err
+	}
+	if responseString != "" {
+		*response = append(*response, strings.Split(responseString, ",")...)
+	}
 	return nil
 }
 
