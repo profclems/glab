@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/acarl005/stripansi"
 	"github.com/profclems/glab/internal/git"
 	"github.com/profclems/glab/internal/glrepo"
 	"github.com/profclems/glab/internal/utils"
@@ -619,61 +620,186 @@ func Test_PickMetadata(t *testing.T) {
 }
 
 func Test_AssigneesPrompt(t *testing.T) {
+	// mock glrepo.Remote object
+	repo := glrepo.New("foo", "bar")
+	remote := &git.Remote{
+		Name:     "test",
+		Resolved: "base",
+	}
+	repoRemote := &glrepo.Remote{
+		Remote: remote,
+		Repo:   repo,
+	}
+
 	testCases := []struct {
-		name   string
-		input  string
-		output []string
+		name               string
+		choice             []string
+		mock               []*gitlab.ProjectMember
+		output             []string
+		minimumAccessLevel int
+		expectedStdErr     string
+		expectedError      string
 	}{
 		{
 			name: "nothing",
 		},
 		{
-			name:   "Single name",
-			input:  "foo",
-			output: []string{"foo"},
+			name:               "reporter",
+			choice:             []string{"foo (reporter)"},
+			output:             []string{"foo"},
+			minimumAccessLevel: 20,
+			mock: []*gitlab.ProjectMember{
+				{
+					Username:    "foo",
+					AccessLevel: gitlab.AccessLevelValue(20),
+				},
+			},
 		},
 		{
-			name:   "2 or more names",
-			input:  "foo,bar",
-			output: []string{"foo", "bar"},
+			name:               "reporter-developer",
+			choice:             []string{"foo (reporter)", "bar (developer)"},
+			output:             []string{"foo", "bar"},
+			minimumAccessLevel: 20,
+			mock: []*gitlab.ProjectMember{
+				{
+					Username:    "foo",
+					AccessLevel: gitlab.AccessLevelValue(20),
+				},
+				{
+					Username:    "bar",
+					AccessLevel: gitlab.AccessLevelValue(30),
+				},
+			},
+		},
+		{
+			name:               "reporter-developer-maintainer",
+			choice:             []string{"foo (reporter)", "bar (developer)", "baz (maintainer)"},
+			output:             []string{"foo", "bar", "baz"},
+			minimumAccessLevel: 20,
+			mock: []*gitlab.ProjectMember{
+				{
+					Username:    "foo",
+					AccessLevel: gitlab.AccessLevelValue(20),
+				},
+				{
+					Username:    "bar",
+					AccessLevel: gitlab.AccessLevelValue(30),
+				},
+				{
+					Username:    "baz",
+					AccessLevel: gitlab.AccessLevelValue(40),
+				},
+			},
+		},
+		{
+			name:               "no-members",
+			minimumAccessLevel: 10,
+			mock:               []*gitlab.ProjectMember{},
+			expectedStdErr:     "Couldn't fetch any members with minimum permission level 10\n",
+		},
+		{
+			name:               "no-valid-members",
+			minimumAccessLevel: 50,
+			mock: []*gitlab.ProjectMember{
+				{
+					Username:    "foo",
+					AccessLevel: gitlab.AccessLevelValue(40),
+				},
+			},
+			expectedStdErr: "Couldn't fetch any members with minimum permission level 50\n",
 		},
 	}
 	for _, tC := range testCases {
 		t.Run(tC.name, func(t *testing.T) {
+			api.ListProjectMembers = func(client *gitlab.Client, projectID interface{}, opts *gitlab.ListProjectMembersOptions) ([]*gitlab.ProjectMember, error) {
+				return tC.mock, nil
+			}
+
 			as, restoreAsk := prompt.InitAskStubber()
 			defer restoreAsk()
 
 			as.Stub([]*prompt.QuestionStub{
 				{
-					Name:  "assignee",
-					Value: tC.input,
+					Name:  "assignees",
+					Value: tC.choice,
 				},
 			})
 
 			var got []string
-			err := AssigneesPrompt(&got)
-			if err != nil {
-				t.Errorf("AssigneesPrompt() unexpected error = %s", err)
+			io, _, _, stderr := utils.IOTest()
+
+			err := AssigneesPrompt(&got, &gitlab.Client{}, repoRemote, io, tC.minimumAccessLevel)
+			if tC.expectedError != "" {
+				assert.EqualError(t, err, tC.expectedError)
+			} else {
+				assert.NoError(t, err)
+			}
+			if tC.expectedStdErr != "" {
+				outErr := stripansi.Strip(stderr.String())
+
+				assert.Equal(t, tC.expectedStdErr, outErr)
 			}
 			assert.ElementsMatch(t, got, tC.output)
+
 		})
 	}
 
 	t.Run("Prompt fails", func(t *testing.T) {
+		var got []string
+
+		api.ListProjectMembers = func(client *gitlab.Client, projectID interface{}, opts *gitlab.ListProjectMembersOptions) ([]*gitlab.ProjectMember, error) {
+			return []*gitlab.ProjectMember{
+				{
+					Username:    "foo",
+					AccessLevel: gitlab.AccessLevelValue(20),
+				},
+			}, nil
+		}
+
 		as, restoreAsk := prompt.InitAskStubber()
 		defer restoreAsk()
 
 		as.Stub([]*prompt.QuestionStub{
 			{
-				Name:  "assignee",
+				Name:  "assignees",
 				Value: errors.New("meant to fail"),
 			},
 		})
 
-		var got []string
-		err := AssigneesPrompt(&got)
+		err := AssigneesPrompt(&got, &gitlab.Client{}, repoRemote, nil, 20)
 		assert.Empty(t, got)
 		assert.EqualError(t, err, "meant to fail")
+	})
+
+	t.Run("respect-flags", func(t *testing.T) {
+		got := []string{"foo"}
+
+		api.ListProjectMembers = func(client *gitlab.Client, projectID interface{}, opts *gitlab.ListProjectMembersOptions) ([]*gitlab.ProjectMember, error) {
+			return []*gitlab.ProjectMember{
+				{
+					Username:    "foo",
+					AccessLevel: gitlab.AccessLevelValue(20),
+				},
+				{
+					Username:    "bar",
+					AccessLevel: gitlab.AccessLevelValue(30),
+				},
+			}, nil
+		}
+
+		as, restoreAsk := prompt.InitAskStubber()
+		defer restoreAsk()
+
+		as.Stub([]*prompt.QuestionStub{
+			{
+				Name:  "assignees",
+				Value: []string{"bar (developer)"},
+			},
+		})
+
+		err := AssigneesPrompt(&got, &gitlab.Client{}, repoRemote, nil, 20)
+		assert.NoError(t, err)
+		assert.ElementsMatch(t, []string{"foo", "bar"}, got)
 	})
 }
 

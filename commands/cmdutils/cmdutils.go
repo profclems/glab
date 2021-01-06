@@ -209,18 +209,55 @@ func MilestonesPrompt(response *int, apiClient *gitlab.Client, repoRemote *glrep
 	return nil
 }
 
-func AssigneesPrompt(response *[]string) (err error) {
-	var responseString string
-	err = prompt.AskQuestionWithInput(&responseString, "assignee", "Assignee(s) Username(s) [Comma Separated]", "", false)
+// GroupMemberLevel maps a number representing the access level to a string shown to the
+// user.
+// API docs:
+// https://docs.gitlab.com/ce/api/members.html#valid-access-levels
+var GroupMemberLevel = map[int]string{
+	0:  "no access",
+	5:  "minimal access",
+	10: "guest",
+	20: "reporter",
+	30: "developer",
+	40: "maintainer",
+	50: "owner",
+}
+
+// AssigneesPrompt creates a multi-selection prompt of all the users below the given access level
+// for the remote referenced by the `*glrepo.Remote`
+func AssigneesPrompt(response *[]string, apiClient *gitlab.Client, repoRemote *glrepo.Remote, io *utils.IOStreams, minimumAccessLevel int) (err error) {
+	var assigneeOptions []string
+	assigneeMap := map[string]string{}
+
+	lOpts := &gitlab.ListProjectMembersOptions{}
+	lOpts.PerPage = 100
+	members, err := api.ListProjectMembers(apiClient, repoRemote.FullName(), lOpts)
 	if err != nil {
 		return err
 	}
-	// Return early on an empty string instead of doing the `strings.Split`, the difference
-	// here is that it won't fill the Slice with one `""` element.
-	if responseString == "" {
+
+	for i := range members {
+		if members[i].AccessLevel >= gitlab.AccessLevelValue(minimumAccessLevel) {
+			assigneeOptions = append(assigneeOptions, fmt.Sprintf("%s (%s)",
+				members[i].Username,
+				GroupMemberLevel[int(members[i].AccessLevel)],
+			))
+			assigneeMap[fmt.Sprintf("%s (%s)", members[i].Username, GroupMemberLevel[int(members[i].AccessLevel)])] = members[i].Username
+		}
+	}
+	if len(assigneeOptions) == 0 {
+		fmt.Fprintf(io.StdErr, "Couldn't fetch any members with minimum permission level %d\n", minimumAccessLevel)
 		return nil
 	}
-	*response = strings.Split(responseString, ",")
+
+	var selectedAssignees []string
+	err = prompt.MultiSelect(&selectedAssignees, "assignees", "Select assignees", assigneeOptions)
+	if err != nil {
+		return err
+	}
+	for _, x := range selectedAssignees {
+		*response = append(*response, assigneeMap[x])
+	}
 
 	return nil
 }
