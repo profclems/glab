@@ -2,6 +2,7 @@ package mrutils
 
 import (
 	"errors"
+	"fmt"
 	"testing"
 
 	"github.com/profclems/glab/commands/cmdutils"
@@ -411,7 +412,7 @@ func Test_MRFromArgsWithOpts(t *testing.T) {
 				t.Skipf("failed to get base repo: %s", err)
 			}
 
-			gotMR, gotRepo, err := MRFromArgs(&f, []string{"2"})
+			gotMR, gotRepo, err := MRFromArgs(&f, []string{"foo"})
 			assert.NoError(t, err)
 
 			assert.Equal(t, expectedRepo.FullName(), gotRepo.FullName())
@@ -461,6 +462,19 @@ func Test_MRFromArgsWithOpts(t *testing.T) {
 			assert.Nil(t, gotRepo)
 			assert.EqualError(t, err, "invalid merge request ID provided")
 		})
+		t.Run("invalid-name", func(t *testing.T) {
+			f := *f
+
+			GetOpenMRForBranch = func(apiClient *gitlab.Client, baseRepo glrepo.Interface, arg string) (*gitlab.MergeRequest, error) {
+				return nil, fmt.Errorf("no merge requests from branch %q", arg)
+			}
+
+			gotMR, gotRepo, err := MRFromArgs(&f, []string{"foo"})
+			assert.Nil(t, gotMR)
+			assert.Nil(t, gotRepo)
+			assert.EqualError(t, err, `no merge requests from branch "foo"`)
+
+		})
 		t.Run("api.GetMR", func(t *testing.T) {
 			f := *f
 
@@ -474,4 +488,38 @@ func Test_MRFromArgsWithOpts(t *testing.T) {
 			assert.EqualError(t, err, "failed to get merge request 2: API call failed")
 		})
 	})
+}
+
+func Test_DisplayAllMRs(t *testing.T) {
+	mrs := []*gitlab.MergeRequest{
+		{
+			IID:          1,
+			State:        "opened",
+			Title:        "add tests",
+			TargetBranch: "trunk",
+			SourceBranch: "new-tests",
+		},
+		{
+			IID:          2,
+			State:        "merged",
+			Title:        "fix bug",
+			TargetBranch: "trunk",
+			SourceBranch: "new-feature",
+		},
+		{
+			IID:          1,
+			State:        "closed",
+			Title:        "add new feature",
+			TargetBranch: "trunk",
+			SourceBranch: "new-tests",
+		},
+	}
+
+	expected := `!1	add tests      	(trunk) ← (new-tests)  
+!2	fix bug        	(trunk) ← (new-feature)
+!1	add new feature	(trunk) ← (new-tests)  
+`
+
+	got := DisplayAllMRs(mrs, "unused")
+	assert.Equal(t, expected, got)
 }
