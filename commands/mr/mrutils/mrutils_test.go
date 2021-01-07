@@ -2,6 +2,7 @@ package mrutils
 
 import (
 	"errors"
+	"fmt"
 	"testing"
 
 	"github.com/profclems/glab/commands/cmdutils"
@@ -460,6 +461,19 @@ func Test_MRFromArgsWithOpts(t *testing.T) {
 			assert.Nil(t, gotMR)
 			assert.Nil(t, gotRepo)
 			assert.EqualError(t, err, "invalid merge request ID provided")
+		})
+		t.Run("invalid-name", func(t *testing.T) {
+			f := *f
+
+			GetOpenMRForBranch = func(apiClient *gitlab.Client, baseRepo glrepo.Interface, arg string) (*gitlab.MergeRequest, error) {
+				return nil, fmt.Errorf("no merge requests from branch %q", arg)
+			}
+
+			gotMR, gotRepo, err := MRFromArgs(&f, []string{"foo"})
+			assert.Nil(t, gotMR)
+			assert.Nil(t, gotRepo)
+			assert.EqualError(t, err, `no merge requests from branch "foo"`)
+
 		})
 		t.Run("api.GetMR", func(t *testing.T) {
 			f := *f
