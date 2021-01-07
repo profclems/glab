@@ -6,7 +6,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/AlecAivazis/survey/v2"
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/internal/glrepo"
 	"github.com/profclems/glab/internal/utils"
@@ -69,7 +68,7 @@ func MRCheckErrors(mr *gitlab.MergeRequest, err MRCheckErrOptions) error {
 	}
 
 	if !mr.Subscribed && err.Unsubscribed {
-		return fmt.Errorf("you are already unsubscribed to this merge request")
+		return fmt.Errorf("you are not subscribed to this merge request")
 	}
 
 	if err.MergePrivilege && !mr.User.CanMerge {
@@ -217,7 +216,7 @@ func MRsFromArgs(f *cmdutils.Factory, args []string) ([]*gitlab.MergeRequest, gl
 
 }
 
-func GetOpenMRForBranch(apiClient *gitlab.Client, baseRepo glrepo.Interface, arg string) (*gitlab.MergeRequest, error) {
+var GetOpenMRForBranch = func(apiClient *gitlab.Client, baseRepo glrepo.Interface, arg string) (*gitlab.MergeRequest, error) {
 	currentBranch := arg // Assume the user is using only 'branch', not 'OWNER:branch'
 	var owner string
 
@@ -269,10 +268,11 @@ func GetOpenMRForBranch(apiClient *gitlab.Client, baseRepo glrepo.Interface, arg
 		mrNames = append(mrNames, t)
 	}
 	pickedMR := mrNames[0]
-	err = prompt.AskOne(&survey.Select{
-		Message: "There are multiple merge requests matching the requested branch, pick one",
-		Options: mrNames,
-	}, &pickedMR)
+	err = prompt.Select(&pickedMR,
+		"mr",
+		"There are multiple merge requests matching the requested branch, pick one",
+		mrNames,
+	)
 	if err != nil {
 		return nil, fmt.Errorf("a merge request must be picked: %w", err)
 	}
