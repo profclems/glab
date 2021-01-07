@@ -411,7 +411,7 @@ func Test_MRFromArgsWithOpts(t *testing.T) {
 				t.Skipf("failed to get base repo: %s", err)
 			}
 
-			gotMR, gotRepo, err := MRFromArgs(&f, []string{"2"})
+			gotMR, gotRepo, err := MRFromArgs(&f, []string{"foo"})
 			assert.NoError(t, err)
 
 			assert.Equal(t, expectedRepo.FullName(), gotRepo.FullName())
