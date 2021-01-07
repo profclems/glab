@@ -1,9 +1,13 @@
 package mrutils
 
 import (
+	"errors"
 	"testing"
 
-	"github.com/alecthomas/assert"
+	"github.com/profclems/glab/internal/glrepo"
+	"github.com/profclems/glab/pkg/api"
+	"github.com/profclems/glab/pkg/prompt"
+	"github.com/stretchr/testify/assert"
 	"github.com/xanzy/go-gitlab"
 )
 
@@ -177,5 +181,173 @@ func Test_MRCheckErrors(t *testing.T) {
 	t.Run("nil", func(t *testing.T) {
 		err := MRCheckErrors(&gitlab.MergeRequest{}, MRCheckErrOptions{})
 		assert.Nil(t, err)
+	})
+}
+
+func Test_GetOpenMRForBranchFails(t *testing.T) {
+	baseRepo := glrepo.NewWithHost("foo", "bar", "gitlab.com")
+
+	t.Run("API-call-failed", func(t *testing.T) {
+		api.ListMRs = func(_ *gitlab.Client, _ interface{}, _ *gitlab.ListProjectMergeRequestsOptions) ([]*gitlab.MergeRequest, error) {
+			return nil, errors.New("API call failed")
+		}
+
+		got, err := GetOpenMRForBranch(&gitlab.Client{}, baseRepo, "foo")
+		assert.Nil(t, got)
+		assert.EqualError(t, err, `failed to get open merge request for "foo": API call failed`)
+	})
+
+	t.Run("no-return", func(t *testing.T) {
+		api.ListMRs = func(_ *gitlab.Client, _ interface{}, _ *gitlab.ListProjectMergeRequestsOptions) ([]*gitlab.MergeRequest, error) {
+			return []*gitlab.MergeRequest{}, nil
+		}
+
+		got, err := GetOpenMRForBranch(&gitlab.Client{}, baseRepo, "foo")
+		assert.Nil(t, got)
+		assert.EqualError(t, err, `no open merge request available for "foo"`)
+	})
+
+	t.Run("owner-no-match", func(t *testing.T) {
+		api.ListMRs = func(_ *gitlab.Client, _ interface{}, _ *gitlab.ListProjectMergeRequestsOptions) ([]*gitlab.MergeRequest, error) {
+			return []*gitlab.MergeRequest{
+				{
+					IID: 1,
+					Author: &gitlab.BasicUser{
+						Username: "profclems",
+					},
+				},
+				{
+					IID: 2,
+					Author: &gitlab.BasicUser{
+						Username: "maxice8",
+					},
+				},
+			}, nil
+		}
+
+		got, err := GetOpenMRForBranch(&gitlab.Client{}, baseRepo, "zemzale:foo")
+		assert.Nil(t, got)
+		assert.EqualError(t, err, `no open merge request available for "foo" owned by @zemzale`)
+	})
+}
+
+func Test_GetOpenMRForBranch(t *testing.T) {
+	baseRepo := glrepo.NewWithHost("foo", "bar", "gitlab.com")
+
+	testCases := []struct {
+		name   string
+		input  string
+		mrs    []*gitlab.MergeRequest
+		expect *gitlab.MergeRequest
+	}{
+		{
+			name: "one-match",
+			mrs: []*gitlab.MergeRequest{
+				{
+					IID: 1,
+					Author: &gitlab.BasicUser{
+						Username: "profclems",
+					},
+				},
+			},
+			expect: &gitlab.MergeRequest{
+				IID: 1,
+				Author: &gitlab.BasicUser{
+					Username: "profclems",
+				},
+			},
+		},
+		{
+			name:  "owner-match",
+			input: "maxice8:foo",
+			mrs: []*gitlab.MergeRequest{
+				{
+					IID: 1,
+					Author: &gitlab.BasicUser{
+						Username: "profclems",
+					},
+				},
+				{
+					IID: 2,
+					Author: &gitlab.BasicUser{
+						Username: "maxice8",
+					},
+				},
+			},
+			expect: &gitlab.MergeRequest{
+				IID: 2,
+				Author: &gitlab.BasicUser{
+					Username: "maxice8",
+				},
+			},
+		},
+	}
+	for _, tC := range testCases {
+		t.Run(tC.name, func(t *testing.T) {
+			api.ListMRs = func(_ *gitlab.Client, _ interface{}, _ *gitlab.ListProjectMergeRequestsOptions) ([]*gitlab.MergeRequest, error) {
+				return tC.mrs, nil
+			}
+
+			got, err := GetOpenMRForBranch(&gitlab.Client{}, baseRepo, tC.input)
+			assert.NoError(t, err)
+
+			assert.Equal(t, tC.expect.IID, got.IID)
+			assert.Equal(t, tC.expect.Author.Username, got.Author.Username)
+		})
+	}
+}
+
+func Test_GetOpenMRForBranchPrompt(t *testing.T) {
+	baseRepo := glrepo.NewWithHost("foo", "bar", "gitlab.com")
+
+	api.ListMRs = func(_ *gitlab.Client, _ interface{}, _ *gitlab.ListProjectMergeRequestsOptions) ([]*gitlab.MergeRequest, error) {
+		return []*gitlab.MergeRequest{
+			{
+				IID: 1,
+				Author: &gitlab.BasicUser{
+					Username: "profclems",
+				},
+			},
+			{
+				IID: 2,
+				Author: &gitlab.BasicUser{
+					Username: "maxice8",
+				},
+			},
+		}, nil
+	}
+
+	t.Run("success", func(t *testing.T) {
+		as, restoreAsk := prompt.InitAskStubber()
+		defer restoreAsk()
+
+		as.Stub([]*prompt.QuestionStub{
+			{
+				Name:  "mr",
+				Value: "!1 (foo) by @profclems",
+			},
+		})
+
+		got, err := GetOpenMRForBranch(&gitlab.Client{}, baseRepo, "foo")
+		assert.NoError(t, err)
+
+		assert.Equal(t, 1, got.IID)
+		assert.Equal(t, "profclems", got.Author.Username)
+	})
+
+	t.Run("error", func(t *testing.T) {
+		as, restoreAsk := prompt.InitAskStubber()
+		defer restoreAsk()
+
+		as.Stub([]*prompt.QuestionStub{
+			{
+				Name:  "mr",
+				Value: errors.New("prompt failed"),
+			},
+		})
+
+		got, err := GetOpenMRForBranch(&gitlab.Client{}, baseRepo, "foo")
+		assert.Nil(t, got)
+		assert.EqualError(t, err, "a merge request must be picked: prompt failed")
 	})
 }
