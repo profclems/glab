@@ -69,7 +69,7 @@ func MRCheckErrors(mr *gitlab.MergeRequest, err MRCheckErrOptions) error {
 	}
 
 	if !mr.Subscribed && err.Unsubscribed {
-		return fmt.Errorf("you are already unsubscribed to this merge request")
+		return fmt.Errorf("you are not subscribed to this merge request")
 	}
 
 	if err.MergePrivilege && !mr.User.CanMerge {
