@@ -136,44 +136,37 @@ func DescriptionPrompt(response *string, templateContent, editorCommand string) 
 }
 
 func LabelsPrompt(response *[]string, apiClient *gitlab.Client, repoRemote *glrepo.Remote) (err error) {
-	var labelOptions string
-	if repoRemote.Name != "" {
-		labelOptions, _ = git.Config("remote." + repoRemote.Name + ".glab-cached-labels")
+	lOpts := &gitlab.ListLabelsOptions{}
+	lOpts.PerPage = 100
+	labels, err := api.ListLabels(apiClient, repoRemote.FullName(), lOpts)
+	if err != nil {
+		return err
 	}
-	if labelOptions == "" {
-		lOpts := &gitlab.ListLabelsOptions{}
-		lOpts.PerPage = 100
-		labels, err := api.ListLabels(apiClient, repoRemote.FullName(), lOpts)
-		if err == nil && labels != nil {
-			for i, label := range labels {
-				if i > 0 {
-					labelOptions += ","
-				}
-				labelOptions += label.Name
-			}
-			if labelOptions != "" && repoRemote.Name != "" {
-				// silently fails if not a git repo
-				_ = git.SetConfig(repoRemote.Name, "glab-cached-labels", labelOptions)
-			}
+
+	if len(labels) != 0 {
+		var labelOptions []string
+
+		for i := range labels {
+			labelOptions = append(labelOptions, labels[i].Name)
 		}
-	}
-	if labelOptions != "" {
+
 		var selectedLabels []string
-		err = prompt.MultiSelect(&selectedLabels, "labels", "Select Labels", strings.Split(labelOptions, ","))
+		err = prompt.MultiSelect(&selectedLabels, "labels", "Select Labels", labelOptions)
 		if err != nil {
 			return err
 		}
-		*response = selectedLabels
-
-	} else {
-		var responseString string
-		err = prompt.AskQuestionWithInput(&responseString, "labels", "Label(s) [Comma Separated]", "", false)
-		if err != nil {
-			return err
-		}
-		*response = strings.Split(responseString, ",")
+		*response = append(*response, selectedLabels...)
+		return nil
 	}
 
+	var responseString string
+	err = prompt.AskQuestionWithInput(&responseString, "labels", "Label(s) [Comma Separated]", "", false)
+	if err != nil {
+		return err
+	}
+	if responseString != "" {
+		*response = append(*response, strings.Split(responseString, ",")...)
+	}
 	return nil
 }
 
@@ -289,25 +282,13 @@ func ConfirmSubmission(allowPreview bool, allowAddMetadata bool) (Action, error)
 	}
 	options = append(options, cancelLabel)
 
-	confirmAnswers := struct {
-		Confirmation int
-	}{}
-	confirmQs := []*survey.Question{
-		{
-			Name: "confirmation",
-			Prompt: &survey.Select{
-				Message: "What's next?",
-				Options: options,
-			},
-		},
-	}
-
-	err := prompt.Ask(confirmQs, &confirmAnswers)
+	var confirmAnswer string
+	err := prompt.Select(&confirmAnswer, "confirmation", "What's next?", options)
 	if err != nil {
 		return -1, fmt.Errorf("could not prompt: %w", err)
 	}
 
-	switch options[confirmAnswers.Confirmation] {
+	switch confirmAnswer {
 	case submitLabel:
 		return SubmitAction, nil
 	case previewLabel:
@@ -317,7 +298,7 @@ func ConfirmSubmission(allowPreview bool, allowAddMetadata bool) (Action, error)
 	case cancelLabel:
 		return CancelAction, nil
 	default:
-		return -1, fmt.Errorf("invalid index: %d", confirmAnswers.Confirmation)
+		return -1, fmt.Errorf("invalid value: %s", confirmAnswer)
 	}
 }
 
