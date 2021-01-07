@@ -282,25 +282,13 @@ func ConfirmSubmission(allowPreview bool, allowAddMetadata bool) (Action, error)
 	}
 	options = append(options, cancelLabel)
 
-	confirmAnswers := struct {
-		Confirmation int
-	}{}
-	confirmQs := []*survey.Question{
-		{
-			Name: "confirmation",
-			Prompt: &survey.Select{
-				Message: "What's next?",
-				Options: options,
-			},
-		},
-	}
-
-	err := prompt.Ask(confirmQs, &confirmAnswers)
+	var confirmAnswer string
+	err := prompt.Select(&confirmAnswer, "confirmation", "What's next?", options)
 	if err != nil {
 		return -1, fmt.Errorf("could not prompt: %w", err)
 	}
 
-	switch options[confirmAnswers.Confirmation] {
+	switch confirmAnswer {
 	case submitLabel:
 		return SubmitAction, nil
 	case previewLabel:
@@ -310,7 +298,7 @@ func ConfirmSubmission(allowPreview bool, allowAddMetadata bool) (Action, error)
 	case cancelLabel:
 		return CancelAction, nil
 	default:
-		return -1, fmt.Errorf("invalid index: %d", confirmAnswers.Confirmation)
+		return -1, fmt.Errorf("invalid value: %s", confirmAnswer)
 	}
 }
 
