@@ -1253,3 +1253,99 @@ func Test_LabelsPromptAskQuestionWithInput(t *testing.T) {
 		})
 	}
 }
+
+func Test_ConfirmSubmission(t *testing.T) {
+	const (
+		submitLabel      = "Submit"
+		previewLabel     = "Continue in browser"
+		addMetadataLabel = "Add metadata"
+		cancelLabel      = "Cancel"
+	)
+
+	t.Run("success", func(t *testing.T) {
+		testCases := []struct {
+			name             string
+			input            string
+			allowPreview     bool
+			allowAddMetadata bool
+			output           Action
+		}{
+			{
+				name:   "submit",
+				input:  submitLabel,
+				output: SubmitAction,
+			},
+			{
+				name:         "preview",
+				input:        previewLabel,
+				allowPreview: true,
+				output:       PreviewAction,
+			},
+			{
+				name:             "Add Metadata",
+				input:            addMetadataLabel,
+				allowAddMetadata: true,
+				output:           AddMetadataAction,
+			},
+			{
+				name:   "cancel",
+				input:  cancelLabel,
+				output: CancelAction,
+			},
+		}
+		for _, tC := range testCases {
+			t.Run(tC.name, func(t *testing.T) {
+				as, restoreAsk := prompt.InitAskStubber()
+				defer restoreAsk()
+
+				as.Stub([]*prompt.QuestionStub{
+					{
+						Name:  "confirmation",
+						Value: tC.input,
+					},
+				})
+
+				var got Action
+				got, err := ConfirmSubmission(tC.allowPreview, tC.allowAddMetadata)
+				assert.NoError(t, err)
+				assert.Equal(t, tC.output, got)
+			})
+		}
+	})
+	t.Run("failed", func(t *testing.T) {
+		testCases := []struct {
+			name   string
+			input  interface{}
+			output string
+		}{
+			{
+				name:   "prompt",
+				input:  errors.New("no terminal"),
+				output: "could not prompt: no terminal",
+			},
+			{
+				name:   "invalid value",
+				input:  "does not exist",
+				output: "invalid value: does not exist",
+			},
+		}
+		for _, tC := range testCases {
+			t.Run(tC.name, func(t *testing.T) {
+				as, restoreAsk := prompt.InitAskStubber()
+				defer restoreAsk()
+
+				as.Stub([]*prompt.QuestionStub{
+					{
+						Name:  "confirmation",
+						Value: tC.input,
+					},
+				})
+
+				var got Action
+				got, err := ConfirmSubmission(false, false)
+				assert.Equal(t, Action(-1), got)
+				assert.EqualError(t, err, tC.output)
+			})
+		}
+	})
+}
