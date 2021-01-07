@@ -216,7 +216,7 @@ func MRsFromArgs(f *cmdutils.Factory, args []string) ([]*gitlab.MergeRequest, gl
 
 }
 
-func GetOpenMRForBranch(apiClient *gitlab.Client, baseRepo glrepo.Interface, arg string) (*gitlab.MergeRequest, error) {
+var GetOpenMRForBranch = func(apiClient *gitlab.Client, baseRepo glrepo.Interface, arg string) (*gitlab.MergeRequest, error) {
 	currentBranch := arg // Assume the user is using only 'branch', not 'OWNER:branch'
 	var owner string
 
