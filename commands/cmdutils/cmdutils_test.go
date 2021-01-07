@@ -771,6 +771,18 @@ func Test_AssigneesPrompt(t *testing.T) {
 		assert.EqualError(t, err, "meant to fail")
 	})
 
+	t.Run("API Failed", func(t *testing.T) {
+		var got []string
+
+		api.ListProjectMembers = func(client *gitlab.Client, projectID interface{}, opts *gitlab.ListProjectMembersOptions) ([]*gitlab.ProjectMember, error) {
+			return nil, errors.New("meant to fail")
+		}
+
+		err := AssigneesPrompt(&got, &gitlab.Client{}, repoRemote, nil, 20)
+		assert.Empty(t, got)
+		assert.EqualError(t, err, "meant to fail")
+	})
+
 	t.Run("respect-flags", func(t *testing.T) {
 		got := []string{"foo"}
 
