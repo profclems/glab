@@ -4,13 +4,12 @@ import (
 	"fmt"
 
 	"github.com/profclems/glab/commands/cmdutils"
+	"github.com/profclems/glab/commands/mr/mrutils"
 	"github.com/profclems/glab/internal/git"
-	"github.com/profclems/glab/internal/utils"
 	"github.com/profclems/glab/pkg/api"
 	"github.com/tcnksm/go-gitconfig"
 
 	"github.com/spf13/cobra"
-	"github.com/xanzy/go-gitlab"
 )
 
 type mrCheckoutConfig struct {
@@ -24,7 +23,7 @@ var (
 
 func NewCmdCheckout(f *cmdutils.Factory) *cobra.Command {
 	var mrCheckoutCmd = &cobra.Command{
-		Use:   "checkout <id>",
+		Use:   "checkout [<id> | <branch>]",
 		Short: "Checkout to an open merge request",
 		Long:  ``,
 		Args:  cobra.ExactArgs(1),
@@ -37,21 +36,11 @@ func NewCmdCheckout(f *cmdutils.Factory) *cobra.Command {
 				return err
 			}
 
-			repo, err := f.BaseRepo()
+			mr, repo, err := mrutils.MRFromArgs(f, args)
 			if err != nil {
 				return err
 			}
 
-			mrID := utils.StringToInt(args[0])
-
-			mr, err := api.GetMR(apiClient, repo.FullName(), mrID, &gitlab.GetMergeRequestsOptions{})
-
-			if err != nil {
-				return err
-			}
-			if mr == nil {
-				return fmt.Errorf("merge Request !%d not found\n", mrID)
-			}
 			if mrCheckoutCfg.branch == "" {
 				mrCheckoutCfg.branch = mr.SourceBranch
 			}
@@ -79,7 +68,7 @@ func NewCmdCheckout(f *cmdutils.Factory) *cobra.Command {
 				fmt.Println(err)
 			}
 
-			mrRef := fmt.Sprintf("refs/merge-requests/%d/head", mrID)
+			mrRef := fmt.Sprintf("refs/merge-requests/%d/head", mr.IID)
 			fetchRefSpec := fmt.Sprintf("%s:%s", mrRef, fetchToRef)
 			if err := git.RunCmd([]string{"fetch", repoRemote.Name, fetchRefSpec}); err != nil {
 				return err
