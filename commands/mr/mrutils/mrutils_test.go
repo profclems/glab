@@ -475,3 +475,37 @@ func Test_MRFromArgsWithOpts(t *testing.T) {
 		})
 	})
 }
+
+func Test_DisplayAllMRs(t *testing.T) {
+	mrs := []*gitlab.MergeRequest{
+		{
+			IID:          1,
+			State:        "opened",
+			Title:        "add tests",
+			TargetBranch: "trunk",
+			SourceBranch: "new-tests",
+		},
+		{
+			IID:          2,
+			State:        "merged",
+			Title:        "fix bug",
+			TargetBranch: "trunk",
+			SourceBranch: "new-feature",
+		},
+		{
+			IID:          1,
+			State:        "closed",
+			Title:        "add new feature",
+			TargetBranch: "trunk",
+			SourceBranch: "new-tests",
+		},
+	}
+
+	expected := `!1	add tests      	(trunk) ← (new-tests)  
+!2	fix bug        	(trunk) ← (new-feature)
+!1	add new feature	(trunk) ← (new-tests)  
+`
+
+	got := DisplayAllMRs(mrs, "unused")
+	assert.Equal(t, expected, got)
+}
