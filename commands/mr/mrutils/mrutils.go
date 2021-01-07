@@ -6,7 +6,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/AlecAivazis/survey/v2"
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/internal/glrepo"
 	"github.com/profclems/glab/internal/utils"
@@ -269,10 +268,11 @@ func GetOpenMRForBranch(apiClient *gitlab.Client, baseRepo glrepo.Interface, arg
 		mrNames = append(mrNames, t)
 	}
 	pickedMR := mrNames[0]
-	err = prompt.AskOne(&survey.Select{
-		Message: "There are multiple merge requests matching the requested branch, pick one",
-		Options: mrNames,
-	}, &pickedMR)
+	err = prompt.Select(&pickedMR,
+		"mr",
+		"There are multiple merge requests matching the requested branch, pick one",
+		mrNames,
+	)
 	if err != nil {
 		return nil, fmt.Errorf("a merge request must be picked: %w", err)
 	}
