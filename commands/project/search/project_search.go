@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/MakeNowJust/heredoc"
 	"github.com/profclems/glab/pkg/tableprinter"
 
 	"github.com/profclems/glab/commands/cmdutils"
@@ -20,6 +21,12 @@ func NewCmdSearch(f *cmdutils.Factory) *cobra.Command {
 		Long:    ``,
 		Args:    cobra.ExactArgs(0),
 		Aliases: []string{"find", "lookup"},
+		Example: heredoc.Doc(`
+			$ glab project search title
+			$ glab repo search title
+			$ glab project find title
+			$ glab proejct lookup title
+		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var err error
 
