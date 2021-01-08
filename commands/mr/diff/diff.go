@@ -10,6 +10,7 @@ import (
 	"strings"
 	"syscall"
 
+	"github.com/MakeNowJust/heredoc"
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/commands/mr/mrutils"
 	"github.com/profclems/glab/internal/utils"
@@ -35,7 +36,13 @@ func NewCmdDiff(f *cmdutils.Factory, runF func(*DiffOptions) error) *cobra.Comma
 	cmd := &cobra.Command{
 		Use:   "diff [<id> | <branch>]",
 		Short: "View changes in a merge request",
-		Args:  cobra.MaximumNArgs(1),
+		Example: heredoc.Doc(`
+			$ glab mr diff 123
+			$ glab mr diff branch
+			$ glab mr diff  # get from current branch
+			$ glab mr diff 123 --color=never
+		`),
+		Args: cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 
 			if repoOverride, _ := cmd.Flags().GetString("repo"); repoOverride != "" && len(args) == 0 {
