@@ -60,6 +60,6 @@ func NewCmdApprove(f *cmdutils.Factory) *cobra.Command {
 	}
 
 	//mrApproveCmd.Flags().StringP("password", "p", "", "Current user’s password. Required if 'Require user password to approve' is enabled in the project settings.")
-	mrApproveCmd.Flags().StringP("sha", "s", "", "The HEAD of the merge request")
+	mrApproveCmd.Flags().StringP("sha", "s", "", "SHA which must match the SHA of the HEAD commit of the merge request")
 	return mrApproveCmd
 }
