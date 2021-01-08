@@ -30,22 +30,16 @@ func NewCmdRoot(f *cmdutils.Factory, version, buildDate string) *cobra.Command {
 	var rootCmd = &cobra.Command{
 		Use:           "glab <command> <subcommand> [flags]",
 		Short:         "A GitLab CLI Tool",
-		Long:          `GLab is an open source Gitlab Cli tool bringing GitLab to your command line`,
+		Long:          `GLab is an open source GitLab CLI tool bringing GitLab to your command line`,
 		SilenceErrors: true,
 		SilenceUsage:  true,
-		Example: heredoc.Doc(`
-	$ glab issue create
-	$ glab mr list --all
-	$ glab mr checkout 123
-	$ glab pipeline ci view
-	`),
 		Annotations: map[string]string{
 			"help:environment": heredoc.Doc(`
 			GITLAB_TOKEN: an authentication token for API requests. Setting this avoids being
 			prompted to authenticate and overrides any previously stored credentials.
 			Can be set in the config with 'glab config set token xxxxxx'
 
-			GITLAB_URI or GITLAB_HOST: specify the url of the gitlab server if self hosted (eg: https://gitlab.example.com). Default is https://gitlab.com.
+			GITLAB_HOST or GL_HOST: specify the url of the gitlab server if self hosted (eg: https://gitlab.example.com). Default is https://gitlab.com.
 
 			REMOTE_ALIAS or GIT_REMOTE_URL_VAR: git remote variable or alias that contains the gitlab url.
 			Can be set in the config with 'glab config set remote_alias origin'
@@ -59,6 +53,10 @@ func NewCmdRoot(f *cmdutils.Factory, version, buildDate string) *cobra.Command {
 			GLAMOUR_STYLE: environment variable to set your desired markdown renderer style
 			Available options are (dark|light|notty) or set a custom style
 			https://github.com/charmbracelet/glamour#styles
+
+			NO_PROMPT: set to 1 (true) or 0 (false) to disable and enable prompts respectively
+
+			NO_COLOR: set to any value to avoid printing ANSI escape sequences for color output.
 		`),
 			"help:feedback": heredoc.Docf(`
 			Encountered a bug or want to suggest a feature?

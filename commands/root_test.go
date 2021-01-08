@@ -58,7 +58,7 @@ func TestRootNoArg(t *testing.T) {
 	w.Close()
 	os.Stdout = old // restoring the real stdout
 	out := <-outC
-	assert.Contains(t, out, `GLab is an open source Gitlab Cli tool bringing GitLab to your command line`)
+	assert.Contains(t, out, "GLab is an open source GitLab CLI tool bringing GitLab to your command line\n")
 	assert.Contains(t, out, `USAGE
   glab <command> <subcommand> [flags]
 
