@@ -236,8 +236,10 @@ func createRun(opts *CreateOpts) error {
 		if err != nil {
 			// when the base repo is overridden with --repo flag, it is likely it has no
 			// remote set for the current working git dir which will error.
-			// We use the repo instead but cast it
-			repoRemote = repo.(*glrepo.Remote)
+			// Init a new remote without actually adding a new git remote
+			repoRemote = &glrepo.Remote{
+				Repo: repo,
+			}
 		}
 
 		for _, x := range metadataActions {
