@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/url"
 
+	"github.com/MakeNowJust/heredoc"
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/internal/config"
 	"github.com/profclems/glab/internal/git"
@@ -52,11 +53,11 @@ func NewCmdFork(f *cmdutils.Factory, runE func(*cmdutils.Factory) error) *cobra.
 	var forkCmd = &cobra.Command{
 		Use:   "fork <repo>",
 		Short: "Create a fork of a GitLab repository",
-		Example: `
-		$ glab repo fork
-		$ glab repo fork namespace/repo
-		$ glab repo fork namespace/repo --clone
-`,
+		Example: heredoc.Doc(`
+			$ glab repo fork
+			$ glab repo fork namespace/repo
+			$ glab repo fork namespace/repo --clone
+		`),
 		Args: cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
 			if len(args) > 0 {
