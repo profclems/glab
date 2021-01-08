@@ -3,6 +3,7 @@ package checkout
 import (
 	"fmt"
 
+	"github.com/MakeNowJust/heredoc"
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/commands/mr/mrutils"
 	"github.com/profclems/glab/internal/git"
@@ -26,7 +27,13 @@ func NewCmdCheckout(f *cmdutils.Factory) *cobra.Command {
 		Use:   "checkout [<id> | <branch>]",
 		Short: "Checkout to an open merge request",
 		Long:  ``,
-		Args:  cobra.ExactArgs(1),
+		Example: heredoc.Doc(`
+			$ glab mr checkout 1
+			$ glab mr checkout branch --track
+			$ glab mr checkout 12 --branch todo-fix
+			$ glab mr checkout   # use checked out branch
+		`),
+		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 
 			var err error

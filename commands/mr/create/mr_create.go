@@ -7,6 +7,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/MakeNowJust/heredoc"
 	"github.com/profclems/glab/internal/config"
 	"github.com/profclems/glab/internal/glrepo"
 
@@ -76,7 +77,13 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 		Short:   `Create new merge request`,
 		Long:    ``,
 		Aliases: []string{"new"},
-		Args:    cobra.ExactArgs(0),
+		Example: heredoc.Doc(`
+			$ glab mr new
+			$ glab mr create -a username -t "fix annoying bug"
+			$ glab mr create -f --draft --label RFC
+			$ glab mr create --autofill --yes --web
+		`),
+		Args: cobra.ExactArgs(0),
 		PreRun: func(cmd *cobra.Command, args []string) {
 			repoOverride, _ := cmd.Flags().GetString("head")
 			if repoFromEnv := os.Getenv("GITLAB_HEAD_REPO"); repoOverride == "" && repoFromEnv != "" {

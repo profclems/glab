@@ -3,6 +3,7 @@ package rebase
 import (
 	"fmt"
 
+	"github.com/MakeNowJust/heredoc"
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/commands/mr/mrutils"
 	"github.com/profclems/glab/internal/utils"
@@ -14,11 +15,15 @@ import (
 
 func NewCmdRebase(f *cmdutils.Factory) *cobra.Command {
 	var mrRebaseCmd = &cobra.Command{
-		Use:     "rebase [<id> | <branch>] [flags]",
-		Short:   `Automatically rebase the source_branch of the merge request against its target_branch.`,
-		Long:    `If you don’t have permissions to push to the merge request’s source branch - you’ll get a 403 Forbidden response.`,
-		Aliases: []string{"accept"},
-		Args:    cobra.MaximumNArgs(1),
+		Use:   "rebase [<id> | <branch>] [flags]",
+		Short: `Automatically rebase the source_branch of the merge request against its target_branch.`,
+		Long:  `If you don’t have permissions to push to the merge request’s source branch - you’ll get a 403 Forbidden response.`,
+		Example: heredoc.Doc(`
+			$ glab mr rebase 123
+			$ glab mr rebase  # get from current branch
+			$ glab mr rebase branch
+		`),
+		Args: cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var err error
 

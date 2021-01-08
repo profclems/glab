@@ -3,6 +3,7 @@ package delete
 import (
 	"fmt"
 
+	"github.com/MakeNowJust/heredoc"
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/commands/mr/mrutils"
 	"github.com/profclems/glab/internal/utils"
@@ -18,7 +19,11 @@ func NewCmdDelete(f *cmdutils.Factory) *cobra.Command {
 		Long:    ``,
 		Args:    cobra.MaximumNArgs(1),
 		Aliases: []string{"del"},
-		Example: "$ glab delete 123",
+		Example: heredoc.Doc(`
+			$ glab mr delete 123
+			$ glab mr del 123
+			$ glab mr delete branch
+		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			apiClient, err := f.HttpClient()
 			if err != nil {
