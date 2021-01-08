@@ -3,6 +3,7 @@ package revoke
 import (
 	"fmt"
 
+	"github.com/MakeNowJust/heredoc"
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/commands/mr/mrutils"
 	"github.com/profclems/glab/internal/utils"
@@ -17,7 +18,13 @@ func NewCmdRevoke(f *cmdutils.Factory) *cobra.Command {
 		Short:   `Revoke approval on a merge request <id>`,
 		Long:    ``,
 		Aliases: []string{"unapprove"},
-		Args:    cobra.MaximumNArgs(1),
+		Example: heredoc.Doc(`
+			$ glab mr revoke 123
+			$ glab mr unapprove 123
+			$ glab mr revoke branch
+			$ glab mr revoke  # use checked out branch
+		`),
+		Args: cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var err error
 
