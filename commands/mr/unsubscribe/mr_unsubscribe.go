@@ -3,6 +3,7 @@ package unsubscribe
 import (
 	"fmt"
 
+	"github.com/MakeNowJust/heredoc"
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/commands/mr/mrutils"
 	"github.com/profclems/glab/internal/utils"
@@ -17,7 +18,12 @@ func NewCmdUnsubscribe(f *cmdutils.Factory) *cobra.Command {
 		Short:   `Unsubscribe from merge requests`,
 		Long:    ``,
 		Aliases: []string{"unsub"},
-		Args:    cobra.MaximumNArgs(1),
+		Example: heredoc.Doc(`
+			$ glab mr unsubscribe 123
+			$ glab mr unsub 123
+			$ glab mr unsubscribe branch
+		`),
+		Args: cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var err error
 
