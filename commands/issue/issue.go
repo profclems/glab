@@ -1,6 +1,7 @@
 package issue
 
 import (
+	"github.com/MakeNowJust/heredoc"
 	"github.com/profclems/glab/commands/cmdutils"
 	issueBoardCmd "github.com/profclems/glab/commands/issue/board"
 	issueCloseCmd "github.com/profclems/glab/commands/issue/close"
@@ -22,6 +23,18 @@ func NewCmdIssue(f *cmdutils.Factory) *cobra.Command {
 		Use:   "issue [command] [flags]",
 		Short: `Work with GitLab issues`,
 		Long:  ``,
+		Example: heredoc.Doc(`
+			$ glab issue list
+			$ glab issue create --label --confidential
+			$ glab issue view --web
+			$ glab issue note -m "closing because !123 was merged" <issue number>
+		`),
+		Annotations: map[string]string{
+			"help:arguments": heredoc.Doc(`
+				An issue can be supplied as argument in any of the following formats:
+				- by number, e.g. "123".
+			`),
+		},
 	}
 
 	cmdutils.EnableRepoOverride(issueCmd, f)
