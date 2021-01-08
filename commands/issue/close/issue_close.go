@@ -3,6 +3,7 @@ package close
 import (
 	"fmt"
 
+	"github.com/MakeNowJust/heredoc"
 	"github.com/profclems/glab/internal/utils"
 	"github.com/profclems/glab/pkg/api"
 
@@ -17,7 +18,11 @@ func NewCmdClose(f *cmdutils.Factory) *cobra.Command {
 		Use:   "close <id>",
 		Short: `Close an issue`,
 		Long:  ``,
-		Args:  cobra.ExactArgs(1),
+		Example: heredoc.Doc(`
+			$ glab issue close 123
+			$ glab issue close https://gitlab.com/profclems/glab/-/issues/123
+		`),
+		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var err error
 
