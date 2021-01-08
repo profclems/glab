@@ -3,6 +3,7 @@ package issues
 import (
 	"fmt"
 
+	"github.com/MakeNowJust/heredoc"
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/commands/issue/issueutils"
 	"github.com/profclems/glab/commands/mr/mrutils"
@@ -20,7 +21,11 @@ func NewCmdIssues(f *cmdutils.Factory) *cobra.Command {
 		Long:    ``,
 		Aliases: []string{"issue"},
 		Args:    cobra.MaximumNArgs(1),
-		Example: "$ glab mr issues 46",
+		Example: heredoc.Doc(`
+			$ glab mr issues 46
+			$ glab mr issues branch
+			$ glab mr issues  # use checked out branch
+		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var err error
 
