@@ -18,6 +18,7 @@ import (
 	userCmd "github.com/profclems/glab/commands/user"
 	versionCmd "github.com/profclems/glab/commands/version"
 	"github.com/profclems/glab/internal/glrepo"
+	"github.com/profclems/glab/internal/utils"
 
 	"github.com/MakeNowJust/heredoc"
 	"github.com/spf13/cobra"
@@ -59,6 +60,10 @@ func NewCmdRoot(f *cmdutils.Factory, version, buildDate string) *cobra.Command {
 			Available options are (dark|light|notty) or set a custom style
 			https://github.com/charmbracelet/glamour#styles
 		`),
+			"help:feedback": heredoc.Docf(`
+			Encountered a bug or want to suggest a feature?
+			Open an issue using '%s'
+		`, utils.Bold(utils.Yellow("glab issue create -R profclems/glab"))),
 		},
 	}
 
