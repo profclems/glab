@@ -3,6 +3,7 @@ package reopen
 import (
 	"fmt"
 
+	"github.com/MakeNowJust/heredoc"
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/commands/issue/issueutils"
 	"github.com/profclems/glab/internal/utils"
@@ -18,7 +19,12 @@ func NewCmdReopen(f *cmdutils.Factory) *cobra.Command {
 		Short:   `Reopen a closed issue`,
 		Long:    ``,
 		Aliases: []string{"open"},
-		Args:    cobra.ExactArgs(1),
+		Example: heredoc.Doc(`
+			$ glab issue reopen 123
+			$ glab issue open 123
+			$ glab issue reopen https://gitlab.com/profclems/glab/-/issues/123
+		`),
+		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var err error
 			out := f.IO.StdOut
