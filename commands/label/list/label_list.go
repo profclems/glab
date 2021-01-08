@@ -3,6 +3,7 @@ package list
 import (
 	"fmt"
 
+	"github.com/MakeNowJust/heredoc"
 	"github.com/profclems/glab/pkg/api"
 
 	"github.com/profclems/glab/commands/cmdutils"
@@ -18,7 +19,12 @@ func NewCmdList(f *cmdutils.Factory) *cobra.Command {
 		Short:   `List labels in repository`,
 		Long:    ``,
 		Aliases: []string{"ls"},
-		Args:    cobra.ExactArgs(0),
+		Example: heredoc.Doc(`
+			$ glab label list
+			$ glab label ls
+			$ glab label list -R owner/repository
+		`),
+		Args: cobra.ExactArgs(0),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var err error
 
