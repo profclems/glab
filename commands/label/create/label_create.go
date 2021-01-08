@@ -3,6 +3,7 @@ package create
 import (
 	"fmt"
 
+	"github.com/MakeNowJust/heredoc"
 	"github.com/profclems/glab/pkg/api"
 
 	"github.com/profclems/glab/commands/cmdutils"
@@ -16,7 +17,12 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 		Short:   `Create labels for repository/project`,
 		Long:    ``,
 		Aliases: []string{"new"},
-		Args:    cobra.ExactArgs(0),
+		Example: heredoc.Doc(`
+			$ glab label create
+			$ glab label new
+			$ glab label create -R owner/repo
+		`),
+		Args: cobra.ExactArgs(0),
 		RunE: func(cmd *cobra.Command, args []string) error {
 
 			var err error
