@@ -3,6 +3,7 @@ package subscribe
 import (
 	"fmt"
 
+	"github.com/MakeNowJust/heredoc"
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/commands/mr/mrutils"
 	"github.com/profclems/glab/internal/utils"
@@ -17,7 +18,12 @@ func NewCmdSubscribe(f *cmdutils.Factory) *cobra.Command {
 		Short:   `Subscribe to merge requests`,
 		Long:    ``,
 		Aliases: []string{"sub"},
-		Args:    cobra.MaximumNArgs(1),
+		Example: heredoc.Doc(`
+			$ glab mr subscribe 123
+			$ glab mr sub 123
+			$ glab mr subscribe branch
+		`),
+		Args: cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var err error
 
