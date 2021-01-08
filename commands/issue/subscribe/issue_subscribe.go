@@ -3,6 +3,7 @@ package subscribe
 import (
 	"fmt"
 
+	"github.com/MakeNowJust/heredoc"
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/commands/issue/issueutils"
 	"github.com/profclems/glab/internal/utils"
@@ -16,7 +17,12 @@ func NewCmdSubscribe(f *cmdutils.Factory) *cobra.Command {
 		Short:   `Subscribe to an issue`,
 		Long:    ``,
 		Aliases: []string{"sub"},
-		Args:    cobra.ExactArgs(1),
+		Example: heredoc.Doc(`
+			$ glab issue subscribe 123
+			$ glab issue sub 123
+			$ glab issue subscribe https://gitlab.com/profclems/glab/-/issues/123
+		`),
+		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			apiClient, err := f.HttpClient()
 			if err != nil {
