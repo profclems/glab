@@ -14,11 +14,10 @@ import (
 
 func NewCmdClose(f *cmdutils.Factory) *cobra.Command {
 	var issueCloseCmd = &cobra.Command{
-		Use:     "close <id>",
-		Short:   `Close an issue`,
-		Long:    ``,
-		Aliases: []string{"unsub"},
-		Args:    cobra.ExactArgs(1),
+		Use:   "close <id>",
+		Short: `Close an issue`,
+		Long:  ``,
+		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var err error
 
