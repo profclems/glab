@@ -1,6 +1,7 @@
 package mr
 
 import (
+	"github.com/MakeNowJust/heredoc"
 	"github.com/profclems/glab/commands/cmdutils"
 	mrApproveCmd "github.com/profclems/glab/commands/mr/approve"
 	mrApproversCmd "github.com/profclems/glab/commands/mr/approvers"
@@ -31,6 +32,18 @@ func NewCmdMR(f *cmdutils.Factory) *cobra.Command {
 		Use:   "mr <command> [flags]",
 		Short: `Create, view and manage merge requests`,
 		Long:  ``,
+		Example: heredoc.Doc(`
+			$ glab mr create --autofill --labels bugfix
+			$ glab mr merge 123
+			$ glab mr note -m "needs to do X before it can be merged" branch-foo
+		`),
+		Annotations: map[string]string{
+			"help:arguments": heredoc.Doc(`
+			A merge request can be supplied as argument in any of the following formats:
+			- by number, e.g. "123"; or
+			- by the name of its source branch, e.g. "patch-1" or "OWNER:patch-1".
+			`),
+		},
 	}
 
 	cmdutils.EnableRepoOverride(mrCmd, f)
