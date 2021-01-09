@@ -19,7 +19,7 @@ type ListOptions struct {
 	// metadata
 	Assignee  string
 	Author    string
-	Labels    string
+	Labels    []string
 	NotLabels []string
 	Milestone string
 	Mine      bool
@@ -91,7 +91,7 @@ func NewCmdList(f *cmdutils.Factory, runE func(opts *ListOptions) error) *cobra.
 	issueListCmd.Flags().StringVar(&opts.Author, "author", "", "Filter issue by author <username>")
 	issueListCmd.Flags().StringVar(&opts.Search, "search", "", "Search <string> in the fields defined by --in")
 	issueListCmd.Flags().StringVar(&opts.In, "in", "title,description", "search in {title|description}")
-	issueListCmd.Flags().StringVarP(&opts.Labels, "label", "l", "", "Filter issue by label <name>")
+	issueListCmd.Flags().StringSliceVarP(&opts.Labels, "label", "l", []string{}, "Filter issue by label <name>")
 	issueListCmd.Flags().StringSliceVar(&opts.NotLabels, "not-label", []string{}, "Filter issue by lack of label <name>")
 	issueListCmd.Flags().StringVarP(&opts.Milestone, "milestone", "m", "", "Filter issue by milestone <id>")
 	issueListCmd.Flags().BoolVarP(&opts.All, "all", "A", false, "Get all issues")
@@ -159,11 +159,8 @@ func listRun(opts *ListOptions) error {
 		listOpts.Search = gitlab.String(opts.Search)
 		opts.ListType = "search"
 	}
-	if opts.Labels != "" {
-		label := gitlab.Labels{
-			opts.Labels,
-		}
-		listOpts.Labels = label
+	if len(opts.Labels) != 0 {
+		listOpts.Labels = opts.Labels
 		opts.ListType = "search"
 	}
 	if len(opts.NotLabels) != 0 {
