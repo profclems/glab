@@ -18,17 +18,21 @@ import (
 
 type ListOptions struct {
 	// metadata
-	Assignee  []string
-	Labels    []string
-	Milestone string
-	Mine      bool
+	Assignee     []string
+	Author       string
+	Labels       []string
+	Milestone    string
+	SourceBranch string
+	TargetBranch string
+	Search       string
+	Mine         bool
 
 	// issue states
 	State  string
 	Closed bool
-	Opened bool
 	Merged bool
 	All    bool
+	Draft  bool
 
 	// Pagination
 	Page    int
@@ -67,8 +71,10 @@ func NewCmdList(f *cmdutils.Factory, runE func(opts *ListOptions) error) *cobra.
 			opts.HTTPClient = f.HttpClient
 
 			// check if any of the two or all of states flag are specified
-			if opts.Closed && (opts.Merged || opts.Opened) || (opts.Merged && opts.Opened) {
-				return cmdutils.FlagError{Err: errors.New("specify either --closed, --merged or --opened. Use --all issues in all states")}
+			if opts.Closed && opts.Merged {
+				return cmdutils.FlagError{
+					Err: errors.New("specify either --closed or --merged. Use --all issues in all states"),
+				}
 			}
 			if opts.All {
 				opts.State = "all"
@@ -92,15 +98,26 @@ func NewCmdList(f *cmdutils.Factory, runE func(opts *ListOptions) error) *cobra.
 	}
 
 	mrListCmd.Flags().StringSliceVarP(&opts.Labels, "label", "l", []string{}, "Filter merge request by label <name>")
+	mrListCmd.Flags().StringVar(&opts.Author, "author", "", "Fitler merge request by Author <username>")
 	mrListCmd.Flags().StringVarP(&opts.Milestone, "milestone", "m", "", "Filter merge request by milestone <id>")
+	mrListCmd.Flags().StringVarP(&opts.SourceBranch, "source-branch", "s", "", "Filter by source branch <name>")
+	mrListCmd.Flags().StringVarP(&opts.TargetBranch, "target-branch", "t", "", "Filter by target branch <name>")
+	mrListCmd.Flags().StringVar(&opts.Search, "search", "", "Filter by <string> in title and description")
 	mrListCmd.Flags().BoolVarP(&opts.All, "all", "A", false, "Get all merge requests")
 	mrListCmd.Flags().BoolVarP(&opts.Closed, "closed", "c", false, "Get only closed merge requests")
-	mrListCmd.Flags().BoolVarP(&opts.Opened, "opened", "o", false, "Get only open merge requests")
 	mrListCmd.Flags().BoolVarP(&opts.Merged, "merged", "M", false, "Get only merged merge requests")
+	mrListCmd.Flags().BoolVarP(&opts.Draft, "draft", "d", false, "Filter by draft merge requests")
 	mrListCmd.Flags().IntVarP(&opts.Page, "page", "p", 1, "Page number")
 	mrListCmd.Flags().IntVarP(&opts.PerPage, "per-page", "P", 30, "Number of items to list per page")
-	mrListCmd.Flags().BoolVarP(&opts.Mine, "mine", "", false, "Get only merge requests assigned to me")
 	mrListCmd.Flags().StringSliceVarP(&opts.Assignee, "assignee", "a", []string{}, "Get only merge requests assigned to users")
+
+	mrListCmd.Flags().BoolP("opened", "o", false, "Get only open merge requests")
+	mrListCmd.Flags().MarkHidden("opened")
+	mrListCmd.Flags().MarkDeprecated("opened", "default value if neither --closed, --locked or --merged is used")
+
+	mrListCmd.Flags().BoolVarP(&opts.Mine, "mine", "", false, "Get only merge requests assigned to me")
+	mrListCmd.Flags().MarkHidden("mine")
+	mrListCmd.Flags().MarkDeprecated("mine", "use --assignee=@me")
 
 	return mrListCmd
 }
@@ -124,6 +141,26 @@ func listRun(opts *ListOptions) error {
 	l.Page = 1
 	l.PerPage = 30
 
+	if opts.Author != "" {
+		u, err := api.UserByName(apiClient, opts.Author)
+		if err != nil {
+			return err
+		}
+		l.AuthorID = gitlab.Int(u.ID)
+		opts.ListType = "search"
+	}
+	if opts.SourceBranch != "" {
+		l.SourceBranch = gitlab.String(opts.SourceBranch)
+		opts.ListType = "search"
+	}
+	if opts.TargetBranch != "" {
+		l.TargetBranch = gitlab.String(opts.TargetBranch)
+		opts.ListType = "search"
+	}
+	if opts.Search != "" {
+		l.Search = gitlab.String(opts.Search)
+		opts.ListType = "search"
+	}
 	if len(opts.Labels) > 0 {
 		l.Labels = opts.Labels
 		opts.ListType = "search"
@@ -137,6 +174,10 @@ func listRun(opts *ListOptions) error {
 	}
 	if opts.PerPage != 0 {
 		l.PerPage = opts.PerPage
+	}
+	if opts.Draft {
+		l.WIP = gitlab.String("yes")
+		opts.ListType = "search"
 	}
 
 	if opts.Mine {
