@@ -21,6 +21,7 @@ type ListOptions struct {
 	Labels    string
 	Milestone string
 	Mine      bool
+	Search    string
 
 	// issue states
 	State        string
@@ -32,6 +33,9 @@ type ListOptions struct {
 	// Pagination
 	Page    int
 	PerPage int
+
+	// Other
+	In string
 
 	// display opts
 	ListType       string
@@ -77,6 +81,8 @@ func NewCmdList(f *cmdutils.Factory, runE func(opts *ListOptions) error) *cobra.
 	}
 	issueListCmd.Flags().StringVarP(&opts.Assignee, "assignee", "a", "", "Filter issue by assignee <username>")
 	issueListCmd.Flags().StringVar(&opts.Author, "author", "", "Filter issue by author <username>")
+	issueListCmd.Flags().StringVar(&opts.Search, "search", "", "Search <string> in the fields defined by --in")
+	issueListCmd.Flags().StringVar(&opts.In, "in", "title,description", "search in {title|description}")
 	issueListCmd.Flags().StringVarP(&opts.Labels, "label", "l", "", "Filter issue by label <name>")
 	issueListCmd.Flags().StringVarP(&opts.Milestone, "milestone", "m", "", "Filter issue by milestone <id>")
 	issueListCmd.Flags().BoolVarP(&opts.All, "all", "A", false, "Get all issues")
@@ -109,20 +115,40 @@ func listRun(opts *ListOptions) error {
 
 	listOpts := &gitlab.ListProjectIssuesOptions{
 		State: gitlab.String(opts.State),
+		In:    gitlab.String(opts.In),
 	}
 	listOpts.Page = 1
 	listOpts.PerPage = 30
 
-	if opts.Assignee != "" {
+	if opts.Assignee != "" || opts.Mine {
+		if opts.Assignee == "@me" || opts.Mine {
+			u, err := api.CurrentUser(nil)
+			if err != nil {
+				return err
+			}
+			opts.Assignee = u.Username
+		}
 		listOpts.AssigneeUsername = gitlab.String(opts.Assignee)
 	}
 	if opts.Author != "" {
-		// go-gitlab still doesn't have an AuthorUsername field so convert to ID
-		u, err := api.UserByName(apiClient, opts.Author)
-		if err != nil {
-			return err
+		var u *gitlab.User
+		if opts.Author == "@me" {
+			u, err = api.CurrentUser(nil)
+			if err != nil {
+				return err
+			}
+		} else {
+			// go-gitlab still doesn't have an AuthorUsername field so convert to ID
+			u, err = api.UserByName(apiClient, opts.Author)
+			if err != nil {
+				return err
+			}
 		}
 		listOpts.AuthorID = gitlab.Int(u.ID)
+	}
+	if opts.Search != "" {
+		listOpts.Search = gitlab.String(opts.Search)
+		opts.ListType = "search"
 	}
 	if opts.Labels != "" {
 		label := gitlab.Labels{
