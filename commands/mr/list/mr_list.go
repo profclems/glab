@@ -21,6 +21,7 @@ type ListOptions struct {
 	Assignee     []string
 	Author       string
 	Labels       []string
+	NotLabels    []string
 	Milestone    string
 	SourceBranch string
 	TargetBranch string
@@ -65,6 +66,7 @@ func NewCmdList(f *cmdutils.Factory, runE func(opts *ListOptions) error) *cobra.
 			$ glab mr list --target-branch=trunk
 			$ glab mr list --search "this adds feature X"
 			$ glab mr list --label needs-review
+			$ glab mr list --not-label waiting-maintainer-feedback,subsystem-x
 			$ glab mr list -M --per-page 10
 		`),
 		Args: cobra.ExactArgs(0),
@@ -72,6 +74,12 @@ func NewCmdList(f *cmdutils.Factory, runE func(opts *ListOptions) error) *cobra.
 			// supports repo override
 			opts.BaseRepo = f.BaseRepo
 			opts.HTTPClient = f.HttpClient
+
+			if len(opts.Labels) != 0 && len(opts.NotLabels) != 0 {
+				return cmdutils.FlagError{
+					Err: errors.New("flags --label and --not-label are mutually exclusive"),
+				}
+			}
 
 			// check if any of the two or all of states flag are specified
 			if opts.Closed && opts.Merged {
@@ -101,6 +109,7 @@ func NewCmdList(f *cmdutils.Factory, runE func(opts *ListOptions) error) *cobra.
 	}
 
 	mrListCmd.Flags().StringSliceVarP(&opts.Labels, "label", "l", []string{}, "Filter merge request by label <name>")
+	mrListCmd.Flags().StringSliceVar(&opts.NotLabels, "not-label", []string{}, "Filter merge requests by not having label <name>")
 	mrListCmd.Flags().StringVar(&opts.Author, "author", "", "Fitler merge request by Author <username>")
 	mrListCmd.Flags().StringVarP(&opts.Milestone, "milestone", "m", "", "Filter merge request by milestone <id>")
 	mrListCmd.Flags().StringVarP(&opts.SourceBranch, "source-branch", "s", "", "Filter by source branch <name>")
