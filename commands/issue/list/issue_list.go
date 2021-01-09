@@ -17,14 +17,15 @@ import (
 
 type ListOptions struct {
 	// metadata
-	Assignee  string
-	Author    string
-	NotAuthor []string
-	Labels    []string
-	NotLabels []string
-	Milestone string
-	Mine      bool
-	Search    string
+	Assignee    string
+	NotAssignee []string
+	Author      string
+	NotAuthor   []string
+	Labels      []string
+	NotLabels   []string
+	Milestone   string
+	Mine        bool
+	Search      string
 
 	// issue states
 	State        string
@@ -77,6 +78,12 @@ func NewCmdList(f *cmdutils.Factory, runE func(opts *ListOptions) error) *cobra.
 				}
 			}
 
+			if opts.Assignee != "" && len(opts.NotAssignee) != 0 {
+				return cmdutils.FlagError{
+					Err: errors.New("flags --assignee and --not-assignee are mutually exclusive"),
+				}
+			}
+
 			if opts.All {
 				opts.State = "all"
 			} else if opts.Closed {
@@ -95,6 +102,7 @@ func NewCmdList(f *cmdutils.Factory, runE func(opts *ListOptions) error) *cobra.
 		},
 	}
 	issueListCmd.Flags().StringVarP(&opts.Assignee, "assignee", "a", "", "Filter issue by assignee <username>")
+	issueListCmd.Flags().StringSliceVar(&opts.NotAssignee, "not-assignee", []string{}, "Filter issue by not being assigneed to <username>")
 	issueListCmd.Flags().StringVar(&opts.Author, "author", "", "Filter issue by author <username>")
 	issueListCmd.Flags().StringSliceVar(&opts.NotAuthor, "not-author", []string{}, "Filter by not being by author(s) <username>")
 	issueListCmd.Flags().StringVar(&opts.Search, "search", "", "Search <string> in the fields defined by --in")
@@ -146,6 +154,17 @@ func listRun(opts *ListOptions) error {
 			opts.Assignee = u.Username
 		}
 		listOpts.AssigneeUsername = gitlab.String(opts.Assignee)
+	}
+	if len(opts.NotAssignee) != 0 {
+		us, err := api.UsersByNames(apiClient, opts.NotAssignee)
+		if err != nil {
+			return err
+		}
+		var IDs []int
+		for i := range us {
+			IDs = append(IDs, us[i].ID)
+		}
+		listOpts.NotAssigneeID = IDs
 	}
 	if opts.Author != "" {
 		var u *gitlab.User
