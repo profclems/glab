@@ -26,7 +26,6 @@ type ListOptions struct {
 	// issue states
 	State  string
 	Closed bool
-	Opened bool
 	Merged bool
 	All    bool
 
@@ -67,8 +66,10 @@ func NewCmdList(f *cmdutils.Factory, runE func(opts *ListOptions) error) *cobra.
 			opts.HTTPClient = f.HttpClient
 
 			// check if any of the two or all of states flag are specified
-			if opts.Closed && (opts.Merged || opts.Opened) || (opts.Merged && opts.Opened) {
-				return cmdutils.FlagError{Err: errors.New("specify either --closed, --merged or --opened. Use --all issues in all states")}
+			if opts.Closed && opts.Merged {
+				return cmdutils.FlagError{
+					Err: errors.New("specify either --closed or --merged. Use --all issues in all states"),
+				}
 			}
 			if opts.All {
 				opts.State = "all"
@@ -95,12 +96,15 @@ func NewCmdList(f *cmdutils.Factory, runE func(opts *ListOptions) error) *cobra.
 	mrListCmd.Flags().StringVarP(&opts.Milestone, "milestone", "m", "", "Filter merge request by milestone <id>")
 	mrListCmd.Flags().BoolVarP(&opts.All, "all", "A", false, "Get all merge requests")
 	mrListCmd.Flags().BoolVarP(&opts.Closed, "closed", "c", false, "Get only closed merge requests")
-	mrListCmd.Flags().BoolVarP(&opts.Opened, "opened", "o", false, "Get only open merge requests")
 	mrListCmd.Flags().BoolVarP(&opts.Merged, "merged", "M", false, "Get only merged merge requests")
 	mrListCmd.Flags().IntVarP(&opts.Page, "page", "p", 1, "Page number")
 	mrListCmd.Flags().IntVarP(&opts.PerPage, "per-page", "P", 30, "Number of items to list per page")
 	mrListCmd.Flags().BoolVarP(&opts.Mine, "mine", "", false, "Get only merge requests assigned to me")
 	mrListCmd.Flags().StringSliceVarP(&opts.Assignee, "assignee", "a", []string{}, "Get only merge requests assigned to users")
+
+	mrListCmd.Flags().BoolP("opened", "o", false, "Get only open merge requests")
+	mrListCmd.Flags().MarkHidden("opened")
+	mrListCmd.Flags().MarkDeprecated("opened", "default value if neither --closed, --locked or --merged is used")
 
 	return mrListCmd
 }
