@@ -79,7 +79,6 @@ func NewCmdList(f *cmdutils.Factory, runE func(opts *ListOptions) error) *cobra.
 	issueListCmd.Flags().StringVar(&opts.Author, "author", "", "Filter issue by author <username>")
 	issueListCmd.Flags().StringVarP(&opts.Labels, "label", "l", "", "Filter issue by label <name>")
 	issueListCmd.Flags().StringVarP(&opts.Milestone, "milestone", "m", "", "Filter issue by milestone <id>")
-	issueListCmd.Flags().BoolVarP(&opts.Mine, "mine", "M", false, "Filter only issues issues assigned to me")
 	issueListCmd.Flags().BoolVarP(&opts.All, "all", "A", false, "Get all issues")
 	issueListCmd.Flags().BoolVarP(&opts.Closed, "closed", "c", false, "Get only closed issues")
 	issueListCmd.Flags().BoolVarP(&opts.Confidential, "confidential", "C", false, "Filter by confidential issues")
@@ -89,6 +88,10 @@ func NewCmdList(f *cmdutils.Factory, runE func(opts *ListOptions) error) *cobra.
 	issueListCmd.Flags().BoolP("opened", "o", false, "Get only opened issues")
 	issueListCmd.Flags().MarkHidden("opened")
 	issueListCmd.Flags().MarkDeprecated("opened", "default if --closed is not used")
+
+	issueListCmd.Flags().BoolVarP(&opts.Mine, "mine", "M", false, "Filter only issues issues assigned to me")
+	issueListCmd.Flags().MarkHidden("mine")
+	issueListCmd.Flags().MarkDeprecated("mine", "use --assignee=@me")
 
 	return issueListCmd
 }
@@ -145,14 +148,6 @@ func listRun(opts *ListOptions) error {
 		opts.ListType = "search"
 	}
 
-	if opts.Mine {
-		u, err := api.CurrentUser(nil)
-		if err != nil {
-			return err
-		}
-		listOpts.AssigneeUsername = gitlab.String(u.Username)
-		opts.ListType = "search"
-	}
 	issues, err := api.ListIssues(apiClient, repo.FullName(), listOpts)
 	if err != nil {
 		return err
