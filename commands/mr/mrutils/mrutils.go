@@ -92,7 +92,7 @@ func MRState(m *gitlab.MergeRequest) string {
 	if m.State == "opened" {
 		return utils.Green(fmt.Sprintf("!%d", m.IID))
 	} else if m.State == "merged" {
-		return utils.Blue(fmt.Sprintf("!%d", m.IID))
+		return utils.Magenta(fmt.Sprintf("!%d", m.IID))
 	} else {
 		return utils.Red(fmt.Sprintf("!%d", m.IID))
 	}
