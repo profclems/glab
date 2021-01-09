@@ -156,15 +156,11 @@ func listRun(opts *ListOptions) error {
 		listOpts.AssigneeUsername = gitlab.String(opts.Assignee)
 	}
 	if len(opts.NotAssignee) != 0 {
-		us, err := api.UsersByNames(apiClient, opts.NotAssignee)
+		u, err := api.UsersByNames(apiClient, opts.NotAssignee)
 		if err != nil {
 			return err
 		}
-		var IDs []int
-		for i := range us {
-			IDs = append(IDs, us[i].ID)
-		}
-		listOpts.NotAssigneeID = IDs
+		listOpts.NotAssigneeID = cmdutils.IDsFromUsers(u)
 	}
 	if opts.Author != "" {
 		u, err := api.UserByName(apiClient, opts.Author)
@@ -174,15 +170,11 @@ func listRun(opts *ListOptions) error {
 		listOpts.AuthorID = gitlab.Int(u.ID)
 	}
 	if len(opts.NotAuthor) != 0 {
-		us, err := api.UsersByNames(apiClient, opts.NotAuthor)
+		u, err := api.UsersByNames(apiClient, opts.NotAuthor)
 		if err != nil {
 			return err
 		}
-		var IDs []int
-		for i := range us {
-			IDs = append(IDs, us[i].ID)
-		}
-		listOpts.NotAuthorID = IDs
+		listOpts.NotAuthorID = cmdutils.IDsFromUsers(u)
 	}
 	if opts.Search != "" {
 		listOpts.Search = gitlab.String(opts.Search)
