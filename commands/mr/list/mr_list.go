@@ -19,6 +19,7 @@ import (
 type ListOptions struct {
 	// metadata
 	Assignee  []string
+	Author    string
 	Labels    []string
 	Milestone string
 	Mine      bool
@@ -93,6 +94,7 @@ func NewCmdList(f *cmdutils.Factory, runE func(opts *ListOptions) error) *cobra.
 	}
 
 	mrListCmd.Flags().StringSliceVarP(&opts.Labels, "label", "l", []string{}, "Filter merge request by label <name>")
+	mrListCmd.Flags().StringVar(&opts.Author, "author", "", "Fitler merge request by Author <username>")
 	mrListCmd.Flags().StringVarP(&opts.Milestone, "milestone", "m", "", "Filter merge request by milestone <id>")
 	mrListCmd.Flags().BoolVarP(&opts.All, "all", "A", false, "Get all merge requests")
 	mrListCmd.Flags().BoolVarP(&opts.Closed, "closed", "c", false, "Get only closed merge requests")
@@ -128,6 +130,14 @@ func listRun(opts *ListOptions) error {
 	l.Page = 1
 	l.PerPage = 30
 
+	if opts.Author != "" {
+		u, err := api.UserByName(apiClient, opts.Author)
+		if err != nil {
+			return err
+		}
+		l.AuthorID = gitlab.Int(u.ID)
+		opts.ListType = "search"
+	}
 	if len(opts.Labels) > 0 {
 		l.Labels = opts.Labels
 		opts.ListType = "search"
