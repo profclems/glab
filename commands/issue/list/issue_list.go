@@ -17,9 +17,11 @@ import (
 type ListOptions struct {
 	// metadata
 	Assignee  string
+	Author    string
 	Labels    string
 	Milestone string
 	Mine      bool
+	Search    string
 
 	// issue states
 	State        string
@@ -31,6 +33,9 @@ type ListOptions struct {
 	// Pagination
 	Page    int
 	PerPage int
+
+	// Other
+	In string
 
 	// display opts
 	ListType       string
@@ -75,15 +80,24 @@ func NewCmdList(f *cmdutils.Factory, runE func(opts *ListOptions) error) *cobra.
 		},
 	}
 	issueListCmd.Flags().StringVarP(&opts.Assignee, "assignee", "a", "", "Filter issue by assignee <username>")
+	issueListCmd.Flags().StringVar(&opts.Author, "author", "", "Filter issue by author <username>")
+	issueListCmd.Flags().StringVar(&opts.Search, "search", "", "Search <string> in the fields defined by --in")
+	issueListCmd.Flags().StringVar(&opts.In, "in", "title,description", "search in {title|description}")
 	issueListCmd.Flags().StringVarP(&opts.Labels, "label", "l", "", "Filter issue by label <name>")
 	issueListCmd.Flags().StringVarP(&opts.Milestone, "milestone", "m", "", "Filter issue by milestone <id>")
-	issueListCmd.Flags().BoolVarP(&opts.Mine, "mine", "M", false, "Filter only issues issues assigned to me")
 	issueListCmd.Flags().BoolVarP(&opts.All, "all", "A", false, "Get all issues")
-	issueListCmd.Flags().BoolVarP(&opts.Opened, "closed", "c", false, "Get only closed issues")
-	issueListCmd.Flags().BoolVarP(&opts.Opened, "opened", "o", false, "Get only opened issues")
+	issueListCmd.Flags().BoolVarP(&opts.Closed, "closed", "c", false, "Get only closed issues")
 	issueListCmd.Flags().BoolVarP(&opts.Confidential, "confidential", "C", false, "Filter by confidential issues")
 	issueListCmd.Flags().IntVarP(&opts.Page, "page", "p", 1, "Page number")
 	issueListCmd.Flags().IntVarP(&opts.PerPage, "per-page", "P", 30, "Number of items to list per page. (default 30)")
+
+	issueListCmd.Flags().BoolP("opened", "o", false, "Get only opened issues")
+	issueListCmd.Flags().MarkHidden("opened")
+	issueListCmd.Flags().MarkDeprecated("opened", "default if --closed is not used")
+
+	issueListCmd.Flags().BoolVarP(&opts.Mine, "mine", "M", false, "Filter only issues issues assigned to me")
+	issueListCmd.Flags().MarkHidden("mine")
+	issueListCmd.Flags().MarkDeprecated("mine", "use --assignee=@me")
 
 	return issueListCmd
 }
@@ -101,12 +115,40 @@ func listRun(opts *ListOptions) error {
 
 	listOpts := &gitlab.ListProjectIssuesOptions{
 		State: gitlab.String(opts.State),
+		In:    gitlab.String(opts.In),
 	}
 	listOpts.Page = 1
 	listOpts.PerPage = 30
 
-	if opts.Assignee != "" {
+	if opts.Assignee != "" || opts.Mine {
+		if opts.Assignee == "@me" || opts.Mine {
+			u, err := api.CurrentUser(nil)
+			if err != nil {
+				return err
+			}
+			opts.Assignee = u.Username
+		}
 		listOpts.AssigneeUsername = gitlab.String(opts.Assignee)
+	}
+	if opts.Author != "" {
+		var u *gitlab.User
+		if opts.Author == "@me" {
+			u, err = api.CurrentUser(nil)
+			if err != nil {
+				return err
+			}
+		} else {
+			// go-gitlab still doesn't have an AuthorUsername field so convert to ID
+			u, err = api.UserByName(apiClient, opts.Author)
+			if err != nil {
+				return err
+			}
+		}
+		listOpts.AuthorID = gitlab.Int(u.ID)
+	}
+	if opts.Search != "" {
+		listOpts.Search = gitlab.String(opts.Search)
+		opts.ListType = "search"
 	}
 	if opts.Labels != "" {
 		label := gitlab.Labels{
@@ -132,14 +174,6 @@ func listRun(opts *ListOptions) error {
 		opts.ListType = "search"
 	}
 
-	if opts.Mine {
-		u, err := api.CurrentUser(nil)
-		if err != nil {
-			return err
-		}
-		listOpts.AssigneeUsername = gitlab.String(u.Username)
-		opts.ListType = "search"
-	}
 	issues, err := api.ListIssues(apiClient, repo.FullName(), listOpts)
 	if err != nil {
 		return err
