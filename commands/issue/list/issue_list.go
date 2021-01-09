@@ -1,6 +1,7 @@
 package list
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/profclems/glab/internal/glrepo"
@@ -16,12 +17,15 @@ import (
 
 type ListOptions struct {
 	// metadata
-	Assignee  string
-	Author    string
-	Labels    string
-	Milestone string
-	Mine      bool
-	Search    string
+	Assignee    string
+	NotAssignee []string
+	Author      string
+	NotAuthor   []string
+	Labels      []string
+	NotLabels   []string
+	Milestone   string
+	Mine        bool
+	Search      string
 
 	// issue states
 	State        string
@@ -62,6 +66,24 @@ func NewCmdList(f *cmdutils.Factory, runE func(opts *ListOptions) error) *cobra.
 			opts.BaseRepo = f.BaseRepo
 			opts.HTTPClient = f.HttpClient
 
+			if len(opts.Labels) != 0 && len(opts.NotLabels) != 0 {
+				return cmdutils.FlagError{
+					Err: errors.New("flags --label and --not-label are mutually exclusive"),
+				}
+			}
+
+			if opts.Author != "" && len(opts.NotAuthor) != 0 {
+				return cmdutils.FlagError{
+					Err: errors.New("flags --author and --not-author are mutually exclusive"),
+				}
+			}
+
+			if opts.Assignee != "" && len(opts.NotAssignee) != 0 {
+				return cmdutils.FlagError{
+					Err: errors.New("flags --assignee and --not-assignee are mutually exclusive"),
+				}
+			}
+
 			if opts.All {
 				opts.State = "all"
 			} else if opts.Closed {
@@ -80,10 +102,13 @@ func NewCmdList(f *cmdutils.Factory, runE func(opts *ListOptions) error) *cobra.
 		},
 	}
 	issueListCmd.Flags().StringVarP(&opts.Assignee, "assignee", "a", "", "Filter issue by assignee <username>")
+	issueListCmd.Flags().StringSliceVar(&opts.NotAssignee, "not-assignee", []string{}, "Filter issue by not being assigneed to <username>")
 	issueListCmd.Flags().StringVar(&opts.Author, "author", "", "Filter issue by author <username>")
+	issueListCmd.Flags().StringSliceVar(&opts.NotAuthor, "not-author", []string{}, "Filter by not being by author(s) <username>")
 	issueListCmd.Flags().StringVar(&opts.Search, "search", "", "Search <string> in the fields defined by --in")
 	issueListCmd.Flags().StringVar(&opts.In, "in", "title,description", "search in {title|description}")
-	issueListCmd.Flags().StringVarP(&opts.Labels, "label", "l", "", "Filter issue by label <name>")
+	issueListCmd.Flags().StringSliceVarP(&opts.Labels, "label", "l", []string{}, "Filter issue by label <name>")
+	issueListCmd.Flags().StringSliceVar(&opts.NotLabels, "not-label", []string{}, "Filter issue by lack of label <name>")
 	issueListCmd.Flags().StringVarP(&opts.Milestone, "milestone", "m", "", "Filter issue by milestone <id>")
 	issueListCmd.Flags().BoolVarP(&opts.All, "all", "A", false, "Get all issues")
 	issueListCmd.Flags().BoolVarP(&opts.Closed, "closed", "c", false, "Get only closed issues")
@@ -130,31 +155,37 @@ func listRun(opts *ListOptions) error {
 		}
 		listOpts.AssigneeUsername = gitlab.String(opts.Assignee)
 	}
+	if len(opts.NotAssignee) != 0 {
+		u, err := api.UsersByNames(apiClient, opts.NotAssignee)
+		if err != nil {
+			return err
+		}
+		listOpts.NotAssigneeID = cmdutils.IDsFromUsers(u)
+	}
 	if opts.Author != "" {
-		var u *gitlab.User
-		if opts.Author == "@me" {
-			u, err = api.CurrentUser(nil)
-			if err != nil {
-				return err
-			}
-		} else {
-			// go-gitlab still doesn't have an AuthorUsername field so convert to ID
-			u, err = api.UserByName(apiClient, opts.Author)
-			if err != nil {
-				return err
-			}
+		u, err := api.UserByName(apiClient, opts.Author)
+		if err != nil {
+			return err
 		}
 		listOpts.AuthorID = gitlab.Int(u.ID)
+	}
+	if len(opts.NotAuthor) != 0 {
+		u, err := api.UsersByNames(apiClient, opts.NotAuthor)
+		if err != nil {
+			return err
+		}
+		listOpts.NotAuthorID = cmdutils.IDsFromUsers(u)
 	}
 	if opts.Search != "" {
 		listOpts.Search = gitlab.String(opts.Search)
 		opts.ListType = "search"
 	}
-	if opts.Labels != "" {
-		label := gitlab.Labels{
-			opts.Labels,
-		}
-		listOpts.Labels = label
+	if len(opts.Labels) != 0 {
+		listOpts.Labels = opts.Labels
+		opts.ListType = "search"
+	}
+	if len(opts.NotLabels) != 0 {
+		listOpts.NotLabels = opts.NotLabels
 		opts.ListType = "search"
 	}
 	if opts.Milestone != "" {
