@@ -167,18 +167,9 @@ func listRun(opts *ListOptions) error {
 		listOpts.NotAssigneeID = IDs
 	}
 	if opts.Author != "" {
-		var u *gitlab.User
-		if opts.Author == "@me" {
-			u, err = api.CurrentUser(nil)
-			if err != nil {
-				return err
-			}
-		} else {
-			// go-gitlab still doesn't have an AuthorUsername field so convert to ID
-			u, err = api.UserByName(apiClient, opts.Author)
-			if err != nil {
-				return err
-			}
+		u, err := api.UserByName(apiClient, opts.Author)
+		if err != nil {
+			return err
 		}
 		listOpts.AuthorID = gitlab.Int(u.ID)
 	}
