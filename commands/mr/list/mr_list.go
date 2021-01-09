@@ -109,12 +109,15 @@ func NewCmdList(f *cmdutils.Factory, runE func(opts *ListOptions) error) *cobra.
 	mrListCmd.Flags().BoolVarP(&opts.Draft, "draft", "d", false, "Filter by draft merge requests")
 	mrListCmd.Flags().IntVarP(&opts.Page, "page", "p", 1, "Page number")
 	mrListCmd.Flags().IntVarP(&opts.PerPage, "per-page", "P", 30, "Number of items to list per page")
-	mrListCmd.Flags().BoolVarP(&opts.Mine, "mine", "", false, "Get only merge requests assigned to me")
 	mrListCmd.Flags().StringSliceVarP(&opts.Assignee, "assignee", "a", []string{}, "Get only merge requests assigned to users")
 
 	mrListCmd.Flags().BoolP("opened", "o", false, "Get only open merge requests")
 	mrListCmd.Flags().MarkHidden("opened")
 	mrListCmd.Flags().MarkDeprecated("opened", "default value if neither --closed, --locked or --merged is used")
+
+	mrListCmd.Flags().BoolVarP(&opts.Mine, "mine", "", false, "Get only merge requests assigned to me")
+	mrListCmd.Flags().MarkHidden("mine")
+	mrListCmd.Flags().MarkDeprecated("mine", "use --assignee=@me")
 
 	return mrListCmd
 }
