@@ -7,10 +7,8 @@ import (
 
 	"github.com/profclems/glab/commands/issue/issueutils"
 
-	"github.com/profclems/glab/internal/config"
-	"github.com/profclems/glab/internal/glrepo"
-
 	"github.com/profclems/glab/commands/cmdutils"
+	"github.com/profclems/glab/internal/config"
 	"github.com/profclems/glab/internal/utils"
 	"github.com/profclems/glab/pkg/api"
 
@@ -24,7 +22,6 @@ var (
 	showComments   bool
 	limit          int
 	pageNumber     int
-	baseRepo       glrepo.Interface
 	cfg            config.Config
 	glamourStyle   string
 	notes          []*gitlab.Note

@@ -160,6 +160,9 @@ func issueMetadataFromURL(s string) (int, glrepo.Interface) {
 	u.Path = strings.Replace(u.Path, fmt.Sprintf("/issues/%d", issueIID), "", 1)
 
 	repo, err := glrepo.FromURL(u)
+	if err != nil {
+		return 0, nil
+	}
 	return issueIID, repo
 }
 
