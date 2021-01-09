@@ -2,9 +2,9 @@ package delete
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/profclems/glab/commands/cmdutils"
+	"github.com/profclems/glab/commands/issue/issueutils"
 	"github.com/profclems/glab/internal/utils"
 	"github.com/profclems/glab/pkg/api"
 
@@ -19,8 +19,6 @@ func NewCmdDelete(f *cmdutils.Factory) *cobra.Command {
 		Aliases: []string{"del"},
 		Args:    cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-
-			issueID := strings.TrimSpace(args[0])
 			var err error
 
 			apiClient, err := f.HttpClient()
@@ -28,18 +26,17 @@ func NewCmdDelete(f *cmdutils.Factory) *cobra.Command {
 				return err
 			}
 
-			repo, err := f.BaseRepo()
+			issues, repo, err := issueutils.IssuesFromArgs(apiClient, f.BaseRepo, args)
 			if err != nil {
 				return err
 			}
 
-			arrIds := strings.Split(strings.Trim(issueID, "[] "), ",")
-			for _, i2 := range arrIds {
+			for _, issue := range issues {
 				if f.IO.IsErrTTY && f.IO.IsaTTY {
-					fmt.Fprintln(f.IO.StdOut, "- Deleting Issue #"+i2)
+					fmt.Fprintf(f.IO.StdOut, "- Deleting Issue #%d\n", issue.IID)
 				}
 
-				err := api.DeleteIssue(apiClient, repo.FullName(), utils.StringToInt(i2))
+				err := api.DeleteIssue(apiClient, repo.FullName(), issue.IID)
 				if err != nil {
 					return err
 				}

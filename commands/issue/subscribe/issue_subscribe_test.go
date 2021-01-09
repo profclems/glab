@@ -47,17 +47,17 @@ func TestNewCmdSubscribe(t *testing.T) {
 		{
 			Name:        "Issue Exists",
 			Issue:       "1",
-			ExpectedMsg: []string{"- Subscribing to Issue #1", "✓ Subscribed to issue #1"},
+			ExpectedMsg: []string{"- Subscribing to Issue #1 in glab-cli/test", "✓ Subscribed to issue #1"},
 		},
 		{
 			Name:        "Issue on another repo",
 			Issue:       "1 -R profclems/glab",
-			ExpectedMsg: []string{"- Subscribing to Issue #1", "✓ Subscribed to issue #1"},
+			ExpectedMsg: []string{"- Subscribing to Issue #1 in profclems/glab", "✓ Subscribed to issue #1"},
 		},
 		{
 			Name:        "Issue Does Not Exist",
 			Issue:       "0",
-			ExpectedMsg: []string{"- Subscribing to Issue #0", "error expected"},
+			ExpectedMsg: []string{"- Subscribing to Issue #0 in glab-cli/test", "error expected"},
 			wantErr:     true,
 		},
 	}

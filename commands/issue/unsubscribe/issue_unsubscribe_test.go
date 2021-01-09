@@ -47,17 +47,17 @@ func TestNewCmdUnsubscribe(t *testing.T) {
 		{
 			Name:        "Issue Exists",
 			Issue:       "1",
-			ExpectedMsg: []string{"- Unsubscribing from Issue #1", "✔ Unsubscribed from issue #1"},
+			ExpectedMsg: []string{"- Unsubscribing from Issue #1 in glab-cli/test", "✔ Unsubscribed from issue #1"},
 		},
 		{
 			Name:        "Issue on another repo",
 			Issue:       "1 -R profclems/glab",
-			ExpectedMsg: []string{"- Unsubscribing from Issue #1", "✔ Unsubscribed from issue #1"},
+			ExpectedMsg: []string{"- Unsubscribing from Issue #1 in profclems/glab", "✔ Unsubscribed from issue #1"},
 		},
 		{
 			Name:        "Issue Does Not Exist",
 			Issue:       "0",
-			ExpectedMsg: []string{"- Unsubscribing from Issue #0", "error expected"},
+			ExpectedMsg: []string{"- Unsubscribing from Issue #0 in glab-cli/test", "error expected"},
 			wantErr:     true,
 		},
 	}
