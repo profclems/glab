@@ -17,6 +17,7 @@ import (
 type ListOptions struct {
 	// metadata
 	Assignee  string
+	Author    string
 	Labels    string
 	Milestone string
 	Mine      bool
@@ -75,6 +76,7 @@ func NewCmdList(f *cmdutils.Factory, runE func(opts *ListOptions) error) *cobra.
 		},
 	}
 	issueListCmd.Flags().StringVarP(&opts.Assignee, "assignee", "a", "", "Filter issue by assignee <username>")
+	issueListCmd.Flags().StringVar(&opts.Author, "author", "", "Filter issue by author <username>")
 	issueListCmd.Flags().StringVarP(&opts.Labels, "label", "l", "", "Filter issue by label <name>")
 	issueListCmd.Flags().StringVarP(&opts.Milestone, "milestone", "m", "", "Filter issue by milestone <id>")
 	issueListCmd.Flags().BoolVarP(&opts.Mine, "mine", "M", false, "Filter only issues issues assigned to me")
@@ -107,6 +109,14 @@ func listRun(opts *ListOptions) error {
 
 	if opts.Assignee != "" {
 		listOpts.AssigneeUsername = gitlab.String(opts.Assignee)
+	}
+	if opts.Author != "" {
+		// go-gitlab still doesn't have an AuthorUsername field so convert to ID
+		u, err := api.UserByName(apiClient, opts.Author)
+		if err != nil {
+			return err
+		}
+		listOpts.AuthorID = gitlab.Int(u.ID)
 	}
 	if opts.Labels != "" {
 		label := gitlab.Labels{
