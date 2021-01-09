@@ -1,6 +1,7 @@
 package list
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/profclems/glab/internal/glrepo"
@@ -19,6 +20,7 @@ type ListOptions struct {
 	Assignee  string
 	Author    string
 	Labels    string
+	NotLabels []string
 	Milestone string
 	Mine      bool
 	Search    string
@@ -62,6 +64,12 @@ func NewCmdList(f *cmdutils.Factory, runE func(opts *ListOptions) error) *cobra.
 			opts.BaseRepo = f.BaseRepo
 			opts.HTTPClient = f.HttpClient
 
+			if len(opts.Labels) != 0 && len(opts.NotLabels) != 0 {
+				return cmdutils.FlagError{
+					Err: errors.New("flags --label and --not-label are mutually exclusive"),
+				}
+			}
+
 			if opts.All {
 				opts.State = "all"
 			} else if opts.Closed {
@@ -84,6 +92,7 @@ func NewCmdList(f *cmdutils.Factory, runE func(opts *ListOptions) error) *cobra.
 	issueListCmd.Flags().StringVar(&opts.Search, "search", "", "Search <string> in the fields defined by --in")
 	issueListCmd.Flags().StringVar(&opts.In, "in", "title,description", "search in {title|description}")
 	issueListCmd.Flags().StringVarP(&opts.Labels, "label", "l", "", "Filter issue by label <name>")
+	issueListCmd.Flags().StringSliceVar(&opts.NotLabels, "not-label", []string{}, "Filter issue by lack of label <name>")
 	issueListCmd.Flags().StringVarP(&opts.Milestone, "milestone", "m", "", "Filter issue by milestone <id>")
 	issueListCmd.Flags().BoolVarP(&opts.All, "all", "A", false, "Get all issues")
 	issueListCmd.Flags().BoolVarP(&opts.Closed, "closed", "c", false, "Get only closed issues")
@@ -155,6 +164,10 @@ func listRun(opts *ListOptions) error {
 			opts.Labels,
 		}
 		listOpts.Labels = label
+		opts.ListType = "search"
+	}
+	if len(opts.NotLabels) != 0 {
+		listOpts.NotLabels = opts.NotLabels
 		opts.ListType = "search"
 	}
 	if opts.Milestone != "" {
