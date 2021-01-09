@@ -24,6 +24,7 @@ type ListOptions struct {
 	Milestone    string
 	SourceBranch string
 	TargetBranch string
+	Search       string
 	Mine         bool
 
 	// issue states
@@ -101,6 +102,7 @@ func NewCmdList(f *cmdutils.Factory, runE func(opts *ListOptions) error) *cobra.
 	mrListCmd.Flags().StringVarP(&opts.Milestone, "milestone", "m", "", "Filter merge request by milestone <id>")
 	mrListCmd.Flags().StringVarP(&opts.SourceBranch, "source-branch", "s", "", "Filter by source branch <name>")
 	mrListCmd.Flags().StringVarP(&opts.TargetBranch, "target-branch", "t", "", "Filter by target branch <name>")
+	mrListCmd.Flags().StringVar(&opts.Search, "search", "", "Filter by <string> in title and description")
 	mrListCmd.Flags().BoolVarP(&opts.All, "all", "A", false, "Get all merge requests")
 	mrListCmd.Flags().BoolVarP(&opts.Closed, "closed", "c", false, "Get only closed merge requests")
 	mrListCmd.Flags().BoolVarP(&opts.Merged, "merged", "M", false, "Get only merged merge requests")
@@ -150,6 +152,10 @@ func listRun(opts *ListOptions) error {
 	}
 	if opts.TargetBranch != "" {
 		l.TargetBranch = gitlab.String(opts.TargetBranch)
+		opts.ListType = "search"
+	}
+	if opts.Search != "" {
+		l.Search = gitlab.String(opts.Search)
 		opts.ListType = "search"
 	}
 	if len(opts.Labels) > 0 {
