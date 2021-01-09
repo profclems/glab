@@ -31,6 +31,7 @@ type ListOptions struct {
 	Closed bool
 	Merged bool
 	All    bool
+	Draft  bool
 
 	// Pagination
 	Page    int
@@ -103,6 +104,7 @@ func NewCmdList(f *cmdutils.Factory, runE func(opts *ListOptions) error) *cobra.
 	mrListCmd.Flags().BoolVarP(&opts.All, "all", "A", false, "Get all merge requests")
 	mrListCmd.Flags().BoolVarP(&opts.Closed, "closed", "c", false, "Get only closed merge requests")
 	mrListCmd.Flags().BoolVarP(&opts.Merged, "merged", "M", false, "Get only merged merge requests")
+	mrListCmd.Flags().BoolVarP(&opts.Draft, "draft", "d", false, "Filter by draft merge requests")
 	mrListCmd.Flags().IntVarP(&opts.Page, "page", "p", 1, "Page number")
 	mrListCmd.Flags().IntVarP(&opts.PerPage, "per-page", "P", 30, "Number of items to list per page")
 	mrListCmd.Flags().BoolVarP(&opts.Mine, "mine", "", false, "Get only merge requests assigned to me")
@@ -163,6 +165,10 @@ func listRun(opts *ListOptions) error {
 	}
 	if opts.PerPage != 0 {
 		l.PerPage = opts.PerPage
+	}
+	if opts.Draft {
+		l.WIP = gitlab.String("yes")
+		opts.ListType = "search"
 	}
 
 	if opts.Mine {
