@@ -7,7 +7,6 @@ import (
 
 	"github.com/profclems/glab/internal/utils"
 
-	"github.com/acarl005/stripansi"
 	"github.com/profclems/glab/commands/cmdtest"
 	"github.com/profclems/glab/pkg/api"
 	"github.com/stretchr/testify/assert"
@@ -39,40 +38,34 @@ func TestNewCmdUnsubscribe(t *testing.T) {
 	}
 
 	testCases := []struct {
-		Name        string
-		Issue       string
-		ExpectedMsg []string
-		wantErr     bool
+		Name    string
+		Issue   string
+		stderr  string
+		wantErr bool
 	}{
 		{
-			Name:        "Issue Exists",
-			Issue:       "1",
-			ExpectedMsg: []string{"- Unsubscribing from Issue #1 in glab-cli/test", "✔ Unsubscribed from issue #1"},
+			Name:   "Issue Exists",
+			Issue:  "1",
+			stderr: "- Unsubscribing from Issue #1 in glab-cli/test\n✔ Unsubscribed\n",
 		},
 		{
-			Name:        "Issue on another repo",
-			Issue:       "1 -R profclems/glab",
-			ExpectedMsg: []string{"- Unsubscribing from Issue #1 in profclems/glab", "✔ Unsubscribed from issue #1"},
-		},
-		{
-			Name:        "Issue Does Not Exist",
-			Issue:       "0",
-			ExpectedMsg: []string{"- Unsubscribing from Issue #0 in glab-cli/test", "error expected"},
-			wantErr:     true,
+			Name:    "Issue Does Not Exist",
+			Issue:   "0",
+			stderr:  "- Unsubscribing from Issue #0 in glab-cli/test\nerror expected\n",
+			wantErr: true,
 		},
 	}
 
-	io, _, stdout, stderr := utils.IOTest()
-	f := cmdtest.StubFactory("https://gitlab.com/glab-cli/test")
-	f.IO = io
-	f.IO.IsaTTY = true
-	f.IO.IsErrTTY = true
-
-	cmd := NewCmdUnsubscribe(f)
-	cmd.Flags().StringP("repo", "R", "", "")
-
 	for _, tc := range testCases {
 		t.Run(tc.Name, func(t *testing.T) {
+			io, _, _, stderr := utils.IOTest()
+			f := cmdtest.StubFactory("https://gitlab.com/glab-cli/test")
+			f.IO = io
+			f.IO.IsaTTY = true
+			f.IO.IsErrTTY = true
+
+			cmd := NewCmdUnsubscribe(f)
+			cmd.Flags().StringP("repo", "R", "", "")
 
 			_, err := cmdtest.RunCommand(cmd, tc.Issue)
 			if tc.wantErr {
@@ -82,12 +75,7 @@ func TestNewCmdUnsubscribe(t *testing.T) {
 				require.NoError(t, err)
 			}
 
-			out := stripansi.Strip(stdout.String())
-
-			for _, msg := range tc.ExpectedMsg {
-				assert.Contains(t, out, msg)
-				assert.Contains(t, stderr.String(), "")
-			}
+			assert.Equal(t, tc.stderr, stderr.String())
 		})
 	}
 
