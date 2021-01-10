@@ -4,6 +4,8 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/profclems/glab/commands/issue/issueutils"
+
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/internal/utils"
 	"github.com/profclems/glab/pkg/api"
@@ -28,19 +30,12 @@ func NewCmdNote(f *cmdutils.Factory) *cobra.Command {
 				return err
 			}
 
-			repo, err := f.BaseRepo()
+			issue, repo, err := issueutils.IssueFromArg(apiClient, f.BaseRepo, args[0])
 			if err != nil {
 				return err
 			}
-
-			issueID := args[0]
 
 			body, _ := cmd.Flags().GetString("message")
-
-			issue, err := api.GetIssue(apiClient, repo.FullName(), utils.StringToInt(issueID))
-			if err != nil {
-				return err
-			}
 
 			if body == "" {
 				body = utils.Editor(utils.EditorOptions{
@@ -54,7 +49,7 @@ func NewCmdNote(f *cmdutils.Factory) *cobra.Command {
 				return errors.New("aborted... Note is empty")
 			}
 
-			noteInfo, err := api.CreateIssueNote(apiClient, repo.FullName(), utils.StringToInt(issueID), &gitlab.CreateIssueNoteOptions{
+			noteInfo, err := api.CreateIssueNote(apiClient, repo.FullName(), issue.IID, &gitlab.CreateIssueNoteOptions{
 				Body: &body,
 			})
 			if err != nil {

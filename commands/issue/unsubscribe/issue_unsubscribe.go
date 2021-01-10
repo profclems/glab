@@ -2,7 +2,6 @@ package unsubscribe
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/commands/issue/issueutils"
@@ -20,34 +19,28 @@ func NewCmdUnsubscribe(f *cmdutils.Factory) *cobra.Command {
 		Aliases: []string{"unsub"},
 		Args:    cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			var err error
-			out := f.IO.StdOut
-
 			apiClient, err := f.HttpClient()
 			if err != nil {
 				return err
 			}
 
-			repo, err := f.BaseRepo()
+			issues, repo, err := issueutils.IssuesFromArgs(apiClient, f.BaseRepo, args)
 			if err != nil {
 				return err
 			}
 
-			mergeID := strings.TrimSpace(args[0])
-
-			arrIds := strings.Split(strings.Trim(mergeID, "[] "), ",")
-			for _, i2 := range arrIds {
+			for _, issue := range issues {
 				if f.IO.IsaTTY && f.IO.IsErrTTY {
-					fmt.Fprintln(out, "- Unsubscribing from Issue #"+i2)
+					fmt.Fprintf(f.IO.StdErr, "- Unsubscribing from Issue #%d in %s\n", issue.IID, utils.Cyan(repo.FullName()))
 				}
 
-				issue, err := api.UnsubscribeFromIssue(apiClient, repo.FullName(), utils.StringToInt(i2), nil)
+				issue, err := api.UnsubscribeFromIssue(apiClient, repo.FullName(), issue.IID, nil)
 				if err != nil {
 					return err
 				}
 
-				fmt.Fprintln(out, utils.Red("✔"), "Unsubscribed from issue #"+i2)
-				fmt.Fprintln(out, issueutils.DisplayIssue(issue))
+				fmt.Fprintln(f.IO.StdErr, utils.Red("✔"), "Unsubscribed")
+				fmt.Fprintln(f.IO.StdOut, issueutils.DisplayIssue(issue))
 			}
 			return nil
 		},

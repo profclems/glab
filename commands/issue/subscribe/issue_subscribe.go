@@ -2,13 +2,11 @@ package subscribe
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/commands/issue/issueutils"
 	"github.com/profclems/glab/internal/utils"
 	"github.com/profclems/glab/pkg/api"
-
 	"github.com/spf13/cobra"
 )
 
@@ -20,34 +18,28 @@ func NewCmdSubscribe(f *cmdutils.Factory) *cobra.Command {
 		Aliases: []string{"sub"},
 		Args:    cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			out := f.IO.StdOut
-			var err error
-
 			apiClient, err := f.HttpClient()
 			if err != nil {
 				return err
 			}
 
-			repo, err := f.BaseRepo()
+			issues, repo, err := issueutils.IssuesFromArgs(apiClient, f.BaseRepo, args)
 			if err != nil {
 				return err
 			}
 
-			mergeID := strings.TrimSpace(args[0])
-
-			arrIds := strings.Split(strings.Trim(mergeID, "[] "), ",")
-			for _, i2 := range arrIds {
+			for _, issue := range issues {
 				if f.IO.IsErrTTY && f.IO.IsaTTY {
-					fmt.Fprintln(out, "- Subscribing to Issue #"+i2)
+					fmt.Fprintf(f.IO.StdErr, "- Subscribing to Issue #%d in %s\n", issue.IID, utils.Cyan(repo.FullName()))
 				}
 
-				issue, err := api.SubscribeToIssue(apiClient, repo.FullName(), utils.StringToInt(i2), nil)
+				issue, err := api.SubscribeToIssue(apiClient, repo.FullName(), issue.IID, nil)
 				if err != nil {
 					return err
 				}
 
-				fmt.Fprintln(out, utils.GreenCheck(), "Subscribed to issue #"+i2)
-				fmt.Fprintln(out, issueutils.DisplayIssue(issue))
+				fmt.Fprintln(f.IO.StdErr, utils.GreenCheck(), "Subscribed")
+				fmt.Fprintln(f.IO.StdOut, issueutils.DisplayIssue(issue))
 			}
 			return nil
 		},

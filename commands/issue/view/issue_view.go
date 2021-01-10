@@ -5,10 +5,10 @@ import (
 	"io"
 	"strings"
 
-	"github.com/profclems/glab/internal/config"
-	"github.com/profclems/glab/internal/glrepo"
+	"github.com/profclems/glab/commands/issue/issueutils"
 
 	"github.com/profclems/glab/commands/cmdutils"
+	"github.com/profclems/glab/internal/config"
 	"github.com/profclems/glab/internal/utils"
 	"github.com/profclems/glab/pkg/api"
 
@@ -22,7 +22,6 @@ var (
 	showComments   bool
 	limit          int
 	pageNumber     int
-	baseRepo       glrepo.Interface
 	cfg            config.Config
 	glamourStyle   string
 	notes          []*gitlab.Note
@@ -36,7 +35,6 @@ func NewCmdView(f *cmdutils.Factory) *cobra.Command {
 		Aliases: []string{"show"},
 		Args:    cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			pid := utils.StringToInt(args[0])
 
 			var err error
 			out := f.IO.StdOut
@@ -45,15 +43,9 @@ func NewCmdView(f *cmdutils.Factory) *cobra.Command {
 			if err != nil {
 				return err
 			}
-			repo, err := f.BaseRepo()
-			if err != nil {
-				return err
-			}
-
-			baseRepo = repo
 			cfg, _ = f.Config()
 
-			issue, err := api.GetIssue(apiClient, repo.FullName(), pid)
+			issue, baseRepo, err := issueutils.IssueFromArg(apiClient, f.BaseRepo, args[0])
 			if err != nil {
 				return err
 			}
@@ -64,7 +56,7 @@ func NewCmdView(f *cmdutils.Factory) *cobra.Command {
 					fmt.Fprintf(out, "Opening %s in your browser.\n", utils.DisplayURL(issue.WebURL))
 				}
 
-				browser, _ := cfg.Get(repo.RepoHost(), "browser")
+				browser, _ := cfg.Get(baseRepo.RepoHost(), "browser")
 				return utils.OpenInBrowser(issue.WebURL, browser)
 			}
 

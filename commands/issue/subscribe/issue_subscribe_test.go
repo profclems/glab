@@ -7,7 +7,6 @@ import (
 
 	"github.com/profclems/glab/internal/utils"
 
-	"github.com/acarl005/stripansi"
 	"github.com/profclems/glab/commands/cmdtest"
 	"github.com/profclems/glab/pkg/api"
 	"github.com/stretchr/testify/assert"
@@ -39,40 +38,34 @@ func TestNewCmdSubscribe(t *testing.T) {
 	}
 
 	testCases := []struct {
-		Name        string
-		Issue       string
-		ExpectedMsg []string
-		wantErr     bool
+		Name    string
+		Issue   string
+		stderr  string
+		wantErr bool
 	}{
 		{
-			Name:        "Issue Exists",
-			Issue:       "1",
-			ExpectedMsg: []string{"- Subscribing to Issue #1", "✓ Subscribed to issue #1"},
+			Name:   "Issue Exists",
+			Issue:  "1",
+			stderr: "- Subscribing to Issue #1 in glab-cli/test\n✓ Subscribed\n",
 		},
 		{
-			Name:        "Issue on another repo",
-			Issue:       "1 -R profclems/glab",
-			ExpectedMsg: []string{"- Subscribing to Issue #1", "✓ Subscribed to issue #1"},
-		},
-		{
-			Name:        "Issue Does Not Exist",
-			Issue:       "0",
-			ExpectedMsg: []string{"- Subscribing to Issue #0", "error expected"},
-			wantErr:     true,
+			Name:    "Issue Does Not Exist",
+			Issue:   "0",
+			stderr:  "- Subscribing to Issue #0 in glab-cli/test\nerror expected\n",
+			wantErr: true,
 		},
 	}
 
-	io, _, stdout, stderr := utils.IOTest()
-	f := cmdtest.StubFactory("https://gitlab.com/glab-cli/test")
-	f.IO = io
-	f.IO.IsaTTY = true
-	f.IO.IsErrTTY = true
-
-	cmd := NewCmdSubscribe(f)
-	cmd.Flags().StringP("repo", "R", "", "")
-
 	for _, tc := range testCases {
 		t.Run(tc.Name, func(t *testing.T) {
+			io, _, _, stderr := utils.IOTest()
+			f := cmdtest.StubFactory("https://gitlab.com/glab-cli/test")
+			f.IO = io
+			f.IO.IsaTTY = true
+			f.IO.IsErrTTY = true
+
+			cmd := NewCmdSubscribe(f)
+			cmd.Flags().StringP("repo", "R", "", "")
 
 			_, err := cmdtest.RunCommand(cmd, tc.Issue)
 			if tc.wantErr {
@@ -81,13 +74,7 @@ func TestNewCmdSubscribe(t *testing.T) {
 			} else {
 				require.NoError(t, err)
 			}
-
-			out := stripansi.Strip(stdout.String())
-
-			for _, msg := range tc.ExpectedMsg {
-				assert.Contains(t, out, msg)
-				assert.Contains(t, stderr.String(), "")
-			}
+			assert.Equal(t, tc.stderr, stderr.String())
 		})
 	}
 

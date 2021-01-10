@@ -65,12 +65,10 @@ func NewCmdUpdate(f *cmdutils.Factory) *cobra.Command {
 			if err != nil {
 				return err
 			}
-			repo, err := f.BaseRepo()
+			issue, repo, err := issueutils.IssueFromArg(apiClient, f.BaseRepo, args[0])
 			if err != nil {
 				return err
 			}
-
-			issueID := utils.StringToInt(args[0])
 			l := &gitlab.UpdateIssueOptions{}
 
 			if m, _ := cmd.Flags().GetString("title"); m != "" {
@@ -127,7 +125,7 @@ func NewCmdUpdate(f *cmdutils.Factory) *cobra.Command {
 						return err
 					}
 				} else if len(ua.ToAdd) != 0 || len(ua.ToRemove) != 0 {
-					issue, err := api.GetIssue(apiClient, repo.FullName(), issueID)
+					issue, err := api.GetIssue(apiClient, repo.FullName(), issue.IID)
 					if err != nil {
 						return err
 					}
@@ -138,9 +136,9 @@ func NewCmdUpdate(f *cmdutils.Factory) *cobra.Command {
 				}
 			}
 
-			fmt.Fprintf(out, "- Updating issue #%d\n", issueID)
+			fmt.Fprintf(out, "- Updating issue #%d\n", issue.IID)
 
-			issue, err := api.UpdateIssue(apiClient, repo.FullName(), issueID, l)
+			issue, err = api.UpdateIssue(apiClient, repo.FullName(), issue.IID, l)
 			if err != nil {
 				return err
 			}

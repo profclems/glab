@@ -2,6 +2,8 @@
 package api
 
 import (
+	"errors"
+
 	"github.com/xanzy/go-gitlab"
 )
 
@@ -101,8 +103,14 @@ var SubscribeToIssue = func(client *gitlab.Client, projectID interface{}, issueI
 		client = apiClient.Lab()
 	}
 
-	issue, _, err := client.Issues.SubscribeToIssue(projectID, issueID, opts)
+	issue, resp, err := client.Issues.SubscribeToIssue(projectID, issueID, opts)
 	if err != nil {
+		if resp != nil {
+			// If the user is already subscribed to the issue, the status code 304 is returned.
+			if resp.StatusCode == 304 {
+				return nil, errors.New("you are already subscribed to this issue")
+			}
+		}
 		return issue, err
 	}
 
@@ -114,8 +122,14 @@ var UnsubscribeFromIssue = func(client *gitlab.Client, projectID interface{}, is
 		client = apiClient.Lab()
 	}
 
-	issue, _, err := client.Issues.UnsubscribeFromIssue(projectID, issueID, opts)
+	issue, resp, err := client.Issues.UnsubscribeFromIssue(projectID, issueID, opts)
 	if err != nil {
+		if resp != nil {
+			// If the user is not subscribed to the issue, the status code 304 is returned.
+			if resp.StatusCode == 304 {
+				return nil, errors.New("you are not subscribed to this issue")
+			}
+		}
 		return issue, err
 	}
 

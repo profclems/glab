@@ -2,7 +2,6 @@ package reopen
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/commands/issue/issueutils"
@@ -24,33 +23,31 @@ func NewCmdReopen(f *cmdutils.Factory) *cobra.Command {
 			var err error
 			out := f.IO.StdOut
 
-			gLabClient, err := f.HttpClient()
+			apiClient, err := f.HttpClient()
 
 			if err != nil {
 				return err
 			}
 
-			repo, err := f.BaseRepo()
+			issues, repo, err := issueutils.IssuesFromArgs(apiClient, f.BaseRepo, args)
 			if err != nil {
 				return err
 			}
-
-			issueID := strings.TrimSpace(args[0])
 
 			l := &gitlab.UpdateIssueOptions{}
 			l.StateEvent = gitlab.String("reopen")
-			arrIds := strings.Split(strings.Trim(issueID, "[] "), ",")
-			for _, i2 := range arrIds {
+
+			for _, issue := range issues {
 				if f.IO.IsaTTY && f.IO.IsErrTTY {
 					fmt.Fprintln(out, "- Reopening Issue...")
 				}
 
-				issue, err := api.UpdateIssue(gLabClient, repo.FullName(), utils.StringToInt(i2), l)
+				issue, err := api.UpdateIssue(apiClient, repo.FullName(), issue.IID, l)
 				if err != nil {
 					return err
 				}
 
-				fmt.Fprintf(out, "%s Reopened Issue #%s\n", utils.GreenCheck(), i2)
+				fmt.Fprintf(out, "%s Reopened Issue #%d\n", utils.GreenCheck(), issue.IID)
 				fmt.Fprintln(out, issueutils.DisplayIssue(issue))
 			}
 			return nil

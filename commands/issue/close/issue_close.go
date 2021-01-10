@@ -2,7 +2,6 @@ package close
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/profclems/glab/internal/utils"
 	"github.com/profclems/glab/pkg/api"
@@ -22,28 +21,27 @@ func NewCmdClose(f *cmdutils.Factory) *cobra.Command {
 		Args:    cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var err error
-			issueID := strings.TrimSpace(args[0])
 
 			apiClient, err := f.HttpClient()
 			if err != nil {
 				return err
 			}
 
-			repo, err := f.BaseRepo()
+			issues, repo, err := issueutils.IssuesFromArgs(apiClient, f.BaseRepo, args)
 			if err != nil {
 				return err
 			}
 
 			l := &gitlab.UpdateIssueOptions{}
 			l.StateEvent = gitlab.String("close")
-			arrIds := strings.Split(strings.Trim(issueID, "[] "), ",")
-			for _, i2 := range arrIds {
+
+			for _, issue := range issues {
 				fmt.Fprintln(f.IO.StdOut, "- Closing Issue...")
-				issue, err := api.UpdateIssue(apiClient, repo.FullName(), utils.StringToInt(i2), l)
+				issue, err := api.UpdateIssue(apiClient, repo.FullName(), issue.IID, l)
 				if err != nil {
 					return err
 				}
-				fmt.Fprintf(f.IO.StdOut, "%s Closed Issue #%s\n", utils.RedCheck(), i2)
+				fmt.Fprintf(f.IO.StdOut, "%s Closed Issue #%d\n", utils.RedCheck(), issue.IID)
 				fmt.Fprintln(f.IO.StdOut, issueutils.DisplayIssue(issue))
 			}
 			return nil
