@@ -553,6 +553,10 @@ func generateMRCompareURL(opts *CreateOpts) (string, error) {
 		// this uses the slash commands to add milestone to the description
 		description += fmt.Sprintf("\n/milestone %%%d", opts.MileStone)
 	}
+	if opts.IsWIP || opts.IsDraft {
+		// this uses quick-actions to make the merge request a work in progress
+		description += "\n/wip"
+	}
 
 	// The merge request **must** be opened against the head repo
 	u, err := url.Parse(opts.SourceProject.WebURL)
