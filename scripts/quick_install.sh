@@ -1,32 +1,39 @@
-#!/usr/bin/env bash
+#!/bin/sh
+# Usage: sudo /install [<BINDIR>]
+#
+# Example:
+#     1. sudo /install /usr/local/bin
+#     2. sudo /install /bin
+#
+# Default BINDIR=/usr/bin
 
-set -eu -o pipefail
+set -euf
 
-if [[ ! -z ${DEBUG-} ]]; then
+if [ -n "${DEBUG-}" ]; then
     set -x
 fi
 
-: ${PREFIX:=/usr/local}
-BINDIR="$PREFIX/bin"
+: "${PREFIX:=/usr}"
+BINDIR="${PREFIX}/bin"
 
-if [[ $# -gt 0 ]]; then
+if [ $# -gt 0 ]; then
   BINDIR=$1
 fi
 
 _can_install() {
-  if [[ ! -d "$BINDIR" ]]; then
-    mkdir -p "$BINDIR" 2> /dev/null
+  if [ ! -d "${BINDIR}" ]; then
+    mkdir -p "${BINDIR}" 2> /dev/null
   fi
-  [[ -d "$BINDIR" && -w "$BINDIR" ]]
+  [ -d "${BINDIR}" ] && [ -w "${BINDIR}" ]
 }
 
-if ! _can_install && [[ $EUID != 0 ]]; then
-  echo "Run script as sudo"
+if ! _can_install && [ "$(id -u)" != 0 ]; then
+  printf "Run script as sudo\n"
   exit 1
 fi
 
 if ! _can_install; then
-  echo "Can't install to $BINDIR"
+  printf -- "Can't install to %s\n" "${BINDIR}"
   exit 1
 fi
 
@@ -40,13 +47,25 @@ case $(uname -s) in
         os="Darwin"
         ;;
     *)
-        echo "OS not supported"
+        printf "OS not supported\n"
         exit 1
         ;;
 esac
 
+printf "Fetching latest version\n"
 latest="$(curl -sL 'https://api.github.com/repos/profclems/glab/releases/latest' | grep 'tag_name' | grep --only 'v[0-9\.]\+' | cut -c 2-)"
-echo $machine
-curl -sL "https://github.com/profclems/glab/releases/download/v${latest}/glab_${latest}_${os}_${machine}.tar.gz" | tar -C /tmp/ -xzf -
-install -m755 /tmp/glab $BINDIR/glab
-echo "Successfully installed glab into $BINDIR/"
+tempFolder="/tmp/glab_v${latest}"
+
+printf -- "Found version %s\n" "${latest}"
+
+mkdir -p "${tempFolder}" 2> /dev/null
+printf -- "Downloading glab_%s_%s_%s.tar.gz\n" "${latest}" "${os}" "${machine}"
+curl -sL "https://github.com/profclems/glab/releases/download/v${latest}/glab_${latest}_${os}_${machine}.tar.gz" | tar -C "${tempFolder}" -xzf -
+
+printf "Installing...\n"
+install -m755 "${tempFolder}/bin/glab" "${BINDIR}/glab"
+
+printf "Cleaning up temp files\n"
+rm -rf "${tempFolder}"
+
+printf -- "Successfully installed glab into %s/\n" "${BINDIR}"
