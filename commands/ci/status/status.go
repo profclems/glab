@@ -82,7 +82,11 @@ func NewCmdStatus(f *cmdutils.Factory) *cobra.Command {
 						var status string
 						switch s := job.Status; s {
 						case "failed":
-							status = utils.Red(s)
+							if job.AllowFailure {
+								status = utils.Yellow(s)
+							} else {
+								status = utils.Red(s)
+							}
 						case "success":
 							status = utils.Green(s)
 						default:

@@ -477,8 +477,13 @@ func jobsView(app *tview.Application, jobsCh chan []*gitlab.Job, inputCh chan st
 			b.SetBorderColor(tcell.ColorGreen)
 			statChar = '✔'
 		case "failed":
-			b.SetBorderColor(tcell.ColorRed)
-			statChar = '✘'
+			if j.AllowFailure {
+				b.SetBorderColor(tcell.ColorOrange)
+				statChar = '!'
+			} else {
+				b.SetBorderColor(tcell.ColorRed)
+				statChar = '✘'
+			}
 		case "running":
 			b.SetBorderColor(tcell.ColorBlue)
 			statChar = '●'
