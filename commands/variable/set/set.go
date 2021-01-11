@@ -28,9 +28,11 @@ type SetOpts struct {
 	Protected bool
 	Masked    bool
 	Group     string
+
+	ValueSet bool
 }
 
-func NewVariableCmd(f *cmdutils.Factory, runE func(opts *SetOpts) error) *cobra.Command {
+func NewCmdSet(f *cmdutils.Factory, runE func(opts *SetOpts) error) *cobra.Command {
 	opts := &SetOpts{
 		IO: f.IO,
 	}
@@ -51,7 +53,7 @@ func NewVariableCmd(f *cmdutils.Factory, runE func(opts *SetOpts) error) *cobra.
 			$ cat file.txt | glab variable set SERVER_TOKEN
 			$ cat token.txt | glab variable set GROUP_TOKEN -g mygroup --scope=prod
 		`),
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, args []string) (err error) {
 			// Supports repo override
 			opts.HTTPClient = f.HttpClient
 			opts.BaseRepo = f.BaseRepo
@@ -59,47 +61,42 @@ func NewVariableCmd(f *cmdutils.Factory, runE func(opts *SetOpts) error) *cobra.
 			opts.Key = args[0]
 
 			if !isValidKey(opts.Key) {
-				return cmdutils.FlagError{Err: fmt.Errorf("invalid key provided.\n%s", validKeyMsg)}
+				err = cmdutils.FlagError{Err: fmt.Errorf("invalid key provided.\n%s", validKeyMsg)}
+				return
 			}
 
 			if opts.Value != "" && len(args) == 2 {
 				if opts.Value != "" {
-					return cmdutils.FlagError{Err: errors.New("specify value either by second positional argument or --value flag")}
+					err = cmdutils.FlagError{Err: errors.New("specify value either by second positional argument or --value flag")}
+					return
 				}
 				opts.Value = args[1]
 			}
 
 			if cmd.Flags().Changed("scope") && opts.Group != "" {
-				return cmdutils.FlagError{Err: errors.New("scope is not required for group variables")}
+				err = cmdutils.FlagError{Err: errors.New("scope is not required for group variables")}
+				return
 			}
 
-			valueSet := cmd.Flags().Changed("value") || len(args) == 2
-
-			if !valueSet && opts.Value == "" {
-				if opts.IO.IsInTTY {
-					return &cmdutils.FlagError{Err: errors.New("no value specified but nothing on STDIN")}
-				}
-				// read value from STDIN if not provided
-
-				defer opts.IO.In.Close()
-				value, err := ioutil.ReadAll(opts.IO.In)
-				if err != nil {
-					return fmt.Errorf("failed to read value from STDIN: %w", err)
-				}
-				opts.Value = strings.TrimSpace(string(value))
-
+			opts.ValueSet = cmd.Flags().Changed("value") || len(args) == 2
+			opts.Value, err = getValue(opts)
+			if err != nil {
+				return
 			}
 
 			if cmd.Flags().Changed("type") {
 				if opts.Type != "env_var" && opts.Type != "file" {
-					return cmdutils.FlagError{Err: fmt.Errorf("invalid type: %s. --type must be one of `env_var` or `file`", opts.Type)}
+					err = cmdutils.FlagError{Err: fmt.Errorf("invalid type: %s. --type must be one of `env_var` or `file`", opts.Type)}
+					return
 				}
 			}
 
 			if runE != nil {
-				return runE(opts)
+				err = runE(opts)
+				return
 			}
-			return setRun(opts)
+			err = setRun(opts)
+			return
 		},
 	}
 
@@ -155,6 +152,24 @@ func setRun(opts *SetOpts) error {
 
 	fmt.Fprintf(opts.IO.StdOut, "%s Created variable %s for %s\n", utils.GreenCheck(), opts.Key, baseRepo.FullName())
 	return nil
+}
+
+func getValue(opts *SetOpts) (string, error) {
+	if opts.Value != "" || opts.ValueSet {
+		return opts.Value, nil
+	}
+
+	if opts.IO.IsInTTY {
+		return "", &cmdutils.FlagError{Err: errors.New("no value specified but nothing on STDIN")}
+	}
+
+	// read value from STDIN if not provided
+	defer opts.IO.In.Close()
+	value, err := ioutil.ReadAll(opts.IO.In)
+	if err != nil {
+		return "", fmt.Errorf("failed to read value from STDIN: %w", err)
+	}
+	return strings.TrimSpace(string(value)), nil
 }
 
 // isValidKey checks if a key is valid if it follows the following criteria:

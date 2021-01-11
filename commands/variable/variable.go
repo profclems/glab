@@ -15,6 +15,6 @@ func NewVariableCmd(f *cmdutils.Factory) *cobra.Command {
 
 	cmdutils.EnableRepoOverride(cmd, f)
 
-	cmd.AddCommand(setCmd.NewVariableCmd(f, nil))
+	cmd.AddCommand(setCmd.NewCmdSet(f, nil))
 	return cmd
 }
