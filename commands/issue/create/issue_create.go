@@ -6,6 +6,7 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/MakeNowJust/heredoc"
 	"github.com/profclems/glab/internal/config"
 	"github.com/profclems/glab/internal/glrepo"
 	"github.com/profclems/glab/internal/utils"
@@ -57,7 +58,13 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 		Short:   `Create an issue`,
 		Long:    ``,
 		Aliases: []string{"new"},
-		Args:    cobra.ExactArgs(0),
+		Example: heredoc.Doc(`
+			$ glab issue create
+			$ glab issue new
+			$ glab issue create -m release-2.0.0 -t "we need this feature" --label important
+			$ glab issue new -t "Fix CVE-YYYY-XXXX" -l security --linked-mr 123
+		`),
+		Args: cobra.ExactArgs(0),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var err error
 

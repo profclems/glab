@@ -3,6 +3,7 @@ package unsubscribe
 import (
 	"fmt"
 
+	"github.com/MakeNowJust/heredoc"
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/commands/issue/issueutils"
 	"github.com/profclems/glab/internal/utils"
@@ -17,7 +18,12 @@ func NewCmdUnsubscribe(f *cmdutils.Factory) *cobra.Command {
 		Short:   `Unsubscribe to an issue`,
 		Long:    ``,
 		Aliases: []string{"unsub"},
-		Args:    cobra.ExactArgs(1),
+		Example: heredoc.Doc(`
+			$ glab issue unsubscribe 123
+			$ glab issue unsub 123
+			$ glab issue unsubscribe https://gitlab.com/profclems/glab/-/issues/123
+		`),
+		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			apiClient, err := f.HttpClient()
 			if err != nil {

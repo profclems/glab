@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/MakeNowJust/heredoc"
 	"github.com/profclems/glab/internal/glrepo"
 
 	"github.com/profclems/glab/commands/cmdutils"
@@ -60,7 +61,13 @@ func NewCmdList(f *cmdutils.Factory, runE func(opts *ListOptions) error) *cobra.
 		Short:   `List project issues`,
 		Long:    ``,
 		Aliases: []string{"ls"},
-		Args:    cobra.ExactArgs(0),
+		Example: heredoc.Doc(`
+			$ glab issue list --all
+			$ glab issue ls --all
+			$ glab issue list --mine
+			$ glab issue list --milestone release-2.0.0 --opened
+		`),
+		Args: cobra.ExactArgs(0),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// support repo override
 			opts.BaseRepo = f.BaseRepo
