@@ -9,7 +9,6 @@ import (
 	"github.com/profclems/glab/pkg/prompt"
 
 	"github.com/profclems/glab/commands/ci/ciutils"
-	ciViewCmd "github.com/profclems/glab/commands/ci/view"
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/internal/git"
 	"github.com/profclems/glab/internal/utils"
@@ -138,12 +137,6 @@ func TraceRun(opts *TraceOpts) error {
 		}
 	}
 
-	commit, err := api.GetCommit(apiClient, repo.FullName(), opts.Branch)
-	if err != nil {
-		return err
-	}
-
-	ciViewCmd.CommitSHA = commit.ID
 	job, err := api.GetPipelineJob(apiClient, opts.JobID, repo.FullName())
 	if err != nil {
 		return err
