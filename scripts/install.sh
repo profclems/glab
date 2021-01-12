@@ -1,9 +1,11 @@
 #!/bin/sh
-# Usage: sudo /install [<BINDIR>]
+# Usage: [sudo] [BINDIR=/usr/local/bin] ./install.sh [<BINDIR>]
 #
 # Example:
-#     1. sudo /install /usr/local/bin
-#     2. sudo /install /bin
+#     1. sudo ./install.sh /usr/local/bin
+#     2. sudo ./install.sh /usr/bin
+#     3. ./install.sh $HOME/usr/bin
+#     4. BINDIR=$HOME/usr/bin ./install.sh
 #
 # Default BINDIR=/usr/bin
 
@@ -13,8 +15,7 @@ if [ -n "${DEBUG-}" ]; then
     set -x
 fi
 
-: "${PREFIX:=/usr}"
-BINDIR="${PREFIX}/bin"
+: "${BINDIR:=/usr/bin}"
 
 if [ $# -gt 0 ]; then
   BINDIR=$1
@@ -62,7 +63,7 @@ mkdir -p "${tempFolder}" 2> /dev/null
 printf -- "Downloading glab_%s_%s_%s.tar.gz\n" "${latest}" "${os}" "${machine}"
 curl -sL "https://github.com/profclems/glab/releases/download/v${latest}/glab_${latest}_${os}_${machine}.tar.gz" | tar -C "${tempFolder}" -xzf -
 
-printf "Installing...\n"
+printf -- "Installing...\n"
 install -m755 "${tempFolder}/bin/glab" "${BINDIR}/glab"
 
 printf "Cleaning up temp files\n"
