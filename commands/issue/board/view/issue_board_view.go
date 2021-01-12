@@ -6,7 +6,7 @@ import (
 	"runtime/debug"
 
 	"github.com/AlecAivazis/survey/v2"
-	"github.com/gdamore/tcell"
+	"github.com/gdamore/tcell/v2"
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/internal/glrepo"
 	"github.com/profclems/glab/pkg/api"

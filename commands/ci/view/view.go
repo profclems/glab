@@ -18,7 +18,7 @@ import (
 	"github.com/profclems/glab/pkg/api"
 
 	"github.com/MakeNowJust/heredoc"
-	"github.com/gdamore/tcell"
+	"github.com/gdamore/tcell/v2"
 	"github.com/lunixbochs/vtclean"
 	"github.com/pkg/errors"
 	"github.com/rivo/tview"
