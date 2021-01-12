@@ -95,16 +95,18 @@ Read the [documentation](https://glab.readthedocs.io/) for more information on t
 ## Installation
 Download a binary suitable for your OS at the [releases page](https://github.com/profclems/glab/releases/latest).
 
-### Quick Install (Bash)
+### Quick Install (shell)
+**Supported Platforms**: Linux and macOS
+
 You can install or update `glab` with:
-```bash
-curl -sL https://j.mp/glab-i | sudo bash
+```sh
+curl -sL https://j.mp/glab-cli | sudo sh
 ```
 or
-```bash
-curl -s https://raw.githubusercontent.com/profclems/glab/trunk/scripts/quick_install.sh | sudo bash
+```sh
+curl -s https://raw.githubusercontent.com/profclems/glab/trunk/scripts/install.sh | sudo sh
 ```
-*Installs into `usr/local/bin`*
+*Installs into `usr/bin`*
 
 **NOTE**: Please take care when running scripts in this fashion. Consider peaking at the install script itself and verify that it works as intended.
 
