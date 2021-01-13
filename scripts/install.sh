@@ -45,7 +45,7 @@ case $(uname -s) in
         os="Linux"
         ;;
     Darwin)
-        os="Darwin"
+        os="macOS"
         ;;
     *)
         printf "OS not supported\n"
