@@ -37,6 +37,7 @@ type CreateOpts struct {
 	IsInteractive  bool
 	OpenInWeb      bool
 	Yes            bool
+	Web            bool
 
 	IO         *utils.IOStreams
 	BaseRepo   func() (glrepo.Interface, error)
@@ -63,6 +64,7 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 			$ glab issue new
 			$ glab issue create -m release-2.0.0 -t "we need this feature" --label important
 			$ glab issue new -t "Fix CVE-YYYY-XXXX" -l security --linked-mr 123
+			$ glab issue create -m release-1.0.1 -t "security fix" --label security --web
 		`),
 		Args: cobra.ExactArgs(0),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -95,6 +97,12 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 				return &cmdutils.FlagError{Err: errors.New("--title and --description required for non-interactive mode")}
 			}
 
+			// Remove this once --yes does more than just skip the prompts that --web happen to skip
+			// by design
+			if opts.Yes && opts.Web {
+				return &cmdutils.FlagError{Err: errors.New("--web already skips all prompts currently skipped by --yes")}
+			}
+
 			opts.BaseProject, err = api.GetProject(apiClient, repo.FullName())
 			if err != nil {
 				return err
@@ -118,6 +126,7 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 	issueCreateCmd.Flags().IntVarP(&opts.Weight, "weight", "w", 0, "The weight of the issue. Valid values are greater than or equal to 0.")
 	issueCreateCmd.Flags().BoolVarP(&opts.NoEditor, "no-editor", "", false, "Don't open editor to enter description. If set to true, uses prompt. Default is false")
 	issueCreateCmd.Flags().BoolVarP(&opts.Yes, "yes", "y", false, "Don't prompt for confirmation to submit the issue")
+	issueCreateCmd.Flags().BoolVar(&opts.Web, "web", false, "continue issue creation with web interface")
 
 	return issueCreateCmd
 }
@@ -218,6 +227,10 @@ func createRun(opts *CreateOpts) error {
 	// submit without prompting for non interactive mode
 	if !opts.IsInteractive || opts.Yes {
 		action = cmdutils.SubmitAction
+	}
+
+	if opts.Web {
+		action = cmdutils.PreviewAction
 	}
 
 	if action == cmdutils.NoAction {
