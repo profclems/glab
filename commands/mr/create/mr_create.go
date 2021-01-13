@@ -44,6 +44,7 @@ type CreateOpts struct {
 	NoEditor      bool
 	IsInteractive bool
 	Yes           bool
+	Web           bool
 
 	IO       *utils.IOStreams
 	Branch   func() (string, error)
@@ -118,6 +119,11 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 			}
 			if cmd.Flags().Changed("wip") && cmd.Flags().Changed("draft") {
 				return &cmdutils.FlagError{Err: errors.New("specify either of --draft or --wip")}
+			}
+			// Remove this once --yes does more than just skip the prompts that --web happen to skip
+			// by design
+			if opts.Yes && opts.Web {
+				return &cmdutils.FlagError{Err: errors.New("--web already skips all prompts currently skipped by --yes")}
 			}
 
 			labClient, err := opts.Lab()
@@ -331,6 +337,10 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 				action = cmdutils.SubmitAction
 			}
 
+			if opts.Web {
+				action = cmdutils.PreviewAction
+			}
+
 			if action == cmdutils.NoAction {
 				action, err = cmdutils.ConfirmSubmission(true, true)
 				if err != nil {
@@ -445,6 +455,7 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 	mrCreateCmd.Flags().BoolVarP(&opts.NoEditor, "no-editor", "", false, "Don't open editor to enter description. If set to true, uses prompt. Default is false")
 	mrCreateCmd.Flags().StringP("head", "H", "", "Select another head repository using the `OWNER/REPO` or `GROUP/NAMESPACE/REPO` format or the project ID or full URL")
 	mrCreateCmd.Flags().BoolVarP(&opts.Yes, "yes", "y", false, "Skip submission confirmation prompt, with --autofill it skips all optional prompts")
+	mrCreateCmd.Flags().BoolVarP(&opts.Web, "web", "w", false, "continue merge request creation on web browser")
 
 	mrCreateCmd.Flags().StringVarP(&mrCreateTargetProject, "target-project", "", "", "Add target project by id or OWNER/REPO or GROUP/NAMESPACE/REPO")
 	mrCreateCmd.Flags().MarkHidden("target-project")
