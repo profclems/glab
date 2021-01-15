@@ -14,12 +14,12 @@ import (
 )
 
 type StatusOpts struct {
+	Hostname  string
+	ShowToken bool
+
 	HttpClient func() (*gitlab.Client, error)
 	IO         *utils.IOStreams
 	Config     func() (config.Config, error)
-
-	Hostname  string
-	ShowToken bool
 }
 
 func NewCmdStatus(f *cmdutils.Factory, runE func(*StatusOpts) error) *cobra.Command {
@@ -65,16 +65,20 @@ func statusRun(opts *StatusOpts) error {
 	instances, err := cfg.Hosts()
 	if len(instances) == 0 || err != nil {
 		fmt.Fprintf(stderr,
-			"No GitLab instance has been authenticated with glab. Run %s to authenticate.\n", utils.Bold("glab auth login"))
+			"No GitLab instance has been authenticated with glab. Run `%s` to authenticate.\n", utils.Bold("glab auth login"))
 		return cmdutils.SilentError
 	}
 
-	var failed bool
+	var hostNotAuthenticated bool
+	if opts.Hostname != "" {
+		hostNotAuthenticated = true
+	}
 
 	for _, instance := range instances {
 		if opts.Hostname != "" && opts.Hostname != instance {
 			continue
 		}
+		hostNotAuthenticated = false
 		statusInfo[instance] = []string{}
 		addMsg := func(x string, ys ...interface{}) {
 			statusInfo[instance] = append(statusInfo[instance], fmt.Sprintf(x, ys...))
@@ -122,6 +126,11 @@ func statusRun(opts *StatusOpts) error {
 		}
 	}
 
+	if opts.Hostname != "" && hostNotAuthenticated {
+		fmt.Fprintf(stderr, "%s %s not authenticated with glab. Run `%s %s` to authenticate", utils.FailedIcon(), opts.Hostname, utils.Bold("glab auth login --hostname"), utils.Bold(opts.Hostname))
+		return cmdutils.SilentError
+	}
+
 	for _, instance := range instances {
 		lines, ok := statusInfo[instance]
 		if !ok {
@@ -131,10 +140,6 @@ func statusRun(opts *StatusOpts) error {
 		for _, line := range lines {
 			fmt.Fprintf(stderr, "  %s\n", line)
 		}
-	}
-
-	if failed {
-		return cmdutils.SilentError
 	}
 	return nil
 }
