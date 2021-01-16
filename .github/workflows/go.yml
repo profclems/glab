@@ -20,38 +20,6 @@ jobs:
       - name: Download dependencies
         run: go mod download
 
-      - name: Build
-        run: go build -v ./cmd/glab
-
-  build-minimum:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Set up Go 1.13
-        uses: actions/setup-go@v2
-        with:
-          go-version: 1.13
-
-      - name: Check out code
-        uses: actions/checkout@v2
-
-      - name: Build
-        run: go build -v ./cmd/glab
-
-  run-tests:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Set up Go 1.15
-        uses: actions/setup-go@v2
-        with:
-          go-version: 1.15
-
-      - name: Check out code
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-
       - name: Setup SSH Key
         run: |
           mkdir ~/.ssh && chmod 700 ~/.ssh
@@ -72,4 +40,23 @@ jobs:
         run: make test
 
       - name: Upload Test Result to Codecov
+        if: matrix.os == 'ubuntu-latest'
         run: bash <(curl -s https://codecov.io/bash)
+
+      - name: Build
+        run: go build -v ./cmd/glab
+
+  build-minimum:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Set up Go 1.13
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.13
+
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Build
+        run: go build -v ./cmd/glab
