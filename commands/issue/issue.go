@@ -32,7 +32,8 @@ func NewCmdIssue(f *cmdutils.Factory) *cobra.Command {
 		Annotations: map[string]string{
 			"help:arguments": heredoc.Doc(`
 				An issue can be supplied as argument in any of the following formats:
-				- by number, e.g. "123".
+				- by number, e.g. "123"
+				- by URL, e.g. "https://gitlab.com/NAMESPACE/REPO/-/issues/123"
 			`),
 		},
 	}
