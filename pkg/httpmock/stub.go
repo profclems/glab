@@ -6,6 +6,7 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 	"os"
 	"strings"
 )
@@ -23,15 +24,34 @@ func MatchAny(*http.Request) bool {
 	return true
 }
 
-func newRequest(method, path string) Matcher {
+func newRequest(method, path string, match matchType) Matcher {
 	return func(req *http.Request) bool {
 		if !strings.EqualFold(req.Method, method) {
 			return false
 		}
-		if !strings.HasPrefix(path, "/api/v4") {
-			path = "/api/v4" + path
+		if match == PathOnly {
+			if !strings.HasPrefix(path, "/api/v4") {
+				path = "/api/v4" + path
+			}
+			return req.URL.Path == path
 		}
-		return req.URL.Path == path
+		u, err := url.Parse(path)
+		if err != nil {
+			return false
+		}
+		if match == FullURL {
+			return req.URL.String() == u.String()
+		}
+		if match == HostOnly {
+			return req.URL.Host == u.Host
+		}
+		if match == HostAndPath {
+			return req.URL.Host == u.Host && req.URL.Path == u.Path
+		}
+		if match == PathAndQuerystring {
+			return req.URL.RawQuery == u.RawQuery && req.URL.Path == u.Path
+		}
+		return false
 	}
 }
 

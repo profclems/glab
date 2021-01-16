@@ -6,10 +6,21 @@ import (
 	"sync"
 )
 
+type matchType int
+
+const (
+	PathOnly matchType = iota
+	HostOnly
+	FullURL
+	HostAndPath
+	PathAndQuerystring
+)
+
 type Mocker struct {
 	mu       sync.Mutex
 	stubs    []*Stub
 	Requests []*http.Request
+	MatchURL matchType // if false, only matches the path and if true, matches full url
 }
 
 func New() *Mocker {
@@ -18,7 +29,7 @@ func New() *Mocker {
 
 func (r *Mocker) RegisterResponder(method, path string, resp Responder) {
 	r.stubs = append(r.stubs, &Stub{
-		Matcher:   newRequest(method, path),
+		Matcher:   newRequest(method, path, r.MatchURL),
 		Responder: resp,
 	})
 }

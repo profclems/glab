@@ -2,7 +2,12 @@ package status
 
 import (
 	"bytes"
+	"fmt"
+	"net/http"
 	"testing"
+
+	"github.com/profclems/glab/pkg/api"
+	"github.com/profclems/glab/pkg/httpmock"
 
 	"github.com/profclems/glab/internal/config"
 	"github.com/profclems/glab/internal/utils"
@@ -76,18 +81,15 @@ hosts:
     token: xxxxxxxxxxxxxxxxxxxx
     git_protocol: ssh
     api_protocol: https
-  somehost.com:
-    token: yyyyyyyyyyyyyyyyyyyy
-    git_protocol: ssh
-    api_protocol: https
   another.host:
     token: isinvalid
+  gl.io:
+    token: 
 `, "")()
 
+	cfgFile := config.ConfigFile()
 	configs, err := config.ParseConfig("config.yml")
 	assert.Nil(t, err)
-
-	io, _, stdout, stderr := utils.IOTest()
 
 	tests := []struct {
 		name    string
@@ -100,21 +102,47 @@ hosts:
 			opts: &StatusOpts{
 				Hostname: "gitlab.alpinelinux.org",
 			},
-			stderr: `gitlab.alpinelinux.org
-  x gitlab.alpinelinux.org: api call failed: GET https://gitlab.alpinelinux.org/api/v4/user: 401 {message: 401 Unauthorized}
+			wantErr: false,
+			stderr: fmt.Sprintf(`gitlab.alpinelinux.org
+  ✓ Logged in to gitlab.alpinelinux.org as john_smith (%s)
   ✓ Git operations for gitlab.alpinelinux.org configured to use ssh protocol.
   ✓ API calls for gitlab.alpinelinux.org are made over https protocol
   ✓ REST API Endpoint: https://gitlab.alpinelinux.org/api/v4/
   ✓ GraphQL Endpoint: https://gitlab.alpinelinux.org/api/graphql/
   ✓ Token: ********************
-`,
+`, cfgFile),
+		},
+		{
+			name: "instance not authenticated",
+			opts: &StatusOpts{
+				Hostname: "invalid.instance",
+			},
+			wantErr: true,
+			stderr:  "x invalid.instance not authenticated with glab. Run `glab auth login --hostname invalid.instance` to authenticate",
 		},
 	}
+
+	fakeHTTP := httpmock.New()
+	defer fakeHTTP.Verify(t)
+
+	fakeHTTP.RegisterResponder("GET", "/user", httpmock.NewStringResponse(200, `
+		{
+  			"username": "john_smith"
+		}
+	`))
+	client := func(token, hostname string) (*api.Client, error) {
+		return api.TestClient(&http.Client{Transport: fakeHTTP}, token, "", false)
+	}
+	// FIXME: something fishy is occurring here as without making a first call to client function, httpMock does not work
+	_, _ = client("", "gitlab.com")
+
 	for _, tt := range tests {
+		io, _, stdout, stderr := utils.IOTest()
 		tt.opts.Config = func() (config.Config, error) {
 			return configs, nil
 		}
 		tt.opts.IO = io
+		tt.opts.HttpClientOverride = client
 		t.Run(tt.name, func(t *testing.T) {
 			if err := statusRun(tt.opts); (err != nil) != tt.wantErr {
 				t.Errorf("statusRun() error = %v, wantErr %v", err, tt.wantErr)
@@ -125,7 +153,93 @@ hosts:
 	}
 }
 
-func Test_statusRun_noinstance(t *testing.T) {
+func Test_statusRun_noHostnameSpecified(t *testing.T) {
+	defer config.StubConfig(`---
+hosts:
+  gitlab.alpinelinux.org:
+    token: xxxxxxxxxxxxxxxxxxxx
+    git_protocol: ssh
+    api_protocol: https
+  another.host:
+    token: isinvalid
+  gl.io:
+    token: 
+`, "")()
+
+	fakeHTTP := &httpmock.Mocker{
+		MatchURL: httpmock.HostAndPath,
+	}
+	defer fakeHTTP.Verify(t)
+
+	cfgFile := config.ConfigFile()
+
+	fakeHTTP.RegisterResponder("GET", "https://gitlab.alpinelinux.org/api/v4/user", httpmock.NewStringResponse(200, `
+		{
+  			"username": "john_smith"
+		}
+	`))
+
+	fakeHTTP.RegisterResponder("GET", "https://another.host/api/v4/user?u=1", httpmock.NewStringResponse(401, `
+		{
+  			"message": "invalid token"
+		}
+	`))
+
+	fakeHTTP.RegisterResponder("GET", "https://gl.io/api/v4/user?u=1", httpmock.NewStringResponse(401, `
+		{
+  			"message": "no token provided"
+		}
+	`))
+
+	expectedOutput := fmt.Sprintf(`gitlab.alpinelinux.org
+  ✓ Logged in to gitlab.alpinelinux.org as john_smith (%s)
+  ✓ Git operations for gitlab.alpinelinux.org configured to use ssh protocol.
+  ✓ API calls for gitlab.alpinelinux.org are made over https protocol
+  ✓ REST API Endpoint: https://gitlab.alpinelinux.org/api/v4/
+  ✓ GraphQL Endpoint: https://gitlab.alpinelinux.org/api/graphql/
+  ✓ Token: ********************
+another.host
+  x another.host: api call failed: GET https://another.host/api/v4/user: 401 {message: invalid token}
+  ✓ Git operations for another.host configured to use ssh protocol.
+  ✓ API calls for another.host are made over https protocol
+  ✓ REST API Endpoint: https://another.host/api/v4/
+  ✓ GraphQL Endpoint: https://another.host/api/graphql/
+  ✓ Token: ********************
+  ! Invalid token provided
+gl.io
+  x gl.io: api call failed: GET https://gl.io/api/v4/user: 401 {message: no token provided}
+  ✓ Git operations for gl.io configured to use ssh protocol.
+  ✓ API calls for gl.io are made over https protocol
+  ✓ REST API Endpoint: https://gl.io/api/v4/
+  ✓ GraphQL Endpoint: https://gl.io/api/graphql/
+  x No token provided
+`, cfgFile)
+
+	configs, err := config.ParseConfig("config.yml")
+	assert.Nil(t, err)
+	io, _, stdout, stderr := utils.IOTest()
+
+	client := func(token, hostname string) (*api.Client, error) {
+		return api.TestClient(&http.Client{Transport: fakeHTTP}, token, hostname, false)
+	}
+	// FIXME: something fishy is occurring here as without making a first call to client function, httpMock does not work
+	_, _ = client("", "gitlab.com")
+
+	opts := &StatusOpts{
+		Config: func() (config.Config, error) {
+			return configs, nil
+		},
+		HttpClientOverride: client,
+		IO:                 io,
+	}
+
+	err = statusRun(opts)
+	assert.Equal(t, err, nil)
+	assert.Equal(t, stdout.String(), "")
+	assert.Equal(t, expectedOutput, stderr.String())
+}
+
+func Test_statusRun_noInstance(t *testing.T) {
 	defer config.StubConfig(`---
 git_protocol: ssh
 `, "")()
@@ -141,10 +255,10 @@ git_protocol: ssh
 		IO: io,
 	}
 	t.Run("no instance authenticated", func(t *testing.T) {
-		if err := statusRun(opts); (err != nil) != true {
-			t.Errorf("statusRun() error = %v, wantErr %v", err, true)
-		}
+
+		err := statusRun(opts)
+		assert.Equal(t, err, cmdutils.SilentError)
 		assert.Equal(t, stdout.String(), "")
-		assert.Equal(t, "No GitLab instance has been authenticated with glab. Run glab auth login to authenticate.\n", stderr.String())
+		assert.Equal(t, "No GitLab instance has been authenticated with glab. Run `glab auth login` to authenticate.\n", stderr.String())
 	})
 }

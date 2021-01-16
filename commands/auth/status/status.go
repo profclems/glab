@@ -10,23 +10,21 @@ import (
 	"github.com/profclems/glab/internal/utils"
 	"github.com/profclems/glab/pkg/api"
 	"github.com/spf13/cobra"
-	"github.com/xanzy/go-gitlab"
 )
 
 type StatusOpts struct {
 	Hostname  string
 	ShowToken bool
 
-	HttpClient func() (*gitlab.Client, error)
-	IO         *utils.IOStreams
-	Config     func() (config.Config, error)
+	HttpClientOverride func(token, hostname string) (*api.Client, error) // used in tests to mock http client
+	IO                 *utils.IOStreams
+	Config             func() (config.Config, error)
 }
 
 func NewCmdStatus(f *cmdutils.Factory, runE func(*StatusOpts) error) *cobra.Command {
 	opts := &StatusOpts{
-		HttpClient: f.HttpClient,
-		IO:         f.IO,
-		Config:     f.Config,
+		IO:     f.IO,
+		Config: f.Config,
 	}
 
 	cmd := &cobra.Command{
@@ -86,6 +84,9 @@ func statusRun(opts *StatusOpts) error {
 
 		token, tokenSource, _ := cfg.GetWithSource(instance, "token")
 		apiClient, err := api.NewClientWithCfg(instance, cfg, false)
+		if opts.HttpClientOverride != nil {
+			apiClient, _ = opts.HttpClientOverride(token, instance)
+		}
 		if err == nil {
 			user, err := api.CurrentUser(apiClient.Lab())
 			if err != nil {
