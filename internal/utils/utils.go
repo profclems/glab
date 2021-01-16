@@ -102,6 +102,14 @@ func GreenCheck() string {
 	return Green("✓")
 }
 
+func FailedIcon() string {
+	return Red("x")
+}
+
+func WarnIcon() string {
+	return Yellow("!")
+}
+
 func RedCheck() string {
 	return Red("✔")
 }
