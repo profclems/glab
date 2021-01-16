@@ -113,17 +113,14 @@ func TestNewCmdView_web_numberArg(t *testing.T) {
 		return
 	}
 
-	out := stripansi.Strip(stdout.String())
-	outErr := stripansi.Strip(stderr.String())
-	stdout.Reset()
-	stderr.Reset()
-
-	assert.Contains(t, out, "Opening gitlab.com/glab-cli/test/-/issues/225 in your browser.")
-	assert.Equal(t, "", outErr)
+	assert.Contains(t, stderr.String(), "Opening gitlab.com/glab-cli/test/-/issues/225 in your browser.")
+	assert.Equal(t, "", stdout.String())
 
 	if seenCmd == nil {
 		t.Log("expected a command to run")
 	}
+	stdout.Reset()
+	stderr.Reset()
 }
 
 func TestNewCmdView(t *testing.T) {
