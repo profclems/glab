@@ -31,13 +31,8 @@ func NewCmdUpdate(f *cmdutils.Factory) *cobra.Command {
 			var ua *cmdutils.UserAssignments
 			out := f.IO.StdOut
 
-			if cmd.Flags().Changed("unassign") {
-				if cmd.Flags().Changed("assignee") {
-					return &cmdutils.FlagError{Err: fmt.Errorf("--assignee and --unassign are mutually exclusive")}
-				}
-				ua = &cmdutils.UserAssignments{
-					ToReplace: []string{"0"},
-				}
+			if cmd.Flags().Changed("unassign") && cmd.Flags().Changed("assignee") {
+				return &cmdutils.FlagError{Err: fmt.Errorf("--assignee and --unassign are mutually exclusive")}
 			}
 
 			// Parse assignees Early so we can fail early in case of conflicts
