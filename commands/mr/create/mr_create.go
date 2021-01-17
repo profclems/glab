@@ -114,6 +114,11 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 			// disable interactive mode if title and description are explicitly defined
 			opts.IsInteractive = !(hasTitle && hasDescription)
 
+			if hasTitle && hasDescription && opts.Autofill {
+				return &cmdutils.FlagError{
+					Err: errors.New("usage of --title and --description completely override --autofill"),
+				}
+			}
 			if opts.IsInteractive && !opts.IO.PromptEnabled() && !opts.Autofill {
 				return &cmdutils.FlagError{Err: errors.New("--title or --fill required for non-interactive mode")}
 			}
