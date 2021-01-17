@@ -113,6 +113,10 @@ func NewCmdUpdate(f *cmdutils.Factory) *cobra.Command {
 					l.MilestoneID = gitlab.Int(0)
 				}
 			}
+			if cmd.Flags().Changed("unassign") {
+				l.AssigneeIDs = []int{0} // 0 or an empty int[] is the documented way to unassign
+				actions = append(actions, "unassigned all users")
+			}
 			if ua != nil {
 				if len(ua.ToReplace) != 0 {
 					l.AssigneeIDs, actions, err = ua.UsersFromReplaces(apiClient, actions)
