@@ -201,7 +201,7 @@ func TestMrBodyAndTitle(t *testing.T) {
 		TargetBranch:         "master",
 		TargetTrackingBranch: "origin/master",
 	}
-	t.Run("", func(t *testing.T) {
+	t.Run("normal", func(t *testing.T) {
 		if err = mrBodyAndTitle(opts); err != nil {
 			t.Errorf("unexpected error: %v", err)
 			return
@@ -212,6 +212,40 @@ func TestMrBodyAndTitle(t *testing.T) {
 Little longer
 
 Resolves #1
+`, opts.Description)
+	})
+	t.Run("given-title", func(t *testing.T) {
+		opts := *opts
+		opts.Title = "docs: make some other stuff"
+		if err = mrBodyAndTitle(&opts); err != nil {
+			t.Errorf("unexpected error: %v", err)
+			return
+		}
+
+		assert.Equal(t, "docs: make some other stuff", opts.Title)
+		assert.Equal(t, `Here, I am adding some commit body.
+Little longer
+
+Resolves #1
+`, opts.Description)
+	})
+	t.Run("given-description", func(t *testing.T) {
+		opts := *opts
+		opts.Description = `Make it multiple lines
+like this
+
+resolves #1
+`
+		if err = mrBodyAndTitle(&opts); err != nil {
+			t.Errorf("unexpected error: %v", err)
+			return
+		}
+
+		assert.Equal(t, "docs: add some changes to txt file", opts.Title)
+		assert.Equal(t, `Make it multiple lines
+like this
+
+resolves #1
 `, opts.Description)
 	})
 }
