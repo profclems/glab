@@ -471,20 +471,28 @@ func mrBodyAndTitle(opts *CreateOpts) error {
 		return err
 	}
 	if len(commits) == 1 {
-		opts.Title = commits[0].Title
-		body, err := git.CommitBody(commits[0].Sha)
-		if err != nil {
-			return err
+		if opts.Title == "" {
+			opts.Title = commits[0].Title
 		}
-		opts.Description = body
+		if opts.Description == "" {
+			body, err := git.CommitBody(commits[0].Sha)
+			if err != nil {
+				return err
+			}
+			opts.Description = body
+		}
 	} else {
-		opts.Title = utils.Humanize(opts.SourceBranch)
-
-		var body strings.Builder
-		for i := len(commits) - 1; i >= 0; i-- {
-			fmt.Fprintf(&body, "- %s\n", commits[i].Title)
+		if opts.Title == "" {
+			opts.Title = utils.Humanize(opts.SourceBranch)
 		}
-		opts.Description = body.String()
+
+		if opts.Description == "" {
+			var body strings.Builder
+			for i := len(commits) - 1; i >= 0; i-- {
+				fmt.Fprintf(&body, "- %s\n", commits[i].Title)
+			}
+			opts.Description = body.String()
+		}
 	}
 	return nil
 }
