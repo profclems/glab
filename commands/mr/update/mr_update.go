@@ -122,6 +122,10 @@ func NewCmdUpdate(f *cmdutils.Factory) *cobra.Command {
 				actions = append(actions, fmt.Sprintf("removed labels %s", strings.Join(m, " ")))
 				l.RemoveLabels = gitlab.Labels(m)
 			}
+			if m, _ := cmd.Flags().GetString("target-branch"); m != "" {
+				actions = append(actions, fmt.Sprintf("set target branch to %q", m))
+				l.TargetBranch = gitlab.String(m)
+			}
 			if ok := cmd.Flags().Changed("milestone"); ok {
 				if m, _ := cmd.Flags().GetString("milestone"); m != "" || m == "0" {
 					mID, err := cmdutils.ParseMilestone(apiClient, repo, m)
@@ -188,6 +192,7 @@ func NewCmdUpdate(f *cmdutils.Factory) *cobra.Command {
 	mrUpdateCmd.Flags().Bool("unassign", false, "unassign all users")
 	mrUpdateCmd.Flags().BoolP("remove-source-branch", "", false, "Remove Source Branch on merge")
 	mrUpdateCmd.Flags().StringP("milestone", "m", "", "title of the milestone to assign, pass \"\" or 0 to unassign")
+	mrUpdateCmd.Flags().String("target-branch", "", "set target branch")
 
 	return mrUpdateCmd
 }
