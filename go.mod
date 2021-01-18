@@ -19,13 +19,13 @@ require (
 	github.com/lunixbochs/vtclean v1.0.0
 	github.com/mattn/go-colorable v0.1.8
 	github.com/mattn/go-isatty v0.0.12
-	github.com/mattn/go-runewidth v0.0.9
+	github.com/mattn/go-runewidth v0.0.10
 	github.com/mgutz/ansi v0.0.0-20200706080929-d51e80ef957d
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/onsi/gomega v1.10.3 // indirect
 	github.com/otiai10/copy v1.4.2
 	github.com/pkg/errors v0.9.1
-	github.com/rivo/tview v0.0.0-20210111184519-c818a0c789ee
+	github.com/rivo/tview v0.0.0-20210117162420-745e4ceeb711
 	github.com/spf13/cast v1.3.1
 	github.com/spf13/cobra v1.1.1
 	github.com/spf13/pflag v1.0.5
