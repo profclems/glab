@@ -170,7 +170,13 @@ If you do not have the community repo configured in your `KISS_PATH`, follow the
 
 `glab` is available on the [Alpine Community Repo](https://git.alpinelinux.org/aports/tree/community/glab?h=master) as `glab`.
 
-**Warning:** The package is currently only available under the `edge`. `edge` is under constant development so be careful using it in production. It is possible that bugs in `edge` could cause data loss or could break your system.
+##### Install
+
+We use `--no-cache` so we don't need to do an `apk update` before.
+
+```sh
+apk add --no-cache glab
+```
 
 ##### Install a pinned version from edge
 
@@ -190,14 +196,14 @@ apk add --no-cache glab@edge
 Use edge directly
 
 ```sh
-FROM alpine:edge
+FROM alpine:3.13
 RUN apk add --no-cache glab
 ```
 
-Use for a stable version of alpine linux but glab from `edge`. This is neccesary until `alpine:3.13`
+Fetching latest glab version from edge
 
 ```sh
-FROM alpine:3.12
+FROM alpine:3.13
 RUN echo "@edge http://dl-cdn.alpinelinux.org/alpine/edge/community" >> /etc/apk/repositories
 RUN apk add --no-cache glab@edge
 ```
