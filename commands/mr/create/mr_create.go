@@ -205,20 +205,7 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 			}
 
 			if opts.TargetBranch == "" {
-				branchConfig := git.ReadBranchConfig(opts.SourceBranch)
-				// Check if our given git.BranchConfig{} is not empty, otherwise it will fail
-				// if try to access the fields, this is needed because the ReadBranchConfig
-				// function can return an empty struct
-				if branchConfig != (git.BranchConfig{}) {
-					if branchConfig.RemoteName != "" && branchConfig.MergeRef != "" {
-						// The MergeRef takes the form of refs/head/BRANCH_NAME, so split it
-						// by '/' and get the last element
-						branchName := strings.Split(branchConfig.MergeRef, "/")
-						opts.TargetBranch = branchName[len(branchName)-1]
-					}
-				} else {
-					opts.TargetBranch, _ = git.GetDefaultBranch(baseRepoRemote.PushURL.String())
-				}
+				opts.TargetBranch = getTargetBranch(baseRepoRemote, opts.SourceBranch)
 			}
 
 			opts.TargetTrackingBranch = fmt.Sprintf("%s/%s", baseRepoRemote.Name, opts.TargetBranch)
@@ -667,4 +654,23 @@ func repoRemote(labClient *gitlab.Client, opts *CreateOpts, repo glrepo.Interfac
 	}
 
 	return repoRemote, nil
+}
+
+func getTargetBranch(baseRepoRemote *glrepo.Remote, sourceBranch string) string {
+	branchConfig := git.ReadBranchConfig(sourceBranch)
+	// Check if our given git.BranchConfig{} is not empty, otherwise it will fail
+	// if try to access the fields, this is needed because the ReadBranchConfig
+	// function can return an empty struct
+	if branchConfig != (git.BranchConfig{}) {
+		if branchConfig.RemoteName != "" && branchConfig.MergeRef != "" {
+			// The MergeRef takes the form of refs/head/BRANCH_NAME, so split it
+			// by '/' and get the last element
+			branchName := strings.Split(branchConfig.MergeRef, "/")
+			return branchName[len(branchName)-1]
+		}
+	}
+	br, _ := git.GetDefaultBranch(baseRepoRemote.PushURL.String())
+	// we ignore the error since git.GetDefaultBranch returns master and an error
+	// if the default branch cannot be determined
+	return br
 }
