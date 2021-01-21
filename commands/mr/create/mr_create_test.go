@@ -2,6 +2,7 @@ package create
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"os/exec"
 	"strings"
@@ -119,6 +120,9 @@ func TestMrCmd(t *testing.T) {
 	t.Log(cli)
 	_, err := runCommand(cmd, cli)
 	if err != nil {
+		if errors.Is(err, cmdutils.SilentError) {
+			t.Errorf("Unexpected error: %q", stderr.String())
+		}
 		t.Error(err)
 		return
 	}
@@ -152,6 +156,9 @@ func TestNewCmdCreate_autofill(t *testing.T) {
 		gitCmd.Dir = testRepo
 		b, err := gitCmd.CombinedOutput()
 		if err != nil {
+			if errors.Is(err, cmdutils.SilentError) {
+				t.Errorf("Unexpected error: %q", stderr.String())
+			}
 			t.Log(string(b))
 			t.Fatal(err)
 		}
@@ -193,6 +200,9 @@ func TestMrBodyAndTitle(t *testing.T) {
 	gitCmd.Dir = testRepo
 	b, err := gitCmd.CombinedOutput()
 	if err != nil {
+		if errors.Is(err, cmdutils.SilentError) {
+			t.Errorf("Unexpected error: %q", stderr.String())
+		}
 		t.Log(string(b))
 		t.Fatal(err)
 	}
