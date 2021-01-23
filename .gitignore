@@ -1,7 +1,15 @@
-# Binaries for glab
-cmd/glab/bin
-bin
+/bin
+.envrc
+
+# man pages
+/share/man/man1
+
+# changelog file generated during release
 /CHANGELOG.md
+
+# GLab local config dir
+/.glab-cli
+/test/testdata/.glab-cli
 
 # Test binary, built with `go test -c`
 *.test
@@ -19,20 +27,22 @@ bin
 # test
 _test
 
-coverage*
-vendor
-log.txt
-
 # VsCode
 .vscode/
 
 # Dist binaries created at build with make rt
-dist
-
-# GLab local config dir
-test/testdata/.glab-cli
+/dist
 
 # The testdata-* copies created by the unit tests must be ignored or the tests
 # will encounter write errors as Git attempts to add the dirs to its index.
 test/testdata-*
-.glab-cli
+
+# macOS
+.DS_Store
+
+# vim
+*.swp
+
+coverage*
+vendor
+log.txt
