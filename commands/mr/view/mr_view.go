@@ -155,6 +155,19 @@ func printTTYMRPreview(out io.Writer, mr *gitlab.MergeRequest, notes []*gitlab.N
 	if mr.State == "closed" {
 		fmt.Fprintf(out, "Closed By: %s %s\n", mr.ClosedBy.Username, mrTimeAgo)
 	}
+	if mr.Pipeline != nil {
+		fmt.Fprint(out, utils.Bold("Pipeline Status: "))
+		var status string
+		switch s := mr.Pipeline.Status; s {
+		case "failed":
+			status = utils.Red(s)
+		case "success":
+			status = utils.Green(s)
+		default:
+			status = utils.Gray(s)
+		}
+		fmt.Fprintln(out, status)
+	}
 
 	// Comments
 	if opts.ShowComments {
