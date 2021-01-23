@@ -2,7 +2,7 @@
 name: "\U0001F41B Bug report"
 about: Encountered a bug or an unexpected issue or behaviour while using `glab`? Create a report to help us improve
 title: ''
-labels: 'kind: bug'
+labels: 'bug'
 assignees: ''
 ---
 

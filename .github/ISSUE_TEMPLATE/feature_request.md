@@ -1,8 +1,8 @@
 ---
 name: "💬 Feature request"
-about: Suggest an idea for this project or a problem you'd like to solve
+about: Suggest an idea for this project, or a problem you'd like to solve
 title: ''
-labels: 'kind: enhancement'
+labels: 'enhancement'
 assignees: ''
 
 ---
