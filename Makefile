@@ -87,10 +87,13 @@ rtdebug: ## Test release with debug info
 release:
 	goreleaser $(run)
 
+.PHONY: manpage
+manpage: ## Generate manual pages
+	go run ./cmd/gen-docs/docs.go --manpage --path ./share/man/man1
+
 .PHONY: gen-docs
-gen-docs: ## Generate docs
+gen-docs: ## Generate web docs
 	go run ./cmd/gen-docs/docs.go
-	#cp ./docs/glab.rst ./docs/index.rst
 
 .PHONY: check
 check: test lint ## Run tests and linters
@@ -118,7 +121,7 @@ test:  bin/gotestsum ## Run tests
 
 ifdef HASGOCILINT
 bin/golangci-lint:
-	echo "Skip this"
+	@echo "Skip this"
 else
 bin/golangci-lint: bin/golangci-lint-${GOLANGCI_VERSION}
 	@ln -sf golangci-lint-${GOLANGCI_VERSION} bin/golangci-lint

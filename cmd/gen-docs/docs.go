@@ -8,6 +8,9 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/spf13/cobra/doc"
+	"github.com/spf13/pflag"
+
 	"github.com/profclems/glab/commands"
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/internal/config"
@@ -24,44 +27,84 @@ var tocTree = `.. toctree::
 `
 
 func main() {
-	//err := doc.GenMarkdownTree(commands.NewCmdRoot(&cmdutils.Factory{}, "", ""), "./docs")
-	//if err != nil {
-	//	log.Fatal(err)
-	//}
+	var flagErr pflag.ErrorHandling
+	docsCmd := pflag.NewFlagSet("", flagErr)
+	manpage := docsCmd.BoolP("manpage", "m", false, "Generate manual pages instead of web docs")
+	path := docsCmd.StringP("path", "p", "./docs/source/", "Path where you want the generated docs saved")
+	help := docsCmd.BoolP("help", "h", false, "Help about any command")
 
-	docLoc := "./docs/source/"
-	var err error
+	if err := docsCmd.Parse(os.Args); err != nil {
+		fatal(err)
+	}
+	if *help {
+		_, err := fmt.Fprintf(os.Stderr, "Usage of %s:\n\n%s", os.Args[0], docsCmd.FlagUsages())
+		if err != nil {
+			fatal(err)
+		}
+		os.Exit(1)
+	}
+	err := os.MkdirAll(*path, 0755)
+	if err != nil {
+		fatal(err)
+	}
 
-	ioS, _, _, _ := utils.IOTest()
-	glabCli := commands.NewCmdRoot(&cmdutils.Factory{IO: ioS}, "", "")
+	ioStream, _, _, _ := utils.IOTest()
+	glabCli := commands.NewCmdRoot(&cmdutils.Factory{IO: ioStream}, "", "")
 	glabCli.DisableAutoGenTag = true
+	if *manpage {
+		if err := genManPage(glabCli, *path); err != nil {
+			fatal(err)
+		}
+	} else {
+		if err := genWebDocs(glabCli, *path); err != nil {
+			fatal(err)
+		}
+	}
+}
+
+func genManPage(glabCli *cobra.Command, path string) error {
+	header := &doc.GenManHeader{
+		Title:   "glab",
+		Section: "1",
+		Source:  "",
+		Manual:  "",
+	}
+	err := doc.GenManTree(glabCli, header, path)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func genWebDocs(glabCli *cobra.Command, path string) error {
 	cmds := glabCli.Commands()
 
 	for _, cmd := range cmds {
 		fmt.Println("Generating docs for " + cmd.Name())
 		// create directories for parent commands
-		_ = os.MkdirAll(docLoc+cmd.Name(), 0750)
+		_ = os.MkdirAll(path+cmd.Name(), 0750)
 
 		// Generate parent command
 		out := new(bytes.Buffer)
-		err = GenReSTCustom(cmd, out)
+		err := GenReSTCustom(cmd, out)
 		if err != nil {
-			fatal(err)
+			return err
 		}
 
 		// Generate children commands
 		for _, cmdC := range cmd.Commands() {
-			err = GenReSTTreeCustom(cmdC, docLoc+cmd.Name())
+			err = GenReSTTreeCustom(cmdC, path+cmd.Name())
 			if err != nil {
-				fatal(err)
+				return err
 			}
 		}
 
-		err = config.WriteFile(docLoc+cmd.Name()+"/index.rst", out.Bytes(), 0755)
+		err = config.WriteFile(path+cmd.Name()+"/index.rst", out.Bytes(), 0755)
 		if err != nil {
-			fatal(err)
+			return err
 		}
 	}
+	return nil
 }
 
 func printSubcommands(cmd *cobra.Command, buf *bytes.Buffer) {
