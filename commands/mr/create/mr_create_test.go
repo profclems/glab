@@ -219,11 +219,12 @@ func TestMrBodyAndTitle(t *testing.T) {
 		TargetBranch:         "master",
 		TargetTrackingBranch: "origin/master",
 	}
-	cs, csTeardown := test.InitCmdStubber()
-	defer csTeardown()
-	cs.Stub("d1sd2e,docs: add some changes to txt file")                           // git log
-	cs.Stub("Here, I am adding some commit body.\nLittle longer\n\nResolves #1\n") // git log
 	t.Run("", func(t *testing.T) {
+		cs, csTeardown := test.InitCmdStubber()
+		defer csTeardown()
+		cs.Stub("d1sd2e,docs: add some changes to txt file")                           // git log
+		cs.Stub("Here, I am adding some commit body.\nLittle longer\n\nResolves #1\n") // git log
+
 		if err := mrBodyAndTitle(opts); err != nil {
 			t.Errorf("unexpected error: %v", err)
 			return
@@ -231,5 +232,50 @@ func TestMrBodyAndTitle(t *testing.T) {
 
 		assert.Equal(t, "docs: add some changes to txt file", opts.Title)
 		assert.Equal(t, "Here, I am adding some commit body.\nLittle longer\n\nResolves #1\n", opts.Description)
+	})
+	t.Run("given-title", func(t *testing.T) {
+		cs, csTeardown := test.InitCmdStubber()
+		defer csTeardown()
+
+		cs.Stub("d1sd2e,docs: add some changes to txt file")
+		cs.Stub("Here, I am adding some commit body.\nLittle longer\n\nResolves #1\n") // git log
+
+		opts := *opts
+		opts.Title = "docs: make some other stuff"
+		if err := mrBodyAndTitle(&opts); err != nil {
+			t.Errorf("unexpected error: %v", err)
+			return
+		}
+
+		assert.Equal(t, "docs: make some other stuff", opts.Title)
+		assert.Equal(t, `Here, I am adding some commit body.
+Little longer
+
+Resolves #1
+`, opts.Description)
+	})
+	t.Run("given-description", func(t *testing.T) {
+		cs, csTeardown := test.InitCmdStubber()
+		defer csTeardown()
+
+		cs.Stub("d1sd2e,docs: add some changes to txt file")
+
+		opts := *opts
+		opts.Description = `Make it multiple lines
+like this
+
+resolves #1
+`
+		if err := mrBodyAndTitle(&opts); err != nil {
+			t.Errorf("unexpected error: %v", err)
+			return
+		}
+
+		assert.Equal(t, "docs: add some changes to txt file", opts.Title)
+		assert.Equal(t, `Make it multiple lines
+like this
+
+resolves #1
+`, opts.Description)
 	})
 }

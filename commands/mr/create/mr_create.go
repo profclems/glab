@@ -108,6 +108,11 @@ func NewCmdCreate(f *cmdutils.Factory, runE func(opts *CreateOpts) error) *cobra
 			// disable interactive mode if title and description are explicitly defined
 			opts.IsInteractive = !(hasTitle && hasDescription)
 
+			if hasTitle && hasDescription && opts.Autofill {
+				return &cmdutils.FlagError{
+					Err: errors.New("usage of --title and --description completely override --autofill"),
+				}
+			}
 			if opts.IsInteractive && !opts.IO.PromptEnabled() && !opts.Autofill {
 				return &cmdutils.FlagError{Err: errors.New("--title or --fill required for non-interactive mode")}
 			}
@@ -447,7 +452,6 @@ func createRun(opts *CreateOpts) error {
 	}
 
 	if action == cmdutils.SubmitAction {
-
 		message := "\nCreating merge request for %s into %s in %s\n\n"
 		if opts.IsDraft || opts.IsWIP {
 			message = "\nCreating draft merge request for %s into %s in %s\n\n"
@@ -476,20 +480,28 @@ func mrBodyAndTitle(opts *CreateOpts) error {
 		return err
 	}
 	if len(commits) == 1 {
-		opts.Title = commits[0].Title
-		body, err := git.CommitBody(commits[0].Sha)
-		if err != nil {
-			return err
+		if opts.Title == "" {
+			opts.Title = commits[0].Title
 		}
-		opts.Description = body
+		if opts.Description == "" {
+			body, err := git.CommitBody(commits[0].Sha)
+			if err != nil {
+				return err
+			}
+			opts.Description = body
+		}
 	} else {
-		opts.Title = utils.Humanize(opts.SourceBranch)
-
-		var body strings.Builder
-		for i := len(commits) - 1; i >= 0; i-- {
-			fmt.Fprintf(&body, "- %s\n", commits[i].Title)
+		if opts.Title == "" {
+			opts.Title = utils.Humanize(opts.SourceBranch)
 		}
-		opts.Description = body.String()
+
+		if opts.Description == "" {
+			var body strings.Builder
+			for i := len(commits) - 1; i >= 0; i-- {
+				fmt.Fprintf(&body, "- %s\n", commits[i].Title)
+			}
+			opts.Description = body.String()
+		}
 	}
 	return nil
 }
