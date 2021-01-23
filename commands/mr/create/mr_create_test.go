@@ -3,100 +3,133 @@ package create
 import (
 	"bytes"
 	"errors"
-	"fmt"
-	"os/exec"
+	"io/ioutil"
+	"net/http"
+	"net/url"
 	"strings"
 	"testing"
-	"time"
 
+	"github.com/MakeNowJust/heredoc"
+	"github.com/profclems/glab/commands/cmdtest"
 	"github.com/profclems/glab/pkg/prompt"
 
 	"github.com/google/shlex"
-	"github.com/profclems/glab/test"
-
-	"github.com/profclems/glab/internal/utils"
-
-	"github.com/acarl005/stripansi"
-	"github.com/profclems/glab/commands/cmdtest"
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/internal/config"
+	"github.com/profclems/glab/internal/git"
+	"github.com/profclems/glab/internal/glrepo"
+	"github.com/profclems/glab/internal/utils"
 	"github.com/profclems/glab/pkg/api"
-	"github.com/spf13/cobra"
+	"github.com/profclems/glab/pkg/httpmock"
+	"github.com/profclems/glab/test"
 	"github.com/stretchr/testify/assert"
 	"github.com/xanzy/go-gitlab"
 )
 
-var (
-	stubFactory *cmdutils.Factory
-	cmd         *cobra.Command
-	stdout      *bytes.Buffer
-	stderr      *bytes.Buffer
-)
+func runCommand(rt http.RoundTripper, remotes glrepo.Remotes, runE func(opts *CreateOpts) error, branch string, isTTY bool, cli string) (*test.CmdOut, error) {
+	io, _, stdout, stderr := utils.IOTest()
+	io.IsaTTY = isTTY
+	io.IsInTTY = isTTY
+	io.IsErrTTY = isTTY
 
-func runCommand(cmd *cobra.Command, cli string) (*test.CmdOut, error) {
+	factory := &cmdutils.Factory{
+		IO: io,
+		HttpClient: func() (*gitlab.Client, error) {
+			a, err := api.TestClient(&http.Client{Transport: rt}, "", "", false)
+			if err != nil {
+				return nil, err
+			}
+			return a.Lab(), err
+		},
+		Config: func() (config.Config, error) {
+			return config.NewBlankConfig(), nil
+		},
+		Remotes: func() (glrepo.Remotes, error) {
+			if remotes != nil {
+				return remotes, nil
+			}
+			return glrepo.Remotes{
+				{
+					Remote: &git.Remote{
+						Name:     "origin",
+						Resolved: "base",
+					},
+					Repo: glrepo.New("OWNER", "REPO"),
+				},
+			}, nil
+		},
+		Branch: func() (string, error) {
+			return branch, nil
+		},
+		BaseRepo: func() (glrepo.Interface, error) {
+			return glrepo.New("OWNER", "REPO"), nil
+		},
+	}
+
+	// TODO: shouldn't be there but the stub doesn't work without it
+	_, _ = factory.HttpClient()
+
+	cmd := NewCmdCreate(factory, runE)
+	cmd.PersistentFlags().StringP("repo", "R", "", "")
+
 	argv, err := shlex.Split(cli)
 	if err != nil {
 		return nil, err
 	}
 	cmd.SetArgs(argv)
-	_, err = cmd.ExecuteC()
 
+	cmd.SetIn(&bytes.Buffer{})
+	cmd.SetOut(ioutil.Discard)
+	cmd.SetErr(ioutil.Discard)
+
+	_, err = cmd.ExecuteC()
 	return &test.CmdOut{
 		OutBuf: stdout,
 		ErrBuf: stderr,
 	}, err
 }
 
-func TestMain(m *testing.M) {
-	defer config.StubConfig(`---
-git_protocol: https
-hosts:
-  gitlab.com:
-    username: monalisa
-`, "")()
+func TestNewCmdCreate_tty(t *testing.T) {
+	fakeHTTP := httpmock.New()
+	defer fakeHTTP.Verify(t)
 
-	var io *utils.IOStreams
-	io, _, stdout, stderr = utils.IOTest()
-	stubFactory, _ = cmdtest.StubFactoryWithConfig("https://gitlab.com/glab-cli/test.git")
-	stubFactory.IO = io
-	stubFactory.IO.IsaTTY = true
-	stubFactory.IO.IsErrTTY = true
+	fakeHTTP.RegisterResponder("POST", "/projects/OWNER/REPO/merge_requests",
+		httpmock.NewStringResponse(200, `
+			{
+ 				"id": 1,
+ 				"iid": 12,
+ 				"project_id": 3,
+ 				"title": "myMRtitle",
+ 				"description": "myMRbody",
+ 				"state": "open",
+ 				"target_branch": "master",
+ 				"source_branch": "feat-new-mr",
+				"web_url": "https://gitlab.com/OWNER/REPO/-/merge_requests/12"
+			}
+		`),
+	)
+	fakeHTTP.RegisterResponder("GET", "/projects/OWNER/REPO",
+		httpmock.NewStringResponse(200, `
+			{
+ 				"id": 1,
+				"description": null,
+				"default_branch": "master",
+				"web_url": "http://gitlab.com/OWNER/REPO",
+				"name": "OWNER",
+				"path": "REPO",
+				"merge_requests_enabled": true,
+				"path_with_namespace": "OWNER/REPO"
+			}
+		`),
+	)
+	fakeHTTP.RegisterResponder("GET", "/users",
+		httpmock.NewStringResponse(200, `
+			[{
+ 				"username": "testuser"
+			}]
+		`),
+	)
 
-	timer, _ := time.Parse(time.RFC3339, "2014-11-12T11:45:26.371Z")
-	api.CreateMR = func(client *gitlab.Client, projectID interface{}, opts *gitlab.CreateMergeRequestOptions) (*gitlab.MergeRequest, error) {
-		if projectID == "" || projectID == "WRONG_REPO" || projectID == "expected_err" {
-			return nil, fmt.Errorf("error expected")
-		}
-		repo, err := stubFactory.BaseRepo()
-		if err != nil {
-			return nil, err
-		}
-		return &gitlab.MergeRequest{
-			ID:           1,
-			IID:          1,
-			Title:        *opts.Title,
-			Labels:       opts.Labels,
-			State:        "opened",
-			Description:  *opts.Description,
-			SourceBranch: *opts.SourceBranch,
-			TargetBranch: *opts.TargetBranch,
-			Author: &gitlab.BasicUser{
-				ID:       1,
-				Name:     "John Dev Wick",
-				Username: "jdwick",
-			},
-			WebURL:    "https://" + repo.RepoHost() + "/" + repo.FullName() + "/-/merge_requests/1",
-			CreatedAt: &timer,
-		}, nil
-	}
-
-	cmd = NewCmdCreate(stubFactory)
-	cmd.Flags().StringP("repo", "R", "", "")
-
-	cmdtest.InitTest(m, "mr_cmd_autofill")
-}
-
-func TestMrCmd(t *testing.T) {
 	ask, teardown := prompt.InitAskStubber()
 	defer teardown()
 
@@ -106,122 +139,97 @@ func TestMrCmd(t *testing.T) {
 			Value: 0,
 		},
 	})
+
+	cs, csTeardown := test.InitCmdStubber()
+	defer csTeardown()
+	cs.Stub("")
+	cs.Stub("HEAD branch: master\n")
+	cs.Stub(heredoc.Doc(`
+		deadbeef HEAD
+		deadb00f refs/remotes/upstream/feat-new-mr
+		deadbeef refs/remotes/origin/feat-new-mr
+	`))
 
 	cliStr := []string{"-t", "myMRtitle",
 		"-d", "myMRbody",
 		"-l", "test,bug",
 		"--milestone", "1",
 		"--assignee", "testuser",
-		"-R", "glab-cli/test",
-		"-s", "test-cli",
 	}
 
 	cli := strings.Join(cliStr, " ")
+
+	runE := func(opts *CreateOpts) error {
+		opts.HeadRepo = func() (glrepo.Interface, error) {
+			return glrepo.New("OWNER", "REPO"), nil
+		}
+		return createRun(opts)
+	}
 	t.Log(cli)
-	_, err := runCommand(cmd, cli)
+
+	pu, _ := url.Parse("https://github.com/OWNER/REPO.git")
+	t.Log(pu)
+	remotes := glrepo.Remotes{
+		{
+			Remote: &git.Remote{
+				Name:     "upstream",
+				Resolved: "base",
+				PushURL:  pu,
+			},
+			Repo: glrepo.New("OWNER", "REPO"),
+		},
+		{
+			Remote: &git.Remote{
+				Name:     "origin",
+				Resolved: "base",
+				PushURL:  pu,
+			},
+			Repo: glrepo.New("monalisa", "REPO"),
+		},
+	}
+	output, err := runCommand(fakeHTTP, remotes, runE, "feat-new-mr", true, cli)
 	if err != nil {
 		if errors.Is(err, cmdutils.SilentError) {
-			t.Errorf("Unexpected error: %q", stderr.String())
+			t.Errorf("Unexpected error: %q", output.Stderr())
 		}
 		t.Error(err)
 		return
 	}
 
-	out := stripansi.Strip(stdout.String())
-	outErr := stripansi.Strip(stderr.String())
-	stdout.Reset()
-	stderr.Reset()
-
-	assert.Contains(t, cmdtest.FirstLine([]byte(out)), `!1 myMRtitle (test-cli)`)
-	assert.Contains(t, outErr, "\nCreating merge request for test-cli into master in glab-cli/test\n\n")
-	assert.Contains(t, out, "https://gitlab.com/glab-cli/test/-/merge_requests/1")
-	stdout.Reset()
-	stderr.Reset()
-}
-
-func TestNewCmdCreate_autofill(t *testing.T) {
-	ask, teardown := prompt.InitAskStubber()
-	defer teardown()
-
-	ask.Stub([]*prompt.QuestionStub{
-		{
-			Name:  "confirmation",
-			Value: 0,
-		},
-	})
-
-	t.Run("create_autofill", func(t *testing.T) {
-		testRepo := cmdtest.CopyTestRepo(t, "mr_cmd_autofill")
-		gitCmd := exec.Command("git", "checkout", "mr-autofill-test-br")
-		gitCmd.Dir = testRepo
-		b, err := gitCmd.CombinedOutput()
-		if err != nil {
-			if errors.Is(err, cmdutils.SilentError) {
-				t.Errorf("Unexpected error: %q", stderr.String())
-			}
-			t.Log(string(b))
-			t.Fatal(err)
-		}
-		_, err = runCommand(cmd, "-f -b master -s mr-autofill-test-br")
-		if err != nil {
-			t.Error(err)
-			return
-		}
-
-		out := stripansi.Strip(stdout.String())
-		outErr := stripansi.Strip(stderr.String())
-
-		assert.Equal(t, `!1 docs: add some changes to txt file (mr-autofill-test-br)
- https://gitlab.com/glab-cli/test/-/merge_requests/1
-
-`, out)
-		assert.Contains(t, outErr, "\nCreating merge request for mr-autofill-test-br into master in glab-cli/test\n\n")
-		stdout.Reset()
-		stderr.Reset()
-	})
+	assert.Contains(t, cmdtest.FirstLine([]byte(output.String())), `!12 myMRtitle (feat-new-mr)`)
+	assert.Contains(t, output.Stderr(), "\nCreating merge request for feat-new-mr into master in OWNER/REPO\n\n")
+	assert.Contains(t, output.String(), "https://gitlab.com/OWNER/REPO/-/merge_requests/12")
 }
 
 func TestMRCreate_nontty_insufficient_flags(t *testing.T) {
-	stubFactory.IO.SetPrompt("true")
-	cmd = NewCmdCreate(stubFactory)
-	_, err := runCommand(cmd, "")
+	fakeHTTP := httpmock.New()
+	defer fakeHTTP.Verify(t)
+
+	_, err := runCommand(fakeHTTP, nil, nil, "test-br", false, "")
 	if err == nil {
 		t.Fatal("expected error")
 	}
 
 	assert.Equal(t, "--title or --fill required for non-interactive mode", err.Error())
-
-	assert.Equal(t, "", stdout.String())
 }
 
 func TestMrBodyAndTitle(t *testing.T) {
-	testRepo := cmdtest.CopyTestRepo(t, "mr_cmd_autofill")
-	gitCmd := exec.Command("git", "checkout", "mr-autofill-test-br")
-	gitCmd.Dir = testRepo
-	b, err := gitCmd.CombinedOutput()
-	if err != nil {
-		if errors.Is(err, cmdutils.SilentError) {
-			t.Errorf("Unexpected error: %q", stderr.String())
-		}
-		t.Log(string(b))
-		t.Fatal(err)
-	}
 	opts := &CreateOpts{
 		SourceBranch:         "mr-autofill-test-br",
 		TargetBranch:         "master",
 		TargetTrackingBranch: "origin/master",
 	}
+	cs, csTeardown := test.InitCmdStubber()
+	defer csTeardown()
+	cs.Stub("d1sd2e,docs: add some changes to txt file")                           // git log
+	cs.Stub("Here, I am adding some commit body.\nLittle longer\n\nResolves #1\n") // git log
 	t.Run("", func(t *testing.T) {
-		if err = mrBodyAndTitle(opts); err != nil {
+		if err := mrBodyAndTitle(opts); err != nil {
 			t.Errorf("unexpected error: %v", err)
 			return
 		}
 
 		assert.Equal(t, "docs: add some changes to txt file", opts.Title)
-		assert.Equal(t, `Here, I am adding some commit body.
-Little longer
-
-Resolves #1
-`, opts.Description)
+		assert.Equal(t, "Here, I am adding some commit body.\nLittle longer\n\nResolves #1\n", opts.Description)
 	})
 }

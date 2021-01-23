@@ -52,7 +52,7 @@ func NewCmdMR(f *cmdutils.Factory) *cobra.Command {
 	mrCmd.AddCommand(mrApproversCmd.NewCmdApprovers(f))
 	mrCmd.AddCommand(mrCheckoutCmd.NewCmdCheckout(f))
 	mrCmd.AddCommand(mrCloseCmd.NewCmdClose(f))
-	mrCmd.AddCommand(mrCreateCmd.NewCmdCreate(f))
+	mrCmd.AddCommand(mrCreateCmd.NewCmdCreate(f, nil))
 	mrCmd.AddCommand(mrDeleteCmd.NewCmdDelete(f))
 	mrCmd.AddCommand(mrDiffCmd.NewCmdDiff(f, nil))
 	mrCmd.AddCommand(mrForCmd.NewCmdFor(f))
