@@ -167,6 +167,18 @@ func printTTYMRPreview(out io.Writer, mr *gitlab.MergeRequest, notes []*gitlab.N
 			status = utils.Gray(s)
 		}
 		fmt.Fprintln(out, status)
+
+		if mr.MergeWhenPipelineSucceeds && mr.Pipeline.Status != "success" {
+			fmt.Fprintf(out, "%s Requires pipeline to succeed before merging\n", utils.WarnIcon())
+		}
+	}
+	fmt.Fprintf(out, "%s This merge request has %s changes\n", utils.GreenCheck(), utils.Yellow(mr.ChangesCount))
+	if mr.State == "merged" && mr.MergedBy != nil {
+		fmt.Fprintf(out, "%s The changes were merged into %s by %s %s\n", utils.GreenCheck(), mr.TargetBranch, mr.MergedBy.Name, utils.TimeToPrettyTimeAgo(*mr.MergedAt))
+	}
+
+	if mr.HasConflicts {
+		fmt.Fprintf(out, utils.Red("%s This branch has conflicts that must be resolved\n"), utils.FailedIcon())
 	}
 
 	// Comments
