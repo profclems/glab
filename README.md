@@ -330,6 +330,16 @@ $ glab config set editor vim --host gitlab.example.org
   NO_COLOR: set to any value to avoid printing ANSI escape sequences for color output. 
   ```
 
+## What about [Lab](https://github.com/zaquestion/lab)?
+
+Both `glab` and `lab` are open-source tools with the same goal of bringing GitLab to your command line.
+
+`lab` behaves as a proxy to `git`, and `glab` is a standalone tool.
+
+If you want a tool that’s more opinionated and intended to help simplify your GitLab workflows from the command line, then `glab` is for you. However, If you're looking for a tool like [`Hub`](https://github.com/github/hub) that wraps Git and allows you to interact with GitLab, you might as well consider using [`lab`](https://gitlab.com/zaquestion/lab).
+
+Some `glab` commands such as `ci view` and `ci trace` were adopted from [`lab`](https://github.com/zaquestion/lab).
+
 ## Issues
 If you have an issue: report it on the [issue tracker](https://github.com/profclems/glab/issues)
 
