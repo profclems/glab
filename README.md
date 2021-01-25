@@ -43,6 +43,7 @@ Table of Contents
 * [Authentication](#authentication)
 * [Configuration](#configuration)
 * [Environment Variables](#environment-variables)
+* [What about lab](#what-about-lab)
 * [Issues](#issues)
 * [Contributing](#contributing)
    * [Support glab <g-emoji class="g-emoji" alias="sparkling_heart" fallback-src="https://github.githubassets.com/images/icons/emoji/unicode/1f496.png">💖</g-emoji>](#support-glab-)
@@ -332,13 +333,15 @@ $ glab config set editor vim --host gitlab.example.org
 
 ## What about [Lab](https://github.com/zaquestion/lab)?
 
-Both `glab` and `lab` are open-source tools with the same goal of bringing GitLab to your command line.
+Both `glab` and [lab] are open-source tools with the same goal of bringing GitLab to your command line and simplifying the developer workflower. In many ways `lab` is to [hub], what `glab` is to [gh].
 
-`lab` behaves as a proxy to `git`, and `glab` is a standalone tool.
+If you want a tool that’s more opinionated and intended to help simplify your GitLab workflows from the command line, then `glab` is for you. However, If you're looking for a tool like [hub] that feels like using git and allows you to interact with GitLab, you might consider using [lab].
 
-If you want a tool that’s more opinionated and intended to help simplify your GitLab workflows from the command line, then `glab` is for you. However, If you're looking for a tool like [`Hub`](https://github.com/github/hub) that wraps Git and allows you to interact with GitLab, you might as well consider using [`lab`](https://gitlab.com/zaquestion/lab).
+Some `glab` commands such as `ci view` and `ci trace` were adopted from [lab].
 
-Some `glab` commands such as `ci view` and `ci trace` were adopted from [`lab`](https://github.com/zaquestion/lab).
+[gh]:https://github.com/cli/cli
+[hub]:https://github.com/github/hub
+[lab]:https://github.com/zaquestion/lab
 
 ## Issues
 If you have an issue: report it on the [issue tracker](https://github.com/profclems/glab/issues)
