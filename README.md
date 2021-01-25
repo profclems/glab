@@ -333,7 +333,7 @@ $ glab config set editor vim --host gitlab.example.org
 
 ## What about [Lab](https://github.com/zaquestion/lab)?
 
-Both `glab` and [lab] are open-source tools with the same goal of bringing GitLab to your command line and simplifying the developer workflower. In many ways `lab` is to [hub], what `glab` is to [gh].
+Both `glab` and [lab] are open-source tools with the same goal of bringing GitLab to your command line and simplifying the developer workflow. In many ways `lab` is to [hub], while `glab` is to [gh].
 
 If you want a tool that’s more opinionated and intended to help simplify your GitLab workflows from the command line, then `glab` is for you. However, If you're looking for a tool like [hub] that feels like using git and allows you to interact with GitLab, you might consider using [lab].
 
