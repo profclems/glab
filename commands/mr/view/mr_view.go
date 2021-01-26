@@ -166,7 +166,7 @@ func printTTYMRPreview(out io.Writer, mr *gitlab.MergeRequest, notes []*gitlab.N
 		default:
 			status = utils.Gray(s)
 		}
-		fmt.Fprintln(out, status)
+		fmt.Fprintf(out, "%s (View pipeline with `%s`)\n", status, utils.Bold("glab ci view "+mr.SourceBranch))
 
 		if mr.MergeWhenPipelineSucceeds && mr.Pipeline.Status != "success" {
 			fmt.Fprintf(out, "%s Requires pipeline to succeed before merging\n", utils.WarnIcon())
