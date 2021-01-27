@@ -91,18 +91,18 @@ jobs:
           $srcDir = Convert-Path .
           Rename-Item -Path $srcDir/bin/glab -NewName glab.exe
           Copy-Item -Path $srcDir/scripts/setup_windows.iss -Destination $srcDir
-          iscc "setup_windows.iss" /DVersion=${{steps.get_version.outputs.version}}
+          iscc "setup_windows.iss" /DVersion=${{steps.get_version.outputs.version-without-v}}
 
       - name: Generate Hash
         env:
           GITHUB_TOKEN: ${{secrets.BOT_TOKEN}}
         run:
           gh release download -p "checksums.txt";
-          echo "$(Get-FileHash ./bin/glab_${{ steps.get_version.outputs.version }}_Windows_x86_64_installer.exe -Algorithm SHA256 | Select-Object "Hash" | ForEach-Object {$_.Hash})  glab_${{ steps.get_version.outputs.version }}_Windows_x86_64_installer.exe" >> checksums.txt
+          echo "$(Get-FileHash ./bin/glab_${{ steps.get_version.outputs.version-without-v }}_Windows_x86_64_installer.exe -Algorithm SHA256 | Select-Object "Hash" | ForEach-Object {$_.Hash})  glab_${{ steps.get_version.outputs.version-without-v }}_Windows_x86_64_installer.exe" >> checksums.txt
 
       - name: Upload Installer to Release
         continue-on-error: true
         env:
           GITHUB_TOKEN: ${{secrets.BOT_TOKEN}}
         run: |
-          gh release upload "${{ steps.get_version.outputs.version-without-v }}" ./bin/glab_${{ steps.get_version.outputs.version }}_Windows_x86_64_installer.exe checksums.txt --clobber
+          gh release upload "${{ steps.get_version.outputs.version }}" ./bin/glab_${{ steps.get_version.outputs.version-without-v }}_Windows_x86_64_installer.exe checksums.txt --clobber
