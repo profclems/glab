@@ -54,7 +54,7 @@ func ParseURL(rawURL string) (u *url.URL, err error) {
 	return
 }
 
-// IsValidUrl tests a string to determine if it is a well-structured url or not.
+// IsValidUrl tests a string to determine if it is a valid Git url or not.
 func IsValidURL(u string) bool {
 	return strings.HasPrefix(u, "git@") || isSupportedProtocol(u)
 }
