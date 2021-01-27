@@ -150,3 +150,18 @@ func CommonElementsInStringSlice(s1 []string, s2 []string) (arr []string) {
 	}
 	return arr
 }
+
+// isValidUrl tests a string to determine if it is a well-structured url or not.
+func IsValidURL(toTest string) bool {
+	_, err := url.ParseRequestURI(toTest)
+	if err != nil {
+		return false
+	}
+
+	u, err := url.Parse(toTest)
+	if err != nil || u.Scheme == "" || u.Host == "" {
+		return false
+	}
+
+	return true
+}

@@ -5,6 +5,8 @@ import (
 	"net/url"
 	"testing"
 
+	"github.com/profclems/glab/internal/config"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/xanzy/go-gitlab"
 )
@@ -206,21 +208,35 @@ func Test_repoFromURL(t *testing.T) {
 }
 
 func TestFromFullName(t *testing.T) {
+	defer config.StubConfig(`---
+hosts:
+  gitlab.com:
+    token: xxxxxxxxxxxxxxxxxxxx
+    git_protocol: ssh
+    api_protocol: https
+  example.org:
+    token: xxxxxxxxxxxxxxxxxxxxx
+`, "")()
 	tests := []struct {
-		name      string
-		input     string
-		wantOwner string
-		wantName  string
-		wantHost  string
-		wantErr   error
+		name          string
+		input         string
+		wantOwner     string
+		wantName      string
+		wantHost      string
+		wantFullname  string
+		wantGroup     string
+		wantNamespace string
+		wantErr       error
 	}{
 		{
-			name:      "OWNER/REPO combo",
-			input:     "OWNER/REPO",
-			wantHost:  "gitlab.com",
-			wantOwner: "OWNER",
-			wantName:  "REPO",
-			wantErr:   nil,
+			name:          "OWNER/REPO combo",
+			input:         "OWNER/REPO",
+			wantHost:      "gitlab.com",
+			wantOwner:     "OWNER",
+			wantName:      "REPO",
+			wantFullname:  "OWNER/REPO",
+			wantNamespace: "OWNER",
+			wantErr:       nil,
 		},
 		{
 			name:    "too few elements",
@@ -228,20 +244,26 @@ func TestFromFullName(t *testing.T) {
 			wantErr: errors.New(`expected the "[HOST/]OWNER/[NAMESPACE/]REPO" format, got "OWNER"`),
 		},
 		{
-			name:      "group namespace",
-			input:     "a/b/c/d",
-			wantHost:  "a",
-			wantOwner: "b",
-			wantName:  "c/d",
-			wantErr:   nil,
+			name:          "group namespace",
+			input:         "a/b/c/d",
+			wantHost:      "a",
+			wantOwner:     "b/c",
+			wantName:      "d",
+			wantFullname:  "b/c/d",
+			wantNamespace: "c",
+			wantGroup:     "b",
+			wantErr:       nil,
 		},
 		{
-			name:      "with group namespace",
-			input:     "gitlab.com/owner/namespace/repo",
-			wantHost:  "gitlab.com",
-			wantOwner: "owner",
-			wantName:  "namespace/repo",
-			wantErr:   nil,
+			name:          "with group namespace",
+			input:         "gitlab.com/owner/namespace/repo",
+			wantHost:      "gitlab.com",
+			wantOwner:     "owner/namespace",
+			wantName:      "repo",
+			wantFullname:  "owner/namespace/repo",
+			wantNamespace: "namespace",
+			wantGroup:     "owner",
+			wantErr:       nil,
 		},
 		{
 			name:    "blank value",
@@ -249,28 +271,48 @@ func TestFromFullName(t *testing.T) {
 			wantErr: errors.New(`expected the "[HOST/]OWNER/[NAMESPACE/]REPO" format, got "a/"`),
 		},
 		{
-			name:      "with hostname",
-			input:     "example.org/OWNER/REPO",
-			wantHost:  "example.org",
-			wantOwner: "OWNER",
-			wantName:  "REPO",
-			wantErr:   nil,
+			name:          "with hostname",
+			input:         "example.org/OWNER/REPO",
+			wantHost:      "example.org",
+			wantOwner:     "OWNER",
+			wantName:      "REPO",
+			wantFullname:  "OWNER/REPO",
+			wantNamespace: "OWNER",
+			wantGroup:     "",
+			wantErr:       nil,
 		},
 		{
-			name:      "full URL",
-			input:     "https://example.org/OWNER/REPO.git",
-			wantHost:  "example.org",
-			wantOwner: "OWNER",
-			wantName:  "REPO",
-			wantErr:   nil,
+			name:          "group name has dot",
+			input:         "my.group/sub.group/repo",
+			wantHost:      "gitlab.com",
+			wantOwner:     "my.group/sub.group",
+			wantName:      "repo",
+			wantFullname:  "my.group/sub.group/repo",
+			wantNamespace: "sub.group",
+			wantGroup:     "my.group",
+			wantErr:       nil,
 		},
 		{
-			name:      "SSH URL",
-			input:     "git@example.org:OWNER/REPO.git",
-			wantHost:  "example.org",
-			wantOwner: "OWNER",
-			wantName:  "REPO",
-			wantErr:   nil,
+			name:          "full URL",
+			input:         "https://example.org/OWNER/REPO.git",
+			wantHost:      "example.org",
+			wantOwner:     "OWNER",
+			wantName:      "REPO",
+			wantFullname:  "OWNER/REPO",
+			wantNamespace: "OWNER",
+			wantGroup:     "",
+			wantErr:       nil,
+		},
+		{
+			name:          "SSH URL",
+			input:         "git@example.org:OWNER/REPO.git",
+			wantHost:      "example.org",
+			wantOwner:     "OWNER",
+			wantName:      "REPO",
+			wantFullname:  "OWNER/REPO",
+			wantNamespace: "OWNER",
+			wantGroup:     "",
+			wantErr:       nil,
 		},
 		{
 			name:    "invalid URL",
@@ -300,6 +342,15 @@ func TestFromFullName(t *testing.T) {
 			}
 			if r.RepoName() != tt.wantName {
 				t.Errorf("expected name %q, got %q", tt.wantName, r.RepoName())
+			}
+			if r.RepoGroup() != tt.wantGroup {
+				t.Errorf("expected group %q, got %q", tt.wantGroup, r.RepoGroup())
+			}
+			if r.FullName() != tt.wantFullname {
+				t.Errorf("expected fullname %q, got %q", tt.wantFullname, r.FullName())
+			}
+			if r.RepoNamespace() != tt.wantNamespace {
+				t.Errorf("expected namespace %q, got %q", tt.wantNamespace, r.RepoNamespace())
 			}
 		})
 	}
