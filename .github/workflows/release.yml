@@ -81,26 +81,28 @@ jobs:
         id: buildwin
         run: |
           make build && Get-ChildItem bin
-          echo ::set-output name=tag::${GITHUB_REF#refs/tags/v}
-          echo ::set-output name=vtag::${GITHUB_REF#refs/tags/}
+      
+      - name: Get Latest Version Tag
+        id: get_version
+        uses: battila7/get-version-action@v2
 
       - name: Create Installer
         run: |
           $srcDir = Convert-Path .
           Rename-Item -Path $srcDir/bin/glab -NewName glab.exe
           Copy-Item -Path $srcDir/scripts/setup_windows.iss -Destination $srcDir
-          iscc "setup_windows.iss" /DVersion=${{steps.buildwin.outputs.tag}}
+          iscc "setup_windows.iss" /DVersion=${{steps.get_version.outputs.version}}
 
       - name: Generate Hash
         env:
           GITHUB_TOKEN: ${{secrets.BOT_TOKEN}}
         run:
           gh release download -p "checksums.txt";
-          echo "$(Get-FileHash ./bin/glab_${{ steps.buildwin.outputs.tag }}_Windows_x86_64_installer.exe -Algorithm SHA256 | Select-Object "Hash" | ForEach-Object {$_.Hash})  glab_${{ steps.buildwin.outputs.tag }}_Windows_x86_64_installer.exe" >> checksums.txt
+          echo "$(Get-FileHash ./bin/glab_${{ steps.get_version.outputs.version }}_Windows_x86_64_installer.exe -Algorithm SHA256 | Select-Object "Hash" | ForEach-Object {$_.Hash})  glab_${{ steps.get_version.outputs.version }}_Windows_x86_64_installer.exe" >> checksums.txt
 
       - name: Upload Installer to Release
         continue-on-error: true
         env:
           GITHUB_TOKEN: ${{secrets.BOT_TOKEN}}
         run: |
-          gh release upload "${{ steps.buildwin.outputs.vtag }}" ./bin/glab_${{ steps.buildwin.outputs.tag }}_Windows_x86_64_installer.exe checksums.txt --clobber
+          gh release upload "${{ steps.get_version.outputs.version-without-v }}" ./bin/glab_${{ steps.get_version.outputs.version }}_Windows_x86_64_installer.exe checksums.txt --clobber
