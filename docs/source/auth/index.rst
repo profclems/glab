@@ -25,6 +25,7 @@ Subcommands
    :maxdepth: 0
 
    login <login>
+   status <status>
    
 
 

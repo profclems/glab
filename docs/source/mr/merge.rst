@@ -20,8 +20,9 @@ Examples
 
 ::
 
-  glab mr merge 235
-  glab mr merge    # Finds open merge request from current branch
+  $ glab mr merge 235
+  $ glab mr accept 235
+  $ glab mr merge    # Finds open merge request from current branch
   
 
 Options
@@ -42,5 +43,5 @@ Options inherited from parent commands
 ::
 
       --help              Show help for command
-  -R, --repo OWNER/REPO   Select another repository using the OWNER/REPO or `GROUP/NAMESPACE/REPO` format or the project ID or full URL
+  -R, --repo OWNER/REPO   Select another repository using the OWNER/REPO or `GROUP/NAMESPACE/REPO` format or full URL or git URL
 

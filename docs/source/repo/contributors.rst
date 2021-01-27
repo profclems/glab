@@ -3,17 +3,13 @@
 glab repo contributors
 ----------------------
 
-Get contributors of the repository.
+Get repository contributors list.
 
 Synopsis
 ~~~~~~~~
 
 
-Clone supports these shorthands
-- repo
-- namespace/repo
-- namespace/group/repo
-
+Get repository contributors list.
 
 ::
 
@@ -25,7 +21,9 @@ Examples
 ::
 
   $ glab repo contributors
-  $ glab repo archive  // Downloads zip file of current repository
+  
+  $ glab repo contributors -R gitlab-com/www-gitlab-com
+  #=> Supports repo override
   
 
 Options
@@ -33,9 +31,11 @@ Options
 
 ::
 
-  -f, --order string      Return contributors ordered by name, email, or commits (orders by commit date) fields. Default is commits (default "zip")
-  -R, --repo OWNER/REPO   Select another repository using the OWNER/REPO or `GROUP/NAMESPACE/REPO` format or the project ID or full URL
-  -s, --sort string       Return contributors sorted in asc or desc order. Default is asc
+  -o, --order string      Return contributors ordered by name, email, or commits (orders by commit date) fields (default "commits")
+  -p, --page int          Page number (default 1)
+  -P, --per-page int      Number of items to list per page. (default 30)
+  -R, --repo OWNER/REPO   Select another repository using the OWNER/REPO or `GROUP/NAMESPACE/REPO` format or full URL or git URL
+  -s, --sort string       Return contributors sorted in asc or desc order
 
 Options inherited from parent commands
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

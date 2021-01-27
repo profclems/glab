@@ -15,11 +15,21 @@ Subscribe to merge requests
 
   glab mr subscribe [<id> | <branch>] [flags]
 
+Examples
+~~~~~~~~
+
+::
+
+  $ glab mr subscribe 123
+  $ glab mr sub 123
+  $ glab mr subscribe branch
+  
+
 Options inherited from parent commands
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ::
 
       --help              Show help for command
-  -R, --repo OWNER/REPO   Select another repository using the OWNER/REPO or `GROUP/NAMESPACE/REPO` format or the project ID or full URL
+  -R, --repo OWNER/REPO   Select another repository using the OWNER/REPO or `GROUP/NAMESPACE/REPO` format or full URL or git URL
 

@@ -32,7 +32,7 @@ Options
 
 ::
 
-  -s, --shell string   Shell type: {bash|zsh|fish|powershell}
+  -s, --shell string   Shell type: {bash|zsh|fish|powershell} (default "bash")
 
 Options inherited from parent commands
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

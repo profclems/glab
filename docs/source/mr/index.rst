@@ -11,12 +11,22 @@ Synopsis
 
 Create, view and manage merge requests
 
+Examples
+~~~~~~~~
+
+::
+
+  $ glab mr create --autofill --labels bugfix
+  $ glab mr merge 123
+  $ glab mr note -m "needs to do X before it can be merged" branch-foo
+  
+
 Options
 ~~~~~~~
 
 ::
 
-  -R, --repo OWNER/REPO   Select another repository using the OWNER/REPO or `GROUP/NAMESPACE/REPO` format or the project ID or full URL
+  -R, --repo OWNER/REPO   Select another repository using the OWNER/REPO or `GROUP/NAMESPACE/REPO` format or full URL or git URL
 
 Options inherited from parent commands
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

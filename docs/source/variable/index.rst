@@ -1,15 +1,15 @@
-.. _glab_release:
+.. _glab_variable:
 
-glab release
-------------
+glab variable
+-------------
 
-Manage GitLab releases
+Manage GitLab Project and Group Variables
 
 Synopsis
 ~~~~~~~~
 
 
-Manage GitLab releases
+Manage GitLab Project and Group Variables
 
 Options
 ~~~~~~~
@@ -31,7 +31,7 @@ Subcommands
    :glob:
    :maxdepth: 0
 
-   list <list>
+   set <set>
    
 
 

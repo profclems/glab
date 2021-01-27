@@ -1,7 +1,7 @@
-.. _glab_ci_help:
+.. _glab_variable_help:
 
-glab ci help
-------------
+glab variable help
+------------------
 
 Help about any command
 
@@ -10,11 +10,11 @@ Synopsis
 
 
 Help provides help for any command in the application.
-Simply type ci help [path to command] for full details.
+Simply type variable help [path to command] for full details.
 
 ::
 
-  glab ci help [command] [flags]
+  glab variable help [command] [flags]
 
 Options inherited from parent commands
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -15,6 +15,17 @@ Search for GitLab repositories and projects by name
 
   glab repo search [flags]
 
+Examples
+~~~~~~~~
+
+::
+
+  $ glab project search title
+  $ glab repo search title
+  $ glab project find title
+  $ glab proejct lookup title
+  
+
 Options
 ~~~~~~~
 

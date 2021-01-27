@@ -11,12 +11,23 @@ Synopsis
 
 Work with GitLab issues
 
+Examples
+~~~~~~~~
+
+::
+
+  $ glab issue list
+  $ glab issue create --label --confidential
+  $ glab issue view --web
+  $ glab issue note -m "closing because !123 was merged" <issue number>
+  
+
 Options
 ~~~~~~~
 
 ::
 
-  -R, --repo OWNER/REPO   Select another repository using the OWNER/REPO or `GROUP/NAMESPACE/REPO` format or the project ID or full URL
+  -R, --repo OWNER/REPO   Select another repository using the OWNER/REPO or `GROUP/NAMESPACE/REPO` format or full URL or git URL
 
 Options inherited from parent commands
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -15,6 +15,16 @@ Create labels for repository/project
 
   glab label create [flags]
 
+Examples
+~~~~~~~~
+
+::
+
+  $ glab label create
+  $ glab label new
+  $ glab label create -R owner/repo
+  
+
 Options
 ~~~~~~~
 
@@ -30,5 +40,5 @@ Options inherited from parent commands
 ::
 
       --help              Show help for command
-  -R, --repo OWNER/REPO   Select another repository using the OWNER/REPO or `GROUP/NAMESPACE/REPO` format or the project ID or full URL
+  -R, --repo OWNER/REPO   Select another repository using the OWNER/REPO or `GROUP/NAMESPACE/REPO` format or full URL or git URL
 
