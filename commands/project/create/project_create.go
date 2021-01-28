@@ -7,6 +7,8 @@ import (
 	"path"
 	"strings"
 
+	"github.com/profclems/glab/pkg/iostreams"
+
 	"github.com/profclems/glab/pkg/prompt"
 
 	"github.com/profclems/glab/internal/glrepo"
@@ -16,8 +18,6 @@ import (
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/internal/git"
 	"github.com/profclems/glab/internal/run"
-	"github.com/profclems/glab/internal/utils"
-
 	"github.com/spf13/cobra"
 	"github.com/xanzy/go-gitlab"
 )
@@ -148,7 +148,7 @@ func runCreateProject(cmd *cobra.Command, args []string, f *cmdutils.Factory) er
 
 	project, err := api.CreateProject(apiClient, opts)
 
-	greenCheck := utils.Green("✓")
+	greenCheck := iostreams.Green("✓")
 
 	if err == nil {
 		fmt.Fprintf(f.IO.StdOut, "%s Created repository %s on GitLab: %s\n", greenCheck, project.NameWithNamespace, project.WebURL)

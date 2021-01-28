@@ -5,13 +5,14 @@ import (
 	"os/exec"
 	"testing"
 
+	"github.com/profclems/glab/pkg/iostreams"
+
 	"github.com/alecthomas/assert"
 	"github.com/google/shlex"
 	"github.com/profclems/glab/pkg/prompt"
 
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/internal/config"
-	"github.com/profclems/glab/internal/utils"
 	"github.com/spf13/cobra"
 
 	"github.com/profclems/glab/commands/cmdtest"
@@ -35,8 +36,8 @@ hosts:
     username: root
 `, "")()
 
-	var io *utils.IOStreams
-	io, _, stdout, _ = utils.IOTest()
+	var io *iostreams.IOStreams
+	io, _, stdout, _ = iostreams.IOTest()
 	stubFactory, _ = cmdtest.StubFactoryWithConfig("https://gitlab.com/glab-cli/test.git")
 	stubFactory.IO = io
 	stubFactory.IO.IsaTTY = true
@@ -117,8 +118,8 @@ hosts:
 }
 
 func TestTraceRun(t *testing.T) {
-	var io *utils.IOStreams
-	io, _, stdout, _ = utils.IOTest()
+	var io *iostreams.IOStreams
+	io, _, stdout, _ = iostreams.IOTest()
 	stubFactory = cmdtest.StubFactory("https://gitlab.com/glab-cli/test.git")
 	stubFactory.IO = io
 	stubFactory.IO.IsaTTY = true

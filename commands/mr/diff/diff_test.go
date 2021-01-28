@@ -8,6 +8,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/profclems/glab/pkg/iostreams"
+
 	"github.com/profclems/glab/pkg/api"
 	"github.com/xanzy/go-gitlab"
 
@@ -17,7 +19,6 @@ import (
 	"github.com/profclems/glab/internal/config"
 	"github.com/profclems/glab/internal/git"
 	"github.com/profclems/glab/internal/glrepo"
-	"github.com/profclems/glab/internal/utils"
 	"github.com/profclems/glab/test"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -71,7 +72,7 @@ func Test_NewCmdDiff(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			io, _, _, _ := utils.IOTest()
+			io, _, _, _ := iostreams.IOTest()
 			io.IsaTTY = tt.isTTY
 			io.IsInTTY = tt.isTTY
 			io.IsErrTTY = tt.isTTY
@@ -110,7 +111,7 @@ func Test_NewCmdDiff(t *testing.T) {
 }
 
 func runCommand(remotes glrepo.Remotes, isTTY bool, cli string) (*test.CmdOut, error) {
-	io, _, stdout, stderr := utils.IOTest()
+	io, _, stdout, stderr := iostreams.IOTest()
 	io.IsaTTY = isTTY
 	io.IsInTTY = isTTY
 	io.IsErrTTY = isTTY

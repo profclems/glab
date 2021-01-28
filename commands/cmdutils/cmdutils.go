@@ -9,6 +9,8 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/profclems/glab/pkg/iostreams"
+
 	"github.com/profclems/glab/internal/glrepo"
 	"github.com/profclems/glab/internal/utils"
 	"github.com/profclems/glab/pkg/api"
@@ -170,7 +172,7 @@ func LabelsPrompt(response *[]string, apiClient *gitlab.Client, repoRemote *glre
 	return nil
 }
 
-func MilestonesPrompt(response *int, apiClient *gitlab.Client, repoRemote *glrepo.Remote, io *utils.IOStreams) (err error) {
+func MilestonesPrompt(response *int, apiClient *gitlab.Client, repoRemote *glrepo.Remote, io *iostreams.IOStreams) (err error) {
 	var milestoneOptions []string
 	milestoneMap := map[string]*gitlab.Milestone{}
 
@@ -218,7 +220,7 @@ var GroupMemberLevel = map[int]string{
 
 // AssigneesPrompt creates a multi-selection prompt of all the users below the given access level
 // for the remote referenced by the `*glrepo.Remote`
-func AssigneesPrompt(response *[]string, apiClient *gitlab.Client, repoRemote *glrepo.Remote, io *utils.IOStreams, minimumAccessLevel int) (err error) {
+func AssigneesPrompt(response *[]string, apiClient *gitlab.Client, repoRemote *glrepo.Remote, io *iostreams.IOStreams, minimumAccessLevel int) (err error) {
 	var assigneeOptions []string
 	assigneeMap := map[string]string{}
 

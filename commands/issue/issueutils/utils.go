@@ -8,6 +8,8 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/profclems/glab/pkg/iostreams"
+
 	"github.com/profclems/glab/internal/config"
 	"github.com/profclems/glab/internal/glrepo"
 	"github.com/profclems/glab/pkg/api"
@@ -26,12 +28,12 @@ func DisplayIssueList(issues []*gitlab.Issue, projectID string) string {
 		table.AddCell(issue.Title)
 
 		if len(issue.Labels) > 0 {
-			table.AddCellf("(%s)", utils.Cyan(strings.Trim(strings.Join(issue.Labels, ", "), ",")))
+			table.AddCellf("(%s)", iostreams.Cyan(strings.Trim(strings.Join(issue.Labels, ", "), ",")))
 		} else {
 			table.AddCell("")
 		}
 
-		table.AddCell(utils.Gray(utils.TimeToPrettyTimeAgo(*issue.CreatedAt)))
+		table.AddCell(iostreams.Gray(utils.TimeToPrettyTimeAgo(*issue.CreatedAt)))
 		table.EndRow()
 	}
 
@@ -48,9 +50,9 @@ func DisplayIssue(i *gitlab.Issue) string {
 
 func IssueState(i *gitlab.Issue) (issueID string) {
 	if i.State == "opened" {
-		issueID = utils.Green(fmt.Sprintf("#%d", i.IID))
+		issueID = iostreams.Green(fmt.Sprintf("#%d", i.IID))
 	} else {
-		issueID = utils.Red(fmt.Sprintf("#%d", i.IID))
+		issueID = iostreams.Red(fmt.Sprintf("#%d", i.IID))
 	}
 	return
 }

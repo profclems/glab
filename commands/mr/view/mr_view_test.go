@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/profclems/glab/internal/utils"
+	"github.com/profclems/glab/pkg/iostreams"
 
 	"github.com/acarl005/stripansi"
 	"github.com/profclems/glab/commands/cmdutils"
@@ -47,8 +47,8 @@ hosts:
     token: OTOKEN
 `, "")()
 
-	var io *utils.IOStreams
-	io, _, stdout, stderr = utils.IOTest()
+	var io *iostreams.IOStreams
+	io, _, stdout, stderr = iostreams.IOTest()
 	stubFactory, _ = cmdtest.StubFactoryWithConfig("")
 	stubFactory.IO = io
 	stubFactory.IO.IsaTTY = true

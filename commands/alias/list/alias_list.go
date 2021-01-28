@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"sort"
 
+	"github.com/profclems/glab/pkg/iostreams"
+
 	"github.com/profclems/glab/pkg/tableprinter"
 
 	"github.com/profclems/glab/commands/cmdutils"
-	"github.com/profclems/glab/internal/utils"
-
 	"github.com/profclems/glab/internal/config"
 
 	"github.com/spf13/cobra"
@@ -16,7 +16,7 @@ import (
 
 type ListOptions struct {
 	Config func() (config.Config, error)
-	IO     *utils.IOStreams
+	IO     *iostreams.IOStreams
 }
 
 func NewCmdList(f *cmdutils.Factory, runF func(*ListOptions) error) *cobra.Command {

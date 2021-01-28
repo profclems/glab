@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/profclems/glab/internal/utils"
+	"github.com/profclems/glab/pkg/iostreams"
 
 	"github.com/profclems/glab/commands/cmdutils"
 
@@ -52,7 +52,7 @@ func TestNewCmdCreate(t *testing.T) {
 			wantErr: true,
 		},
 	}
-	io, _, stdout, stderr := utils.IOTest()
+	io, _, stdout, stderr := iostreams.IOTest()
 
 	f := cmdtest.StubFactory("https://gitlab.com/glab-cli/test")
 	f.IO = io

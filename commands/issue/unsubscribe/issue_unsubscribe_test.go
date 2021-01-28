@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/profclems/glab/internal/utils"
+	"github.com/profclems/glab/pkg/iostreams"
 
 	"github.com/profclems/glab/commands/cmdtest"
 	"github.com/profclems/glab/pkg/api"
@@ -58,7 +58,7 @@ func TestNewCmdUnsubscribe(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.Name, func(t *testing.T) {
-			io, _, _, stderr := utils.IOTest()
+			io, _, _, stderr := iostreams.IOTest()
 			f := cmdtest.StubFactory("https://gitlab.com/glab-cli/test")
 			f.IO = io
 			f.IO.IsaTTY = true

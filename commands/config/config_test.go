@@ -4,7 +4,7 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/profclems/glab/internal/utils"
+	"github.com/profclems/glab/pkg/iostreams"
 
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/stretchr/testify/assert"
@@ -97,7 +97,7 @@ func TestConfigGet(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			io, _, stdout, stderr := utils.IOTest()
+			io, _, stdout, stderr := iostreams.IOTest()
 			io.IsaTTY = tt.isTTY
 			io.IsErrTTY = tt.isTTY
 
@@ -155,7 +155,7 @@ func TestConfigSet(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			io, _, stdout, stderr := utils.IOTest()
+			io, _, stdout, stderr := iostreams.IOTest()
 			io.IsaTTY = tt.isTTY
 			io.IsErrTTY = tt.isTTY
 

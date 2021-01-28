@@ -3,13 +3,13 @@ package approvers
 import (
 	"fmt"
 
+	"github.com/profclems/glab/pkg/iostreams"
+
 	"github.com/profclems/glab/commands/mr/mrutils"
 	"github.com/profclems/glab/pkg/api"
 	"github.com/profclems/glab/pkg/tableprinter"
 
 	"github.com/profclems/glab/commands/cmdutils"
-	"github.com/profclems/glab/internal/utils"
-
 	"github.com/spf13/cobra"
 	"github.com/xanzy/go-gitlab"
 )
@@ -39,14 +39,14 @@ func NewCmdApprovers(f *cmdutils.Factory) *cobra.Command {
 				return err
 			}
 			if mrApprovals.ApprovalRulesOverwritten {
-				fmt.Fprintln(f.IO.StdOut, utils.Yellow("Approval rules overwritten"))
+				fmt.Fprintln(f.IO.StdOut, iostreams.Yellow("Approval rules overwritten"))
 			}
 			for _, rule := range mrApprovals.Rules {
 				table := tableprinter.NewTablePrinter()
 				if rule.Approved {
-					fmt.Fprintln(f.IO.StdOut, utils.Green(fmt.Sprintf("Rule %q sufficient approvals (%d/%d required):", rule.Name, len(rule.ApprovedBy), rule.ApprovalsRequired)))
+					fmt.Fprintln(f.IO.StdOut, iostreams.Green(fmt.Sprintf("Rule %q sufficient approvals (%d/%d required):", rule.Name, len(rule.ApprovedBy), rule.ApprovalsRequired)))
 				} else {
-					fmt.Fprintln(f.IO.StdOut, utils.Yellow(fmt.Sprintf("Rule %q insufficient approvals (%d/%d required):", rule.Name, len(rule.ApprovedBy), rule.ApprovalsRequired)))
+					fmt.Fprintln(f.IO.StdOut, iostreams.Yellow(fmt.Sprintf("Rule %q insufficient approvals (%d/%d required):", rule.Name, len(rule.ApprovedBy), rule.ApprovalsRequired)))
 				}
 
 				eligibleApprovers := rule.EligibleApprovers

@@ -9,12 +9,13 @@ import (
 	"os"
 	"testing"
 
+	"github.com/profclems/glab/pkg/iostreams"
+
 	"github.com/profclems/glab/commands/cmdtest"
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/internal/config"
 	"github.com/profclems/glab/internal/git"
 	"github.com/profclems/glab/internal/glrepo"
-	"github.com/profclems/glab/internal/utils"
 	"github.com/profclems/glab/pkg/api"
 	"github.com/xanzy/go-gitlab"
 
@@ -25,7 +26,7 @@ import (
 
 func Test_NewCmdApi(t *testing.T) {
 	f := cmdtest.StubFactory("")
-	f.IO, _, _, _ = utils.IOTest()
+	f.IO, _, _, _ = iostreams.IOTest()
 
 	tests := []struct {
 		name     string
@@ -367,7 +368,7 @@ func Test_apiRun(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			io, _, stdout, stderr := utils.IOTest()
+			io, _, stdout, stderr := iostreams.IOTest()
 
 			tt.options.IO = io
 			tt.options.Config = config.NewBlankConfig()
@@ -400,7 +401,7 @@ func Test_apiRun(t *testing.T) {
 }
 
 func Test_apiRun_paginationREST(t *testing.T) {
-	io, _, stdout, stderr := utils.IOTest()
+	io, _, stdout, stderr := iostreams.IOTest()
 
 	requestCount := 0
 	responses := []*http.Response{
@@ -458,7 +459,7 @@ func Test_apiRun_paginationREST(t *testing.T) {
 }
 
 func Test_apiRun_paginationGraphQL(t *testing.T) {
-	io, _, stdout, stderr := utils.IOTest()
+	io, _, stdout, stderr := iostreams.IOTest()
 
 	requestCount := 0
 	responses := []*http.Response{
@@ -563,7 +564,7 @@ func Test_apiRun_inputFile(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			io, stdin, _, _ := utils.IOTest()
+			io, stdin, _, _ := iostreams.IOTest()
 			resp := &http.Response{StatusCode: 204}
 
 			inputFile := tt.inputFile
@@ -620,7 +621,7 @@ func Test_apiRun_inputFile(t *testing.T) {
 }
 
 func Test_parseFields(t *testing.T) {
-	io, stdin, _, _ := utils.IOTest()
+	io, stdin, _, _ := iostreams.IOTest()
 	fmt.Fprint(stdin, "pasted contents")
 
 	opts := ApiOptions{
@@ -664,7 +665,7 @@ func Test_magicFieldValue(t *testing.T) {
 	f.Close()
 	t.Cleanup(func() { os.Remove(f.Name()) })
 
-	io, _, _, _ := utils.IOTest()
+	io, _, _, _ := iostreams.IOTest()
 
 	type args struct {
 		v    string

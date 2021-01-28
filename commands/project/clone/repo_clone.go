@@ -5,6 +5,8 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/profclems/glab/pkg/iostreams"
+
 	"github.com/MakeNowJust/heredoc"
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/internal/config"
@@ -35,7 +37,7 @@ type CloneOptions struct {
 
 	RemoteArgs *glrepo.RemoteArgs
 
-	IO        *utils.IOStreams
+	IO        *iostreams.IOStreams
 	APIClient *api.Client
 	Config    func() (config.Config, error)
 

@@ -6,6 +6,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/profclems/glab/pkg/iostreams"
+
 	"github.com/profclems/glab/pkg/prompt"
 
 	"github.com/profclems/glab/internal/utils"
@@ -53,7 +55,7 @@ func Test_IssueCreate(t *testing.T) {
 		}, nil
 	}
 
-	io, _, stdout, stderr := utils.IOTest()
+	io, _, stdout, stderr := iostreams.IOTest()
 	f := cmdtest.StubFactory("https://gitlab.com/glab-cli/test")
 	f.IO = io
 	f.IO.IsaTTY = true

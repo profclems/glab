@@ -7,6 +7,8 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/profclems/glab/pkg/iostreams"
+
 	"github.com/MakeNowJust/heredoc"
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/internal/glrepo"
@@ -18,7 +20,7 @@ import (
 
 type SetOpts struct {
 	HTTPClient func() (*gitlab.Client, error)
-	IO         *utils.IOStreams
+	IO         *iostreams.IOStreams
 	BaseRepo   func() (glrepo.Interface, error)
 
 	Key       string

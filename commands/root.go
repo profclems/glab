@@ -19,7 +19,7 @@ import (
 	variableCmd "github.com/profclems/glab/commands/variable"
 	versionCmd "github.com/profclems/glab/commands/version"
 	"github.com/profclems/glab/internal/glrepo"
-	"github.com/profclems/glab/internal/utils"
+	"github.com/profclems/glab/pkg/iostreams"
 
 	"github.com/MakeNowJust/heredoc"
 	"github.com/spf13/cobra"
@@ -62,7 +62,7 @@ func NewCmdRoot(f *cmdutils.Factory, version, buildDate string) *cobra.Command {
 			"help:feedback": heredoc.Docf(`
 			Encountered a bug or want to suggest a feature?
 			Open an issue using '%s'
-		`, utils.Bold(utils.Yellow("glab issue create -R profclems/glab"))),
+		`, iostreams.Bold(iostreams.Yellow("glab issue create -R profclems/glab"))),
 		},
 	}
 

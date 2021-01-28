@@ -7,6 +7,8 @@ import (
 	"os"
 	"strings"
 
+	"github.com/profclems/glab/pkg/iostreams"
+
 	"github.com/MakeNowJust/heredoc"
 	"github.com/profclems/glab/internal/config"
 	"github.com/profclems/glab/internal/glrepo"
@@ -47,7 +49,7 @@ type CreateOpts struct {
 	Yes           bool
 	Web           bool
 
-	IO       *utils.IOStreams
+	IO       *iostreams.IOStreams
 	Branch   func() (string, error)
 	Remotes  func() (glrepo.Remotes, error)
 	Lab      func() (*gitlab.Client, error)
@@ -457,7 +459,7 @@ func createRun(opts *CreateOpts) error {
 			message = "\nCreating draft merge request for %s into %s in %s\n\n"
 		}
 
-		fmt.Fprintf(opts.IO.StdErr, message, utils.Cyan(opts.SourceBranch), utils.Cyan(opts.TargetBranch), baseRepo.FullName())
+		fmt.Fprintf(opts.IO.StdErr, message, iostreams.Cyan(opts.SourceBranch), iostreams.Cyan(opts.TargetBranch), baseRepo.FullName())
 
 		// It is intentional that we create against the head repo, it is necessary
 		// for cross-repository merge requests

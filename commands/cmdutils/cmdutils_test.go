@@ -5,10 +5,11 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/profclems/glab/pkg/iostreams"
+
 	"github.com/acarl005/stripansi"
 	"github.com/profclems/glab/internal/git"
 	"github.com/profclems/glab/internal/glrepo"
-	"github.com/profclems/glab/internal/utils"
 	"github.com/profclems/glab/pkg/api"
 	"github.com/profclems/glab/pkg/prompt"
 	"github.com/stretchr/testify/assert"
@@ -726,7 +727,7 @@ func Test_AssigneesPrompt(t *testing.T) {
 			})
 
 			var got []string
-			io, _, _, stderr := utils.IOTest()
+			io, _, _, stderr := iostreams.IOTest()
 
 			err := AssigneesPrompt(&got, &gitlab.Client{}, repoRemote, io, tC.minimumAccessLevel)
 			if tC.expectedError != "" {
@@ -871,7 +872,7 @@ func Test_MilestonesPrompt(t *testing.T) {
 			})
 
 			var got int
-			var io utils.IOStreams
+			var io iostreams.IOStreams
 
 			err := MilestonesPrompt(&got, &gitlab.Client{}, repoRemote, &io)
 			if err != nil {
@@ -895,7 +896,7 @@ func Test_MilestonesPrompt(t *testing.T) {
 		})
 
 		var got int
-		var io utils.IOStreams
+		var io iostreams.IOStreams
 
 		err := MilestonesPrompt(&got, &gitlab.Client{}, repoRemote, &io)
 		assert.Empty(t, got)
@@ -923,7 +924,7 @@ func Test_MilestonesPromptNoPrompts(t *testing.T) {
 	}
 
 	var got int
-	io, _, _, stderr := utils.IOTest()
+	io, _, _, stderr := iostreams.IOTest()
 
 	err := MilestonesPrompt(&got, &gitlab.Client{}, repoRemote, io)
 	if err != nil {
@@ -951,7 +952,7 @@ func TestMilestonesPromptFailures(t *testing.T) {
 	}
 
 	var got int
-	io, _, _, _ := utils.IOTest()
+	io, _, _, _ := iostreams.IOTest()
 
 	err := MilestonesPrompt(&got, &gitlab.Client{}, repoRemote, io)
 	if err == nil {

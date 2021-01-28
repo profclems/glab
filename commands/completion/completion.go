@@ -3,11 +3,12 @@ package completion
 import (
 	"fmt"
 
-	"github.com/profclems/glab/internal/utils"
+	"github.com/profclems/glab/pkg/iostreams"
+
 	"github.com/spf13/cobra"
 )
 
-func NewCmdCompletion(io *utils.IOStreams) *cobra.Command {
+func NewCmdCompletion(io *iostreams.IOStreams) *cobra.Command {
 	var shellType string
 
 	var completionCmd = &cobra.Command{

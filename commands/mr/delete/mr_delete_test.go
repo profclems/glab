@@ -5,9 +5,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/google/shlex"
+	"github.com/profclems/glab/pkg/iostreams"
 
-	"github.com/profclems/glab/internal/utils"
+	"github.com/google/shlex"
 
 	"github.com/profclems/glab/internal/config"
 
@@ -30,7 +30,7 @@ hosts:
     username: monalisa
     token: OTOKEN
 `, "")()
-	io, _, stdout, stderr := utils.IOTest()
+	io, _, stdout, stderr := iostreams.IOTest()
 	stubFactory, _ := cmdtest.StubFactoryWithConfig("")
 	stubFactory.IO = io
 	stubFactory.IO.IsaTTY = true

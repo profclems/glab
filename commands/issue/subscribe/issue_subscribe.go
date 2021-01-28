@@ -3,6 +3,8 @@ package subscribe
 import (
 	"fmt"
 
+	"github.com/profclems/glab/pkg/iostreams"
+
 	"github.com/MakeNowJust/heredoc"
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/commands/issue/issueutils"
@@ -36,7 +38,7 @@ func NewCmdSubscribe(f *cmdutils.Factory) *cobra.Command {
 
 			for _, issue := range issues {
 				if f.IO.IsErrTTY && f.IO.IsaTTY {
-					fmt.Fprintf(f.IO.StdErr, "- Subscribing to Issue #%d in %s\n", issue.IID, utils.Cyan(repo.FullName()))
+					fmt.Fprintf(f.IO.StdErr, "- Subscribing to Issue #%d in %s\n", issue.IID, iostreams.Cyan(repo.FullName()))
 				}
 
 				issue, err := api.SubscribeToIssue(apiClient, repo.FullName(), issue.IID, nil)

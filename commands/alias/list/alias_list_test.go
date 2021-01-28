@@ -5,7 +5,7 @@ import (
 	"io/ioutil"
 	"testing"
 
-	"github.com/profclems/glab/internal/utils"
+	"github.com/profclems/glab/pkg/iostreams"
 
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/internal/config"
@@ -50,7 +50,7 @@ func TestAliasList(t *testing.T) {
 
 			cfg := config.NewFromString(tt.config)
 
-			io, _, stdout, stderr := utils.IOTest()
+			io, _, stdout, stderr := iostreams.IOTest()
 			io.IsaTTY = tt.isaTTy
 			io.IsErrTTY = tt.isaTTy
 

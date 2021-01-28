@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"net/url"
 
+	"github.com/profclems/glab/pkg/iostreams"
+
 	"github.com/MakeNowJust/heredoc"
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/internal/config"
@@ -34,7 +36,7 @@ type ForkOptions struct {
 	CurrentDirIsParent bool
 
 	RepoToFork  glrepo.Interface
-	IO          *utils.IOStreams
+	IO          *iostreams.IOStreams
 	LabClient   *gitlab.Client
 	CurrentUser *gitlab.User
 	BaseRepo    func() (glrepo.Interface, error)
@@ -130,7 +132,7 @@ func forkRun(opts *ForkOptions) error {
 	opts.LabClient = apiClient.LabClient
 
 	if opts.IsTerminal {
-		fmt.Fprintf(opts.IO.StdErr, "- Forking %s\n", utils.Bold(opts.RepoToFork.FullName()))
+		fmt.Fprintf(opts.IO.StdErr, "- Forking %s\n", iostreams.Bold(opts.RepoToFork.FullName()))
 	}
 
 	forkOpts := &gitlab.ForkProjectOptions{}
@@ -194,7 +196,7 @@ loop:
 	}
 
 	if importError != nil {
-		fmt.Fprintf(opts.IO.StdErr, "%s: %q", utils.Red("Fork failed"), importError.Error())
+		fmt.Fprintf(opts.IO.StdErr, "%s: %q", iostreams.Red("Fork failed"), importError.Error())
 		return nil
 	}
 
@@ -231,7 +233,7 @@ loop:
 
 		if remote, err := remotes.FindByRepo(forkedProject.Namespace.FullPath, forkedProject.Path); err == nil {
 			if opts.IsTerminal {
-				fmt.Fprintf(opts.IO.StdErr, "%s Using existing remote %s\n", utils.GreenCheck(), utils.Bold(remote.Name))
+				fmt.Fprintf(opts.IO.StdErr, "%s Using existing remote %s\n", utils.GreenCheck(), iostreams.Bold(remote.Name))
 			}
 			return nil
 		}
@@ -258,7 +260,7 @@ loop:
 					return err
 				}
 				if opts.IsTerminal {
-					fmt.Fprintf(opts.IO.StdErr, "%s Renamed %s remote to %s\n", utils.GreenCheck(), utils.Bold(remoteName), utils.Bold(renameTarget))
+					fmt.Fprintf(opts.IO.StdErr, "%s Renamed %s remote to %s\n", utils.GreenCheck(), iostreams.Bold(remoteName), iostreams.Bold(renameTarget))
 				}
 			}
 
@@ -280,7 +282,7 @@ loop:
 			}
 
 			if opts.IsTerminal {
-				fmt.Fprintf(opts.IO.StdErr, "%s Added remote %s\n", utils.GreenCheck(), utils.Bold(remoteName))
+				fmt.Fprintf(opts.IO.StdErr, "%s Added remote %s\n", utils.GreenCheck(), iostreams.Bold(remoteName))
 			}
 		}
 	} else {

@@ -6,9 +6,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/google/shlex"
+	"github.com/profclems/glab/pkg/iostreams"
 
-	"github.com/profclems/glab/internal/utils"
+	"github.com/google/shlex"
 
 	cmdTestUtils "github.com/profclems/glab/commands/cmdtest"
 	"github.com/profclems/glab/commands/cmdutils"
@@ -110,7 +110,7 @@ func TestNewCmdReleaseList(t *testing.T) {
 		},
 	}
 
-	io, _, stdout, stderr := utils.IOTest()
+	io, _, stdout, stderr := iostreams.IOTest()
 	f := cmdTestUtils.StubFactory("https://gitlab.com/glab-cli/test")
 	f.IO = io
 	f.IO.IsaTTY = true

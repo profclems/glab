@@ -4,11 +4,13 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/profclems/glab/pkg/iostreams"
+
 	"github.com/profclems/glab/internal/utils"
 	"github.com/spf13/cobra"
 )
 
-func NewCheckUpdateCmd(s *utils.IOStreams, version string) *cobra.Command {
+func NewCheckUpdateCmd(s *iostreams.IOStreams, version string) *cobra.Command {
 	var cmd = &cobra.Command{
 		Use:     "check-update",
 		Short:   "Check for latest glab releases",
@@ -22,7 +24,7 @@ func NewCheckUpdateCmd(s *utils.IOStreams, version string) *cobra.Command {
 	return cmd
 }
 
-func CheckUpdate(s *utils.IOStreams, version string, silentErr bool) error {
+func CheckUpdate(s *iostreams.IOStreams, version string, silentErr bool) error {
 	latestRelease, err := GetUpdateInfo()
 	if err != nil {
 		if silentErr {
@@ -33,15 +35,15 @@ func CheckUpdate(s *utils.IOStreams, version string, silentErr bool) error {
 
 	if isOlderVersion(latestRelease.Version, version) {
 		fmt.Fprintf(s.StdOut, "%s %s → %s\n%s\n",
-			utils.Yellow("A new version of glab has been released:"),
-			utils.Red(version), utils.Green(latestRelease.Version),
+			iostreams.Yellow("A new version of glab has been released:"),
+			iostreams.Red(version), iostreams.Green(latestRelease.Version),
 			latestRelease.URL)
 	} else {
 		if silentErr {
 			return nil
 		}
 		fmt.Fprintf(s.StdOut, "%v %v", utils.GreenCheck(),
-			utils.Green("You are already using the latest version of glab"))
+			iostreams.Green("You are already using the latest version of glab"))
 	}
 	return nil
 }

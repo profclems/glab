@@ -5,11 +5,12 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/profclems/glab/pkg/iostreams"
+
 	"github.com/profclems/glab/internal/config"
 	"github.com/profclems/glab/internal/git"
 	"github.com/profclems/glab/internal/glinstance"
 	"github.com/profclems/glab/internal/glrepo"
-	"github.com/profclems/glab/internal/utils"
 	"github.com/profclems/glab/pkg/api"
 	"github.com/xanzy/go-gitlab"
 )
@@ -25,7 +26,7 @@ type Factory struct {
 	Remotes    func() (glrepo.Remotes, error)
 	Config     func() (config.Config, error)
 	Branch     func() (string, error)
-	IO         *utils.IOStreams
+	IO         *iostreams.IOStreams
 }
 
 func (f *Factory) RepoOverride(repo string) error {
@@ -125,7 +126,7 @@ func NewFactory() *Factory {
 			}
 			return currentBranch, nil
 		},
-		IO: utils.InitIOStream(),
+		IO: iostreams.InitIOStream(),
 	}
 }
 

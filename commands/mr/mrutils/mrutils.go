@@ -6,9 +6,10 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/profclems/glab/pkg/iostreams"
+
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/internal/glrepo"
-	"github.com/profclems/glab/internal/utils"
 	"github.com/profclems/glab/pkg/api"
 	"github.com/profclems/glab/pkg/prompt"
 	"github.com/profclems/glab/pkg/tableprinter"
@@ -90,11 +91,11 @@ func DisplayMR(mr *gitlab.MergeRequest) string {
 
 func MRState(m *gitlab.MergeRequest) string {
 	if m.State == "opened" {
-		return utils.Green(fmt.Sprintf("!%d", m.IID))
+		return iostreams.Green(fmt.Sprintf("!%d", m.IID))
 	} else if m.State == "merged" {
-		return utils.Magenta(fmt.Sprintf("!%d", m.IID))
+		return iostreams.Magenta(fmt.Sprintf("!%d", m.IID))
 	} else {
-		return utils.Red(fmt.Sprintf("!%d", m.IID))
+		return iostreams.Red(fmt.Sprintf("!%d", m.IID))
 	}
 }
 
@@ -103,7 +104,7 @@ func DisplayAllMRs(mrs []*gitlab.MergeRequest, projectID string) string {
 	for _, m := range mrs {
 		table.AddCell(MRState(m))
 		table.AddCell(m.Title)
-		table.AddCell(utils.Cyan(fmt.Sprintf("(%s) ← (%s)", m.TargetBranch, m.SourceBranch)))
+		table.AddCell(iostreams.Cyan(fmt.Sprintf("(%s) ← (%s)", m.TargetBranch, m.SourceBranch)))
 		table.EndRow()
 	}
 

@@ -5,7 +5,7 @@ import (
 	"io/ioutil"
 	"testing"
 
-	"github.com/profclems/glab/internal/utils"
+	"github.com/profclems/glab/pkg/iostreams"
 
 	"github.com/MakeNowJust/heredoc"
 	"github.com/google/shlex"
@@ -20,7 +20,7 @@ import (
 )
 
 func runCommand(cfg config.Config, isTTY bool, cli string) (*test.CmdOut, error) {
-	io, _, stdout, stderr := utils.IOTest()
+	io, _, stdout, stderr := iostreams.IOTest()
 	io.IsaTTY = isTTY
 	io.IsErrTTY = isTTY
 

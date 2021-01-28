@@ -1,4 +1,4 @@
-package utils
+package iostreams
 
 import (
 	"bytes"
@@ -7,7 +7,9 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+	"time"
 
+	"github.com/briandowns/spinner"
 	"github.com/google/shlex"
 )
 
@@ -23,6 +25,8 @@ type IOStreams struct {
 
 	pagerCommand string
 	pagerProcess *os.Process
+
+	spinner *spinner.Spinner
 }
 
 func InitIOStream() *IOStreams {
@@ -125,6 +129,25 @@ func (s *IOStreams) StopPager() {
 	s.StdOut.(io.ReadCloser).Close()
 	_, _ = s.pagerProcess.Wait()
 	s.pagerProcess = nil
+}
+
+func (s *IOStreams) StartSpinner(loadingMSG string) {
+	if s.IsOutputTTY() {
+		s.spinner = spinner.New(spinner.CharSets[9], 100*time.Millisecond, spinner.WithWriter(s.StdErr))
+		if loadingMSG != "" {
+			s.spinner.Suffix = " " + loadingMSG
+		}
+		s.spinner.Start()
+	}
+}
+
+func (s *IOStreams) StopSpinner(finalMSG string) {
+	if s.spinner != nil {
+		s.spinner.Suffix = ""
+		s.spinner.FinalMSG = finalMSG
+		s.spinner.Stop()
+		s.spinner = nil
+	}
 }
 
 func (s *IOStreams) TerminalWidth() int {

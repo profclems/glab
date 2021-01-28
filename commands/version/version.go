@@ -4,11 +4,12 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/profclems/glab/internal/utils"
+	"github.com/profclems/glab/pkg/iostreams"
+
 	"github.com/spf13/cobra"
 )
 
-func NewCmdVersion(s *utils.IOStreams, version, buildDate string) *cobra.Command {
+func NewCmdVersion(s *iostreams.IOStreams, version, buildDate string) *cobra.Command {
 	var versionCmd = &cobra.Command{
 		Use:     "version",
 		Short:   "show glab version information",

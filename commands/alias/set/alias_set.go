@@ -4,13 +4,13 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/profclems/glab/commands/cmdutils"
+	"github.com/profclems/glab/pkg/iostreams"
 
-	"github.com/profclems/glab/internal/config"
-	"github.com/profclems/glab/internal/utils"
+	"github.com/profclems/glab/commands/cmdutils"
 
 	"github.com/MakeNowJust/heredoc"
 	"github.com/google/shlex"
+	"github.com/profclems/glab/internal/config"
 	"github.com/spf13/cobra"
 )
 
@@ -20,7 +20,7 @@ type SetOptions struct {
 	Expansion string
 	IsShell   bool
 	RootCmd   *cobra.Command
-	IO        *utils.IOStreams
+	IO        *iostreams.IOStreams
 }
 
 func NewCmdSet(f *cmdutils.Factory, runF func(*SetOptions) error) *cobra.Command {
@@ -89,7 +89,7 @@ func setRun(cmd *cobra.Command, opts *SetOptions) error {
 	}
 
 	if opts.IO.IsaTTY && opts.IO.IsErrTTY {
-		fmt.Fprintf(opts.IO.StdErr, "- Adding alias for %s: %s\n", utils.Bold(opts.Name), utils.Bold(opts.Expansion))
+		fmt.Fprintf(opts.IO.StdErr, "- Adding alias for %s: %s\n", iostreams.Bold(opts.Name), iostreams.Bold(opts.Expansion))
 	}
 
 	expansion := opts.Expansion
@@ -107,13 +107,13 @@ func setRun(cmd *cobra.Command, opts *SetOptions) error {
 		return fmt.Errorf("could not create alias: %s does not correspond to a glab command", expansion)
 	}
 
-	successMsg := fmt.Sprintf("%s Added alias.", utils.Green("✓"))
+	successMsg := fmt.Sprintf("%s Added alias.", iostreams.Green("✓"))
 	if oldExpansion, ok := aliasCfg.Get(opts.Name); ok {
 		successMsg = fmt.Sprintf("%s Changed alias %s from %s to %s",
-			utils.Green("✓"),
-			utils.Bold(opts.Name),
-			utils.Bold(oldExpansion),
-			utils.Bold(expansion),
+			iostreams.Green("✓"),
+			iostreams.Bold(opts.Name),
+			iostreams.Bold(oldExpansion),
+			iostreams.Bold(expansion),
 		)
 	}
 

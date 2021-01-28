@@ -4,6 +4,8 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/profclems/glab/pkg/iostreams"
+
 	"github.com/MakeNowJust/heredoc"
 	"github.com/profclems/glab/internal/glrepo"
 
@@ -46,7 +48,7 @@ type ListOptions struct {
 	ListType       string
 	TitleQualifier string
 
-	IO         *utils.IOStreams
+	IO         *iostreams.IOStreams
 	BaseRepo   func() (glrepo.Interface, error)
 	HTTPClient func() (*gitlab.Client, error)
 }

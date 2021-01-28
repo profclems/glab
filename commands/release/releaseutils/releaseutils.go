@@ -3,6 +3,8 @@ package releaseutils
 import (
 	"fmt"
 
+	"github.com/profclems/glab/pkg/iostreams"
+
 	"github.com/profclems/glab/internal/utils"
 	"github.com/profclems/glab/pkg/tableprinter"
 
@@ -12,7 +14,7 @@ import (
 func DisplayAllReleases(releases []*gitlab.Release, repoName string) string {
 	table := tableprinter.NewTablePrinter()
 	for _, r := range releases {
-		table.AddRow(r.Name, r.TagName, utils.Gray(utils.TimeToPrettyTimeAgo(*r.CreatedAt)))
+		table.AddRow(r.Name, r.TagName, iostreams.Gray(utils.TimeToPrettyTimeAgo(*r.CreatedAt)))
 	}
 
 	return table.Render()
@@ -42,7 +44,7 @@ func DisplayRelease(r *gitlab.Release, glamourStyle string) string {
 		assetsSources += asset.URL + "\n"
 	}
 	return fmt.Sprintf("%s\n%s released this %s \n%s - %s \n%s \n%s \n%s \n%s \n%s", // whoops
-		utils.Bold(r.Name), r.Author.Name, duration, r.Commit.ShortID, r.TagName, description, utils.Bold("ASSETS"),
-		RenderReleaseAssertLinks(r.Assets.Links), utils.Bold("SOURCES"), assetsSources,
+		iostreams.Bold(r.Name), r.Author.Name, duration, r.Commit.ShortID, r.TagName, description, iostreams.Bold("ASSETS"),
+		RenderReleaseAssertLinks(r.Assets.Links), iostreams.Bold("SOURCES"), assetsSources,
 	)
 }

@@ -5,11 +5,12 @@ import (
 	"net/http"
 	"testing"
 
+	"github.com/profclems/glab/pkg/iostreams"
+
 	"github.com/alecthomas/assert"
 	"github.com/google/shlex"
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/internal/glrepo"
-	"github.com/profclems/glab/internal/utils"
 	"github.com/profclems/glab/pkg/api"
 	"github.com/profclems/glab/pkg/httpmock"
 	"github.com/xanzy/go-gitlab"
@@ -75,7 +76,7 @@ func Test_getValue(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			io, stdin, _, _ := utils.IOTest()
+			io, stdin, _, _ := iostreams.IOTest()
 
 			io.IsInTTY = false
 
@@ -161,7 +162,7 @@ func Test_NewCmdSet(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			io, _, _, _ := utils.IOTest()
+			io, _, _, _ := iostreams.IOTest()
 			f := &cmdutils.Factory{
 				IO: io,
 			}
@@ -211,7 +212,7 @@ func Test_setRun_project(t *testing.T) {
 		`),
 	)
 
-	io, _, stdout, _ := utils.IOTest()
+	io, _, stdout, _ := iostreams.IOTest()
 
 	opts := &SetOpts{
 		HTTPClient: func() (*gitlab.Client, error) {
@@ -248,7 +249,7 @@ func Test_setRun_group(t *testing.T) {
 		`),
 	)
 
-	io, _, stdout, _ := utils.IOTest()
+	io, _, stdout, _ := iostreams.IOTest()
 
 	opts := &SetOpts{
 		HTTPClient: func() (*gitlab.Client, error) {

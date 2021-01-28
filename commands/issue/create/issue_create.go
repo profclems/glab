@@ -6,6 +6,8 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/profclems/glab/pkg/iostreams"
+
 	"github.com/MakeNowJust/heredoc"
 	"github.com/profclems/glab/internal/config"
 	"github.com/profclems/glab/internal/glrepo"
@@ -39,7 +41,7 @@ type CreateOpts struct {
 	Yes            bool
 	Web            bool
 
-	IO         *utils.IOStreams
+	IO         *iostreams.IOStreams
 	BaseRepo   func() (glrepo.Interface, error)
 	HTTPClient func() (*gitlab.Client, error)
 	Remotes    func() (glrepo.Remotes, error)

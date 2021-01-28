@@ -6,6 +6,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/profclems/glab/pkg/iostreams"
+
 	"github.com/charmbracelet/glamour"
 	"github.com/profclems/glab/internal/browser"
 	"github.com/profclems/glab/internal/run"
@@ -99,19 +101,19 @@ func DisplayURL(urlStr string) string {
 }
 
 func GreenCheck() string {
-	return Green("✓")
+	return iostreams.Green("✓")
 }
 
 func FailedIcon() string {
-	return Red("x")
+	return iostreams.Red("x")
 }
 
 func WarnIcon() string {
-	return Yellow("!")
+	return iostreams.Yellow("!")
 }
 
 func RedCheck() string {
-	return Red("✔")
+	return iostreams.Red("✓")
 }
 
 // PresentInStringSlice take a Hay (Slice of Strings) and a Needle (string)

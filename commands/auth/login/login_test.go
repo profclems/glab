@@ -4,10 +4,10 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/profclems/glab/commands/cmdtest"
-	"github.com/profclems/glab/internal/utils"
+	"github.com/profclems/glab/pkg/iostreams"
 
 	"github.com/google/shlex"
+	"github.com/profclems/glab/commands/cmdtest"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -104,7 +104,7 @@ func Test_NewCmdLogin(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			io, stdin, _, _ := utils.IOTest()
+			io, stdin, _, _ := iostreams.IOTest()
 			f := cmdtest.StubFactory("https://gitlab.com/glab-cli/test")
 
 			f.IO = io

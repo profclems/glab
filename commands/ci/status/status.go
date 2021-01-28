@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/profclems/glab/pkg/iostreams"
+
 	ciTraceCmd "github.com/profclems/glab/commands/ci/trace"
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/internal/git"
@@ -83,17 +85,17 @@ func NewCmdStatus(f *cmdutils.Factory) *cobra.Command {
 						switch s := job.Status; s {
 						case "failed":
 							if job.AllowFailure {
-								status = utils.Yellow(s)
+								status = iostreams.Yellow(s)
 							} else {
-								status = utils.Red(s)
+								status = iostreams.Red(s)
 							}
 						case "success":
-							status = utils.Green(s)
+							status = iostreams.Green(s)
 						default:
-							status = utils.Gray(s)
+							status = iostreams.Gray(s)
 						}
 						//fmt.Println(job.Tag)
-						fmt.Fprintf(writer, "(%s) • %s\t%s\t\t%s\n", status, utils.Gray(duration), job.Stage, job.Name)
+						fmt.Fprintf(writer, "(%s) • %s\t%s\t\t%s\n", status, iostreams.Gray(duration), job.Stage, job.Name)
 					}
 
 					fmt.Fprintf(writer.Newline(), "\n%s\n", runningPipeline.WebURL)
@@ -147,7 +149,7 @@ func NewCmdStatus(f *cmdutils.Factory) *cobra.Command {
 				}
 				return nil
 			}
-			redCheck := utils.Red("✘")
+			redCheck := iostreams.Red("✘")
 			fmt.Fprintf(f.IO.StdOut, "%s No pipelines running or available on %s branch\n", redCheck, branch)
 			return nil
 		},

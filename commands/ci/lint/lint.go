@@ -8,6 +8,8 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/profclems/glab/pkg/iostreams"
+
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/internal/git"
 	"github.com/profclems/glab/internal/utils"
@@ -84,7 +86,7 @@ func lintRun(f *cmdutils.Factory, path string) error {
 	}
 
 	if lint.Status == "invalid" {
-		fmt.Fprintln(out, utils.Red(path+" is invalid"))
+		fmt.Fprintln(out, iostreams.Red(path+" is invalid"))
 		for i, err := range lint.Errors {
 			i++
 			fmt.Fprintln(out, i, err)

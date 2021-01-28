@@ -3,6 +3,8 @@ package status
 import (
 	"fmt"
 
+	"github.com/profclems/glab/pkg/iostreams"
+
 	"github.com/MakeNowJust/heredoc"
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/internal/config"
@@ -17,7 +19,7 @@ type StatusOpts struct {
 	ShowToken bool
 
 	HttpClientOverride func(token, hostname string) (*api.Client, error) // used in tests to mock http client
-	IO                 *utils.IOStreams
+	IO                 *iostreams.IOStreams
 	Config             func() (config.Config, error)
 }
 
@@ -63,7 +65,7 @@ func statusRun(opts *StatusOpts) error {
 	instances, err := cfg.Hosts()
 	if len(instances) == 0 || err != nil {
 		fmt.Fprintf(stderr,
-			"No GitLab instance has been authenticated with glab. Run `%s` to authenticate.\n", utils.Bold("glab auth login"))
+			"No GitLab instance has been authenticated with glab. Run `%s` to authenticate.\n", iostreams.Bold("glab auth login"))
 		return cmdutils.SilentError
 	}
 
@@ -92,7 +94,7 @@ func statusRun(opts *StatusOpts) error {
 			if err != nil {
 				addMsg("%s %s: api call failed: %s", utils.FailedIcon(), instance, err)
 			} else {
-				addMsg("%s Logged in to %s as %s (%s)", utils.GreenCheck(), instance, utils.Bold(user.Username), tokenSource)
+				addMsg("%s Logged in to %s as %s (%s)", utils.GreenCheck(), instance, iostreams.Bold(user.Username), tokenSource)
 			}
 		} else {
 			addMsg("%s %s: failed to initialize api client: %s", utils.FailedIcon(), instance, err)
@@ -100,18 +102,18 @@ func statusRun(opts *StatusOpts) error {
 		proto, _ := cfg.Get(instance, "git_protocol")
 		if proto != "" {
 			addMsg("%s Git operations for %s configured to use %s protocol.",
-				utils.GreenCheck(), instance, utils.Bold(proto))
+				utils.GreenCheck(), instance, iostreams.Bold(proto))
 		}
 		apiProto, _ := cfg.Get(instance, "api_protocol")
 		apiEndpoint := glinstance.APIEndpoint(instance, apiProto)
 		graphQLEndpoint := glinstance.GraphQLEndpoint(instance, apiProto)
 		if apiProto != "" {
 			addMsg("%s API calls for %s are made over %s protocol",
-				utils.GreenCheck(), instance, utils.Bold(apiProto))
+				utils.GreenCheck(), instance, iostreams.Bold(apiProto))
 			addMsg("%s REST API Endpoint: %s",
-				utils.GreenCheck(), utils.Bold(apiEndpoint))
+				utils.GreenCheck(), iostreams.Bold(apiEndpoint))
 			addMsg("%s GraphQL Endpoint: %s",
-				utils.GreenCheck(), utils.Bold(graphQLEndpoint))
+				utils.GreenCheck(), iostreams.Bold(graphQLEndpoint))
 		}
 		if token != "" {
 			tokenDisplay := "********************"
@@ -128,7 +130,7 @@ func statusRun(opts *StatusOpts) error {
 	}
 
 	if opts.Hostname != "" && hostNotAuthenticated {
-		fmt.Fprintf(stderr, "%s %s not authenticated with glab. Run `%s %s` to authenticate", utils.FailedIcon(), opts.Hostname, utils.Bold("glab auth login --hostname"), utils.Bold(opts.Hostname))
+		fmt.Fprintf(stderr, "%s %s not authenticated with glab. Run `%s %s` to authenticate", utils.FailedIcon(), opts.Hostname, iostreams.Bold("glab auth login --hostname"), iostreams.Bold(opts.Hostname))
 		return cmdutils.SilentError
 	}
 
@@ -137,7 +139,7 @@ func statusRun(opts *StatusOpts) error {
 		if !ok {
 			continue
 		}
-		fmt.Fprintf(stderr, "%s\n", utils.Bold(instance))
+		fmt.Fprintf(stderr, "%s\n", iostreams.Bold(instance))
 		for _, line := range lines {
 			fmt.Fprintf(stderr, "  %s\n", line)
 		}

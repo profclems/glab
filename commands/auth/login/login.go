@@ -7,6 +7,8 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/profclems/glab/pkg/iostreams"
+
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/MakeNowJust/heredoc"
 	"github.com/profclems/glab/commands/cmdutils"
@@ -18,7 +20,7 @@ import (
 )
 
 type LoginOptions struct {
-	IO     *utils.IOStreams
+	IO     *iostreams.IOStreams
 	Config func() (config.Config, error)
 
 	Interactive bool
@@ -150,7 +152,7 @@ func loginRun() error {
 	fmt.Fprintf(opts.IO.StdErr, "- Logging into %s\n", hostname)
 
 	if token := config.GetFromEnv("token"); token != "" {
-		fmt.Fprintf(opts.IO.StdErr, "%s you have GITLAB_TOKEN or OAUTH_TOKEN environment variable set. Unset if you don't want to use it for glab\n", utils.Yellow("!WARNING:"))
+		fmt.Fprintf(opts.IO.StdErr, "%s you have GITLAB_TOKEN or OAUTH_TOKEN environment variable set. Unset if you don't want to use it for glab\n", iostreams.Yellow("!WARNING:"))
 	}
 	existingToken, _, _ := cfg.GetWithSource(hostname, "token")
 
@@ -246,7 +248,7 @@ func loginRun() error {
 		return err
 	}
 
-	fmt.Fprintf(opts.IO.StdErr, "%s Logged in as %s\n", utils.GreenCheck(), utils.Bold(username))
+	fmt.Fprintf(opts.IO.StdErr, "%s Logged in as %s\n", utils.GreenCheck(), iostreams.Bold(username))
 
 	return nil
 }
