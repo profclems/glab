@@ -110,7 +110,7 @@ func TestNewCmdReleaseList(t *testing.T) {
 		},
 	}
 
-	io, _, stdout, stderr := iostreams.IOTest()
+	io, _, stdout, stderr := iostreams.Test()
 	f := cmdTestUtils.StubFactory("https://gitlab.com/glab-cli/test")
 	f.IO = io
 	f.IO.IsaTTY = true

@@ -25,7 +25,7 @@ import (
 )
 
 func runCommand(rt http.RoundTripper, isTTY bool, cli string, runE func(opts *ListOptions) error) (*test.CmdOut, error) {
-	io, _, stdout, stderr := iostreams.IOTest()
+	io, _, stdout, stderr := iostreams.Test()
 	io.IsaTTY = isTTY
 	io.IsInTTY = isTTY
 	io.IsErrTTY = isTTY
@@ -70,7 +70,7 @@ func runCommand(rt http.RoundTripper, isTTY bool, cli string, runE func(opts *Li
 }
 
 func TestNewCmdList(t *testing.T) {
-	io, _, _, _ := iostreams.IOTest()
+	io, _, _, _ := iostreams.Test()
 	io.IsaTTY = true
 	io.IsInTTY = true
 	io.IsErrTTY = true

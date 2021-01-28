@@ -20,7 +20,7 @@ import (
 )
 
 func runCommand(cfg config.Config, isTTY bool, cli string) (*test.CmdOut, error) {
-	io, _, stdout, stderr := iostreams.IOTest()
+	io, _, stdout, stderr := iostreams.Test()
 	io.IsaTTY = isTTY
 	io.IsErrTTY = isTTY
 

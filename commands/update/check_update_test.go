@@ -25,7 +25,7 @@ func TestNewCheckUpdateCmd(t *testing.T) {
   "created_at": "2020-11-03T05:33:29Z",
   "published_at": "2020-11-03T05:39:04Z"}`))
 
-	ioStream, _, stdout, stderr := iostreams.IOTest()
+	ioStream, _, stdout, stderr := iostreams.Test()
 	type args struct {
 		s       *iostreams.IOStreams
 		version string
@@ -80,7 +80,7 @@ func TestNewCheckUpdateCmd_error(t *testing.T) {
 	httpmock.RegisterResponder("GET", `https://api.github.com/repos/profclems/glab/releases/latest`,
 		httpmock.NewErrorResponder(fmt.Errorf("an error expected")))
 
-	ioStream, _, stdout, stderr := iostreams.IOTest()
+	ioStream, _, stdout, stderr := iostreams.Test()
 
 	err := NewCheckUpdateCmd(ioStream, "1.11.0").Execute()
 	assert.NotNil(t, err)
@@ -96,7 +96,7 @@ func TestNewCheckUpdateCmd_json_error(t *testing.T) {
 	httpmock.RegisterResponder("GET", `https://api.github.com/repos/profclems/glab/releases/latest`,
 		httpmock.NewStringResponder(200, ``))
 
-	ioStream, _, stdout, stderr := iostreams.IOTest()
+	ioStream, _, stdout, stderr := iostreams.Test()
 
 	err := NewCheckUpdateCmd(ioStream, "1.11.0").Execute()
 	assert.NotNil(t, err)

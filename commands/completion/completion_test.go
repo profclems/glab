@@ -46,7 +46,7 @@ func TestNewCmdCompletion(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			io, _, stdout, stderr := iostreams.IOTest()
+			io, _, stdout, stderr := iostreams.Test()
 
 			completeCmd := NewCmdCompletion(io)
 			rootCmd := &cobra.Command{Use: "glab"}

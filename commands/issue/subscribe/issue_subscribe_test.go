@@ -58,7 +58,7 @@ func TestNewCmdSubscribe(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.Name, func(t *testing.T) {
-			io, _, _, stderr := iostreams.IOTest()
+			io, _, _, stderr := iostreams.Test()
 			f := cmdtest.StubFactory("https://gitlab.com/glab-cli/test")
 			f.IO = io
 			f.IO.IsaTTY = true

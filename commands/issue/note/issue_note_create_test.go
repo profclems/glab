@@ -22,7 +22,7 @@ import (
 )
 
 func runCommand(rt http.RoundTripper, isTTY bool, cli string) (*test.CmdOut, error) {
-	io, _, stdout, stderr := iostreams.IOTest()
+	io, _, stdout, stderr := iostreams.Test()
 	io.IsaTTY = isTTY
 	io.IsInTTY = isTTY
 	io.IsErrTTY = isTTY

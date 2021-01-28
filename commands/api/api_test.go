@@ -26,7 +26,7 @@ import (
 
 func Test_NewCmdApi(t *testing.T) {
 	f := cmdtest.StubFactory("")
-	f.IO, _, _, _ = iostreams.IOTest()
+	f.IO, _, _, _ = iostreams.Test()
 
 	tests := []struct {
 		name     string
@@ -368,7 +368,7 @@ func Test_apiRun(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			io, _, stdout, stderr := iostreams.IOTest()
+			io, _, stdout, stderr := iostreams.Test()
 
 			tt.options.IO = io
 			tt.options.Config = config.NewBlankConfig()
@@ -401,7 +401,7 @@ func Test_apiRun(t *testing.T) {
 }
 
 func Test_apiRun_paginationREST(t *testing.T) {
-	io, _, stdout, stderr := iostreams.IOTest()
+	io, _, stdout, stderr := iostreams.Test()
 
 	requestCount := 0
 	responses := []*http.Response{
@@ -459,7 +459,7 @@ func Test_apiRun_paginationREST(t *testing.T) {
 }
 
 func Test_apiRun_paginationGraphQL(t *testing.T) {
-	io, _, stdout, stderr := iostreams.IOTest()
+	io, _, stdout, stderr := iostreams.Test()
 
 	requestCount := 0
 	responses := []*http.Response{
@@ -564,7 +564,7 @@ func Test_apiRun_inputFile(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			io, stdin, _, _ := iostreams.IOTest()
+			io, stdin, _, _ := iostreams.Test()
 			resp := &http.Response{StatusCode: 204}
 
 			inputFile := tt.inputFile
@@ -621,7 +621,7 @@ func Test_apiRun_inputFile(t *testing.T) {
 }
 
 func Test_parseFields(t *testing.T) {
-	io, stdin, _, _ := iostreams.IOTest()
+	io, stdin, _, _ := iostreams.Test()
 	fmt.Fprint(stdin, "pasted contents")
 
 	opts := ApiOptions{
@@ -665,7 +665,7 @@ func Test_magicFieldValue(t *testing.T) {
 	f.Close()
 	t.Cleanup(func() { os.Remove(f.Name()) })
 
-	io, _, _, _ := iostreams.IOTest()
+	io, _, _, _ := iostreams.Test()
 
 	type args struct {
 		v    string

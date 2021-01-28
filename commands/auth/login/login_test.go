@@ -104,7 +104,7 @@ func Test_NewCmdLogin(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			io, stdin, _, _ := iostreams.IOTest()
+			io, stdin, _, _ := iostreams.Test()
 			f := cmdtest.StubFactory("https://gitlab.com/glab-cli/test")
 
 			f.IO = io

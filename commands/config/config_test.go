@@ -97,7 +97,7 @@ func TestConfigGet(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			io, _, stdout, stderr := iostreams.IOTest()
+			io, _, stdout, stderr := iostreams.Test()
 			io.IsaTTY = tt.isTTY
 			io.IsErrTTY = tt.isTTY
 
@@ -155,7 +155,7 @@ func TestConfigSet(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			io, _, stdout, stderr := iostreams.IOTest()
+			io, _, stdout, stderr := iostreams.Test()
 			io.IsaTTY = tt.isTTY
 			io.IsErrTTY = tt.isTTY
 

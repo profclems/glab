@@ -727,7 +727,7 @@ func Test_AssigneesPrompt(t *testing.T) {
 			})
 
 			var got []string
-			io, _, _, stderr := iostreams.IOTest()
+			io, _, _, stderr := iostreams.Test()
 
 			err := AssigneesPrompt(&got, &gitlab.Client{}, repoRemote, io, tC.minimumAccessLevel)
 			if tC.expectedError != "" {
@@ -924,7 +924,7 @@ func Test_MilestonesPromptNoPrompts(t *testing.T) {
 	}
 
 	var got int
-	io, _, _, stderr := iostreams.IOTest()
+	io, _, _, stderr := iostreams.Test()
 
 	err := MilestonesPrompt(&got, &gitlab.Client{}, repoRemote, io)
 	if err != nil {
@@ -952,7 +952,7 @@ func TestMilestonesPromptFailures(t *testing.T) {
 	}
 
 	var got int
-	io, _, _, _ := iostreams.IOTest()
+	io, _, _, _ := iostreams.Test()
 
 	err := MilestonesPrompt(&got, &gitlab.Client{}, repoRemote, io)
 	if err == nil {

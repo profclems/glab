@@ -76,7 +76,7 @@ func Test_getValue(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			io, stdin, _, _ := iostreams.IOTest()
+			io, stdin, _, _ := iostreams.Test()
 
 			io.IsInTTY = false
 
@@ -162,7 +162,7 @@ func Test_NewCmdSet(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			io, _, _, _ := iostreams.IOTest()
+			io, _, _, _ := iostreams.Test()
 			f := &cmdutils.Factory{
 				IO: io,
 			}
@@ -212,7 +212,7 @@ func Test_setRun_project(t *testing.T) {
 		`),
 	)
 
-	io, _, stdout, _ := iostreams.IOTest()
+	io, _, stdout, _ := iostreams.Test()
 
 	opts := &SetOpts{
 		HTTPClient: func() (*gitlab.Client, error) {
@@ -249,7 +249,7 @@ func Test_setRun_group(t *testing.T) {
 		`),
 	)
 
-	io, _, stdout, _ := iostreams.IOTest()
+	io, _, stdout, _ := iostreams.Test()
 
 	opts := &SetOpts{
 		HTTPClient: func() (*gitlab.Client, error) {

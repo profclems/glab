@@ -72,7 +72,7 @@ func Test_NewCmdDiff(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			io, _, _, _ := iostreams.IOTest()
+			io, _, _, _ := iostreams.Test()
 			io.IsaTTY = tt.isTTY
 			io.IsInTTY = tt.isTTY
 			io.IsErrTTY = tt.isTTY
@@ -111,7 +111,7 @@ func Test_NewCmdDiff(t *testing.T) {
 }
 
 func runCommand(remotes glrepo.Remotes, isTTY bool, cli string) (*test.CmdOut, error) {
-	io, _, stdout, stderr := iostreams.IOTest()
+	io, _, stdout, stderr := iostreams.Test()
 	io.IsaTTY = isTTY
 	io.IsInTTY = isTTY
 	io.IsErrTTY = isTTY

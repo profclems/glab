@@ -50,7 +50,7 @@ func TestAliasList(t *testing.T) {
 
 			cfg := config.NewFromString(tt.config)
 
-			io, _, stdout, stderr := iostreams.IOTest()
+			io, _, stdout, stderr := iostreams.Test()
 			io.IsaTTY = tt.isaTTy
 			io.IsErrTTY = tt.isaTTy
 

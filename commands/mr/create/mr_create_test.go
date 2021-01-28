@@ -28,7 +28,7 @@ import (
 )
 
 func runCommand(rt http.RoundTripper, remotes glrepo.Remotes, runE func(opts *CreateOpts) error, branch string, isTTY bool, cli string) (*test.CmdOut, error) {
-	io, _, stdout, stderr := iostreams.IOTest()
+	io, _, stdout, stderr := iostreams.Test()
 	io.IsaTTY = isTTY
 	io.IsInTTY = isTTY
 	io.IsErrTTY = isTTY

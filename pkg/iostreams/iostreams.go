@@ -29,7 +29,7 @@ type IOStreams struct {
 	spinner *spinner.Spinner
 }
 
-func InitIOStream() *IOStreams {
+func Init() *IOStreams {
 	stdoutIsTTY := IsTerminal(os.Stdout)
 	stderrIsTTY := IsTerminal(os.Stderr)
 
@@ -155,11 +155,11 @@ func (s *IOStreams) TerminalWidth() int {
 }
 
 //IsOutputTTY returns true if both stdout and stderr is TTY
-func (s IOStreams) IsOutputTTY() bool {
+func (s *IOStreams) IsOutputTTY() bool {
 	return s.IsErrTTY && s.IsaTTY
 }
 
-func IOTest() (*IOStreams, *bytes.Buffer, *bytes.Buffer, *bytes.Buffer) {
+func Test() (*IOStreams, *bytes.Buffer, *bytes.Buffer, *bytes.Buffer) {
 	in := &bytes.Buffer{}
 	out := &bytes.Buffer{}
 	errOut := &bytes.Buffer{}

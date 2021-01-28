@@ -5,13 +5,12 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/profclems/glab/pkg/iostreams"
-
 	"github.com/profclems/glab/internal/config"
 	"github.com/profclems/glab/internal/git"
 	"github.com/profclems/glab/internal/glinstance"
 	"github.com/profclems/glab/internal/glrepo"
 	"github.com/profclems/glab/pkg/api"
+	"github.com/profclems/glab/pkg/iostreams"
 	"github.com/xanzy/go-gitlab"
 )
 
@@ -126,7 +125,7 @@ func NewFactory() *Factory {
 			}
 			return currentBranch, nil
 		},
-		IO: iostreams.InitIOStream(),
+		IO: iostreams.Init(),
 	}
 }
 

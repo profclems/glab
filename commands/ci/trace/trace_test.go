@@ -37,7 +37,7 @@ hosts:
 `, "")()
 
 	var io *iostreams.IOStreams
-	io, _, stdout, _ = iostreams.IOTest()
+	io, _, stdout, _ = iostreams.Test()
 	stubFactory, _ = cmdtest.StubFactoryWithConfig("https://gitlab.com/glab-cli/test.git")
 	stubFactory.IO = io
 	stubFactory.IO.IsaTTY = true
@@ -119,7 +119,7 @@ hosts:
 
 func TestTraceRun(t *testing.T) {
 	var io *iostreams.IOStreams
-	io, _, stdout, _ = iostreams.IOTest()
+	io, _, stdout, _ = iostreams.Test()
 	stubFactory = cmdtest.StubFactory("https://gitlab.com/glab-cli/test.git")
 	stubFactory.IO = io
 	stubFactory.IO.IsaTTY = true

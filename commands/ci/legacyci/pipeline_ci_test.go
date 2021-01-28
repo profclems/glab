@@ -13,7 +13,7 @@ import (
 )
 
 func TestNewCmdCI(t *testing.T) {
-	ioStrm, stdin, stdout, stderr := iostreams.IOTest()
+	ioStrm, stdin, stdout, stderr := iostreams.Test()
 
 	cmd := NewCmdCI(&cmdutils.Factory{
 		IO: ioStrm,

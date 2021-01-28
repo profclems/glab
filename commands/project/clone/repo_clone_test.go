@@ -110,7 +110,7 @@ func TestNewCmdClone(t *testing.T) {
 	}
 	for _, tt := range testCases {
 		t.Run(tt.name, func(t *testing.T) {
-			io, stdin, stdout, stderr := iostreams.IOTest()
+			io, stdin, stdout, stderr := iostreams.Test()
 			fac := &cmdutils.Factory{IO: io}
 
 			var opts *CloneOptions
@@ -156,7 +156,7 @@ hosts:
 	if token != "" {
 		_ = os.Setenv("GITLAB_TOKEN", "")
 	}
-	io, stdin, stdout, stderr := iostreams.IOTest()
+	io, stdin, stdout, stderr := iostreams.Test()
 	fac := &cmdutils.Factory{
 		IO: io,
 		Config: func() (config.Config, error) {
@@ -197,7 +197,7 @@ hosts:
 	if token != "" {
 		_ = os.Setenv("GITLAB_TOKEN", "")
 	}
-	io, stdin, stdout, stderr := iostreams.IOTest()
+	io, stdin, stdout, stderr := iostreams.Test()
 	fac := &cmdutils.Factory{
 		IO: io,
 		Config: func() (config.Config, error) {

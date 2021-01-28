@@ -52,7 +52,7 @@ func TestNewCmdCreate(t *testing.T) {
 			wantErr: true,
 		},
 	}
-	io, _, stdout, stderr := iostreams.IOTest()
+	io, _, stdout, stderr := iostreams.Test()
 
 	f := cmdtest.StubFactory("https://gitlab.com/glab-cli/test")
 	f.IO = io

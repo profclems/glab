@@ -137,7 +137,7 @@ hosts:
 	_, _ = client("", "gitlab.com")
 
 	for _, tt := range tests {
-		io, _, stdout, stderr := iostreams.IOTest()
+		io, _, stdout, stderr := iostreams.Test()
 		tt.opts.Config = func() (config.Config, error) {
 			return configs, nil
 		}
@@ -217,7 +217,7 @@ gl.io
 
 	configs, err := config.ParseConfig("config.yml")
 	assert.Nil(t, err)
-	io, _, stdout, stderr := iostreams.IOTest()
+	io, _, stdout, stderr := iostreams.Test()
 
 	client := func(token, hostname string) (*api.Client, error) {
 		return api.TestClient(&http.Client{Transport: fakeHTTP}, token, hostname, false)
@@ -246,7 +246,7 @@ git_protocol: ssh
 
 	configs, err := config.ParseConfig("config.yml")
 	assert.Nil(t, err)
-	io, _, stdout, stderr := iostreams.IOTest()
+	io, _, stdout, stderr := iostreams.Test()
 
 	opts := &StatusOpts{
 		Config: func() (config.Config, error) {

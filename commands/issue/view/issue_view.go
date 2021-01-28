@@ -39,7 +39,7 @@ func NewCmdView(f *cmdutils.Factory) *cobra.Command {
 	}
 	var issueViewCmd = &cobra.Command{
 		Use:     "view <id>",
-		Short:   `Display the title, body, and other information abopts.IO.StdErr an opts.Issue.`,
+		Short:   `Display the title, body, and other information about an issue.`,
 		Long:    ``,
 		Aliases: []string{"show"},
 		Example: heredoc.Doc(`

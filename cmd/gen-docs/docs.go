@@ -50,7 +50,7 @@ func main() {
 		fatal(err)
 	}
 
-	ioStream, _, _, _ := iostreams.IOTest()
+	ioStream, _, _, _ := iostreams.Test()
 	glabCli := commands.NewCmdRoot(&cmdutils.Factory{IO: ioStream}, "", "")
 	glabCli.DisableAutoGenTag = true
 	if *manpage {

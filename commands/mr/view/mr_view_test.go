@@ -48,7 +48,7 @@ hosts:
 `, "")()
 
 	var io *iostreams.IOStreams
-	io, _, stdout, stderr = iostreams.IOTest()
+	io, _, stdout, stderr = iostreams.Test()
 	stubFactory, _ = cmdtest.StubFactoryWithConfig("")
 	stubFactory.IO = io
 	stubFactory.IO.IsaTTY = true
