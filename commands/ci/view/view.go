@@ -14,8 +14,8 @@ import (
 	"github.com/profclems/glab/commands/ci/ciutils"
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/internal/git"
-	"github.com/profclems/glab/internal/utils"
 	"github.com/profclems/glab/pkg/api"
+	"github.com/profclems/glab/pkg/utils"
 
 	"github.com/MakeNowJust/heredoc"
 	"github.com/gdamore/tcell/v2"

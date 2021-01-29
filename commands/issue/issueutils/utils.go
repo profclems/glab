@@ -15,8 +15,8 @@ import (
 	"github.com/profclems/glab/pkg/api"
 	"golang.org/x/sync/errgroup"
 
-	"github.com/profclems/glab/internal/utils"
 	"github.com/profclems/glab/pkg/tableprinter"
+	"github.com/profclems/glab/pkg/utils"
 
 	"github.com/xanzy/go-gitlab"
 )

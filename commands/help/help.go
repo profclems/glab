@@ -8,7 +8,7 @@ import (
 
 	"github.com/profclems/glab/pkg/iostreams"
 
-	"github.com/profclems/glab/internal/utils"
+	"github.com/profclems/glab/pkg/utils"
 
 	"github.com/spf13/cobra"
 )

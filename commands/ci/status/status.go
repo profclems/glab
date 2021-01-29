@@ -7,8 +7,8 @@ import (
 	ciTraceCmd "github.com/profclems/glab/commands/ci/trace"
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/internal/git"
-	"github.com/profclems/glab/internal/utils"
 	"github.com/profclems/glab/pkg/api"
+	"github.com/profclems/glab/pkg/utils"
 
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/MakeNowJust/heredoc"

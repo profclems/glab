@@ -10,7 +10,7 @@ import (
 
 	"github.com/profclems/glab/pkg/prompt"
 
-	"github.com/profclems/glab/internal/utils"
+	"github.com/profclems/glab/pkg/utils"
 
 	"github.com/acarl005/stripansi"
 	"github.com/profclems/glab/commands/cmdtest"
