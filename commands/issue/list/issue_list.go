@@ -126,12 +126,12 @@ func NewCmdList(f *cmdutils.Factory, runE func(opts *ListOptions) error) *cobra.
 	issueListCmd.Flags().IntVarP(&opts.PerPage, "per-page", "P", 30, "Number of items to list per page. (default 30)")
 
 	issueListCmd.Flags().BoolP("opened", "o", false, "Get only opened issues")
-	issueListCmd.Flags().MarkHidden("opened")
-	issueListCmd.Flags().MarkDeprecated("opened", "default if --closed is not used")
+	_ = issueListCmd.Flags().MarkHidden("opened")
+	_ = issueListCmd.Flags().MarkDeprecated("opened", "default if --closed is not used")
 
 	issueListCmd.Flags().BoolVarP(&opts.Mine, "mine", "M", false, "Filter only issues issues assigned to me")
-	issueListCmd.Flags().MarkHidden("mine")
-	issueListCmd.Flags().MarkDeprecated("mine", "use --assignee=@me")
+	_ = issueListCmd.Flags().MarkHidden("mine")
+	_ = issueListCmd.Flags().MarkDeprecated("mine", "use --assignee=@me")
 
 	return issueListCmd
 }

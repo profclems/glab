@@ -154,8 +154,8 @@ func NewCmdCreate(f *cmdutils.Factory, runE func(opts *CreateOpts) error) *cobra
 	mrCreateCmd.Flags().BoolVarP(&opts.Web, "web", "w", false, "continue merge request creation on web browser")
 
 	mrCreateCmd.Flags().StringVarP(&opts.MRCreateTargetProject, "target-project", "", "", "Add target project by id or OWNER/REPO or GROUP/NAMESPACE/REPO")
-	mrCreateCmd.Flags().MarkHidden("target-project")
-	mrCreateCmd.Flags().MarkDeprecated("target-project", "Use --repo instead")
+	_ = mrCreateCmd.Flags().MarkHidden("target-project")
+	_ = mrCreateCmd.Flags().MarkDeprecated("target-project", "Use --repo instead")
 
 	return mrCreateCmd
 }

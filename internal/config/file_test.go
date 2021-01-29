@@ -17,7 +17,7 @@ func Test_CheckPathExists(t *testing.T) {
 		}
 		defer os.Remove(dir)
 
-		got := CheckPathExists(string(dir))
+		got := CheckPathExists(dir)
 		assert.True(t, got)
 	})
 	t.Run("doesnt-exist", func(t *testing.T) {
@@ -31,11 +31,11 @@ func Test_CheckFileExists(t *testing.T) {
 	if err != nil {
 		t.Skipf("Unexpected error creating temporary file for testing = %s", err)
 	}
-	filepath := file.Name()
-	defer os.Remove(filepath)
+	fPath := file.Name()
+	defer os.Remove(fPath)
 
 	t.Run("exists", func(t *testing.T) {
-		got := CheckFileExists(string(filepath))
+		got := CheckFileExists(fPath)
 		assert.True(t, got)
 	})
 
@@ -51,15 +51,15 @@ func Test_BackupConfigFile(t *testing.T) {
 		if err != nil {
 			t.Skipf("Unexpected error creating temporary file for testing = %s", err)
 		}
-		filepath := file.Name()
-		defer os.Remove(filepath)
+		fPath := file.Name()
+		defer os.Remove(fPath)
 
-		err = BackupConfigFile(filepath)
+		err = BackupConfigFile(fPath)
 		if err != nil {
 			t.Errorf("Unexpected error = %s", err)
 		}
 
-		got := CheckFileExists(filepath + ".bak")
+		got := CheckFileExists(fPath + ".bak")
 		assert.True(t, got)
 	})
 	t.Run("failure", func(t *testing.T) {
@@ -74,12 +74,12 @@ func Test_CheckFileHasLine(t *testing.T) {
 		if err != nil {
 			t.Skipf("Unexpected error creeating temporary file for testing = %s", err)
 		}
-		filepath := file.Name()
-		defer os.Remove(filepath)
+		fPath := file.Name()
+		defer os.Remove(fPath)
 
-		file.WriteString("profclems/glab")
+		_, _ = file.WriteString("profclems/glab")
 
-		got := CheckFileHasLine(filepath, "profclems/glab")
+		got := CheckFileHasLine(fPath, "profclems/glab")
 		assert.True(t, got)
 	})
 	t.Run("failed", func(t *testing.T) {
@@ -88,12 +88,12 @@ func Test_CheckFileHasLine(t *testing.T) {
 			if err != nil {
 				t.Skipf("Unexpected error creeating temporary file for testing = %s", err)
 			}
-			filepath := file.Name()
-			defer os.Remove(filepath)
+			fPath := file.Name()
+			defer os.Remove(fPath)
 
-			file.WriteString("profclems/glab")
+			_, _ = file.WriteString("profclems/glab")
 
-			got := CheckFileHasLine(filepath, "maxice8/glab")
+			got := CheckFileHasLine(fPath, "maxice8/glab")
 			assert.False(t, got)
 		})
 		t.Run("no-file-present", func(t *testing.T) {
@@ -110,12 +110,12 @@ func Test_ReadAndAppend(t *testing.T) {
 			if err != nil {
 				t.Skipf("Unexpected error creating temporary file for testing = %s", err)
 			}
-			filepath := file.Name()
-			defer os.Remove(filepath)
+			fPath := file.Name()
+			defer os.Remove(fPath)
 
-			err = ReadAndAppend(filepath, "profclems/glab")
+			err = ReadAndAppend(fPath, "profclems/glab")
 			assert.NoError(t, err)
-			got := CheckFileHasLine(filepath, "profclems/glab")
+			got := CheckFileHasLine(fPath, "profclems/glab")
 			assert.True(t, got)
 		})
 		t.Run("create-and-write", func(t *testing.T) {
@@ -125,11 +125,11 @@ func Test_ReadAndAppend(t *testing.T) {
 			}
 			defer os.RemoveAll(dir)
 
-			fpath := filepath.Join(dir, "file")
+			fPath := filepath.Join(dir, "file")
 
-			err = ReadAndAppend(fpath, "profclems/glab")
+			err = ReadAndAppend(fPath, "profclems/glab")
 			assert.NoError(t, err)
-			got := CheckFileHasLine(fpath, "profclems/glab")
+			got := CheckFileHasLine(fPath, "profclems/glab")
 			assert.True(t, got)
 		})
 		t.Run("create-and-write-and-append", func(t *testing.T) {
@@ -139,11 +139,11 @@ func Test_ReadAndAppend(t *testing.T) {
 			}
 			defer os.RemoveAll(dir)
 
-			fpath := filepath.Join(dir, "file")
+			fPath := filepath.Join(dir, "file")
 
-			err = ReadAndAppend(fpath, "profclems/glab")
+			err = ReadAndAppend(fPath, "profclems/glab")
 			assert.NoError(t, err)
-			err = ReadAndAppend(fpath, "maxice8/glab")
+			err = ReadAndAppend(fPath, "maxice8/glab")
 			assert.NoError(t, err)
 		})
 		t.Run("write-and-append", func(t *testing.T) {
@@ -151,13 +151,13 @@ func Test_ReadAndAppend(t *testing.T) {
 			if err != nil {
 				t.Skipf("Unexpected error creating temporary file for testing = %s", err)
 			}
-			filepath := file.Name()
-			defer os.Remove(filepath)
+			fPath := file.Name()
+			defer os.Remove(fPath)
 
-			err = ReadAndAppend(filepath, "profclems/glab")
+			err = ReadAndAppend(fPath, "profclems/glab")
 			assert.NoError(t, err)
 
-			err = ReadAndAppend(filepath, "maxice8/glab")
+			err = ReadAndAppend(fPath, "maxice8/glab")
 			assert.NoError(t, err)
 		})
 	})
