@@ -50,7 +50,7 @@ func TestRootNoArg(t *testing.T) {
 	// copy the output in a separate goroutine so printing can't block indefinitely
 	go func() {
 		var buf bytes.Buffer
-		io.Copy(&buf, r)
+		_, _ = io.Copy(&buf, r)
 		outC <- buf.String()
 	}()
 

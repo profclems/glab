@@ -205,3 +205,13 @@ func StubFactoryWithConfig(repo string) (*cmdutils.Factory, error) {
 
 	return CachedTestFactory, nil
 }
+
+type Author struct {
+	ID        int    `json:"id"`
+	Username  string `json:"username"`
+	Email     string `json:"email"`
+	Name      string `json:"name"`
+	State     string `json:"state"`
+	AvatarURL string `json:"avatar_url"`
+	WebURL    string `json:"web_url"`
+}
