@@ -94,7 +94,7 @@ hosts:
 			wantErr: false,
 			assertFunc: func(t *testing.T, out, outErr string, err error) {
 				assert.Contains(t, out, "- Deleting Merge Request !1\n")
-				assert.Contains(t, out, "✔ Merge request !1 deleted\n")
+				assert.Contains(t, out, "✓ Merge request !1 deleted\n")
 			},
 		},
 		{
@@ -103,7 +103,7 @@ hosts:
 			wantErr: false,
 			assertFunc: func(t *testing.T, out, outErr string, err error) {
 				assert.Contains(t, out, "- Deleting Merge Request !1\n")
-				assert.Contains(t, out, "✔ Merge request !1 deleted\n")
+				assert.Contains(t, out, "✓ Merge request !1 deleted\n")
 			},
 		},
 		{

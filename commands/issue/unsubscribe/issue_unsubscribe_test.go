@@ -46,7 +46,7 @@ func TestNewCmdUnsubscribe(t *testing.T) {
 		{
 			Name:   "Issue Exists",
 			Issue:  "1",
-			stderr: "- Unsubscribing from Issue #1 in glab-cli/test\n✔ Unsubscribed\n",
+			stderr: "- Unsubscribing from Issue #1 in glab-cli/test\n✓ Unsubscribed\n",
 		},
 		{
 			Name:    "Issue Does Not Exist",
