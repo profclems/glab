@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"github.com/charmbracelet/glamour"
-	"github.com/profclems/glab/internal/browser"
 	"github.com/profclems/glab/internal/run"
+	"github.com/profclems/glab/pkg/browser"
 )
 
 // OpenInBrowser opens the url in a web browser based on OS and $BROWSER environment variable
