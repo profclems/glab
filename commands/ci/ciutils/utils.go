@@ -8,9 +8,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/profclems/glab/internal/utils"
-	"github.com/profclems/glab/pkg/api"
+	"github.com/profclems/glab/pkg/iostreams"
+
+	"github.com/profclems/glab/api"
 	"github.com/profclems/glab/pkg/tableprinter"
+	"github.com/profclems/glab/pkg/utils"
 
 	"github.com/pkg/errors"
 	"github.com/xanzy/go-gitlab"
@@ -21,7 +23,7 @@ var (
 	offset int64
 )
 
-func DisplayMultiplePipelines(p []*gitlab.PipelineInfo, projectID string) string {
+func DisplayMultiplePipelines(c *iostreams.ColorPalette, p []*gitlab.PipelineInfo, projectID string) string {
 
 	table := tableprinter.NewTablePrinter()
 
@@ -31,14 +33,14 @@ func DisplayMultiplePipelines(p []*gitlab.PipelineInfo, projectID string) string
 			duration := utils.TimeToPrettyTimeAgo(*pipeline.CreatedAt)
 			var pipeState string
 			if pipeline.Status == "success" {
-				pipeState = utils.Green(fmt.Sprintf("(%s) • #%d", pipeline.Status, pipeline.ID))
+				pipeState = c.Green(fmt.Sprintf("(%s) • #%d", pipeline.Status, pipeline.ID))
 			} else if pipeline.Status == "failed" {
-				pipeState = utils.Red(fmt.Sprintf("(%s) • #%d", pipeline.Status, pipeline.ID))
+				pipeState = c.Red(fmt.Sprintf("(%s) • #%d", pipeline.Status, pipeline.ID))
 			} else {
-				pipeState = utils.Gray(fmt.Sprintf("(%s) • #%d", pipeline.Status, pipeline.ID))
+				pipeState = c.Gray(fmt.Sprintf("(%s) • #%d", pipeline.Status, pipeline.ID))
 			}
 
-			table.AddRow(pipeState, pipeline.Ref, utils.Magenta("("+duration+")"))
+			table.AddRow(pipeState, pipeline.Ref, c.Magenta("("+duration+")"))
 		}
 
 		return table.Render()

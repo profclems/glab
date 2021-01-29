@@ -4,9 +4,8 @@ import (
 	"fmt"
 
 	"github.com/MakeNowJust/heredoc"
+	"github.com/profclems/glab/api"
 	"github.com/profclems/glab/commands/mr/mrutils"
-	"github.com/profclems/glab/internal/utils"
-	"github.com/profclems/glab/pkg/api"
 
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/spf13/cobra"
@@ -27,6 +26,7 @@ func NewCmdMerge(f *cmdutils.Factory) *cobra.Command {
 		Args: cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var err error
+			c := f.IO.Color()
 
 			apiClient, err := f.HttpClient()
 			if err != nil {
@@ -78,11 +78,11 @@ func NewCmdMerge(f *cmdutils.Factory) *cobra.Command {
 			}
 
 			if m, _ := cmd.Flags().GetBool("when-pipeline-succeeds"); m {
-				fmt.Fprintln(f.IO.StdOut, utils.GreenCheck(), "Will merge when pipeline succeeds")
+				fmt.Fprintln(f.IO.StdOut, c.GreenCheck(), "Will merge when pipeline succeeds")
 			} else {
-				fmt.Fprintln(f.IO.StdOut, utils.GreenCheck(), "Merged")
+				fmt.Fprintln(f.IO.StdOut, c.GreenCheck(), "Merged")
 			}
-			fmt.Fprintln(f.IO.StdOut, mrutils.DisplayMR(mr))
+			fmt.Fprintln(f.IO.StdOut, mrutils.DisplayMR(c, mr))
 
 			return nil
 		},

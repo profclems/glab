@@ -3,11 +3,13 @@ package contributors
 import (
 	"fmt"
 
+	"github.com/profclems/glab/pkg/iostreams"
+
 	"github.com/MakeNowJust/heredoc"
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/internal/glrepo"
-	"github.com/profclems/glab/internal/utils"
 	"github.com/profclems/glab/pkg/tableprinter"
+	"github.com/profclems/glab/pkg/utils"
 	"github.com/spf13/cobra"
 	"github.com/xanzy/go-gitlab"
 )
@@ -20,7 +22,7 @@ type Options struct {
 
 	BaseRepo   func() (glrepo.Interface, error)
 	HTTPClient func() (*gitlab.Client, error)
-	IO         *utils.IOStreams
+	IO         *iostreams.IOStreams
 }
 
 func NewCmdContributors(f *cmdutils.Factory) *cobra.Command {
@@ -58,6 +60,7 @@ func NewCmdContributors(f *cmdutils.Factory) *cobra.Command {
 
 func runE(opts *Options) error {
 	var err error
+	c := opts.IO.Color()
 
 	apiClient, err := opts.HTTPClient()
 	if err != nil {
@@ -97,7 +100,7 @@ func runE(opts *Options) error {
 	table := tableprinter.NewTablePrinter()
 	for _, user := range users {
 		table.AddCell(user.Name)
-		table.AddCellf("%s", utils.Gray(user.Email))
+		table.AddCellf("%s", c.Gray(user.Email))
 		table.AddCellf("%d commits", user.Commits)
 		table.EndRow()
 	}

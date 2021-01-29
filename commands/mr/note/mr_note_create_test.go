@@ -6,15 +6,16 @@ import (
 	"net/http"
 	"testing"
 
+	"github.com/profclems/glab/pkg/iostreams"
+
 	"github.com/alecthomas/assert"
 	"github.com/google/shlex"
+	"github.com/profclems/glab/api"
 	"github.com/profclems/glab/commands/cmdtest"
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/internal/config"
-	"github.com/profclems/glab/internal/git"
 	"github.com/profclems/glab/internal/glrepo"
-	"github.com/profclems/glab/internal/utils"
-	"github.com/profclems/glab/pkg/api"
+	"github.com/profclems/glab/pkg/git"
 	"github.com/profclems/glab/pkg/httpmock"
 	"github.com/profclems/glab/pkg/prompt"
 	"github.com/profclems/glab/test"
@@ -26,7 +27,7 @@ func TestMain(m *testing.M) {
 }
 
 func runCommand(rt http.RoundTripper, isTTY bool, cli string) (*test.CmdOut, error) {
-	io, _, stdout, stderr := utils.IOTest()
+	io, _, stdout, stderr := iostreams.Test()
 	io.IsaTTY = isTTY
 	io.IsInTTY = isTTY
 	io.IsErrTTY = isTTY

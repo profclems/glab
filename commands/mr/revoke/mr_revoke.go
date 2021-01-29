@@ -4,10 +4,9 @@ import (
 	"fmt"
 
 	"github.com/MakeNowJust/heredoc"
+	"github.com/profclems/glab/api"
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/commands/mr/mrutils"
-	"github.com/profclems/glab/internal/utils"
-	"github.com/profclems/glab/pkg/api"
 
 	"github.com/spf13/cobra"
 )
@@ -27,6 +26,7 @@ func NewCmdRevoke(f *cmdutils.Factory) *cobra.Command {
 		Args: cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var err error
+			c := f.IO.Color()
 
 			apiClient, err := f.HttpClient()
 			if err != nil {
@@ -53,7 +53,7 @@ func NewCmdRevoke(f *cmdutils.Factory) *cobra.Command {
 				return err
 			}
 
-			fmt.Fprintln(f.IO.StdOut, utils.GreenCheck(), "Merge Request approval revoked")
+			fmt.Fprintln(f.IO.StdOut, c.GreenCheck(), "Merge Request approval revoked")
 
 			return nil
 		},

@@ -15,21 +15,22 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/profclems/glab/pkg/api"
+	"github.com/profclems/glab/pkg/iostreams"
+
+	"github.com/profclems/glab/api"
 
 	"github.com/MakeNowJust/heredoc"
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/internal/config"
 	"github.com/profclems/glab/internal/glinstance"
 	"github.com/profclems/glab/internal/glrepo"
-	"github.com/profclems/glab/internal/utils"
 	"github.com/spf13/cobra"
 	jsonPretty "github.com/tidwall/pretty"
 	"github.com/xanzy/go-gitlab"
 )
 
 type ApiOptions struct {
-	IO *utils.IOStreams
+	IO *iostreams.IOStreams
 
 	HttpClient func() (*gitlab.Client, error)
 	BaseRepo   func() (glrepo.Interface, error)

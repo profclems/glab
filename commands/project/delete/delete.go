@@ -4,11 +4,12 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/profclems/glab/pkg/iostreams"
+
 	"github.com/MakeNowJust/heredoc"
+	"github.com/profclems/glab/api"
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/internal/glrepo"
-	"github.com/profclems/glab/internal/utils"
-	"github.com/profclems/glab/pkg/api"
 	"github.com/profclems/glab/pkg/prompt"
 	"github.com/spf13/cobra"
 	"github.com/xanzy/go-gitlab"
@@ -19,7 +20,7 @@ type DeleteOpts struct {
 	RepoName    string
 	Args        []string
 
-	IO       *utils.IOStreams
+	IO       *iostreams.IOStreams
 	Lab      func() (*gitlab.Client, error)
 	BaseRepo func() (glrepo.Interface, error)
 }

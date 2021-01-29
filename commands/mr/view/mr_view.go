@@ -2,13 +2,14 @@ package view
 
 import (
 	"fmt"
-	"io"
 	"strings"
 
+	"github.com/profclems/glab/pkg/iostreams"
+
+	"github.com/profclems/glab/api"
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/commands/mr/mrutils"
-	"github.com/profclems/glab/internal/utils"
-	"github.com/profclems/glab/pkg/api"
+	"github.com/profclems/glab/pkg/utils"
 
 	"github.com/MakeNowJust/heredoc"
 	"github.com/spf13/cobra"
@@ -22,10 +23,14 @@ type ViewOpts struct {
 
 	CommentPageNumber int
 	CommentLimit      int
+
+	IO *iostreams.IOStreams
 }
 
 func NewCmdView(f *cmdutils.Factory) *cobra.Command {
-	opts := ViewOpts{}
+	opts := &ViewOpts{
+		IO: f.IO,
+	}
 	var mrViewCmd = &cobra.Command{
 		Use:     "view {<id> | <branch>}",
 		Short:   `Display the title, body, and other information about a merge request.`,
@@ -79,9 +84,9 @@ func NewCmdView(f *cmdutils.Factory) *cobra.Command {
 
 			if f.IO.IsOutputTTY() {
 				glamourStyle, _ := cfg.Get(baseRepo.RepoHost(), "glamour_style")
-				return printTTYMRPreview(f.IO.StdOut, mr, notes, opts, glamourStyle)
+				return printTTYMRPreview(opts, mr, notes, glamourStyle)
 			}
-			return printRawMRPreview(f.IO.StdOut, mr)
+			return printRawMRPreview(opts, mr)
 		},
 	}
 
@@ -110,25 +115,27 @@ func assigneesList(mr *gitlab.MergeRequest) string {
 	return strings.Trim(assignees, ", ")
 }
 
-func mrState(mr *gitlab.MergeRequest) (mrState string) {
+func mrState(c *iostreams.ColorPalette, mr *gitlab.MergeRequest) (mrState string) {
 	if mr.State == "opened" {
-		mrState = utils.Green("open")
+		mrState = c.Green("open")
 	} else if mr.State == "merged" {
-		mrState = utils.Blue(mr.State)
+		mrState = c.Blue(mr.State)
 	} else {
-		mrState = utils.Red(mr.State)
+		mrState = c.Red(mr.State)
 	}
 
 	return mrState
 }
 
-func printTTYMRPreview(out io.Writer, mr *gitlab.MergeRequest, notes []*gitlab.Note, opts ViewOpts, glamourStyle string) error {
+func printTTYMRPreview(opts *ViewOpts, mr *gitlab.MergeRequest, notes []*gitlab.Note, glamourStyle string) error {
+	c := opts.IO.Color()
+	out := opts.IO.StdOut
 	mrTimeAgo := utils.TimeToPrettyTimeAgo(*mr.CreatedAt)
 	// Header
-	fmt.Fprint(out, mrState(mr))
-	fmt.Fprintf(out, utils.Gray(" • opened by %s %s\n"), mr.Author.Username, mrTimeAgo)
+	fmt.Fprint(out, mrState(c, mr))
+	fmt.Fprintf(out, c.Gray(" • opened by %s %s\n"), mr.Author.Username, mrTimeAgo)
 	fmt.Fprint(out, mr.Title)
-	fmt.Fprintf(out, utils.Gray(" !%d"), mr.IID)
+	fmt.Fprintf(out, c.Gray(" !%d"), mr.IID)
 	fmt.Fprintln(out)
 
 	// Description
@@ -137,48 +144,48 @@ func printTTYMRPreview(out io.Writer, mr *gitlab.MergeRequest, notes []*gitlab.N
 		fmt.Fprintln(out, mr.Description)
 	}
 
-	fmt.Fprintf(out, utils.Gray("\n%d upvotes • %d downvotes • %d comments\n"), mr.Upvotes, mr.Downvotes, mr.UserNotesCount)
+	fmt.Fprintf(out, c.Gray("\n%d upvotes • %d downvotes • %d comments\n"), mr.Upvotes, mr.Downvotes, mr.UserNotesCount)
 
 	// Meta information
 	if labels := labelsList(mr); labels != "" {
-		fmt.Fprint(out, utils.Bold("Labels: "))
+		fmt.Fprint(out, c.Bold("Labels: "))
 		fmt.Fprintln(out, labels)
 	}
 	if assignees := assigneesList(mr); assignees != "" {
-		fmt.Fprint(out, utils.Bold("Assignees: "))
+		fmt.Fprint(out, c.Bold("Assignees: "))
 		fmt.Fprintln(out, assignees)
 	}
 	if mr.Milestone != nil {
-		fmt.Fprint(out, utils.Bold("Milestone: "))
+		fmt.Fprint(out, c.Bold("Milestone: "))
 		fmt.Fprintln(out, mr.Milestone.Title)
 	}
 	if mr.State == "closed" {
 		fmt.Fprintf(out, "Closed By: %s %s\n", mr.ClosedBy.Username, mrTimeAgo)
 	}
 	if mr.Pipeline != nil {
-		fmt.Fprint(out, utils.Bold("Pipeline Status: "))
+		fmt.Fprint(out, c.Bold("Pipeline Status: "))
 		var status string
 		switch s := mr.Pipeline.Status; s {
 		case "failed":
-			status = utils.Red(s)
+			status = c.Red(s)
 		case "success":
-			status = utils.Green(s)
+			status = c.Green(s)
 		default:
-			status = utils.Gray(s)
+			status = c.Gray(s)
 		}
-		fmt.Fprintf(out, "%s (View pipeline with `%s`)\n", status, utils.Bold("glab ci view "+mr.SourceBranch))
+		fmt.Fprintf(out, "%s (View pipeline with `%s`)\n", status, c.Bold("glab ci view "+mr.SourceBranch))
 
 		if mr.MergeWhenPipelineSucceeds && mr.Pipeline.Status != "success" {
-			fmt.Fprintf(out, "%s Requires pipeline to succeed before merging\n", utils.WarnIcon())
+			fmt.Fprintf(out, "%s Requires pipeline to succeed before merging\n", c.WarnIcon())
 		}
 	}
-	fmt.Fprintf(out, "%s This merge request has %s changes\n", utils.GreenCheck(), utils.Yellow(mr.ChangesCount))
+	fmt.Fprintf(out, "%s This merge request has %s changes\n", c.GreenCheck(), c.Yellow(mr.ChangesCount))
 	if mr.State == "merged" && mr.MergedBy != nil {
-		fmt.Fprintf(out, "%s The changes were merged into %s by %s %s\n", utils.GreenCheck(), mr.TargetBranch, mr.MergedBy.Name, utils.TimeToPrettyTimeAgo(*mr.MergedAt))
+		fmt.Fprintf(out, "%s The changes were merged into %s by %s %s\n", c.GreenCheck(), mr.TargetBranch, mr.MergedBy.Name, utils.TimeToPrettyTimeAgo(*mr.MergedAt))
 	}
 
 	if mr.HasConflicts {
-		fmt.Fprintf(out, utils.Red("%s This branch has conflicts that must be resolved\n"), utils.FailedIcon())
+		fmt.Fprintf(out, c.Red("%s This branch has conflicts that must be resolved\n"), c.FailedIcon())
 	}
 
 	// Comments
@@ -197,11 +204,11 @@ func printTTYMRPreview(out io.Writer, mr *gitlab.MergeRequest, notes []*gitlab.N
 				fmt.Fprint(out, note.Author.Username)
 				if note.System {
 					fmt.Fprintf(out, " %s ", note.Body)
-					fmt.Fprintln(out, utils.Gray(createdAt))
+					fmt.Fprintln(out, c.Gray(createdAt))
 				} else {
 					body, _ := utils.RenderMarkdown(note.Body, glamourStyle)
 					fmt.Fprint(out, " commented ")
-					fmt.Fprintf(out, utils.Gray("%s\n"), createdAt)
+					fmt.Fprintf(out, c.Gray("%s\n"), createdAt)
 					fmt.Fprintln(out, utils.Indent(body, " "))
 				}
 				fmt.Fprintln(out)
@@ -212,17 +219,18 @@ func printTTYMRPreview(out io.Writer, mr *gitlab.MergeRequest, notes []*gitlab.N
 	}
 
 	fmt.Fprintln(out)
-	fmt.Fprintf(out, utils.Gray("View this merge request on GitLab: %s\n"), mr.WebURL)
+	fmt.Fprintf(out, c.Gray("View this merge request on GitLab: %s\n"), mr.WebURL)
 
 	return nil
 }
 
-func printRawMRPreview(out io.Writer, mr *gitlab.MergeRequest) error {
+func printRawMRPreview(opts *ViewOpts, mr *gitlab.MergeRequest) error {
+	out := opts.IO.StdOut
 	assignees := assigneesList(mr)
 	labels := labelsList(mr)
 
 	fmt.Fprintf(out, "title:\t%s\n", mr.Title)
-	fmt.Fprintf(out, "state:\t%s\n", mrState(mr))
+	fmt.Fprintf(out, "state:\t%s\n", mrState(opts.IO.Color(), mr))
 	fmt.Fprintf(out, "author:\t%s\n", mr.Author.Username)
 	fmt.Fprintf(out, "labels:\t%s\n", labels)
 	fmt.Fprintf(out, "assignees:\t%s\n", assignees)

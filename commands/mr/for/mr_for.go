@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/profclems/glab/internal/git"
+	"github.com/profclems/glab/pkg/git"
 
+	"github.com/profclems/glab/api"
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/commands/mr/mrutils"
-	"github.com/profclems/glab/internal/utils"
-	"github.com/profclems/glab/pkg/api"
+	"github.com/profclems/glab/pkg/utils"
 
 	"github.com/MakeNowJust/heredoc"
 	"github.com/spf13/cobra"
@@ -137,7 +137,7 @@ func NewCmdFor(f *cmdutils.Factory) *cobra.Command {
 				return err
 			}
 
-			fmt.Fprintln(f.IO.StdOut, mrutils.DisplayMR(mr))
+			fmt.Fprintln(f.IO.StdOut, mrutils.DisplayMR(f.IO.Color(), mr))
 
 			return nil
 		},

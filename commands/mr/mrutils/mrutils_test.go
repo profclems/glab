@@ -5,9 +5,11 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/profclems/glab/pkg/iostreams"
+
+	"github.com/profclems/glab/api"
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/internal/glrepo"
-	"github.com/profclems/glab/pkg/api"
 	"github.com/profclems/glab/pkg/prompt"
 	"github.com/stretchr/testify/assert"
 	"github.com/xanzy/go-gitlab"
@@ -53,9 +55,10 @@ func Test_DisplayMR(t *testing.T) {
 			output: "!3 This is closed (trunk)\n https://gitlab.com/profclems/glab/-/merge_requests/3\n",
 		},
 	}
+	streams, _, _, _ := iostreams.Test()
 	for _, tC := range testCases {
 		t.Run(tC.name, func(t *testing.T) {
-			got := DisplayMR(tC.mr)
+			got := DisplayMR(streams.Color(), tC.mr)
 			assert.Equal(t, tC.output, got)
 		})
 	}
@@ -491,6 +494,7 @@ func Test_MRFromArgsWithOpts(t *testing.T) {
 }
 
 func Test_DisplayAllMRs(t *testing.T) {
+	streams, _, _, _ := iostreams.Test()
 	mrs := []*gitlab.MergeRequest{
 		{
 			IID:          1,
@@ -520,6 +524,6 @@ func Test_DisplayAllMRs(t *testing.T) {
 !1	add new feature	(trunk) ← (new-tests)  
 `
 
-	got := DisplayAllMRs(mrs, "unused")
+	got := DisplayAllMRs(streams.Color(), mrs, "unused")
 	assert.Equal(t, expected, got)
 }

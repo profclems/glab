@@ -4,10 +4,9 @@ import (
 	"fmt"
 
 	"github.com/MakeNowJust/heredoc"
+	"github.com/profclems/glab/api"
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/commands/issue/issueutils"
-	"github.com/profclems/glab/internal/utils"
-	"github.com/profclems/glab/pkg/api"
 
 	"github.com/spf13/cobra"
 )
@@ -25,6 +24,7 @@ func NewCmdUnsubscribe(f *cmdutils.Factory) *cobra.Command {
 		`),
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
+			c := f.IO.Color()
 			apiClient, err := f.HttpClient()
 			if err != nil {
 				return err
@@ -37,7 +37,7 @@ func NewCmdUnsubscribe(f *cmdutils.Factory) *cobra.Command {
 
 			for _, issue := range issues {
 				if f.IO.IsaTTY && f.IO.IsErrTTY {
-					fmt.Fprintf(f.IO.StdErr, "- Unsubscribing from Issue #%d in %s\n", issue.IID, utils.Cyan(repo.FullName()))
+					fmt.Fprintf(f.IO.StdErr, "- Unsubscribing from Issue #%d in %s\n", issue.IID, c.Cyan(repo.FullName()))
 				}
 
 				issue, err := api.UnsubscribeFromIssue(apiClient, repo.FullName(), issue.IID, nil)
@@ -45,8 +45,8 @@ func NewCmdUnsubscribe(f *cmdutils.Factory) *cobra.Command {
 					return err
 				}
 
-				fmt.Fprintln(f.IO.StdErr, utils.Red("✔"), "Unsubscribed")
-				fmt.Fprintln(f.IO.StdOut, issueutils.DisplayIssue(issue))
+				fmt.Fprintln(f.IO.StdErr, c.RedCheck(), "Unsubscribed")
+				fmt.Fprintln(f.IO.StdOut, issueutils.DisplayIssue(c, issue))
 			}
 			return nil
 		},

@@ -6,6 +6,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/profclems/glab/pkg/iostreams"
+
 	"github.com/spf13/cobra"
 
 	"github.com/google/shlex"
@@ -15,7 +17,6 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/profclems/glab/commands/cmdtest"
-	"github.com/profclems/glab/internal/utils"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -109,7 +110,7 @@ func TestNewCmdClone(t *testing.T) {
 	}
 	for _, tt := range testCases {
 		t.Run(tt.name, func(t *testing.T) {
-			io, stdin, stdout, stderr := utils.IOTest()
+			io, stdin, stdout, stderr := iostreams.Test()
 			fac := &cmdutils.Factory{IO: io}
 
 			var opts *CloneOptions
@@ -155,7 +156,7 @@ hosts:
 	if token != "" {
 		_ = os.Setenv("GITLAB_TOKEN", "")
 	}
-	io, stdin, stdout, stderr := utils.IOTest()
+	io, stdin, stdout, stderr := iostreams.Test()
 	fac := &cmdutils.Factory{
 		IO: io,
 		Config: func() (config.Config, error) {
@@ -196,7 +197,7 @@ hosts:
 	if token != "" {
 		_ = os.Setenv("GITLAB_TOKEN", "")
 	}
-	io, stdin, stdout, stderr := utils.IOTest()
+	io, stdin, stdout, stderr := iostreams.Test()
 	fac := &cmdutils.Factory{
 		IO: io,
 		Config: func() (config.Config, error) {

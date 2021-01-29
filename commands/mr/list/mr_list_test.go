@@ -7,24 +7,25 @@ import (
 	"regexp"
 	"testing"
 
+	"github.com/profclems/glab/pkg/iostreams"
+
 	"github.com/profclems/glab/commands/cmdtest"
 
 	"github.com/MakeNowJust/heredoc"
 
 	"github.com/alecthomas/assert"
 	"github.com/google/shlex"
+	"github.com/profclems/glab/api"
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/internal/config"
 	"github.com/profclems/glab/internal/glrepo"
-	"github.com/profclems/glab/internal/utils"
-	"github.com/profclems/glab/pkg/api"
 	"github.com/profclems/glab/pkg/httpmock"
 	"github.com/profclems/glab/test"
 	"github.com/xanzy/go-gitlab"
 )
 
 func runCommand(rt http.RoundTripper, isTTY bool, cli string, runE func(opts *ListOptions) error) (*test.CmdOut, error) {
-	io, _, stdout, stderr := utils.IOTest()
+	io, _, stdout, stderr := iostreams.Test()
 	io.IsaTTY = isTTY
 	io.IsInTTY = isTTY
 	io.IsErrTTY = isTTY
@@ -69,7 +70,7 @@ func runCommand(rt http.RoundTripper, isTTY bool, cli string, runE func(opts *Li
 }
 
 func TestNewCmdList(t *testing.T) {
-	io, _, _, _ := utils.IOTest()
+	io, _, _, _ := iostreams.Test()
 	io.IsaTTY = true
 	io.IsInTTY = true
 	io.IsErrTTY = true

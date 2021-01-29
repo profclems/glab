@@ -5,15 +5,15 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/google/shlex"
+	"github.com/profclems/glab/pkg/iostreams"
 
-	"github.com/profclems/glab/internal/utils"
+	"github.com/google/shlex"
 
 	"github.com/profclems/glab/internal/config"
 
 	"github.com/acarl005/stripansi"
+	"github.com/profclems/glab/api"
 	"github.com/profclems/glab/commands/cmdtest"
-	"github.com/profclems/glab/pkg/api"
 	"github.com/stretchr/testify/assert"
 	"github.com/xanzy/go-gitlab"
 )
@@ -30,7 +30,7 @@ hosts:
     username: monalisa
     token: OTOKEN
 `, "")()
-	io, _, stdout, stderr := utils.IOTest()
+	io, _, stdout, stderr := iostreams.Test()
 	stubFactory, _ := cmdtest.StubFactoryWithConfig("")
 	stubFactory.IO = io
 	stubFactory.IO.IsaTTY = true
@@ -94,7 +94,7 @@ hosts:
 			wantErr: false,
 			assertFunc: func(t *testing.T, out, outErr string, err error) {
 				assert.Contains(t, out, "- Deleting Merge Request !1\n")
-				assert.Contains(t, out, "✔ Merge request !1 deleted\n")
+				assert.Contains(t, out, "✓ Merge request !1 deleted\n")
 			},
 		},
 		{
@@ -103,7 +103,7 @@ hosts:
 			wantErr: false,
 			assertFunc: func(t *testing.T, out, outErr string, err error) {
 				assert.Contains(t, out, "- Deleting Merge Request !1\n")
-				assert.Contains(t, out, "✔ Merge request !1 deleted\n")
+				assert.Contains(t, out, "✓ Merge request !1 deleted\n")
 			},
 		},
 		{

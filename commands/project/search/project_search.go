@@ -8,7 +8,7 @@ import (
 	"github.com/profclems/glab/pkg/tableprinter"
 
 	"github.com/profclems/glab/commands/cmdutils"
-	"github.com/profclems/glab/internal/utils"
+	"github.com/profclems/glab/pkg/utils"
 
 	"github.com/spf13/cobra"
 	"github.com/xanzy/go-gitlab"
@@ -29,7 +29,7 @@ func NewCmdSearch(f *cmdutils.Factory) *cobra.Command {
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var err error
-
+			c := f.IO.Color()
 			apiClient, err := f.HttpClient()
 			if err != nil {
 				return err
@@ -55,14 +55,14 @@ func NewCmdSearch(f *cmdutils.Factory) *cobra.Command {
 
 			table := tableprinter.NewTablePrinter()
 			for _, p := range projects {
-				table.AddCell(utils.Green(string(rune(p.ID))))
+				table.AddCell(c.Green(string(rune(p.ID))))
 
 				var description string
 				if p.Description != "" {
-					description = fmt.Sprintf("\n%s", utils.Cyan(p.Description))
+					description = fmt.Sprintf("\n%s", c.Cyan(p.Description))
 				}
 
-				table.AddCellf("%s%s\n%s", strings.ReplaceAll(p.PathWithNamespace, "/", " / "), description, utils.Gray(p.WebURL))
+				table.AddCellf("%s%s\n%s", strings.ReplaceAll(p.PathWithNamespace, "/", " / "), description, c.Gray(p.WebURL))
 				table.AddCellf("%d stars %d forks %d issues", p.StarCount, p.ForksCount, p.OpenIssuesCount)
 				table.AddCellf("updated %s", utils.TimeToPrettyTimeAgo(*p.LastActivityAt))
 				table.EndRow()

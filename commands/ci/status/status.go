@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/profclems/glab/api"
 	ciTraceCmd "github.com/profclems/glab/commands/ci/trace"
 	"github.com/profclems/glab/commands/cmdutils"
-	"github.com/profclems/glab/internal/git"
-	"github.com/profclems/glab/internal/utils"
-	"github.com/profclems/glab/pkg/api"
+	"github.com/profclems/glab/pkg/git"
+	"github.com/profclems/glab/pkg/utils"
 
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/MakeNowJust/heredoc"
@@ -31,6 +31,7 @@ func NewCmdStatus(f *cmdutils.Factory) *cobra.Command {
 		Args: cobra.ExactArgs(0),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var err error
+			c := f.IO.Color()
 
 			apiClient, err := f.HttpClient()
 			if err != nil {
@@ -83,17 +84,17 @@ func NewCmdStatus(f *cmdutils.Factory) *cobra.Command {
 						switch s := job.Status; s {
 						case "failed":
 							if job.AllowFailure {
-								status = utils.Yellow(s)
+								status = c.Yellow(s)
 							} else {
-								status = utils.Red(s)
+								status = c.Red(s)
 							}
 						case "success":
-							status = utils.Green(s)
+							status = c.Green(s)
 						default:
-							status = utils.Gray(s)
+							status = c.Gray(s)
 						}
 						//fmt.Println(job.Tag)
-						fmt.Fprintf(writer, "(%s) • %s\t%s\t\t%s\n", status, utils.Gray(duration), job.Stage, job.Name)
+						fmt.Fprintf(writer, "(%s) • %s\t%s\t\t%s\n", status, c.Gray(duration), job.Stage, job.Name)
 					}
 
 					fmt.Fprintf(writer.Newline(), "\n%s\n", runningPipeline.WebURL)
@@ -147,7 +148,7 @@ func NewCmdStatus(f *cmdutils.Factory) *cobra.Command {
 				}
 				return nil
 			}
-			redCheck := utils.Red("✘")
+			redCheck := c.Red("✘")
 			fmt.Fprintf(f.IO.StdOut, "%s No pipelines running or available on %s branch\n", redCheck, branch)
 			return nil
 		},

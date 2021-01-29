@@ -5,15 +5,15 @@ import (
 	"testing"
 	"time"
 
+	"github.com/profclems/glab/pkg/iostreams"
+
 	"github.com/google/shlex"
 	"github.com/stretchr/testify/require"
 
-	"github.com/profclems/glab/internal/utils"
-
 	"github.com/acarl005/stripansi"
+	"github.com/profclems/glab/api"
 	"github.com/profclems/glab/commands/cmdtest"
 	"github.com/profclems/glab/internal/config"
-	"github.com/profclems/glab/pkg/api"
 	"github.com/stretchr/testify/assert"
 	"github.com/xanzy/go-gitlab"
 )
@@ -31,7 +31,7 @@ hosts:
     token: OTOKEN
 `, "")()
 
-	io, _, stdout, stderr := utils.IOTest()
+	io, _, stdout, stderr := iostreams.Test()
 	stubFactory, _ := cmdtest.StubFactoryWithConfig("")
 	stubFactory.IO = io
 	stubFactory.IO.IsaTTY = true

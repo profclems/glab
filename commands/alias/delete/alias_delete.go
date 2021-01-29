@@ -3,18 +3,18 @@ package delete
 import (
 	"fmt"
 
+	"github.com/profclems/glab/pkg/iostreams"
+
 	"github.com/profclems/glab/commands/cmdutils"
 
 	"github.com/profclems/glab/internal/config"
-	"github.com/profclems/glab/internal/utils"
-
 	"github.com/spf13/cobra"
 )
 
 type DeleteOptions struct {
 	Config func() (config.Config, error)
 	Name   string
-	IO     *utils.IOStreams
+	IO     *iostreams.IOStreams
 }
 
 func NewCmdDelete(f *cmdutils.Factory, runF func(*DeleteOptions) error) *cobra.Command {
@@ -40,6 +40,7 @@ func NewCmdDelete(f *cmdutils.Factory, runF func(*DeleteOptions) error) *cobra.C
 }
 
 func deleteRun(cmd *cobra.Command, opts *DeleteOptions) error {
+	c := opts.IO.Color()
 	cfg, err := opts.Config()
 	if err != nil {
 		return err
@@ -59,7 +60,7 @@ func deleteRun(cmd *cobra.Command, opts *DeleteOptions) error {
 	if err != nil {
 		return fmt.Errorf("failed to delete alias %s: %w", opts.Name, err)
 	}
-	redCheck := utils.Red("✓")
+	redCheck := c.Red("✓")
 	fmt.Fprintf(opts.IO.StdErr, "%s Deleted alias %s; was %s\n", redCheck, opts.Name, expansion)
 	return nil
 }

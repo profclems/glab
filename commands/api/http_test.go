@@ -7,8 +7,8 @@ import (
 	"os"
 	"testing"
 
+	"github.com/profclems/glab/api"
 	"github.com/profclems/glab/internal/config"
-	"github.com/profclems/glab/pkg/api"
 	"github.com/stretchr/testify/assert"
 )
 

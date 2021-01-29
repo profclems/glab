@@ -3,10 +3,10 @@ package list
 import (
 	"fmt"
 
+	"github.com/profclems/glab/api"
 	"github.com/profclems/glab/commands/ci/ciutils"
 	"github.com/profclems/glab/commands/cmdutils"
-	"github.com/profclems/glab/internal/utils"
-	"github.com/profclems/glab/pkg/api"
+	"github.com/profclems/glab/pkg/utils"
 
 	"github.com/MakeNowJust/heredoc"
 	"github.com/spf13/cobra"
@@ -68,7 +68,7 @@ func NewCmdList(f *cmdutils.Factory) *cobra.Command {
 			title.Page = l.Page
 			title.CurrentPageTotal = len(pipes)
 
-			fmt.Fprintf(f.IO.StdOut, "%s\n%s\n", title.Describe(), ciutils.DisplayMultiplePipelines(pipes, repo.FullName()))
+			fmt.Fprintf(f.IO.StdOut, "%s\n%s\n", title.Describe(), ciutils.DisplayMultiplePipelines(f.IO.Color(), pipes, repo.FullName()))
 			return nil
 		},
 	}

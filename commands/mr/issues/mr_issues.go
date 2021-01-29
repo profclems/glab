@@ -4,11 +4,11 @@ import (
 	"fmt"
 
 	"github.com/MakeNowJust/heredoc"
+	"github.com/profclems/glab/api"
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/commands/issue/issueutils"
 	"github.com/profclems/glab/commands/mr/mrutils"
-	"github.com/profclems/glab/internal/utils"
-	"github.com/profclems/glab/pkg/api"
+	"github.com/profclems/glab/pkg/utils"
 	"github.com/spf13/cobra"
 
 	"github.com/xanzy/go-gitlab"
@@ -52,7 +52,7 @@ func NewCmdIssues(f *cmdutils.Factory) *cobra.Command {
 			title.ListActionType = "search"
 			title.CurrentPageTotal = len(mrIssues)
 
-			fmt.Fprintf(f.IO.StdOut, "%s\n%s\n", title.Describe(), issueutils.DisplayIssueList(mrIssues, repo.FullName()))
+			fmt.Fprintf(f.IO.StdOut, "%s\n%s\n", title.Describe(), issueutils.DisplayIssueList(f.IO.Color(), mrIssues, repo.FullName()))
 			return nil
 		},
 	}

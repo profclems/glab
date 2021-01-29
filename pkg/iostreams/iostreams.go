@@ -1,4 +1,4 @@
-package utils
+package iostreams
 
 import (
 	"bytes"
@@ -7,7 +7,9 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+	"time"
 
+	"github.com/briandowns/spinner"
 	"github.com/google/shlex"
 )
 
@@ -23,9 +25,11 @@ type IOStreams struct {
 
 	pagerCommand string
 	pagerProcess *os.Process
+
+	spinner *spinner.Spinner
 }
 
-func InitIOStream() *IOStreams {
+func Init() *IOStreams {
 	stdoutIsTTY := IsTerminal(os.Stdout)
 	stderrIsTTY := IsTerminal(os.Stderr)
 
@@ -127,16 +131,35 @@ func (s *IOStreams) StopPager() {
 	s.pagerProcess = nil
 }
 
+func (s *IOStreams) StartSpinner(loadingMSG string) {
+	if s.IsOutputTTY() {
+		s.spinner = spinner.New(spinner.CharSets[9], 100*time.Millisecond, spinner.WithWriter(s.StdErr))
+		if loadingMSG != "" {
+			s.spinner.Suffix = " " + loadingMSG
+		}
+		s.spinner.Start()
+	}
+}
+
+func (s *IOStreams) StopSpinner(finalMSG string) {
+	if s.spinner != nil {
+		s.spinner.Suffix = ""
+		s.spinner.FinalMSG = finalMSG
+		s.spinner.Stop()
+		s.spinner = nil
+	}
+}
+
 func (s *IOStreams) TerminalWidth() int {
 	return TerminalWidth(s.StdOut)
 }
 
 //IsOutputTTY returns true if both stdout and stderr is TTY
-func (s IOStreams) IsOutputTTY() bool {
+func (s *IOStreams) IsOutputTTY() bool {
 	return s.IsErrTTY && s.IsaTTY
 }
 
-func IOTest() (*IOStreams, *bytes.Buffer, *bytes.Buffer, *bytes.Buffer) {
+func Test() (*IOStreams, *bytes.Buffer, *bytes.Buffer, *bytes.Buffer) {
 	in := &bytes.Buffer{}
 	out := &bytes.Buffer{}
 	errOut := &bytes.Buffer{}

@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"github.com/charmbracelet/glamour"
-	"github.com/profclems/glab/internal/browser"
 	"github.com/profclems/glab/internal/run"
+	"github.com/profclems/glab/pkg/browser"
 )
 
 // OpenInBrowser opens the url in a web browser based on OS and $BROWSER environment variable
@@ -96,22 +96,6 @@ func DisplayURL(urlStr string) string {
 		return urlStr
 	}
 	return u.Hostname() + u.Path
-}
-
-func GreenCheck() string {
-	return Green("✓")
-}
-
-func FailedIcon() string {
-	return Red("x")
-}
-
-func WarnIcon() string {
-	return Yellow("!")
-}
-
-func RedCheck() string {
-	return Red("✔")
 }
 
 // PresentInStringSlice take a Hay (Slice of Strings) and a Needle (string)

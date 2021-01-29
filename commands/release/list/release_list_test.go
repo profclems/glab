@@ -6,13 +6,13 @@ import (
 	"testing"
 	"time"
 
+	"github.com/profclems/glab/pkg/iostreams"
+
 	"github.com/google/shlex"
 
-	"github.com/profclems/glab/internal/utils"
-
+	"github.com/profclems/glab/api"
 	cmdTestUtils "github.com/profclems/glab/commands/cmdtest"
 	"github.com/profclems/glab/commands/cmdutils"
-	"github.com/profclems/glab/pkg/api"
 
 	"github.com/acarl005/stripansi"
 	"github.com/stretchr/testify/assert"
@@ -110,7 +110,7 @@ func TestNewCmdReleaseList(t *testing.T) {
 		},
 	}
 
-	io, _, stdout, stderr := utils.IOTest()
+	io, _, stdout, stderr := iostreams.Test()
 	f := cmdTestUtils.StubFactory("https://gitlab.com/glab-cli/test")
 	f.IO = io
 	f.IO.IsaTTY = true

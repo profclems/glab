@@ -6,7 +6,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/profclems/glab/internal/utils"
+	"github.com/profclems/glab/pkg/iostreams"
+
+	"github.com/profclems/glab/pkg/utils"
 
 	"github.com/spf13/cobra"
 )
@@ -72,7 +74,7 @@ func isRootCmd(command *cobra.Command) bool {
 	return command != nil && !command.HasParent()
 }
 
-func RootHelpFunc(command *cobra.Command, args []string) {
+func RootHelpFunc(c *iostreams.ColorPalette, command *cobra.Command, args []string) {
 	if isRootCmd(command.Parent()) && len(args) >= 2 && args[1] != "--help" && args[1] != "-h" {
 		nestedSuggestFunc(command, args[1])
 		hasFailed = true
@@ -152,7 +154,7 @@ Use 'glab <command> <subcommand> --help' for more information about a command.`}
 	for _, e := range helpEntries {
 		if e.Title != "" {
 			// If there is a title, add indentation to each line in the body
-			fmt.Fprintln(out, utils.Bold(e.Title))
+			fmt.Fprintln(out, c.Bold(e.Title))
 			fmt.Fprintln(out, utils.Indent(strings.Trim(e.Body, "\r\n"), "  "))
 		} else {
 			// If there is no title print the body as is

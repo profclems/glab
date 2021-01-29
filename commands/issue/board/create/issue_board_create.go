@@ -5,9 +5,8 @@ import (
 
 	"github.com/profclems/glab/pkg/prompt"
 
+	"github.com/profclems/glab/api"
 	"github.com/profclems/glab/commands/cmdutils"
-	"github.com/profclems/glab/internal/utils"
-	"github.com/profclems/glab/pkg/api"
 	"github.com/spf13/cobra"
 	"github.com/xanzy/go-gitlab"
 )
@@ -27,6 +26,7 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 			}
 			var err error
 			out := f.IO.StdOut
+			c := f.IO.Color()
 
 			apiClient, err := f.HttpClient()
 			if err != nil {
@@ -56,7 +56,7 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 				return err
 			}
 
-			fmt.Fprintf(out, "%s Board created: %q", utils.GreenCheck(), issueBoard.Name)
+			fmt.Fprintf(out, "%s Board created: %q", c.GreenCheck(), issueBoard.Name)
 
 			return nil
 		},

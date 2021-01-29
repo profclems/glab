@@ -6,7 +6,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/profclems/glab/internal/git"
+	"github.com/profclems/glab/pkg/git"
 	"github.com/stretchr/testify/assert"
 )
 

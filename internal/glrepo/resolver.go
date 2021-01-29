@@ -5,8 +5,8 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/profclems/glab/internal/git"
-	"github.com/profclems/glab/pkg/api"
+	"github.com/profclems/glab/api"
+	"github.com/profclems/glab/pkg/git"
 	"github.com/profclems/glab/pkg/prompt"
 
 	"github.com/xanzy/go-gitlab"

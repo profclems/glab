@@ -3,11 +3,11 @@ package list
 import (
 	"fmt"
 
-	"github.com/profclems/glab/pkg/api"
+	"github.com/profclems/glab/api"
 
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/commands/release/releaseutils"
-	"github.com/profclems/glab/internal/utils"
+	"github.com/profclems/glab/pkg/utils"
 
 	"github.com/spf13/cobra"
 	"github.com/xanzy/go-gitlab"
@@ -33,7 +33,7 @@ func NewCmdReleaseList(f *cmdutils.Factory) *cobra.Command {
 }
 
 func listReleases(cmd *cobra.Command, args []string) error {
-
+	c := factory.IO.Color()
 	l := &gitlab.ListReleasesOptions{}
 
 	tag, err := cmd.Flags().GetString("tag")
@@ -60,7 +60,7 @@ func listReleases(cmd *cobra.Command, args []string) error {
 
 		cfg, _ := factory.Config()
 		glamourStyle, _ := cfg.Get(repo.RepoHost(), "glamour_style")
-		fmt.Fprintln(factory.IO.StdOut, releaseutils.DisplayRelease(release, glamourStyle))
+		fmt.Fprintln(factory.IO.StdOut, releaseutils.DisplayRelease(c, release, glamourStyle))
 	} else {
 		l.PerPage = 30
 
@@ -74,7 +74,7 @@ func listReleases(cmd *cobra.Command, args []string) error {
 		title.Page = 0
 		title.CurrentPageTotal = len(releases)
 
-		fmt.Fprintf(factory.IO.StdOut, "%s\n%s\n", title.Describe(), releaseutils.DisplayAllReleases(releases, repo.FullName()))
+		fmt.Fprintf(factory.IO.StdOut, "%s\n%s\n", title.Describe(), releaseutils.DisplayAllReleases(c, releases, repo.FullName()))
 	}
 	return nil
 }

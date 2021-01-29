@@ -5,9 +5,9 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/profclems/glab/api"
 	"github.com/profclems/glab/commands/cmdutils"
-	"github.com/profclems/glab/internal/git"
-	"github.com/profclems/glab/pkg/api"
+	"github.com/profclems/glab/pkg/git"
 
 	"github.com/MakeNowJust/heredoc"
 	"github.com/spf13/cobra"

@@ -5,10 +5,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/profclems/glab/internal/utils"
+	"github.com/profclems/glab/pkg/iostreams"
 
+	"github.com/profclems/glab/api"
 	"github.com/profclems/glab/commands/cmdtest"
-	"github.com/profclems/glab/pkg/api"
 	"github.com/stretchr/testify/assert"
 	"github.com/xanzy/go-gitlab"
 )
@@ -69,7 +69,7 @@ func TestNewCmdDelete(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 
-			io, _, stdout, stderr := utils.IOTest()
+			io, _, stdout, stderr := iostreams.Test()
 			f := cmdtest.StubFactory("")
 			f.IO = io
 			f.IO.IsaTTY = true

@@ -4,13 +4,15 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/profclems/glab/pkg/iostreams"
+
 	"github.com/MakeNowJust/heredoc"
 	"github.com/profclems/glab/internal/glrepo"
 
+	"github.com/profclems/glab/api"
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/commands/mr/mrutils"
-	"github.com/profclems/glab/internal/utils"
-	"github.com/profclems/glab/pkg/api"
+	"github.com/profclems/glab/pkg/utils"
 
 	"github.com/spf13/cobra"
 	"github.com/xanzy/go-gitlab"
@@ -43,7 +45,7 @@ type ListOptions struct {
 	ListType       string
 	TitleQualifier string
 
-	IO         *utils.IOStreams
+	IO         *iostreams.IOStreams
 	BaseRepo   func() (glrepo.Interface, error)
 	HTTPClient func() (*gitlab.Client, error)
 }
@@ -228,7 +230,7 @@ func listRun(opts *ListOptions) error {
 		return err
 	}
 	defer opts.IO.StopPager()
-	fmt.Fprintf(opts.IO.StdOut, "%s\n%s\n", title.Describe(), mrutils.DisplayAllMRs(mergeRequests, repo.FullName()))
+	fmt.Fprintf(opts.IO.StdOut, "%s\n%s\n", title.Describe(), mrutils.DisplayAllMRs(opts.IO.Color(), mergeRequests, repo.FullName()))
 
 	return nil
 }

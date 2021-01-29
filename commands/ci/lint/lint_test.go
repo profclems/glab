@@ -3,9 +3,9 @@ package lint
 import (
 	"testing"
 
-	"github.com/alecthomas/assert"
-	"github.com/profclems/glab/internal/utils"
+	"github.com/profclems/glab/pkg/iostreams"
 
+	"github.com/alecthomas/assert"
 	"github.com/profclems/glab/commands/cmdtest"
 )
 
@@ -14,7 +14,7 @@ func TestMain(m *testing.M) {
 }
 
 func Test_pipelineCILint(t *testing.T) {
-	io, _, stdout, stderr := utils.IOTest()
+	io, _, stdout, stderr := iostreams.Test()
 	fac := cmdtest.StubFactory("")
 	fac.IO = io
 	fac.IO.StdErr = stderr
@@ -61,7 +61,7 @@ func Test_pipelineCILint(t *testing.T) {
 }
 
 func Test_lintRun(t *testing.T) {
-	io, _, stdout, stderr := utils.IOTest()
+	io, _, stdout, stderr := iostreams.Test()
 	fac := cmdtest.StubFactory("")
 	fac.IO = io
 	fac.IO.StdErr = stderr

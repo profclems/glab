@@ -6,14 +6,14 @@ package legacyci
 import (
 	"testing"
 
-	"github.com/profclems/glab/internal/utils"
+	"github.com/profclems/glab/pkg/iostreams"
 
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestNewCmdCI(t *testing.T) {
-	ioStrm, stdin, stdout, stderr := utils.IOTest()
+	ioStrm, stdin, stdout, stderr := iostreams.Test()
 
 	cmd := NewCmdCI(&cmdutils.Factory{
 		IO: ioStrm,

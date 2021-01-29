@@ -8,13 +8,15 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/profclems/glab/pkg/iostreams"
+
 	"github.com/spf13/cobra/doc"
 	"github.com/spf13/pflag"
 
 	"github.com/profclems/glab/commands"
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/internal/config"
-	"github.com/profclems/glab/internal/utils"
+	"github.com/profclems/glab/pkg/utils"
 	"github.com/spf13/cobra"
 )
 
@@ -48,7 +50,7 @@ func main() {
 		fatal(err)
 	}
 
-	ioStream, _, _, _ := utils.IOTest()
+	ioStream, _, _, _ := iostreams.Test()
 	glabCli := commands.NewCmdRoot(&cmdutils.Factory{IO: ioStream}, "", "")
 	glabCli.DisableAutoGenTag = true
 	if *manpage {

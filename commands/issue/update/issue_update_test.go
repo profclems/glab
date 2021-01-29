@@ -6,13 +6,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/profclems/glab/internal/utils"
+	"github.com/profclems/glab/pkg/iostreams"
 
 	"github.com/google/shlex"
 
 	"github.com/acarl005/stripansi"
+	"github.com/profclems/glab/api"
 	"github.com/profclems/glab/commands/cmdtest"
-	"github.com/profclems/glab/pkg/api"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/xanzy/go-gitlab"
@@ -91,7 +91,7 @@ func TestNewCmdUpdate(t *testing.T) {
 		},
 	}
 
-	io, _, stdout, stderr := utils.IOTest()
+	io, _, stdout, stderr := iostreams.Test()
 	f := cmdtest.StubFactory("https://gitlab.com/glab-cli/test")
 	f.IO = io
 	f.IO.IsaTTY = true

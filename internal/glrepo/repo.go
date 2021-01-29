@@ -8,9 +8,9 @@ import (
 
 	"github.com/profclems/glab/internal/config"
 
-	"github.com/profclems/glab/internal/git"
 	"github.com/profclems/glab/internal/glinstance"
-	"github.com/profclems/glab/internal/utils"
+	"github.com/profclems/glab/pkg/git"
+	"github.com/profclems/glab/pkg/utils"
 	"github.com/xanzy/go-gitlab"
 )
 

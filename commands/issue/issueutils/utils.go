@@ -8,49 +8,51 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/profclems/glab/pkg/iostreams"
+
+	"github.com/profclems/glab/api"
 	"github.com/profclems/glab/internal/config"
 	"github.com/profclems/glab/internal/glrepo"
-	"github.com/profclems/glab/pkg/api"
 	"golang.org/x/sync/errgroup"
 
-	"github.com/profclems/glab/internal/utils"
 	"github.com/profclems/glab/pkg/tableprinter"
+	"github.com/profclems/glab/pkg/utils"
 
 	"github.com/xanzy/go-gitlab"
 )
 
-func DisplayIssueList(issues []*gitlab.Issue, projectID string) string {
+func DisplayIssueList(c *iostreams.ColorPalette, issues []*gitlab.Issue, projectID string) string {
 	table := tableprinter.NewTablePrinter()
 	for _, issue := range issues {
-		table.AddCell(IssueState(issue))
+		table.AddCell(IssueState(c, issue))
 		table.AddCell(issue.Title)
 
 		if len(issue.Labels) > 0 {
-			table.AddCellf("(%s)", utils.Cyan(strings.Trim(strings.Join(issue.Labels, ", "), ",")))
+			table.AddCellf("(%s)", c.Cyan(strings.Trim(strings.Join(issue.Labels, ", "), ",")))
 		} else {
 			table.AddCell("")
 		}
 
-		table.AddCell(utils.Gray(utils.TimeToPrettyTimeAgo(*issue.CreatedAt)))
+		table.AddCell(c.Gray(utils.TimeToPrettyTimeAgo(*issue.CreatedAt)))
 		table.EndRow()
 	}
 
 	return table.Render()
 }
 
-func DisplayIssue(i *gitlab.Issue) string {
+func DisplayIssue(c *iostreams.ColorPalette, i *gitlab.Issue) string {
 	duration := utils.TimeToPrettyTimeAgo(*i.CreatedAt)
-	issueID := IssueState(i)
+	issueID := IssueState(c, i)
 
 	return fmt.Sprintf("%s %s (%s)\n %s\n",
 		issueID, i.Title, duration, i.WebURL)
 }
 
-func IssueState(i *gitlab.Issue) (issueID string) {
+func IssueState(c *iostreams.ColorPalette, i *gitlab.Issue) (issueID string) {
 	if i.State == "opened" {
-		issueID = utils.Green(fmt.Sprintf("#%d", i.IID))
+		issueID = c.Green(fmt.Sprintf("#%d", i.IID))
 	} else {
-		issueID = utils.Red(fmt.Sprintf("#%d", i.IID))
+		issueID = c.Red(fmt.Sprintf("#%d", i.IID))
 	}
 	return
 }

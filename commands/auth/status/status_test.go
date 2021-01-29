@@ -6,13 +6,13 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/profclems/glab/pkg/api"
+	"github.com/profclems/glab/pkg/iostreams"
+
+	"github.com/profclems/glab/api"
 	"github.com/profclems/glab/pkg/httpmock"
 
-	"github.com/profclems/glab/internal/config"
-	"github.com/profclems/glab/internal/utils"
-
 	"github.com/profclems/glab/commands/cmdutils"
+	"github.com/profclems/glab/internal/config"
 
 	"github.com/google/shlex"
 	"github.com/stretchr/testify/assert"
@@ -137,7 +137,7 @@ hosts:
 	_, _ = client("", "gitlab.com")
 
 	for _, tt := range tests {
-		io, _, stdout, stderr := utils.IOTest()
+		io, _, stdout, stderr := iostreams.Test()
 		tt.opts.Config = func() (config.Config, error) {
 			return configs, nil
 		}
@@ -217,7 +217,7 @@ gl.io
 
 	configs, err := config.ParseConfig("config.yml")
 	assert.Nil(t, err)
-	io, _, stdout, stderr := utils.IOTest()
+	io, _, stdout, stderr := iostreams.Test()
 
 	client := func(token, hostname string) (*api.Client, error) {
 		return api.TestClient(&http.Client{Transport: fakeHTTP}, token, hostname, false)
@@ -246,7 +246,7 @@ git_protocol: ssh
 
 	configs, err := config.ParseConfig("config.yml")
 	assert.Nil(t, err)
-	io, _, stdout, stderr := utils.IOTest()
+	io, _, stdout, stderr := iostreams.Test()
 
 	opts := &StatusOpts{
 		Config: func() (config.Config, error) {

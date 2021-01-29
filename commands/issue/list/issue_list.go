@@ -4,13 +4,15 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/profclems/glab/pkg/iostreams"
+
 	"github.com/MakeNowJust/heredoc"
 	"github.com/profclems/glab/internal/glrepo"
 
+	"github.com/profclems/glab/api"
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/commands/issue/issueutils"
-	"github.com/profclems/glab/internal/utils"
-	"github.com/profclems/glab/pkg/api"
+	"github.com/profclems/glab/pkg/utils"
 
 	"github.com/spf13/cobra"
 	"github.com/xanzy/go-gitlab"
@@ -46,7 +48,7 @@ type ListOptions struct {
 	ListType       string
 	TitleQualifier string
 
-	IO         *utils.IOStreams
+	IO         *iostreams.IOStreams
 	BaseRepo   func() (glrepo.Interface, error)
 	HTTPClient func() (*gitlab.Client, error)
 }
@@ -135,6 +137,7 @@ func NewCmdList(f *cmdutils.Factory, runE func(opts *ListOptions) error) *cobra.
 }
 
 func listRun(opts *ListOptions) error {
+	c := opts.IO.Color()
 	apiClient, err := opts.HTTPClient()
 	if err != nil {
 		return err
@@ -228,6 +231,6 @@ func listRun(opts *ListOptions) error {
 	}
 	defer opts.IO.StopPager()
 
-	fmt.Fprintf(opts.IO.StdOut, "%s\n%s\n", title.Describe(), issueutils.DisplayIssueList(issues, repo.FullName()))
+	fmt.Fprintf(opts.IO.StdOut, "%s\n%s\n", title.Describe(), issueutils.DisplayIssueList(c, issues, repo.FullName()))
 	return nil
 }

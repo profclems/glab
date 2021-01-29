@@ -7,9 +7,9 @@ import (
 
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/gdamore/tcell/v2"
+	"github.com/profclems/glab/api"
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/internal/glrepo"
-	"github.com/profclems/glab/pkg/api"
 	"github.com/rivo/tview"
 	"github.com/spf13/cobra"
 	"github.com/xanzy/go-gitlab"

@@ -1,4 +1,4 @@
-package utils
+package iostreams
 
 import (
 	"io"
@@ -11,31 +11,39 @@ import (
 var (
 	_isColorEnabled = true
 	checkedNoColor  = false
-
-	// Magenta outputs ANSI color if stdout is a tty
-	Magenta = makeColorFunc("magenta")
-
-	// Cyan outputs ANSI color if stdout is a tty
-	Cyan = makeColorFunc("cyan")
-
-	// Red outputs ANSI color if stdout is a tty
-	Red = makeColorFunc("red")
-
-	// Yellow outputs ANSI color if stdout is a tty
-	Yellow = makeColorFunc("yellow")
-
-	// Blue outputs ANSI color if stdout is a tty
-	Blue = makeColorFunc("blue")
-
-	// Green outputs ANSI color if stdout is a tty
-	Green = makeColorFunc("green")
-
-	// Gray outputs ANSI color if stdout is a tty
-	Gray = makeColorFunc("black+h")
-
-	// Bold outputs ANSI color if stdout is a tty
-	Bold = makeColorFunc("default+b")
 )
+
+type ColorPalette struct {
+	// Magenta outputs ANSI color if stdout is a tty
+	Magenta func(string) string
+	// Cyan outputs ANSI color if stdout is a tty
+	Cyan func(string) string
+	// Red outputs ANSI color if stdout is a tty
+	Red func(string) string
+	// Yellow outputs ANSI color if stdout is a tty
+	Yellow func(string) string
+	// Blue outputs ANSI color if stdout is a tty
+	Blue func(string) string
+	// Green outputs ANSI color if stdout is a tty
+	Green func(string) string
+	// Gray outputs ANSI color if stdout is a tty
+	Gray func(string) string
+	// Bold outputs ANSI color if stdout is a tty
+	Bold func(string) string
+}
+
+func (s *IOStreams) Color() *ColorPalette {
+	return &ColorPalette{
+		Magenta: makeColorFunc("magenta"),
+		Cyan:    makeColorFunc("cyan"),
+		Red:     makeColorFunc("red"),
+		Yellow:  makeColorFunc("yellow"),
+		Blue:    makeColorFunc("blue"),
+		Green:   makeColorFunc("green"),
+		Gray:    makeColorFunc("black+h"),
+		Bold:    makeColorFunc("default+b"),
+	}
+}
 
 // NewColorable returns an output stream that handles ANSI color sequences on Windows
 func NewColorable(out io.Writer) io.Writer {

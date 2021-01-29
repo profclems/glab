@@ -7,7 +7,6 @@ import (
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/internal/config"
 	"github.com/profclems/glab/internal/glinstance"
-	"github.com/profclems/glab/internal/utils"
 	"github.com/spf13/cobra"
 )
 
@@ -185,6 +184,6 @@ func configInit(f *cmdutils.Factory) error {
 	if cfg.Write() != nil {
 		return err
 	}
-	fmt.Fprintf(f.IO.StdOut, "%s Configuration updated", utils.GreenCheck())
+	fmt.Fprintf(f.IO.StdOut, "%s Configuration updated", f.IO.Color().GreenCheck())
 	return nil
 }

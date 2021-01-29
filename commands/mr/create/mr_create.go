@@ -7,17 +7,19 @@ import (
 	"os"
 	"strings"
 
+	"github.com/profclems/glab/pkg/iostreams"
+
 	"github.com/MakeNowJust/heredoc"
 	"github.com/profclems/glab/internal/config"
 	"github.com/profclems/glab/internal/glrepo"
 
 	"github.com/AlecAivazis/survey/v2"
+	"github.com/profclems/glab/api"
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/commands/mr/mrutils"
-	"github.com/profclems/glab/internal/git"
-	"github.com/profclems/glab/internal/utils"
-	"github.com/profclems/glab/pkg/api"
+	"github.com/profclems/glab/pkg/git"
 	"github.com/profclems/glab/pkg/prompt"
+	"github.com/profclems/glab/pkg/utils"
 	"github.com/spf13/cobra"
 	"github.com/xanzy/go-gitlab"
 )
@@ -47,7 +49,7 @@ type CreateOpts struct {
 	Yes           bool
 	Web           bool
 
-	IO       *utils.IOStreams
+	IO       *iostreams.IOStreams
 	Branch   func() (string, error)
 	Remotes  func() (glrepo.Remotes, error)
 	Lab      func() (*gitlab.Client, error)
@@ -160,6 +162,7 @@ func NewCmdCreate(f *cmdutils.Factory, runE func(opts *CreateOpts) error) *cobra
 
 func createRun(opts *CreateOpts) error {
 	out := opts.IO.StdOut
+	c := opts.IO.Color()
 	mrCreateOpts := &gitlab.CreateMergeRequestOptions{}
 
 	labClient, err := opts.Lab()
@@ -457,7 +460,7 @@ func createRun(opts *CreateOpts) error {
 			message = "\nCreating draft merge request for %s into %s in %s\n\n"
 		}
 
-		fmt.Fprintf(opts.IO.StdErr, message, utils.Cyan(opts.SourceBranch), utils.Cyan(opts.TargetBranch), baseRepo.FullName())
+		fmt.Fprintf(opts.IO.StdErr, message, c.Cyan(opts.SourceBranch), c.Cyan(opts.TargetBranch), baseRepo.FullName())
 
 		// It is intentional that we create against the head repo, it is necessary
 		// for cross-repository merge requests
@@ -466,7 +469,7 @@ func createRun(opts *CreateOpts) error {
 			return err
 		}
 
-		fmt.Fprintln(out, mrutils.DisplayMR(mr))
+		fmt.Fprintln(out, mrutils.DisplayMR(c, mr))
 		return nil
 	}
 

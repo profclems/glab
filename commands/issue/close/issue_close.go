@@ -4,8 +4,7 @@ import (
 	"fmt"
 
 	"github.com/MakeNowJust/heredoc"
-	"github.com/profclems/glab/internal/utils"
-	"github.com/profclems/glab/pkg/api"
+	"github.com/profclems/glab/api"
 
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/commands/issue/issueutils"
@@ -25,6 +24,7 @@ func NewCmdClose(f *cmdutils.Factory) *cobra.Command {
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var err error
+			c := f.IO.Color()
 
 			apiClient, err := f.HttpClient()
 			if err != nil {
@@ -45,8 +45,8 @@ func NewCmdClose(f *cmdutils.Factory) *cobra.Command {
 				if err != nil {
 					return err
 				}
-				fmt.Fprintf(f.IO.StdOut, "%s Closed Issue #%d\n", utils.RedCheck(), issue.IID)
-				fmt.Fprintln(f.IO.StdOut, issueutils.DisplayIssue(issue))
+				fmt.Fprintf(f.IO.StdOut, "%s Closed Issue #%d\n", c.RedCheck(), issue.IID)
+				fmt.Fprintln(f.IO.StdOut, issueutils.DisplayIssue(c, issue))
 			}
 			return nil
 		},

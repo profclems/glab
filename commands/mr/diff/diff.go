@@ -10,10 +10,11 @@ import (
 	"strings"
 	"syscall"
 
+	"github.com/profclems/glab/pkg/iostreams"
+
 	"github.com/MakeNowJust/heredoc"
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/commands/mr/mrutils"
-	"github.com/profclems/glab/internal/utils"
 	"github.com/xanzy/go-gitlab"
 
 	"github.com/spf13/cobra"
@@ -21,7 +22,7 @@ import (
 
 type DiffOptions struct {
 	factory *cmdutils.Factory
-	IO      *utils.IOStreams
+	IO      *iostreams.IOStreams
 
 	Args     []string
 	UseColor string

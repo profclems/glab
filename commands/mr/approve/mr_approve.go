@@ -4,10 +4,9 @@ import (
 	"fmt"
 
 	"github.com/MakeNowJust/heredoc"
+	"github.com/profclems/glab/api"
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/commands/mr/mrutils"
-	"github.com/profclems/glab/internal/utils"
-	"github.com/profclems/glab/pkg/api"
 	"github.com/spf13/cobra"
 	"github.com/xanzy/go-gitlab"
 )
@@ -24,6 +23,7 @@ func NewCmdApprove(f *cmdutils.Factory) *cobra.Command {
 		Args: cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var err error
+			c := f.IO.Color()
 
 			apiClient, err := f.HttpClient()
 			if err != nil {
@@ -53,7 +53,7 @@ func NewCmdApprove(f *cmdutils.Factory) *cobra.Command {
 			if err != nil {
 				return err
 			}
-			fmt.Fprintln(f.IO.StdOut, utils.GreenCheck(), "Approved")
+			fmt.Fprintln(f.IO.StdOut, c.GreenCheck(), "Approved")
 
 			return nil
 		},

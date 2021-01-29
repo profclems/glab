@@ -5,14 +5,16 @@ import (
 	"fmt"
 	"regexp"
 
+	"github.com/profclems/glab/pkg/iostreams"
+
 	"github.com/profclems/glab/internal/glrepo"
 	"github.com/profclems/glab/pkg/prompt"
 
+	"github.com/profclems/glab/api"
 	"github.com/profclems/glab/commands/ci/ciutils"
 	"github.com/profclems/glab/commands/cmdutils"
-	"github.com/profclems/glab/internal/git"
-	"github.com/profclems/glab/internal/utils"
-	"github.com/profclems/glab/pkg/api"
+	"github.com/profclems/glab/pkg/git"
+	"github.com/profclems/glab/pkg/utils"
 
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/MakeNowJust/heredoc"
@@ -26,7 +28,7 @@ type TraceOpts struct {
 
 	BaseRepo   func() (glrepo.Interface, error)
 	HTTPClient func() (*gitlab.Client, error)
-	IO         *utils.IOStreams
+	IO         *iostreams.IOStreams
 }
 
 func NewCmdTrace(f *cmdutils.Factory, runE func(traceOpts *TraceOpts) error) *cobra.Command {

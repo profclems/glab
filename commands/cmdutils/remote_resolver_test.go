@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/profclems/glab/internal/config"
-	"github.com/profclems/glab/internal/git"
+	"github.com/profclems/glab/pkg/git"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 

@@ -6,15 +6,17 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/profclems/glab/pkg/iostreams"
+
 	"github.com/MakeNowJust/heredoc"
 	"github.com/profclems/glab/internal/config"
 	"github.com/profclems/glab/internal/glrepo"
-	"github.com/profclems/glab/internal/utils"
+	"github.com/profclems/glab/pkg/utils"
 
 	"github.com/AlecAivazis/survey/v2"
+	"github.com/profclems/glab/api"
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/commands/issue/issueutils"
-	"github.com/profclems/glab/pkg/api"
 	"github.com/profclems/glab/pkg/prompt"
 	"github.com/spf13/cobra"
 	"github.com/xanzy/go-gitlab"
@@ -39,7 +41,7 @@ type CreateOpts struct {
 	Yes            bool
 	Web            bool
 
-	IO         *utils.IOStreams
+	IO         *iostreams.IOStreams
 	BaseRepo   func() (glrepo.Interface, error)
 	HTTPClient func() (*gitlab.Client, error)
 	Remotes    func() (glrepo.Remotes, error)
@@ -331,7 +333,7 @@ func createRun(opts *CreateOpts) error {
 		if err != nil {
 			return err
 		}
-		fmt.Fprintln(opts.IO.StdOut, issueutils.DisplayIssue(issue))
+		fmt.Fprintln(opts.IO.StdOut, issueutils.DisplayIssue(opts.IO.Color(), issue))
 		return nil
 	}
 

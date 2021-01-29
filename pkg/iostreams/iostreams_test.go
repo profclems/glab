@@ -1,4 +1,4 @@
-package utils
+package iostreams
 
 import (
 	"bytes"
@@ -28,7 +28,7 @@ func Test_HelperFunctions(t *testing.T) {
 		t.Run("PAGER=", func(t *testing.T) {
 			os.Unsetenv("PAGER")
 
-			got := InitIOStream()
+			got := Init()
 
 			assert.Equal(t, ios.In, got.In)
 			assert.Equal(t, ios.IsaTTY, got.IsaTTY)
@@ -40,7 +40,7 @@ func Test_HelperFunctions(t *testing.T) {
 		t.Run("GLAB_PAGER=", func(t *testing.T) {
 			os.Setenv("GLAB_PAGER", "more")
 
-			got := InitIOStream()
+			got := Init()
 
 			assert.Equal(t, ios.In, got.In)
 			assert.Equal(t, ios.IsaTTY, got.IsaTTY)
@@ -196,7 +196,7 @@ func Test_HelperFunctions(t *testing.T) {
 	})
 
 	t.Run("IOTest()", func(t *testing.T) {
-		io, in, out, err := IOTest()
+		io, in, out, err := Test()
 
 		assert.Equal(t, io.In, ioutil.NopCloser(in))
 		assert.Equal(t, io.StdOut, out)
