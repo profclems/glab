@@ -17,7 +17,7 @@ import (
 	"github.com/profclems/glab/api"
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/commands/mr/mrutils"
-	"github.com/profclems/glab/internal/git"
+	"github.com/profclems/glab/pkg/git"
 	"github.com/profclems/glab/pkg/prompt"
 	"github.com/profclems/glab/pkg/utils"
 	"github.com/spf13/cobra"

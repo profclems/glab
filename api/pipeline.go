@@ -5,7 +5,7 @@ import (
 	"io"
 	"sort"
 
-	"github.com/profclems/glab/internal/git"
+	"github.com/profclems/glab/pkg/git"
 	"github.com/xanzy/go-gitlab"
 )
 

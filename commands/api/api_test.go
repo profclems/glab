@@ -15,8 +15,8 @@ import (
 	"github.com/profclems/glab/commands/cmdtest"
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/internal/config"
-	"github.com/profclems/glab/internal/git"
 	"github.com/profclems/glab/internal/glrepo"
+	"github.com/profclems/glab/pkg/git"
 	"github.com/xanzy/go-gitlab"
 
 	"github.com/google/shlex"

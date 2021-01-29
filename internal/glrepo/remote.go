@@ -5,7 +5,7 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/profclems/glab/internal/git"
+	"github.com/profclems/glab/pkg/git"
 )
 
 // Remotes represents a set of git remotes

@@ -13,7 +13,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/profclems/glab/internal/git"
+	"github.com/profclems/glab/pkg/git"
 
 	"github.com/google/shlex"
 	"github.com/otiai10/copy"

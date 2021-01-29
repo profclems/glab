@@ -7,7 +7,7 @@ import (
 
 	"github.com/hashicorp/go-version"
 
-	"github.com/profclems/glab/internal/request"
+	"github.com/profclems/glab/api/request"
 )
 
 type ReleaseInfo struct {

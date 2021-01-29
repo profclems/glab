@@ -14,8 +14,8 @@ import (
 
 	"github.com/MakeNowJust/heredoc"
 	"github.com/profclems/glab/commands/cmdutils"
-	"github.com/profclems/glab/internal/git"
 	"github.com/profclems/glab/internal/run"
+	"github.com/profclems/glab/pkg/git"
 	"github.com/spf13/cobra"
 	"github.com/xanzy/go-gitlab"
 )

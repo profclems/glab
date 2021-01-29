@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/profclems/glab/internal/git"
+	"github.com/profclems/glab/pkg/git"
 
 	"github.com/profclems/glab/api"
 	"github.com/profclems/glab/commands/cmdutils"
