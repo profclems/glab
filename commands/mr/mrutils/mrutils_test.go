@@ -7,9 +7,9 @@ import (
 
 	"github.com/profclems/glab/pkg/iostreams"
 
+	"github.com/profclems/glab/api"
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/internal/glrepo"
-	"github.com/profclems/glab/pkg/api"
 	"github.com/profclems/glab/pkg/prompt"
 	"github.com/stretchr/testify/assert"
 	"github.com/xanzy/go-gitlab"

@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/profclems/glab/api"
 	"github.com/profclems/glab/internal/git"
-	"github.com/profclems/glab/pkg/api"
 	"github.com/profclems/glab/pkg/prompt"
 	"github.com/stretchr/testify/assert"
 	"github.com/xanzy/go-gitlab"

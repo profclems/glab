@@ -10,12 +10,12 @@ import (
 
 	"github.com/alecthomas/assert"
 	"github.com/google/shlex"
+	"github.com/profclems/glab/api"
 	"github.com/profclems/glab/commands/cmdtest"
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/internal/config"
 	"github.com/profclems/glab/internal/git"
 	"github.com/profclems/glab/internal/glrepo"
-	"github.com/profclems/glab/pkg/api"
 	"github.com/profclems/glab/pkg/httpmock"
 	"github.com/profclems/glab/pkg/prompt"
 	"github.com/profclems/glab/test"

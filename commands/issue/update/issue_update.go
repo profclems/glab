@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/profclems/glab/api"
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/commands/issue/issueutils"
-	"github.com/profclems/glab/pkg/api"
 
 	"github.com/MakeNowJust/heredoc"
 	"github.com/spf13/cobra"

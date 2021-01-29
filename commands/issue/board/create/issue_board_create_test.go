@@ -9,8 +9,8 @@ import (
 	"github.com/profclems/glab/commands/cmdutils"
 
 	"github.com/acarl005/stripansi"
+	"github.com/profclems/glab/api"
 	"github.com/profclems/glab/commands/cmdtest"
-	"github.com/profclems/glab/pkg/api"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/xanzy/go-gitlab"

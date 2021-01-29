@@ -6,10 +6,10 @@ import (
 	"github.com/profclems/glab/pkg/iostreams"
 
 	"github.com/MakeNowJust/heredoc"
+	"github.com/profclems/glab/api"
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/internal/config"
 	"github.com/profclems/glab/internal/glinstance"
-	"github.com/profclems/glab/pkg/api"
 	"github.com/spf13/cobra"
 )
 

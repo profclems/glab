@@ -6,10 +6,10 @@ import (
 	"strings"
 
 	"github.com/MakeNowJust/heredoc"
+	"github.com/profclems/glab/api"
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/commands/mr/mrutils"
 	"github.com/profclems/glab/internal/git"
-	"github.com/profclems/glab/pkg/api"
 	"github.com/tcnksm/go-gitconfig"
 
 	"github.com/spf13/cobra"

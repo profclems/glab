@@ -11,11 +11,11 @@ import (
 	"github.com/profclems/glab/pkg/iostreams"
 
 	"github.com/acarl005/stripansi"
+	"github.com/profclems/glab/api"
 	"github.com/profclems/glab/commands/cmdtest"
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/internal/config"
 	"github.com/profclems/glab/internal/run"
-	"github.com/profclems/glab/pkg/api"
 	mainTest "github.com/profclems/glab/test"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

@@ -10,8 +10,8 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/profclems/glab/api"
 	"github.com/profclems/glab/internal/config"
-	"github.com/profclems/glab/pkg/api"
 )
 
 func httpRequest(client *api.Client, config config.Config, hostname string, method string, p string, params interface{}, headers []string) (*http.Response, error) {

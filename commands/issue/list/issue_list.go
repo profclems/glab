@@ -9,9 +9,9 @@ import (
 	"github.com/MakeNowJust/heredoc"
 	"github.com/profclems/glab/internal/glrepo"
 
+	"github.com/profclems/glab/api"
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/commands/issue/issueutils"
-	"github.com/profclems/glab/pkg/api"
 	"github.com/profclems/glab/pkg/utils"
 
 	"github.com/spf13/cobra"

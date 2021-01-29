@@ -10,10 +10,10 @@ import (
 	"github.com/profclems/glab/internal/glrepo"
 	"github.com/profclems/glab/pkg/prompt"
 
+	"github.com/profclems/glab/api"
 	"github.com/profclems/glab/commands/ci/ciutils"
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/internal/git"
-	"github.com/profclems/glab/pkg/api"
 	"github.com/profclems/glab/pkg/utils"
 
 	"github.com/AlecAivazis/survey/v2"

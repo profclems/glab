@@ -3,9 +3,9 @@ package reopen
 import (
 	"fmt"
 
+	"github.com/profclems/glab/api"
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/commands/mr/mrutils"
-	"github.com/profclems/glab/pkg/api"
 
 	"github.com/spf13/cobra"
 	"github.com/xanzy/go-gitlab"

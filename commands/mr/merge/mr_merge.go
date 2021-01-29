@@ -4,8 +4,8 @@ import (
 	"fmt"
 
 	"github.com/MakeNowJust/heredoc"
+	"github.com/profclems/glab/api"
 	"github.com/profclems/glab/commands/mr/mrutils"
-	"github.com/profclems/glab/pkg/api"
 
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/spf13/cobra"

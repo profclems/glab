@@ -10,9 +10,9 @@ import (
 
 	"github.com/profclems/glab/pkg/iostreams"
 
+	"github.com/profclems/glab/api"
 	"github.com/profclems/glab/internal/config"
 	"github.com/profclems/glab/internal/glrepo"
-	"github.com/profclems/glab/pkg/api"
 	"golang.org/x/sync/errgroup"
 
 	"github.com/profclems/glab/pkg/tableprinter"

@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/profclems/glab/api"
 	ciTraceCmd "github.com/profclems/glab/commands/ci/trace"
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/internal/git"
-	"github.com/profclems/glab/pkg/api"
 	"github.com/profclems/glab/pkg/utils"
 
 	"github.com/AlecAivazis/survey/v2"

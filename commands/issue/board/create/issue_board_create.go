@@ -5,8 +5,8 @@ import (
 
 	"github.com/profclems/glab/pkg/prompt"
 
+	"github.com/profclems/glab/api"
 	"github.com/profclems/glab/commands/cmdutils"
-	"github.com/profclems/glab/pkg/api"
 	"github.com/spf13/cobra"
 	"github.com/xanzy/go-gitlab"
 )

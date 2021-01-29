@@ -10,9 +10,9 @@ import (
 
 	"github.com/google/shlex"
 
+	"github.com/profclems/glab/api"
 	cmdTestUtils "github.com/profclems/glab/commands/cmdtest"
 	"github.com/profclems/glab/commands/cmdutils"
-	"github.com/profclems/glab/pkg/api"
 
 	"github.com/acarl005/stripansi"
 	"github.com/stretchr/testify/assert"

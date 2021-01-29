@@ -9,8 +9,8 @@ import (
 
 	"github.com/profclems/glab/pkg/prompt"
 
+	"github.com/profclems/glab/api"
 	"github.com/profclems/glab/internal/glrepo"
-	"github.com/profclems/glab/pkg/api"
 
 	"github.com/MakeNowJust/heredoc"
 	"github.com/profclems/glab/commands/cmdutils"

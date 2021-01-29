@@ -17,7 +17,7 @@ import (
 
 	"github.com/profclems/glab/pkg/iostreams"
 
-	"github.com/profclems/glab/pkg/api"
+	"github.com/profclems/glab/api"
 
 	"github.com/MakeNowJust/heredoc"
 	"github.com/profclems/glab/commands/cmdutils"

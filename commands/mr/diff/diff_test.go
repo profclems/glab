@@ -10,7 +10,7 @@ import (
 
 	"github.com/profclems/glab/pkg/iostreams"
 
-	"github.com/profclems/glab/pkg/api"
+	"github.com/profclems/glab/api"
 	"github.com/xanzy/go-gitlab"
 
 	"github.com/google/shlex"

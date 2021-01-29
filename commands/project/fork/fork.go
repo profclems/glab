@@ -8,12 +8,12 @@ import (
 	"github.com/profclems/glab/pkg/iostreams"
 
 	"github.com/MakeNowJust/heredoc"
+	"github.com/profclems/glab/api"
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/internal/config"
 	"github.com/profclems/glab/internal/git"
 	"github.com/profclems/glab/internal/glrepo"
 	"github.com/profclems/glab/internal/run"
-	"github.com/profclems/glab/pkg/api"
 	"github.com/profclems/glab/pkg/prompt"
 	"github.com/spf13/cobra"
 	"github.com/xanzy/go-gitlab"

@@ -6,9 +6,9 @@ import (
 
 	"github.com/profclems/glab/pkg/iostreams"
 
+	"github.com/profclems/glab/api"
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/commands/mr/mrutils"
-	"github.com/profclems/glab/pkg/api"
 	"github.com/profclems/glab/pkg/utils"
 
 	"github.com/MakeNowJust/heredoc"
