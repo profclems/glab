@@ -29,16 +29,6 @@ var (
 	stderr      *bytes.Buffer
 )
 
-type author struct {
-	ID        int    `json:"id"`
-	Username  string `json:"username"`
-	Email     string `json:"email"`
-	Name      string `json:"name"`
-	State     string `json:"state"`
-	AvatarURL string `json:"avatar_url"`
-	WebURL    string `json:"web_url"`
-}
-
 func TestMain(m *testing.M) {
 	defer config.StubConfig(`---
 hosts:
@@ -136,7 +126,7 @@ func TestMRView(t *testing.T) {
 				ID:    1,
 				Body:  "Note Body",
 				Title: "Note Title",
-				Author: author{
+				Author: cmdtest.Author{
 					ID:       1,
 					Username: "johnwick",
 					Name:     "John Wick",
@@ -149,7 +139,7 @@ func TestMRView(t *testing.T) {
 				ID:    1,
 				Body:  "Marked MR as ready",
 				Title: "",
-				Author: author{
+				Author: cmdtest.Author{
 					ID:       1,
 					Username: "johnwick",
 					Name:     "John Wick",

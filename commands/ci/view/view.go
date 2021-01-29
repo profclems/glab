@@ -434,14 +434,13 @@ func jobsView(app *tview.Application, jobsCh chan []*gitlab.Job, inputCh chan st
 	}
 	lastStage = ""
 	var (
-		rowIdx   = 0
-		stageIdx = 0
+		rowIdx   int
+		stageIdx int
 		maxTitle = 20
 	)
 	for _, j := range jobs {
 		boxX := px + (maxX / stages * stageIdx)
 		if j.Stage != lastStage {
-			rowIdx = 0
 			stageIdx++
 			lastStage = j.Stage
 			key := "stage-" + j.Stage

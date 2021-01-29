@@ -20,15 +20,6 @@ import (
 	"github.com/xanzy/go-gitlab"
 )
 
-type author struct {
-	ID        int    `json:"id"`
-	Name      string `json:"name"`
-	Username  string `json:"username"`
-	State     string `json:"state"`
-	AvatarURL string `json:"avatar_url"`
-	WebURL    string `json:"web_url"`
-}
-
 func TestNewCmdReleaseList(t *testing.T) {
 
 	oldGetRelease := api.GetRelease
@@ -41,7 +32,14 @@ func TestNewCmdReleaseList(t *testing.T) {
 			TagName:     tag,
 			Name:        tag,
 			Description: "Dummy description for " + tag,
-			Author: author{
+			Author: struct {
+				ID        int    `json:"id"`
+				Name      string `json:"name"`
+				Username  string `json:"username"`
+				State     string `json:"state"`
+				AvatarURL string `json:"avatar_url"`
+				WebURL    string `json:"web_url"`
+			}{
 				ID:       1,
 				Name:     "John Dev Wick",
 				Username: "jdwick",
@@ -59,7 +57,14 @@ func TestNewCmdReleaseList(t *testing.T) {
 			TagName:     "0.1.0",
 			Name:        "Initial Release",
 			Description: "Dummy description for 0.1.0",
-			Author: author{
+			Author: struct {
+				ID        int    `json:"id"`
+				Name      string `json:"name"`
+				Username  string `json:"username"`
+				State     string `json:"state"`
+				AvatarURL string `json:"avatar_url"`
+				WebURL    string `json:"web_url"`
+			}{
 				ID:       1,
 				Name:     "John Dev Wick",
 				Username: "jdwick",
