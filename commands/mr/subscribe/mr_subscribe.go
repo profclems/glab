@@ -6,7 +6,6 @@ import (
 	"github.com/MakeNowJust/heredoc"
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/commands/mr/mrutils"
-	"github.com/profclems/glab/internal/utils"
 	"github.com/profclems/glab/pkg/api"
 
 	"github.com/spf13/cobra"
@@ -26,6 +25,7 @@ func NewCmdSubscribe(f *cmdutils.Factory) *cobra.Command {
 		Args: cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var err error
+			c := f.IO.Color()
 
 			apiClient, err := f.HttpClient()
 			if err != nil {
@@ -50,8 +50,8 @@ func NewCmdSubscribe(f *cmdutils.Factory) *cobra.Command {
 				return err
 			}
 
-			fmt.Fprintf(f.IO.StdOut, "%s You have successfully subscribed to merge request !%d\n", utils.GreenCheck(), mr.IID)
-			fmt.Fprintln(f.IO.StdOut, mrutils.DisplayMR(mr))
+			fmt.Fprintf(f.IO.StdOut, "%s You have successfully subscribed to merge request !%d\n", c.GreenCheck(), mr.IID)
+			fmt.Fprintln(f.IO.StdOut, mrutils.DisplayMR(c, mr))
 
 			return nil
 		},

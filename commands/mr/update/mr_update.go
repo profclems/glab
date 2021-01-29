@@ -7,7 +7,6 @@ import (
 
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/commands/mr/mrutils"
-	"github.com/profclems/glab/internal/utils"
 	"github.com/profclems/glab/pkg/api"
 
 	"github.com/MakeNowJust/heredoc"
@@ -30,6 +29,7 @@ func NewCmdUpdate(f *cmdutils.Factory) *cobra.Command {
 			var err error
 			var actions []string
 			var ua *cmdutils.UserAssignments
+			c := f.IO.Color()
 
 			if cmd.Flags().Changed("unassign") && cmd.Flags().Changed("assignee") {
 				return &cmdutils.FlagError{Err: fmt.Errorf("--assignee and --unassign are mutually exclusive")}
@@ -171,10 +171,10 @@ func NewCmdUpdate(f *cmdutils.Factory) *cobra.Command {
 			}
 
 			for _, s := range actions {
-				fmt.Fprintln(f.IO.StdOut, utils.GreenCheck(), s)
+				fmt.Fprintln(f.IO.StdOut, c.GreenCheck(), s)
 			}
 
-			fmt.Fprintln(f.IO.StdOut, mrutils.DisplayMR(mr))
+			fmt.Fprintln(f.IO.StdOut, mrutils.DisplayMR(c, mr))
 			return nil
 		},
 	}

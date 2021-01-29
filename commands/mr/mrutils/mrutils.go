@@ -83,28 +83,28 @@ func MRCheckErrors(mr *gitlab.MergeRequest, err MRCheckErrOptions) error {
 	return nil
 }
 
-func DisplayMR(mr *gitlab.MergeRequest) string {
-	mrID := MRState(mr)
+func DisplayMR(c *iostreams.ColorPalette, mr *gitlab.MergeRequest) string {
+	mrID := MRState(c, mr)
 	return fmt.Sprintf("%s %s (%s)\n %s\n",
 		mrID, mr.Title, mr.SourceBranch, mr.WebURL)
 }
 
-func MRState(m *gitlab.MergeRequest) string {
+func MRState(c *iostreams.ColorPalette, m *gitlab.MergeRequest) string {
 	if m.State == "opened" {
-		return iostreams.Green(fmt.Sprintf("!%d", m.IID))
+		return c.Green(fmt.Sprintf("!%d", m.IID))
 	} else if m.State == "merged" {
-		return iostreams.Magenta(fmt.Sprintf("!%d", m.IID))
+		return c.Magenta(fmt.Sprintf("!%d", m.IID))
 	} else {
-		return iostreams.Red(fmt.Sprintf("!%d", m.IID))
+		return c.Red(fmt.Sprintf("!%d", m.IID))
 	}
 }
 
-func DisplayAllMRs(mrs []*gitlab.MergeRequest, projectID string) string {
+func DisplayAllMRs(c *iostreams.ColorPalette, mrs []*gitlab.MergeRequest, projectID string) string {
 	table := tableprinter.NewTablePrinter()
 	for _, m := range mrs {
-		table.AddCell(MRState(m))
+		table.AddCell(MRState(c, m))
 		table.AddCell(m.Title)
-		table.AddCell(iostreams.Cyan(fmt.Sprintf("(%s) ← (%s)", m.TargetBranch, m.SourceBranch)))
+		table.AddCell(c.Cyan(fmt.Sprintf("(%s) ← (%s)", m.TargetBranch, m.SourceBranch)))
 		table.EndRow()
 	}
 

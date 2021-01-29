@@ -21,38 +21,38 @@ import (
 	"github.com/xanzy/go-gitlab"
 )
 
-func DisplayIssueList(issues []*gitlab.Issue, projectID string) string {
+func DisplayIssueList(c *iostreams.ColorPalette, issues []*gitlab.Issue, projectID string) string {
 	table := tableprinter.NewTablePrinter()
 	for _, issue := range issues {
-		table.AddCell(IssueState(issue))
+		table.AddCell(IssueState(c, issue))
 		table.AddCell(issue.Title)
 
 		if len(issue.Labels) > 0 {
-			table.AddCellf("(%s)", iostreams.Cyan(strings.Trim(strings.Join(issue.Labels, ", "), ",")))
+			table.AddCellf("(%s)", c.Cyan(strings.Trim(strings.Join(issue.Labels, ", "), ",")))
 		} else {
 			table.AddCell("")
 		}
 
-		table.AddCell(iostreams.Gray(utils.TimeToPrettyTimeAgo(*issue.CreatedAt)))
+		table.AddCell(c.Gray(utils.TimeToPrettyTimeAgo(*issue.CreatedAt)))
 		table.EndRow()
 	}
 
 	return table.Render()
 }
 
-func DisplayIssue(i *gitlab.Issue) string {
+func DisplayIssue(c *iostreams.ColorPalette, i *gitlab.Issue) string {
 	duration := utils.TimeToPrettyTimeAgo(*i.CreatedAt)
-	issueID := IssueState(i)
+	issueID := IssueState(c, i)
 
 	return fmt.Sprintf("%s %s (%s)\n %s\n",
 		issueID, i.Title, duration, i.WebURL)
 }
 
-func IssueState(i *gitlab.Issue) (issueID string) {
+func IssueState(c *iostreams.ColorPalette, i *gitlab.Issue) (issueID string) {
 	if i.State == "opened" {
-		issueID = iostreams.Green(fmt.Sprintf("#%d", i.IID))
+		issueID = c.Green(fmt.Sprintf("#%d", i.IID))
 	} else {
-		issueID = iostreams.Red(fmt.Sprintf("#%d", i.IID))
+		issueID = c.Red(fmt.Sprintf("#%d", i.IID))
 	}
 	return
 }

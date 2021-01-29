@@ -6,6 +6,8 @@ import (
 	"os"
 	"testing"
 
+	"github.com/profclems/glab/pkg/iostreams"
+
 	"github.com/profclems/glab/commands/alias"
 	"github.com/profclems/glab/commands/alias/set"
 	"github.com/profclems/glab/commands/cmdutils"
@@ -86,6 +88,7 @@ USAGE
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			streams, _, _, _ := iostreams.Test()
 			old := os.Stdout // keep backup of the real stdout
 			r, w, _ := os.Pipe()
 			os.Stdout = w
@@ -94,7 +97,7 @@ USAGE
 				// falsify a parent command
 				alias.NewCmdAlias(&cmdutils.Factory{}).AddCommand(cmd)
 			}
-			RootHelpFunc(cmd, tt.args.args)
+			RootHelpFunc(streams.Color(), cmd, tt.args.args)
 			outC := make(chan string)
 			// copy the output in a separate goroutine so printing can't block indefinitely
 			go func() {

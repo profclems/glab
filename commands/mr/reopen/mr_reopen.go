@@ -5,7 +5,6 @@ import (
 
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/commands/mr/mrutils"
-	"github.com/profclems/glab/internal/utils"
 	"github.com/profclems/glab/pkg/api"
 
 	"github.com/spf13/cobra"
@@ -20,6 +19,7 @@ func NewCmdReopen(f *cmdutils.Factory) *cobra.Command {
 		Args:    cobra.MaximumNArgs(1),
 		Aliases: []string{"open"},
 		RunE: func(cmd *cobra.Command, args []string) error {
+			c := f.IO.Color()
 			apiClient, err := f.HttpClient()
 			if err != nil {
 				return err
@@ -46,8 +46,8 @@ func NewCmdReopen(f *cmdutils.Factory) *cobra.Command {
 					return err
 				}
 
-				fmt.Fprintf(f.IO.StdOut, "%s Reopened Merge request !%d\n", utils.GreenCheck(), mr.IID)
-				fmt.Fprintln(f.IO.StdOut, mrutils.DisplayMR(mr))
+				fmt.Fprintf(f.IO.StdOut, "%s Reopened Merge request !%d\n", c.GreenCheck(), mr.IID)
+				fmt.Fprintln(f.IO.StdOut, mrutils.DisplayMR(f.IO.Color(), mr))
 			}
 
 			return nil

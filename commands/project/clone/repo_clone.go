@@ -13,7 +13,6 @@ import (
 	"github.com/profclems/glab/internal/git"
 	"github.com/profclems/glab/internal/glinstance"
 	"github.com/profclems/glab/internal/glrepo"
-	"github.com/profclems/glab/internal/utils"
 	"github.com/profclems/glab/pkg/api"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -158,6 +157,7 @@ Clone a GitLab repository/project
 }
 
 func groupClone(opts *CloneOptions, ctxOpts *ContextOpts) error {
+	c := opts.IO.Color()
 	ListGroupProjectOpts := &gitlab.ListGroupProjectsOptions{}
 	if opts.WithShared {
 		ListGroupProjectOpts.WithShared = gitlab.Bool(true)
@@ -196,9 +196,9 @@ func groupClone(opts *CloneOptions, ctxOpts *ContextOpts) error {
 		ctxOpt.Repo = project.PathWithNamespace
 		err = cloneRun(opts, &ctxOpt)
 		if err != nil {
-			finalOutput = append(finalOutput, fmt.Sprintf("%s %s - Error: %q", utils.RedCheck(), project.PathWithNamespace, err.Error()))
+			finalOutput = append(finalOutput, fmt.Sprintf("%s %s - Error: %q", c.RedCheck(), project.PathWithNamespace, err.Error()))
 		} else {
-			finalOutput = append(finalOutput, fmt.Sprintf("%s %s", utils.GreenCheck(), project.PathWithNamespace))
+			finalOutput = append(finalOutput, fmt.Sprintf("%s %s", c.GreenCheck(), project.PathWithNamespace))
 		}
 	}
 

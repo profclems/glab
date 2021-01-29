@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/profclems/glab/pkg/iostreams"
-
 	"github.com/MakeNowJust/heredoc"
 	"github.com/profclems/glab/pkg/tableprinter"
 
@@ -31,7 +29,7 @@ func NewCmdSearch(f *cmdutils.Factory) *cobra.Command {
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var err error
-
+			c := f.IO.Color()
 			apiClient, err := f.HttpClient()
 			if err != nil {
 				return err
@@ -57,14 +55,14 @@ func NewCmdSearch(f *cmdutils.Factory) *cobra.Command {
 
 			table := tableprinter.NewTablePrinter()
 			for _, p := range projects {
-				table.AddCell(iostreams.Green(string(rune(p.ID))))
+				table.AddCell(c.Green(string(rune(p.ID))))
 
 				var description string
 				if p.Description != "" {
-					description = fmt.Sprintf("\n%s", iostreams.Cyan(p.Description))
+					description = fmt.Sprintf("\n%s", c.Cyan(p.Description))
 				}
 
-				table.AddCellf("%s%s\n%s", strings.ReplaceAll(p.PathWithNamespace, "/", " / "), description, iostreams.Gray(p.WebURL))
+				table.AddCellf("%s%s\n%s", strings.ReplaceAll(p.PathWithNamespace, "/", " / "), description, c.Gray(p.WebURL))
 				table.AddCellf("%d stars %d forks %d issues", p.StarCount, p.ForksCount, p.OpenIssuesCount)
 				table.AddCellf("updated %s", utils.TimeToPrettyTimeAgo(*p.LastActivityAt))
 				table.EndRow()

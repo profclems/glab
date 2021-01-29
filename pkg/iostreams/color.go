@@ -15,33 +15,33 @@ var (
 
 type ColorPalette struct {
 	// Magenta outputs ANSI color if stdout is a tty
-	Magenta  func(string) string
+	Magenta func(string) string
 	// Cyan outputs ANSI color if stdout is a tty
-	Cyan  func(string) string
+	Cyan func(string) string
 	// Red outputs ANSI color if stdout is a tty
-	Red  func(string) string
+	Red func(string) string
 	// Yellow outputs ANSI color if stdout is a tty
-	Yellow  func(string) string
+	Yellow func(string) string
 	// Blue outputs ANSI color if stdout is a tty
-	Blue  func(string) string
+	Blue func(string) string
 	// Green outputs ANSI color if stdout is a tty
-	Green  func(string) string
+	Green func(string) string
 	// Gray outputs ANSI color if stdout is a tty
-	Gray  func(string) string
+	Gray func(string) string
 	// Bold outputs ANSI color if stdout is a tty
-	Bold  func(string) string
+	Bold func(string) string
 }
 
 func (s *IOStreams) Color() *ColorPalette {
 	return &ColorPalette{
-		Magenta : makeColorFunc("magenta"),
-		Cyan : makeColorFunc("cyan"),
-		Red : makeColorFunc("red"),
-		Yellow : makeColorFunc("yellow"),
-		Blue : makeColorFunc("blue"),
-		Green : makeColorFunc("green"),
-		Gray : makeColorFunc("black+h"),
-		Bold : makeColorFunc("default+b"),
+		Magenta: makeColorFunc("magenta"),
+		Cyan:    makeColorFunc("cyan"),
+		Red:     makeColorFunc("red"),
+		Yellow:  makeColorFunc("yellow"),
+		Blue:    makeColorFunc("blue"),
+		Green:   makeColorFunc("green"),
+		Gray:    makeColorFunc("black+h"),
+		Bold:    makeColorFunc("default+b"),
 	}
 }
 

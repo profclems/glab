@@ -333,7 +333,7 @@ func createRun(opts *CreateOpts) error {
 		if err != nil {
 			return err
 		}
-		fmt.Fprintln(opts.IO.StdOut, issueutils.DisplayIssue(issue))
+		fmt.Fprintln(opts.IO.StdOut, issueutils.DisplayIssue(opts.IO.Color(), issue))
 		return nil
 	}
 

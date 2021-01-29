@@ -60,6 +60,7 @@ func NewCmdContributors(f *cmdutils.Factory) *cobra.Command {
 
 func runE(opts *Options) error {
 	var err error
+	c := opts.IO.Color()
 
 	apiClient, err := opts.HTTPClient()
 	if err != nil {
@@ -99,7 +100,7 @@ func runE(opts *Options) error {
 	table := tableprinter.NewTablePrinter()
 	for _, user := range users {
 		table.AddCell(user.Name)
-		table.AddCellf("%s", iostreams.Gray(user.Email))
+		table.AddCellf("%s", c.Gray(user.Email))
 		table.AddCellf("%d commits", user.Commits)
 		table.EndRow()
 	}

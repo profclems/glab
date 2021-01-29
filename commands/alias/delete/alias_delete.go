@@ -40,6 +40,7 @@ func NewCmdDelete(f *cmdutils.Factory, runF func(*DeleteOptions) error) *cobra.C
 }
 
 func deleteRun(cmd *cobra.Command, opts *DeleteOptions) error {
+	c := opts.IO.Color()
 	cfg, err := opts.Config()
 	if err != nil {
 		return err
@@ -59,7 +60,7 @@ func deleteRun(cmd *cobra.Command, opts *DeleteOptions) error {
 	if err != nil {
 		return fmt.Errorf("failed to delete alias %s: %w", opts.Name, err)
 	}
-	redCheck := iostreams.Red("✓")
+	redCheck := c.Red("✓")
 	fmt.Fprintf(opts.IO.StdErr, "%s Deleted alias %s; was %s\n", redCheck, opts.Name, expansion)
 	return nil
 }

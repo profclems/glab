@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"github.com/MakeNowJust/heredoc"
 	aliasCmd "github.com/profclems/glab/commands/alias"
 	apiCmd "github.com/profclems/glab/commands/api"
 	authCmd "github.com/profclems/glab/commands/auth"
@@ -19,15 +20,13 @@ import (
 	variableCmd "github.com/profclems/glab/commands/variable"
 	versionCmd "github.com/profclems/glab/commands/version"
 	"github.com/profclems/glab/internal/glrepo"
-	"github.com/profclems/glab/pkg/iostreams"
-
-	"github.com/MakeNowJust/heredoc"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 )
 
 // RootCmd is the main root/parent command
 func NewCmdRoot(f *cmdutils.Factory, version, buildDate string) *cobra.Command {
+	c := f.IO.Color()
 	var rootCmd = &cobra.Command{
 		Use:           "glab <command> <subcommand> [flags]",
 		Short:         "A GitLab CLI Tool",
@@ -62,7 +61,7 @@ func NewCmdRoot(f *cmdutils.Factory, version, buildDate string) *cobra.Command {
 			"help:feedback": heredoc.Docf(`
 			Encountered a bug or want to suggest a feature?
 			Open an issue using '%s'
-		`, iostreams.Bold(iostreams.Yellow("glab issue create -R profclems/glab"))),
+		`, c.Bold(c.Yellow("glab issue create -R profclems/glab"))),
 		},
 	}
 
@@ -70,7 +69,9 @@ func NewCmdRoot(f *cmdutils.Factory, version, buildDate string) *cobra.Command {
 	rootCmd.SetErr(f.IO.StdErr)
 
 	rootCmd.PersistentFlags().Bool("help", false, "Show help for command")
-	rootCmd.SetHelpFunc(help.RootHelpFunc)
+	rootCmd.SetHelpFunc(func(command *cobra.Command, args []string) {
+		help.RootHelpFunc(f.IO.Color(), command, args)
+	})
 	rootCmd.SetUsageFunc(help.RootUsageFunc)
 	rootCmd.SetFlagErrorFunc(func(cmd *cobra.Command, err error) error {
 		if err == pflag.ErrHelp {

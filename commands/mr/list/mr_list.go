@@ -230,7 +230,7 @@ func listRun(opts *ListOptions) error {
 		return err
 	}
 	defer opts.IO.StopPager()
-	fmt.Fprintf(opts.IO.StdOut, "%s\n%s\n", title.Describe(), mrutils.DisplayAllMRs(mergeRequests, repo.FullName()))
+	fmt.Fprintf(opts.IO.StdOut, "%s\n%s\n", title.Describe(), mrutils.DisplayAllMRs(opts.IO.Color(), mergeRequests, repo.FullName()))
 
 	return nil
 }

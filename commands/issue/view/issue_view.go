@@ -130,25 +130,26 @@ func assigneesList(opts *ViewOpts) string {
 	return strings.Trim(assignees, ", ")
 }
 
-func issueState(opts *ViewOpts) (state string) {
+func issueState(opts *ViewOpts, c *iostreams.ColorPalette) (state string) {
 	if opts.Issue.State == "opened" {
-		state = iostreams.Green("open")
+		state = c.Green("open")
 	} else if opts.Issue.State == "locked" {
-		state = iostreams.Blue(opts.Issue.State)
+		state = c.Blue(opts.Issue.State)
 	} else {
-		state = iostreams.Red(opts.Issue.State)
+		state = c.Red(opts.Issue.State)
 	}
 
 	return
 }
 
 func printTTYIssuePreview(opts *ViewOpts) error {
+	c := opts.IO.Color()
 	issueTimeAgo := utils.TimeToPrettyTimeAgo(*opts.Issue.CreatedAt)
 	// Header
-	fmt.Fprint(opts.IO.StdOut, issueState(opts))
-	fmt.Fprintf(opts.IO.StdOut, iostreams.Gray(" • opened by %s %s\n"), opts.Issue.Author.Username, issueTimeAgo)
-	fmt.Fprint(opts.IO.StdOut, iostreams.Bold(opts.Issue.Title))
-	fmt.Fprintf(opts.IO.StdOut, iostreams.Gray(" #%d"), opts.Issue.IID)
+	fmt.Fprint(opts.IO.StdOut, issueState(opts, c))
+	fmt.Fprintf(opts.IO.StdOut, c.Gray(" • opened by %s %s\n"), opts.Issue.Author.Username, issueTimeAgo)
+	fmt.Fprint(opts.IO.StdOut, c.Bold(opts.Issue.Title))
+	fmt.Fprintf(opts.IO.StdOut, c.Gray(" #%d"), opts.Issue.IID)
 	fmt.Fprintln(opts.IO.StdOut)
 
 	// Description
@@ -157,19 +158,19 @@ func printTTYIssuePreview(opts *ViewOpts) error {
 		fmt.Fprintln(opts.IO.StdOut, opts.Issue.Description)
 	}
 
-	fmt.Fprintf(opts.IO.StdOut, iostreams.Gray("\n%d upvotes • %d downvotes • %d comments\n"), opts.Issue.Upvotes, opts.Issue.Downvotes, opts.Issue.UserNotesCount)
+	fmt.Fprintf(opts.IO.StdOut, c.Gray("\n%d upvotes • %d downvotes • %d comments\n"), opts.Issue.Upvotes, opts.Issue.Downvotes, opts.Issue.UserNotesCount)
 
 	// Meta information
 	if labels := labelsList(opts); labels != "" {
-		fmt.Fprint(opts.IO.StdOut, iostreams.Bold("Labels: "))
+		fmt.Fprint(opts.IO.StdOut, c.Bold("Labels: "))
 		fmt.Fprintln(opts.IO.StdOut, labels)
 	}
 	if assignees := assigneesList(opts); assignees != "" {
-		fmt.Fprint(opts.IO.StdOut, iostreams.Bold("Assignees: "))
+		fmt.Fprint(opts.IO.StdOut, c.Bold("Assignees: "))
 		fmt.Fprintln(opts.IO.StdOut, assignees)
 	}
 	if opts.Issue.Milestone != nil {
-		fmt.Fprint(opts.IO.StdOut, iostreams.Bold("Milestone: "))
+		fmt.Fprint(opts.IO.StdOut, c.Bold("Milestone: "))
 		fmt.Fprintln(opts.IO.StdOut, opts.Issue.Milestone.Title)
 	}
 	if opts.Issue.State == "closed" {
@@ -192,11 +193,11 @@ func printTTYIssuePreview(opts *ViewOpts) error {
 				fmt.Fprint(opts.IO.StdOut, note.Author.Username)
 				if note.System {
 					fmt.Fprintf(opts.IO.StdOut, " %s ", note.Body)
-					fmt.Fprintln(opts.IO.StdOut, iostreams.Gray(createdAt))
+					fmt.Fprintln(opts.IO.StdOut, c.Gray(createdAt))
 				} else {
 					body, _ := utils.RenderMarkdown(note.Body, opts.GlamourStyle)
 					fmt.Fprint(opts.IO.StdOut, " commented ")
-					fmt.Fprintf(opts.IO.StdOut, iostreams.Gray("%s\n"), createdAt)
+					fmt.Fprintf(opts.IO.StdOut, c.Gray("%s\n"), createdAt)
 					fmt.Fprintln(opts.IO.StdOut, utils.Indent(body, " "))
 				}
 				fmt.Fprintln(opts.IO.StdOut)
@@ -207,7 +208,7 @@ func printTTYIssuePreview(opts *ViewOpts) error {
 	}
 
 	fmt.Fprintln(opts.IO.StdOut)
-	fmt.Fprintf(opts.IO.StdOut, iostreams.Gray("View this issue on GitLab: %s\n"), opts.Issue.WebURL)
+	fmt.Fprintf(opts.IO.StdOut, c.Gray("View this issue on GitLab: %s\n"), opts.Issue.WebURL)
 
 	return nil
 }
@@ -217,7 +218,7 @@ func printRawIssuePreview(opts *ViewOpts) error {
 	labels := labelsList(opts)
 
 	fmt.Fprintf(opts.IO.StdOut, "title:\t%s\n", opts.Issue.Title)
-	fmt.Fprintf(opts.IO.StdOut, "state:\t%s\n", issueState(opts))
+	fmt.Fprintf(opts.IO.StdOut, "state:\t%s\n", issueState(opts, opts.IO.Color()))
 	fmt.Fprintf(opts.IO.StdOut, "author:\t%s\n", opts.Issue.Author.Username)
 	fmt.Fprintf(opts.IO.StdOut, "labels:\t%s\n", labels)
 	fmt.Fprintf(opts.IO.StdOut, "comments:\t%d\n", opts.Issue.UserNotesCount)

@@ -6,7 +6,6 @@ import (
 	"github.com/MakeNowJust/heredoc"
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/commands/issue/issueutils"
-	"github.com/profclems/glab/internal/utils"
 	"github.com/profclems/glab/pkg/api"
 
 	"github.com/spf13/cobra"
@@ -28,6 +27,7 @@ func NewCmdReopen(f *cmdutils.Factory) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var err error
 			out := f.IO.StdOut
+			c := f.IO.Color()
 
 			apiClient, err := f.HttpClient()
 
@@ -53,8 +53,8 @@ func NewCmdReopen(f *cmdutils.Factory) *cobra.Command {
 					return err
 				}
 
-				fmt.Fprintf(out, "%s Reopened Issue #%d\n", utils.GreenCheck(), issue.IID)
-				fmt.Fprintln(out, issueutils.DisplayIssue(issue))
+				fmt.Fprintf(out, "%s Reopened Issue #%d\n", c.GreenCheck(), issue.IID)
+				fmt.Fprintln(out, issueutils.DisplayIssue(c, issue))
 			}
 			return nil
 		},

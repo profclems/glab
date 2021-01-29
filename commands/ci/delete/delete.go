@@ -27,7 +27,7 @@ func NewCmdDelete(f *cmdutils.Factory) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 
 			var err error
-
+			c := f.IO.Color()
 			apiClient, err := f.HttpClient()
 			if err != nil {
 				return err
@@ -51,7 +51,7 @@ func NewCmdDelete(f *cmdutils.Factory) *cobra.Command {
 						return err
 					}
 
-					fmt.Fprintln(f.IO.StdOut, utils.RedCheck(), "Pipeline #"+strconv.Itoa(item.ID)+" Deleted Successfully")
+					fmt.Fprintln(f.IO.StdOut, c.RedCheck(), "Pipeline #"+strconv.Itoa(item.ID)+" Deleted Successfully")
 				}
 
 			} else {
@@ -65,7 +65,7 @@ func NewCmdDelete(f *cmdutils.Factory) *cobra.Command {
 						return err
 					}
 
-					fmt.Fprintln(f.IO.StdOut, utils.RedCheck(), "Pipeline #"+i2+" Deleted Successfully")
+					fmt.Fprintln(f.IO.StdOut, c.RedCheck(), "Pipeline #"+i2+" Deleted Successfully")
 				}
 				fmt.Println()
 			}

@@ -7,8 +7,6 @@ import (
 	"path"
 	"strings"
 
-	"github.com/profclems/glab/pkg/iostreams"
-
 	"github.com/profclems/glab/pkg/prompt"
 
 	"github.com/profclems/glab/internal/glrepo"
@@ -60,7 +58,6 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 }
 
 func runCreateProject(cmd *cobra.Command, args []string, f *cmdutils.Factory) error {
-
 	var (
 		projectPath string
 		visiblity   gitlab.VisibilityValue
@@ -69,6 +66,7 @@ func runCreateProject(cmd *cobra.Command, args []string, f *cmdutils.Factory) er
 		namespaceID int
 		namespace   string
 	)
+	c := f.IO.Color()
 	if len(args) == 1 {
 		projectPath = args[0]
 		if strings.Contains(projectPath, "/") {
@@ -148,7 +146,7 @@ func runCreateProject(cmd *cobra.Command, args []string, f *cmdutils.Factory) er
 
 	project, err := api.CreateProject(apiClient, opts)
 
-	greenCheck := iostreams.Green("✓")
+	greenCheck := c.Green("✓")
 
 	if err == nil {
 		fmt.Fprintf(f.IO.StdOut, "%s Created repository %s on GitLab: %s\n", greenCheck, project.NameWithNamespace, project.WebURL)

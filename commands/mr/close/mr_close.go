@@ -6,7 +6,6 @@ import (
 	"github.com/MakeNowJust/heredoc"
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/commands/mr/mrutils"
-	"github.com/profclems/glab/internal/utils"
 	"github.com/profclems/glab/pkg/api"
 
 	"github.com/spf13/cobra"
@@ -28,6 +27,7 @@ func NewCmdClose(f *cmdutils.Factory) *cobra.Command {
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var err error
+			c := f.IO.Color()
 			apiClient, err := f.HttpClient()
 			if err != nil {
 				return err
@@ -52,8 +52,8 @@ func NewCmdClose(f *cmdutils.Factory) *cobra.Command {
 				if err != nil {
 					return err
 				}
-				fmt.Fprintf(f.IO.StdOut, "%s Closed Merge request !%d\n", utils.RedCheck(), mr.IID)
-				fmt.Fprintln(f.IO.StdOut, mrutils.DisplayMR(mr))
+				fmt.Fprintf(f.IO.StdOut, "%s Closed Merge request !%d\n", c.RedCheck(), mr.IID)
+				fmt.Fprintln(f.IO.StdOut, mrutils.DisplayMR(c, mr))
 			}
 
 			return nil

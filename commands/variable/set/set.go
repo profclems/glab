@@ -12,7 +12,6 @@ import (
 	"github.com/MakeNowJust/heredoc"
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/internal/glrepo"
-	"github.com/profclems/glab/internal/utils"
 	"github.com/profclems/glab/pkg/api"
 	"github.com/spf13/cobra"
 	"github.com/xanzy/go-gitlab"
@@ -112,6 +111,7 @@ func NewCmdSet(f *cmdutils.Factory, runE func(opts *SetOpts) error) *cobra.Comma
 }
 
 func setRun(opts *SetOpts) error {
+	c := opts.IO.Color()
 	httpClient, err := opts.HTTPClient()
 	if err != nil {
 		return err
@@ -130,7 +130,7 @@ func setRun(opts *SetOpts) error {
 			return err
 		}
 
-		fmt.Fprintf(opts.IO.StdOut, "%s Created variable %s for group %s\n", utils.GreenCheck(), opts.Key, opts.Group)
+		fmt.Fprintf(opts.IO.StdOut, "%s Created variable %s for group %s\n", c.GreenCheck(), opts.Key, opts.Group)
 		return nil
 	}
 
@@ -152,7 +152,7 @@ func setRun(opts *SetOpts) error {
 		return err
 	}
 
-	fmt.Fprintf(opts.IO.StdOut, "%s Created variable %s for %s\n", utils.GreenCheck(), opts.Key, baseRepo.FullName())
+	fmt.Fprintf(opts.IO.StdOut, "%s Created variable %s for %s\n", c.GreenCheck(), opts.Key, baseRepo.FullName())
 	return nil
 }
 

@@ -78,6 +78,7 @@ func NewCmdSet(f *cmdutils.Factory, runF func(*SetOptions) error) *cobra.Command
 }
 
 func setRun(cmd *cobra.Command, opts *SetOptions) error {
+	c := opts.IO.Color()
 	cfg, err := opts.Config()
 	if err != nil {
 		return err
@@ -89,7 +90,7 @@ func setRun(cmd *cobra.Command, opts *SetOptions) error {
 	}
 
 	if opts.IO.IsaTTY && opts.IO.IsErrTTY {
-		fmt.Fprintf(opts.IO.StdErr, "- Adding alias for %s: %s\n", iostreams.Bold(opts.Name), iostreams.Bold(opts.Expansion))
+		fmt.Fprintf(opts.IO.StdErr, "- Adding alias for %s: %s\n", c.Bold(opts.Name), c.Bold(opts.Expansion))
 	}
 
 	expansion := opts.Expansion
@@ -107,13 +108,13 @@ func setRun(cmd *cobra.Command, opts *SetOptions) error {
 		return fmt.Errorf("could not create alias: %s does not correspond to a glab command", expansion)
 	}
 
-	successMsg := fmt.Sprintf("%s Added alias.", iostreams.Green("✓"))
+	successMsg := fmt.Sprintf("%s Added alias.", c.Green("✓"))
 	if oldExpansion, ok := aliasCfg.Get(opts.Name); ok {
 		successMsg = fmt.Sprintf("%s Changed alias %s from %s to %s",
-			iostreams.Green("✓"),
-			iostreams.Bold(opts.Name),
-			iostreams.Bold(oldExpansion),
-			iostreams.Bold(expansion),
+			c.Green("✓"),
+			c.Bold(opts.Name),
+			c.Bold(oldExpansion),
+			c.Bold(expansion),
 		)
 	}
 

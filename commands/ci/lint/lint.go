@@ -8,11 +8,8 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/profclems/glab/pkg/iostreams"
-
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/internal/git"
-	"github.com/profclems/glab/internal/utils"
 	"github.com/profclems/glab/pkg/api"
 
 	"github.com/MakeNowJust/heredoc"
@@ -47,6 +44,7 @@ func NewCmdLint(f *cmdutils.Factory) *cobra.Command {
 func lintRun(f *cmdutils.Factory, path string) error {
 	var err error
 	out := f.IO.StdOut
+	c := f.IO.Color()
 
 	apiClient, err := f.HttpClient()
 	if err != nil {
@@ -86,13 +84,13 @@ func lintRun(f *cmdutils.Factory, path string) error {
 	}
 
 	if lint.Status == "invalid" {
-		fmt.Fprintln(out, iostreams.Red(path+" is invalid"))
+		fmt.Fprintln(out, c.Red(path+" is invalid"))
 		for i, err := range lint.Errors {
 			i++
 			fmt.Fprintln(out, i, err)
 		}
 		return cmdutils.SilentError
 	}
-	fmt.Fprintln(out, utils.GreenCheck(), "CI yml is Valid!")
+	fmt.Fprintln(out, c.GreenCheck(), "CI yml is Valid!")
 	return nil
 }

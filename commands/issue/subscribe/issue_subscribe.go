@@ -3,12 +3,9 @@ package subscribe
 import (
 	"fmt"
 
-	"github.com/profclems/glab/pkg/iostreams"
-
 	"github.com/MakeNowJust/heredoc"
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/commands/issue/issueutils"
-	"github.com/profclems/glab/internal/utils"
 	"github.com/profclems/glab/pkg/api"
 	"github.com/spf13/cobra"
 )
@@ -26,6 +23,7 @@ func NewCmdSubscribe(f *cmdutils.Factory) *cobra.Command {
 		`),
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
+			c := f.IO.Color()
 			apiClient, err := f.HttpClient()
 			if err != nil {
 				return err
@@ -38,7 +36,7 @@ func NewCmdSubscribe(f *cmdutils.Factory) *cobra.Command {
 
 			for _, issue := range issues {
 				if f.IO.IsErrTTY && f.IO.IsaTTY {
-					fmt.Fprintf(f.IO.StdErr, "- Subscribing to Issue #%d in %s\n", issue.IID, iostreams.Cyan(repo.FullName()))
+					fmt.Fprintf(f.IO.StdErr, "- Subscribing to Issue #%d in %s\n", issue.IID, c.Cyan(repo.FullName()))
 				}
 
 				issue, err := api.SubscribeToIssue(apiClient, repo.FullName(), issue.IID, nil)
@@ -46,8 +44,8 @@ func NewCmdSubscribe(f *cmdutils.Factory) *cobra.Command {
 					return err
 				}
 
-				fmt.Fprintln(f.IO.StdErr, utils.GreenCheck(), "Subscribed")
-				fmt.Fprintln(f.IO.StdOut, issueutils.DisplayIssue(issue))
+				fmt.Fprintln(f.IO.StdErr, c.GreenCheck(), "Subscribed")
+				fmt.Fprintln(f.IO.StdOut, issueutils.DisplayIssue(c, issue))
 			}
 			return nil
 		},

@@ -14,7 +14,6 @@ import (
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/internal/config"
 	"github.com/profclems/glab/internal/glinstance"
-	"github.com/profclems/glab/internal/utils"
 	"github.com/profclems/glab/pkg/api"
 	"github.com/spf13/cobra"
 )
@@ -102,6 +101,7 @@ func NewCmdLogin(f *cmdutils.Factory) *cobra.Command {
 }
 
 func loginRun() error {
+	c := opts.IO.Color()
 	cfg, err := opts.Config()
 	if err != nil {
 		return err
@@ -152,7 +152,7 @@ func loginRun() error {
 	fmt.Fprintf(opts.IO.StdErr, "- Logging into %s\n", hostname)
 
 	if token := config.GetFromEnv("token"); token != "" {
-		fmt.Fprintf(opts.IO.StdErr, "%s you have GITLAB_TOKEN or OAUTH_TOKEN environment variable set. Unset if you don't want to use it for glab\n", iostreams.Yellow("!WARNING:"))
+		fmt.Fprintf(opts.IO.StdErr, "%s you have GITLAB_TOKEN or OAUTH_TOKEN environment variable set. Unset if you don't want to use it for glab\n", c.Yellow("!WARNING:"))
 	}
 	existingToken, _, _ := cfg.GetWithSource(hostname, "token")
 
@@ -224,7 +224,7 @@ func loginRun() error {
 			return err
 		}
 
-		fmt.Fprintf(opts.IO.StdErr, "%s Configured git protocol\n", utils.GreenCheck())
+		fmt.Fprintf(opts.IO.StdErr, "%s Configured git protocol\n", c.GreenCheck())
 	}
 
 	apiClient, err := cmdutils.LabClientFunc(hostname, cfg, false)
@@ -248,7 +248,7 @@ func loginRun() error {
 		return err
 	}
 
-	fmt.Fprintf(opts.IO.StdErr, "%s Logged in as %s\n", utils.GreenCheck(), iostreams.Bold(username))
+	fmt.Fprintf(opts.IO.StdErr, "%s Logged in as %s\n", c.GreenCheck(), c.Bold(username))
 
 	return nil
 }

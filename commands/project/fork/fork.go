@@ -13,7 +13,6 @@ import (
 	"github.com/profclems/glab/internal/git"
 	"github.com/profclems/glab/internal/glrepo"
 	"github.com/profclems/glab/internal/run"
-	"github.com/profclems/glab/internal/utils"
 	"github.com/profclems/glab/pkg/api"
 	"github.com/profclems/glab/pkg/prompt"
 	"github.com/spf13/cobra"
@@ -97,6 +96,7 @@ func NewCmdFork(f *cmdutils.Factory, runE func(*cmdutils.Factory) error) *cobra.
 
 func forkRun(opts *ForkOptions) error {
 	var err error
+	c := opts.IO.Color()
 	if opts.Repo != "" {
 		if git.IsValidURL(opts.Repo) {
 			u, err := url.Parse(opts.Repo)
@@ -132,7 +132,7 @@ func forkRun(opts *ForkOptions) error {
 	opts.LabClient = apiClient.LabClient
 
 	if opts.IsTerminal {
-		fmt.Fprintf(opts.IO.StdErr, "- Forking %s\n", iostreams.Bold(opts.RepoToFork.FullName()))
+		fmt.Fprintf(opts.IO.StdErr, "- Forking %s\n", c.Bold(opts.RepoToFork.FullName()))
 	}
 
 	forkOpts := &gitlab.ForkProjectOptions{}
@@ -196,11 +196,11 @@ loop:
 	}
 
 	if importError != nil {
-		fmt.Fprintf(opts.IO.StdErr, "%s: %q", iostreams.Red("Fork failed"), importError.Error())
+		fmt.Fprintf(opts.IO.StdErr, "%s: %q", c.Red("Fork failed"), importError.Error())
 		return nil
 	}
 
-	fmt.Fprintf(opts.IO.StdErr, "%s Created fork %s\n", utils.GreenCheck(), forkedProject.PathWithNamespace)
+	fmt.Fprintf(opts.IO.StdErr, "%s Created fork %s\n", c.GreenCheck(), forkedProject.PathWithNamespace)
 
 	if (!opts.IsTerminal && opts.CurrentDirIsParent && (!opts.AddRemote && opts.AddRemoteSet)) ||
 		(!opts.CurrentDirIsParent && (!opts.Clone && opts.AddRemoteSet)) {
@@ -233,7 +233,7 @@ loop:
 
 		if remote, err := remotes.FindByRepo(forkedProject.Namespace.FullPath, forkedProject.Path); err == nil {
 			if opts.IsTerminal {
-				fmt.Fprintf(opts.IO.StdErr, "%s Using existing remote %s\n", utils.GreenCheck(), iostreams.Bold(remote.Name))
+				fmt.Fprintf(opts.IO.StdErr, "%s Using existing remote %s\n", c.GreenCheck(), c.Bold(remote.Name))
 			}
 			return nil
 		}
@@ -260,7 +260,7 @@ loop:
 					return err
 				}
 				if opts.IsTerminal {
-					fmt.Fprintf(opts.IO.StdErr, "%s Renamed %s remote to %s\n", utils.GreenCheck(), iostreams.Bold(remoteName), iostreams.Bold(renameTarget))
+					fmt.Fprintf(opts.IO.StdErr, "%s Renamed %s remote to %s\n", c.GreenCheck(), c.Bold(remoteName), c.Bold(renameTarget))
 				}
 			}
 
@@ -282,7 +282,7 @@ loop:
 			}
 
 			if opts.IsTerminal {
-				fmt.Fprintf(opts.IO.StdErr, "%s Added remote %s\n", utils.GreenCheck(), iostreams.Bold(remoteName))
+				fmt.Fprintf(opts.IO.StdErr, "%s Added remote %s\n", c.GreenCheck(), c.Bold(remoteName))
 			}
 		}
 	} else {
@@ -323,7 +323,7 @@ loop:
 			}
 
 			if opts.IsTerminal {
-				fmt.Fprintf(opts.IO.StdErr, "%s Cloned fork\n", utils.GreenCheck())
+				fmt.Fprintf(opts.IO.StdErr, "%s Cloned fork\n", c.GreenCheck())
 			}
 		}
 	}
