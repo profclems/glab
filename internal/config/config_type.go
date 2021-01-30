@@ -227,6 +227,10 @@ func NewBlankRoot() *yaml.Node {
 										Value:       "api_protocol",
 									},
 									{
+										Kind:  yaml.ScalarNode,
+										Value: "https",
+									},
+									{
 										HeadComment: "Configure host for api endpoint, defaults to the host itself",
 										Kind:        yaml.ScalarNode,
 										Value:       "api_host",
@@ -234,10 +238,6 @@ func NewBlankRoot() *yaml.Node {
 									{
 										Kind:  yaml.ScalarNode,
 										Value: "gitlab.com",
-									},
-									{
-										Kind:  yaml.ScalarNode,
-										Value: "https",
 									},
 									{
 										HeadComment: "Your GitLab access token. Get an access token at https://gitlab.com/profile/personal_access_tokens",
