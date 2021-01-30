@@ -315,6 +315,8 @@ $ glab config set editor vim --host gitlab.example.org
 
   GITLAB_URI or GITLAB_HOST: specify the url of the gitlab server if self hosted (eg: https://gitlab.example.com). Default is https://gitlab.com.
 
+  GITLAB_API_HOST: specify the host where the endpoint is found: defaults to the hostname
+
   REMOTE_ALIAS or GIT_REMOTE_URL_VAR: git remote variable or alias that contains the gitlab url.
   Can be set in the config with 'glab config set remote_alias origin'
 
@@ -330,6 +332,25 @@ $ glab config set editor vim --host gitlab.example.org
   
   NO_COLOR: set to any value to avoid printing ANSI escape sequences for color output. 
   ```
+
+### example
+
+on cli
+```sh
+export GITLAB_HOST=mygitlab.com 
+export GITLAB_API_HOST=api.mygitlab.com
+glab mr list
+```
+as config in global config file
+```yaml
+...
+hosts:
+    mygitlab.com:
+        api_host: api.mygitlab.com
+        token: mytoken
+...
+```
+
 
 ## What about [Lab](https://github.com/zaquestion/lab)?
 
