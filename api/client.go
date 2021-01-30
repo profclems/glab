@@ -180,14 +180,20 @@ func NewClientWithCfg(repoHost string, cfg config.Config, isGraphQL bool) (clien
 	if repoHost == "" {
 		repoHost = glinstance.OverridableDefault()
 	}
+
+	apiHost, _ := cfg.Get(repoHost, "api_host")
+	if apiHost == "" {
+		apiHost = repoHost
+	}
+
 	token, _ := cfg.Get(repoHost, "token")
 	tlsVerify, _ := cfg.Get(repoHost, "skip_tls_verify")
 	skipTlsVerify := tlsVerify == "true" || tlsVerify == "1"
 	caCert, _ := cfg.Get(repoHost, "ca_cert")
 	if caCert != "" {
-		client, err = NewClientWithCustomCA(repoHost, token, caCert, isGraphQL)
+		client, err = NewClientWithCustomCA(apiHost, token, caCert, isGraphQL)
 	} else {
-		client, err = NewClient(repoHost, token, skipTlsVerify, isGraphQL)
+		client, err = NewClient(apiHost, token, skipTlsVerify, isGraphQL)
 	}
 	if err != nil {
 		return
