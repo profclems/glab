@@ -233,6 +233,10 @@ func NewBlankRoot() *yaml.Node {
 									},
 									{
 										Kind:  yaml.ScalarNode,
+										Value: "gitlab.com",
+									},
+									{
+										Kind:  yaml.ScalarNode,
 										Value: "https",
 									},
 									{
