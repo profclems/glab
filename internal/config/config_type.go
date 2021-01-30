@@ -643,6 +643,8 @@ func ConfigKeyEquivalence(key string) string {
 	key = strings.ToLower(key)
 	// we only have a set default for one setting right now
 	switch key {
+	case "gitlab_api_host":
+		return "api_host"
 	case "gitlab_host", "gitlab_uri", "gl_host":
 		return "host"
 	case "gitlab_token", "oauth_token":
@@ -663,6 +665,8 @@ func EnvKeyEquivalence(key string) []string {
 	key = strings.ToLower(key)
 	// we only have a set default for one setting right now
 	switch key {
+	case "api_host":
+		return []string{"GITLAB_API_HOST"}
 	case "host":
 		return []string{"GITLAB_HOST", "GITLAB_URI", "GL_HOST"}
 	case "token":
