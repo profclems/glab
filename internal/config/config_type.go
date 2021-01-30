@@ -227,6 +227,11 @@ func NewBlankRoot() *yaml.Node {
 										Value:       "api_protocol",
 									},
 									{
+										HeadComment: "Configure host for api endpoint, defaults to the host itself",
+										Kind:        yaml.ScalarNode,
+										Value:       "api_host",
+									},
+									{
 										Kind:  yaml.ScalarNode,
 										Value: "https",
 									},
