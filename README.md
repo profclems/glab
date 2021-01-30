@@ -250,10 +250,10 @@ If a supported binary for your OS is not found at the [releases page](https://gi
    $ make
    ```
 
-4. Move the resulting `bin/glab` executable to somewhere in your PATH
+4. Change PATH to find newly compiled `glab`
 
    ```sh
-   $ sudo mv ./bin/glab /usr/local/bin/
+   $ export PATH=$PWD/bin:$PATH
    ```
 
 4. Run `glab version` to check if it worked and `glab config init` to set up
