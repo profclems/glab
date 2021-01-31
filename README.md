@@ -152,7 +152,7 @@ brew upgrade glab
 Make sure you have snap installed on your Linux Distro (https://snapcraft.io/docs/installing-snapd).
 1. `sudo snap install --edge glab`
 1. `sudo snap connect glab:ssh-keys` to grant ssh access
-1. `sudo snap connect glab:config-git` to grant read access to `/etc/gitconfig`
+1. `sudo snap connect glab:config-git` to grant read access to `/etc/gitconfig`. See https://github.com/profclems/glab/issues/597
 
 #### Arch Linux
 `glab` is available through the [gitlab-glab-bin](https://aur.archlinux.org/packages/gitlab-glab-bin/) package on the AUR or download and install an archive from the [releases page](https://github.com/profclems/glab/releases/latest). Arch Linux also supports [snap](https://snapcraft.io/docs/installing-snap-on-arch-linux).
