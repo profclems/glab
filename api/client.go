@@ -195,9 +195,6 @@ func NewClientWithCfg(repoHost string, cfg config.Config, isGraphQL bool) (clien
 	} else {
 		client, err = NewClient(apiHost, token, skipTlsVerify, isGraphQL)
 	}
-	if err != nil {
-		return
-	}
 	return
 }
 
