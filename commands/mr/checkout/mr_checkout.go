@@ -10,8 +10,6 @@ import (
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/commands/mr/mrutils"
 	"github.com/profclems/glab/pkg/git"
-	"github.com/tcnksm/go-gitconfig"
-
 	"github.com/spf13/cobra"
 )
 
@@ -79,7 +77,7 @@ func NewCmdCheckout(f *cmdutils.Factory) *cobra.Command {
 			fetchToRef := mrCheckoutCfg.branch
 
 			if mrCheckoutCfg.track {
-				if _, err := gitconfig.Local("remote." + mr.Author.Username + ".url"); err != nil {
+				if _, err := git.Config("remote." + mr.Author.Username + ".url"); err != nil {
 					mrProject, err := api.GetProject(apiClient, mr.SourceProjectID)
 					if err != nil {
 						return err
