@@ -333,25 +333,6 @@ $ glab config set editor vim --host gitlab.example.org
   NO_COLOR: set to any value to avoid printing ANSI escape sequences for color output. 
   ```
 
-### example
-
-on cli
-```sh
-export GITLAB_HOST=mygitlab.com 
-export GITLAB_API_HOST=api.mygitlab.com
-glab mr list
-```
-as config in global config file
-```yaml
-...
-hosts:
-    mygitlab.com:
-        api_host: api.mygitlab.com
-        token: mytoken
-...
-```
-
-
 ## What about [Lab](https://github.com/zaquestion/lab)?
 
 Both `glab` and [lab] are open-source tools with the same goal of bringing GitLab to your command line and simplifying the developer workflow. In many ways `lab` is to [hub], while `glab` is to [gh].
