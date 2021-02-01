@@ -315,7 +315,7 @@ $ glab config set editor vim --host gitlab.example.org
 
   GITLAB_URI or GITLAB_HOST: specify the url of the gitlab server if self hosted (eg: https://gitlab.example.com). Default is https://gitlab.com.
 
-  GITLAB_API_HOST: specify the host where the endpoint is found: defaults to the hostname
+  GITLAB_API_HOST: specify the host where the API endpoint is found. Useful when there are separate [sub]domains or hosts for git and the API endpoint: defaults to the hostname found in the git URL
 
   REMOTE_ALIAS or GIT_REMOTE_URL_VAR: git remote variable or alias that contains the gitlab url.
   Can be set in the config with 'glab config set remote_alias origin'
