@@ -67,6 +67,12 @@ func runCreateProject(cmd *cobra.Command, args []string, f *cmdutils.Factory) er
 		namespace   string
 	)
 	c := f.IO.Color()
+
+	err = initGit()
+	if err != nil {
+		return err
+	}
+
 	if len(args) == 1 {
 		projectPath = args[0]
 		if strings.Contains(projectPath, "/") {
@@ -197,6 +203,22 @@ func runCreateProject(cmd *cobra.Command, args []string, f *cmdutils.Factory) er
 		return fmt.Errorf("error creating project: %v", err)
 	}
 	return err
+}
+
+func initGit() error {
+	if stat, err := os.Stat(".git"); err == nil && stat.IsDir() {
+		return nil
+	}
+	var doInit bool
+	err := prompt.Confirm(&doInit, fmt.Sprintf("Directory not git initialized. Run `git init`?"), true)
+	if err != nil || !doInit {
+		return err
+	}
+
+	gitInit := git.GitCommand("init")
+	gitInit.Stdout = os.Stdout
+	gitInit.Stderr = os.Stderr
+	return run.PrepareCmd(gitInit).Run()
 }
 
 func initialiseRepo(projectPath, remoteURL string) error {
