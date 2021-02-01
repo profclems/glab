@@ -210,7 +210,7 @@ func initGit() error {
 		return nil
 	}
 	var doInit bool
-	err := prompt.Confirm(&doInit, fmt.Sprintf("Directory not git initialized. Run `git init`?"), true)
+	err := prompt.Confirm(&doInit, "Directory not git initialized. Run `git init`?", true)
 	if err != nil || !doInit {
 		return err
 	}
