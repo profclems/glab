@@ -68,7 +68,11 @@ func runCreateProject(cmd *cobra.Command, args []string, f *cmdutils.Factory) er
 	)
 	c := f.IO.Color()
 
-	err = initGit()
+	defaultBranch, err := cmd.Flags().GetString("defaultBranch")
+	if err != nil {
+		return err
+	}
+	err = initGit(defaultBranch)
 	if err != nil {
 		return err
 	}
@@ -129,7 +133,6 @@ func runCreateProject(cmd *cobra.Command, args []string, f *cmdutils.Factory) er
 		visiblity = gitlab.PublicVisibility
 	}
 
-	defaultBranch, _ := cmd.Flags().GetString("defaultBranch")
 	tags, _ := cmd.Flags().GetStringArray("tag")
 	readme, _ := cmd.Flags().GetBool("readme")
 
@@ -205,7 +208,7 @@ func runCreateProject(cmd *cobra.Command, args []string, f *cmdutils.Factory) er
 	return err
 }
 
-func initGit() error {
+func initGit(defaultBranch string) error {
 	if stat, err := os.Stat(".git"); err == nil && stat.IsDir() {
 		return nil
 	}
@@ -218,7 +221,19 @@ func initGit() error {
 	gitInit := git.GitCommand("init")
 	gitInit.Stdout = os.Stdout
 	gitInit.Stderr = os.Stderr
-	return run.PrepareCmd(gitInit).Run()
+	err = run.PrepareCmd(gitInit).Run()
+	if err != nil {
+		return err
+	}
+
+	if defaultBranch == "" {
+		return nil
+	}
+
+	gitBranch := git.GitCommand("checkout", "-b", defaultBranch)
+	gitBranch.Stdout = os.Stdout
+	gitBranch.Stdin = os.Stdin
+	return run.PrepareCmd(gitBranch).Run()
 }
 
 func initialiseRepo(projectPath, remoteURL string) error {
