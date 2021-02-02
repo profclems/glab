@@ -11,6 +11,7 @@ require (
 	github.com/charmbracelet/glamour v0.2.1-0.20200724174618-1246d13c1684
 	github.com/dustin/go-humanize v1.0.0
 	github.com/gdamore/tcell/v2 v2.1.0
+	github.com/golang/protobuf v1.4.2 // indirect
 	github.com/google/renameio v0.1.0
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510
 	github.com/gosuri/uilive v0.0.4
@@ -23,7 +24,6 @@ require (
 	github.com/mattn/go-runewidth v0.0.10
 	github.com/mgutz/ansi v0.0.0-20200706080929-d51e80ef957d
 	github.com/mitchellh/go-homedir v1.1.0
-	github.com/onsi/gomega v1.10.3 // indirect
 	github.com/otiai10/copy v1.4.2
 	github.com/pkg/errors v0.9.1
 	github.com/rivo/tview v0.0.0-20210117162420-745e4ceeb711
@@ -31,10 +31,11 @@ require (
 	github.com/spf13/cobra v1.1.1
 	github.com/spf13/pflag v1.0.5
 	github.com/stretchr/testify v1.7.0
-	github.com/tcnksm/go-gitconfig v0.1.2
 	github.com/tidwall/pretty v1.0.2
 	github.com/xanzy/go-gitlab v0.42.0
 	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9
+	golang.org/x/net v0.0.0-20201006153459-a7d1128ccaa0 // indirect
 	golang.org/x/sync v0.0.0-20190423024810-112230192c58
+	gopkg.in/yaml.v2 v2.3.0 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c
 )

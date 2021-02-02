@@ -33,6 +33,7 @@ Run the new binary as: `./bin/glab`
 
 Run tests with: make test or go test ./...
 
+WARNING: Do not run `make test` outside of an isolated environment, it will overwrite your global config.
 
 ## Submitting a pull request
 
