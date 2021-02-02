@@ -231,6 +231,15 @@ func NewBlankRoot() *yaml.Node {
 										Value: "https",
 									},
 									{
+										HeadComment: "Configure host for api endpoint, defaults to the host itself",
+										Kind:        yaml.ScalarNode,
+										Value:       "api_host",
+									},
+									{
+										Kind:  yaml.ScalarNode,
+										Value: "gitlab.com",
+									},
+									{
 										HeadComment: "Your GitLab access token. Get an access token at https://gitlab.com/profile/personal_access_tokens",
 										Kind:        yaml.ScalarNode,
 										Value:       "token",
@@ -638,6 +647,8 @@ func ConfigKeyEquivalence(key string) string {
 	key = strings.ToLower(key)
 	// we only have a set default for one setting right now
 	switch key {
+	case "gitlab_api_host":
+		return "api_host"
 	case "gitlab_host", "gitlab_uri", "gl_host":
 		return "host"
 	case "gitlab_token", "oauth_token":
@@ -658,6 +669,8 @@ func EnvKeyEquivalence(key string) []string {
 	key = strings.ToLower(key)
 	// we only have a set default for one setting right now
 	switch key {
+	case "api_host":
+		return []string{"GITLAB_API_HOST"}
 	case "host":
 		return []string{"GITLAB_HOST", "GITLAB_URI", "GL_HOST"}
 	case "token":

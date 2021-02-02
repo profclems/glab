@@ -251,10 +251,10 @@ If a supported binary for your OS is not found at the [releases page](https://gi
    $ make
    ```
 
-4. Move the resulting `bin/glab` executable to somewhere in your PATH
+4. Change PATH to find newly compiled `glab`
 
    ```sh
-   $ sudo mv ./bin/glab /usr/local/bin/
+   $ export PATH=$PWD/bin:$PATH
    ```
 
 4. Run `glab version` to check if it worked and `glab config init` to set up
@@ -315,6 +315,8 @@ $ glab config set editor vim --host gitlab.example.org
   Can be set in the config with 'glab config set token xxxxxx'
 
   GITLAB_URI or GITLAB_HOST: specify the url of the gitlab server if self hosted (eg: https://gitlab.example.com). Default is https://gitlab.com.
+
+  GITLAB_API_HOST: specify the host where the API endpoint is found. Useful when there are separate [sub]domains or hosts for git and the API endpoint: defaults to the hostname found in the git URL
 
   REMOTE_ALIAS or GIT_REMOTE_URL_VAR: git remote variable or alias that contains the gitlab url.
   Can be set in the config with 'glab config set remote_alias origin'
