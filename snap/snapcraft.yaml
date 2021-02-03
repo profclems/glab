@@ -35,11 +35,6 @@ parts:
       LDFLAGS='' make -j2
       cp bin/glab $SNAPCRAFT_PART_INSTALL/
       bin/glab completion -s bash > $SNAPCRAFT_PART_INSTALL/completion.sh
-plugs:
-  config-git:
-    interface: system-files
-    read:
-    - /etc/gitconfig
 apps:
   glab:
     command: glab
@@ -49,7 +44,6 @@ apps:
     - network-bind
     - desktop
     - ssh-keys
-    - config-git
     completer: completion.sh
     environment:
       GIT_EDITOR: nano
