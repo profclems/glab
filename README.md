@@ -36,6 +36,7 @@ Table of Contents
       * [Alpine Linux](#alpine-linux)
          * [Install a pinned version from edge](#install-a-pinned-version-from-edge)
          * [Alpine Linux Docker-way](#alpine-linux-docker-way)
+      * [Nix/NixOS](#nixnixos)
    * [MacOS](#macos)
       * [Homebrew](#homebrew)
    * [Building From Source](#building-from-source)
@@ -210,7 +211,7 @@ RUN echo "@edge http://dl-cdn.alpinelinux.org/alpine/edge/community" >> /etc/apk
 RUN apk add --no-cache glab@edge
 ```
 
-### Nix/NixOS
+#### Nix/NixOS
 
 Nix/NixOS users can install from [nixpkgs](https://search.nixos.org/packages?channel=unstable&show=glab&from=0&size=30&sort=relevance&query=glab):
 
