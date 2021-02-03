@@ -98,7 +98,7 @@ func IssuesFromArgs(apiClient *gitlab.Client, baseRepoFn func() (glrepo.Interfac
 }
 
 func IssueFromArg(apiClient *gitlab.Client, baseRepoFn func() (glrepo.Interface, error), arg string) (*gitlab.Issue, glrepo.Interface, error) {
-	issueIID, baseRepo := issueMetadataFromURL(arg)
+	issueIID, baseRepo := IssueMetadataFromURL(arg)
 	if issueIID == 0 {
 		var err error
 		issueIID, err = strconv.Atoi(strings.TrimPrefix(arg, "#"))
@@ -135,7 +135,7 @@ func IssueFromArg(apiClient *gitlab.Client, baseRepoFn func() (glrepo.Interface,
 var issueURLPersonalRE = regexp.MustCompile(`^/([^/]+)/([^/]+)/issues/(\d+)`)
 var issueURLGroupRE = regexp.MustCompile(`^/([^/]+)/([^/]+)/([^/]+)/issues/(\d+)`)
 
-func issueMetadataFromURL(s string) (int, glrepo.Interface) {
+func IssueMetadataFromURL(s string) (int, glrepo.Interface) {
 	u, err := url.Parse(s)
 	if err != nil {
 		return 0, nil

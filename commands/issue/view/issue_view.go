@@ -51,12 +51,18 @@ func NewCmdView(f *cmdutils.Factory) *cobra.Command {
 		`),
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
+			cfg, _ := f.Config()
+			_, baseRepo := issueutils.IssueMetadataFromURL(args[0])
+
+			if opts.Web && baseRepo != nil {
+				browser, _ := cfg.Get(baseRepo.RepoHost(), "browser")
+				return openWeb(args[0], browser, f.IO)
+			}
 
 			apiClient, err := f.HttpClient()
 			if err != nil {
 				return err
 			}
-			cfg, _ := f.Config()
 
 			issue, baseRepo, err := issueutils.IssueFromArg(apiClient, f.BaseRepo, args[0])
 			if err != nil {
@@ -67,12 +73,8 @@ func NewCmdView(f *cmdutils.Factory) *cobra.Command {
 
 			//open in browser if --web flag is specified
 			if opts.Web {
-				if f.IO.IsaTTY && f.IO.IsErrTTY {
-					fmt.Fprintf(opts.IO.StdErr, "Opening %s in your browser.\n", utils.DisplayURL(opts.Issue.WebURL))
-				}
-
 				browser, _ := cfg.Get(baseRepo.RepoHost(), "browser")
-				return utils.OpenInBrowser(opts.Issue.WebURL, browser)
+				return openWeb(opts.Issue.WebURL, browser, f.IO)
 			}
 
 			opts.GlamourStyle, _ = cfg.Get(baseRepo.RepoHost(), "glamour_style")
@@ -112,6 +114,13 @@ func NewCmdView(f *cmdutils.Factory) *cobra.Command {
 	issueViewCmd.Flags().IntVarP(&opts.CommentLimit, "per-page", "P", 20, "Number of items to list per page")
 
 	return issueViewCmd
+}
+
+func openWeb(url string, browser string, io *iostreams.IOStreams) error {
+	if io.IsaTTY && io.IsErrTTY {
+		fmt.Fprintf(io.StdErr, "Opening %s in your browser.\n", utils.DisplayURL(url))
+	}
+	return utils.OpenInBrowser(url, browser)
 }
 
 func labelsList(opts *ViewOpts) string {
