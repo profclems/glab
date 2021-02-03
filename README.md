@@ -36,6 +36,7 @@ Table of Contents
       * [Alpine Linux](#alpine-linux)
          * [Install a pinned version from edge](#install-a-pinned-version-from-edge)
          * [Alpine Linux Docker-way](#alpine-linux-docker-way)
+      * [Nix/NixOS](#nixnixos)
    * [macOS](#macos)
       * [Homebrew](#homebrew)
       * [MacPorts](#macports)
@@ -219,7 +220,7 @@ Nix/NixOS users can install from [nixpkgs](https://search.nixos.org/packages?cha
 nix-env -iA nixos.glab
 ```
 
-### MacOS
+### macOS
 
 #### Homebrew
 
