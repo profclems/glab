@@ -36,8 +36,9 @@ Table of Contents
       * [Alpine Linux](#alpine-linux)
          * [Install a pinned version from edge](#install-a-pinned-version-from-edge)
          * [Alpine Linux Docker-way](#alpine-linux-docker-way)
-   * [MacOS](#macos)
+   * [macOS](#macos)
       * [Homebrew](#homebrew)
+      * [MacPorts](#macports)
    * [Building From Source](#building-from-source)
       * [Prerequisites](#prerequisites-for-building-from-source-are)
 * [Authentication](#authentication)
@@ -219,15 +220,30 @@ nix-env -iA nixos.glab
 ```
 
 ### MacOS
-`glab` is available via Homebrew
 
 #### Homebrew
+
+`glab` is available via [Homebrew](https://formulae.brew.sh/formula/glab)
+
 ```sh
 brew install glab
 ```
 Updating:
 ```sh
 brew upgrade glab
+```
+
+#### MacPorts
+
+`glab`is also available via [MacPorts](https://ports.macports.org/port/glab/summary)
+
+```sh
+sudo port install glab
+```
+
+Updating:
+```sh
+sudo port selfupdate && sudo port upgrade glab
 ```
 
 ### Building From Source
