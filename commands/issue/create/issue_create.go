@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
+	"strconv"
 	"strings"
 
 	"github.com/profclems/glab/pkg/iostreams"
@@ -28,9 +29,10 @@ type CreateOpts struct {
 	Labels      []string
 	Assignees   []string
 
-	Weight    int
-	MileStone int
-	LinkedMR  int
+	Weight       int
+	MileStone    int
+	LinkedMR     int
+	LinkedIssues []int
 
 	MilestoneFlag string
 
@@ -129,6 +131,7 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 	issueCreateCmd.Flags().BoolVarP(&opts.NoEditor, "no-editor", "", false, "Don't open editor to enter description. If set to true, uses prompt. Default is false")
 	issueCreateCmd.Flags().BoolVarP(&opts.Yes, "yes", "y", false, "Don't prompt for confirmation to submit the issue")
 	issueCreateCmd.Flags().BoolVar(&opts.Web, "web", false, "continue issue creation with web interface")
+	issueCreateCmd.Flags().IntSliceVarP(&opts.LinkedIssues, "linked-issues", "", []int{}, "The IIDs of issues that this issue links to")
 
 	return issueCreateCmd
 }
@@ -328,10 +331,21 @@ func createRun(opts *CreateOpts) error {
 			}
 			issueCreateOpts.AssigneeIDs = cmdutils.IDsFromUsers(users)
 		}
-		fmt.Fprintln(opts.IO.StdErr, "\n- Creating issue in", repo.FullName())
+		fmt.Fprintln(opts.IO.StdErr, "- Creating issue in", repo.FullName())
 		issue, err := api.CreateIssue(apiClient, repo.FullName(), issueCreateOpts)
 		if err != nil {
 			return err
+		}
+		if len(opts.LinkedIssues) > 0 {
+			for _, targetIssueIID := range opts.LinkedIssues {
+				fmt.Fprintln(opts.IO.StdErr, "- Linking to issue ", targetIssueIID)
+				issue, _, err = api.LinkIssues(apiClient, repo.FullName(), issue.IID, &gitlab.CreateIssueLinkOptions{
+					TargetIssueIID: gitlab.String(strconv.Itoa(targetIssueIID)),
+				})
+				if err != nil {
+					return err
+				}
+			}
 		}
 		fmt.Fprintln(opts.IO.StdOut, issueutils.DisplayIssue(opts.IO.Color(), issue))
 		return nil
