@@ -135,3 +135,16 @@ var UnsubscribeFromIssue = func(client *gitlab.Client, projectID interface{}, is
 
 	return issue, nil
 }
+
+var LinkIssues = func(client *gitlab.Client, projectID interface{}, issueIDD int, opts *gitlab.CreateIssueLinkOptions) (*gitlab.Issue, *gitlab.Issue, error) {
+	if client == nil {
+		client = apiClient.Lab()
+	}
+
+	issueLink, _, err := client.IssueLinks.CreateIssueLink(projectID, issueIDD, opts)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return issueLink.SourceIssue, issueLink.TargetIssue, nil
+}
