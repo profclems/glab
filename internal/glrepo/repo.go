@@ -81,12 +81,12 @@ type Interface interface {
 	FullName() string
 }
 
-// New instantiates a GitLab repository from owner and name arguments
+// New instantiates a GitLab repository from owner and repo name arguments
 func New(owner, repo string) Interface {
 	return NewWithHost(owner, repo, glinstance.OverridableDefault())
 }
 
-// New instantiates a GitLab repository from group, subgroup and name arguments
+// NewWithGroup instantiates a GitLab repository from group, namespace and repo name arguments
 func NewWithGroup(group, namespace, repo, hostname string) Interface {
 	owner := fmt.Sprintf("%s/%s", group, namespace)
 	if hostname == "" {
@@ -130,20 +130,24 @@ func FromFullName(nwo string) (Interface, error) {
 		return FromURL(u)
 	}
 
-	parts := strings.SplitN(nwo, "/", 4)
+	repo := nwo[strings.LastIndex(nwo, "/")+1:]
+	nwoWithoutRepo := strings.TrimSuffix(nwo[:strings.LastIndex(nwo, "/")+1], "/")
+	parts := strings.SplitN(nwoWithoutRepo, "/", 2)
+
+	if repo == "" {
+		return nil, fmt.Errorf(`expected the "[HOST/]OWNER/[NAMESPACE/]REPO" format, got %q`, nwo)
+	}
 	for _, p := range parts {
 		if p == "" {
 			return nil, fmt.Errorf(`expected the "[HOST/]OWNER/[NAMESPACE/]REPO" format, got %q`, nwo)
 		}
 	}
 	switch len(parts) {
-	case 4: // HOST/GROUP/NAMESPACE/REPO
-		return NewWithGroup(parts[1], parts[2], parts[3], parts[0]), nil
-	case 3: // GROUP/NAMESPACE/REPO or HOST/OWNER/REPO
+	case 2: // GROUP/NAMESPACE/REPO or HOST/OWNER/REPO or //HOST/GROUP/NAMESPACE/REPO
 		// First, checks if the first part matches the default instance host (i.e. gitlab.com) or the
 		// overridden default host (mostly from the GITLAB_HOST env variable)
 		if parts[0] == glinstance.Default() || parts[0] == glinstance.OverridableDefault() {
-			return NewWithHost(parts[1], parts[2], normalizeHostname(parts[0])), nil
+			return NewWithHost(parts[1], repo, normalizeHostname(parts[0])), nil
 		}
 		// Dots (.) are allowed in group names by GitLab.
 		// So we check if if the first part contains a dot.
@@ -157,7 +161,7 @@ func FromFullName(nwo string) (Interface, error) {
 				hosts, _ := cfg.Hosts()
 				for _, host := range hosts {
 					if host == parts[0] {
-						rI = NewWithHost(parts[1], parts[2], normalizeHostname(parts[0]))
+						rI = NewWithHost(parts[1], repo, normalizeHostname(parts[0]))
 						break
 					}
 				}
@@ -169,9 +173,9 @@ func FromFullName(nwo string) (Interface, error) {
 		// if the first part is not a valid URL, and does not match an
 		// authenticated hostname then we assume it is in
 		// the format GROUP/NAMESPACE/REPO
-		return NewWithGroup(parts[0], parts[1], parts[2], ""), nil
-	case 2: // OWNER/REPO
-		return New(parts[0], parts[1]), nil
+		return NewWithGroup(parts[0], parts[1], repo, ""), nil
+	case 1: // OWNER/REPO
+		return New(parts[0], repo), nil
 	default:
 		return nil, fmt.Errorf(`expected the "[HOST/]OWNER/[NAMESPACE/]REPO" format, got %q`, nwo)
 	}
@@ -182,13 +186,17 @@ func FromURL(u *url.URL) (Interface, error) {
 	if u.Hostname() == "" {
 		return nil, fmt.Errorf("no hostname detected")
 	}
-
-	parts := strings.SplitN(strings.Trim(u.Path, "/"), "/", 4)
-	if len(parts) == 2 {
-		return NewWithHost(parts[0], strings.TrimSuffix(parts[1], ".git"), u.Hostname()), nil
-	}
-	if len(parts) == 3 {
-		return NewWithGroup(parts[0], parts[1], strings.TrimSuffix(parts[2], ".git"), u.Hostname()), nil
+	path := strings.Trim(strings.TrimSuffix(u.Path, ".git"), "/")
+	repo := path[strings.LastIndex(path, "/")+1:]
+	pathWithoutRepo := strings.TrimSuffix(path[:strings.LastIndex(path, "/")+1], "/")
+	if repo != "" && pathWithoutRepo != "" {
+		parts := strings.SplitN(pathWithoutRepo, "/", 2)
+		if len(parts) == 1 {
+			return NewWithHost(parts[0], repo, u.Hostname()), nil
+		}
+		if len(parts) == 2 {
+			return NewWithGroup(parts[0], parts[1], repo, u.Hostname()), nil
+		}
 	}
 	return nil, fmt.Errorf("invalid path: %s", u.Path)
 }

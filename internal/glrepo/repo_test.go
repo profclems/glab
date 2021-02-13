@@ -177,6 +177,13 @@ func Test_repoFromURL(t *testing.T) {
 			host:   "gitlab.com",
 			err:    nil,
 		},
+		{
+			name:   "gitlab.com deep nested",
+			input:  "git://gitlab.com/owner/subgroup/subgroup1/subgroup2/subgroup3/namespace/repo.git",
+			result: "owner/subgroup/subgroup1/subgroup2/subgroup3/namespace/repo",
+			host:   "gitlab.com",
+			err:    nil,
+		},
 	}
 
 	for _, tt := range tests {
@@ -245,8 +252,8 @@ hosts:
 		},
 		{
 			name:          "group namespace",
-			input:         "a/b/c/d",
-			wantHost:      "a",
+			input:         "example.org/b/c/d",
+			wantHost:      "example.org",
 			wantOwner:     "b/c",
 			wantName:      "d",
 			wantFullname:  "b/c/d",
@@ -269,6 +276,11 @@ hosts:
 			name:    "blank value",
 			input:   "a/",
 			wantErr: errors.New(`expected the "[HOST/]OWNER/[NAMESPACE/]REPO" format, got "a/"`),
+		},
+		{
+			name:    "blank value inner",
+			input:   "a//c",
+			wantErr: errors.New(`expected the "[HOST/]OWNER/[NAMESPACE/]REPO" format, got "a//c"`),
 		},
 		{
 			name:          "with hostname",
@@ -312,6 +324,17 @@ hosts:
 			wantFullname:  "OWNER/REPO",
 			wantNamespace: "OWNER",
 			wantGroup:     "",
+			wantErr:       nil,
+		},
+		{
+			name:          "Deep Nested Groups",
+			input:         "git@example.org:GROUP/SUBGROUP1/SUBGROUP2/SUBGROUP3/SUBGROUP4/REPO.git",
+			wantHost:      "example.org",
+			wantOwner:     "GROUP/SUBGROUP1/SUBGROUP2/SUBGROUP3/SUBGROUP4",
+			wantName:      "REPO",
+			wantFullname:  "GROUP/SUBGROUP1/SUBGROUP2/SUBGROUP3/SUBGROUP4/REPO",
+			wantNamespace: "SUBGROUP1/SUBGROUP2/SUBGROUP3/SUBGROUP4",
+			wantGroup:     "GROUP",
 			wantErr:       nil,
 		},
 		{
@@ -384,6 +407,11 @@ func TestFullNameFromURL(t *testing.T) {
 		{
 			remoteURL: "git@gitlab.com:owner/namespace/repo.git",
 			want:      "owner/namespace/repo",
+			wantErr:   nil,
+		},
+		{
+			remoteURL: "git@gitlab.com:owner/subgroup/subgroup1/subgroup2/subgroup3/namespace/repo.git",
+			want:      "owner/subgroup/subgroup1/subgroup2/subgroup3/namespace/repo",
 			wantErr:   nil,
 		},
 	}
