@@ -3,13 +3,13 @@
 glab issue view
 ---------------
 
-Display the title, body, and other information abopts.IO.StdErr an opts.Issue.
+Display the title, body, and other information about an issue.
 
 Synopsis
 ~~~~~~~~
 
 
-Display the title, body, and other information abopts.IO.StdErr an opts.Issue.
+Display the title, body, and other information about an issue.
 
 ::
 
