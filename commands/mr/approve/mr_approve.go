@@ -18,10 +18,11 @@ func NewCmdApprove(f *cmdutils.Factory) *cobra.Command {
 		Long:  ``,
 		Example: heredoc.Doc(`
 			$ glab mr approve 235
+			$ glab mr approve 123 345
 			$ glab mr approve branch-1
+			$ glab mr approve branch-2 branch-3
 			$ glab mr approve    # Finds open merge request from current branch
 		`),
-		Args: cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var err error
 			c := f.IO.Color()
@@ -31,30 +32,32 @@ func NewCmdApprove(f *cmdutils.Factory) *cobra.Command {
 				return err
 			}
 
-			mr, repo, err := mrutils.MRFromArgs(f, args)
+			mrs, repo, err := mrutils.MRsFromArgs(f, args)
 			if err != nil {
 				return err
 			}
 
-			if err = mrutils.MRCheckErrors(mr, mrutils.MRCheckErrOptions{
-				WorkInProgress: true,
-				Closed:         true,
-				Merged:         true,
-			}); err != nil {
-				return err
-			}
+			for _, mr := range mrs {
+				if err = mrutils.MRCheckErrors(mr, mrutils.MRCheckErrOptions{
+					WorkInProgress: true,
+					Closed:         true,
+					Merged:         true,
+				}); err != nil {
+					return err
+				}
 
-			opts := &gitlab.ApproveMergeRequestOptions{}
-			if s, _ := cmd.Flags().GetString("sha"); s != "" {
-				opts.SHA = gitlab.String(s)
-			}
+				opts := &gitlab.ApproveMergeRequestOptions{}
+				if s, _ := cmd.Flags().GetString("sha"); s != "" {
+					opts.SHA = gitlab.String(s)
+				}
 
-			fmt.Fprintf(f.IO.StdOut, "- Approving Merge Request !%d\n", mr.IID)
-			_, err = api.ApproveMR(apiClient, repo.FullName(), mr.IID, opts)
-			if err != nil {
-				return err
+				fmt.Fprintf(f.IO.StdOut, "- Approving Merge Request !%d\n", mr.IID)
+				_, err = api.ApproveMR(apiClient, repo.FullName(), mr.IID, opts)
+				if err != nil {
+					return err
+				}
+				fmt.Fprintln(f.IO.StdOut, c.GreenCheck(), "Approved")
 			}
-			fmt.Fprintln(f.IO.StdOut, c.GreenCheck(), "Approved")
 
 			return nil
 		},
