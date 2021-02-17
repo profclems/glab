@@ -169,18 +169,14 @@ func MRsFromArgs(f *cmdutils.Factory, args []string) ([]*gitlab.MergeRequest, gl
 			arrIDs = strings.Split(args[0], ",")
 		}
 		if len(arrIDs) <= 1 {
+			// If there are no args then try to auto-detect from the branch name
 			mr, baseRepo, err := MRFromArgs(f, args)
 			if err != nil {
 				return nil, nil, err
 			}
-			return []*gitlab.MergeRequest{mr}, baseRepo, err
+			return []*gitlab.MergeRequest{mr}, baseRepo, nil
 		}
 		args = arrIDs
-	}
-
-	apiClient, err := f.HttpClient()
-	if err != nil {
-		return nil, nil, err
 	}
 
 	baseRepo, err := f.BaseRepo()
@@ -193,18 +189,11 @@ func MRsFromArgs(f *cmdutils.Factory, args []string) ([]*gitlab.MergeRequest, gl
 	for i, arg := range args {
 		i, arg := i, arg
 		errGroup.Go(func() error {
-			mrID, err := strconv.Atoi(arg)
-			if err != nil {
-				return err
-			}
-			if mrID == 0 {
-				return fmt.Errorf("invalid merge request ID provided")
-			}
 			// fetching multiple MRs does not return many major params in the payload
 			// so we fetch again using the single mr endpoint
-			mr, err := api.GetMR(apiClient, baseRepo.FullName(), mrID, &gitlab.GetMergeRequestsOptions{})
+			mr, _, err := MRFromArgs(f, []string{arg})
 			if err != nil {
-				return fmt.Errorf("failed to get merge request %d: %w", mrID, err)
+				return err
 			}
 			mrs[i] = mr
 			return nil
