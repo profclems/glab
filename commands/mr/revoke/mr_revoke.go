@@ -22,8 +22,8 @@ func NewCmdRevoke(f *cmdutils.Factory) *cobra.Command {
 			$ glab mr unapprove 123
 			$ glab mr revoke branch
 			$ glab mr revoke  # use checked out branch
+			$ glab mr revoke 123 branch 456
 		`),
-		Args: cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var err error
 			c := f.IO.Color()
@@ -33,27 +33,29 @@ func NewCmdRevoke(f *cmdutils.Factory) *cobra.Command {
 				return err
 			}
 
-			mr, repo, err := mrutils.MRFromArgs(f, args)
+			mrs, repo, err := mrutils.MRsFromArgs(f, args)
 			if err != nil {
 				return err
 			}
 
-			if err = mrutils.MRCheckErrors(mr, mrutils.MRCheckErrOptions{
-				WorkInProgress: true,
-				Closed:         true,
-				Merged:         true,
-			}); err != nil {
-				return err
+			for _, mr := range mrs {
+				if err = mrutils.MRCheckErrors(mr, mrutils.MRCheckErrOptions{
+					WorkInProgress: true,
+					Closed:         true,
+					Merged:         true,
+				}); err != nil {
+					return err
+				}
+
+				fmt.Fprintf(f.IO.StdOut, "- Revoking approval for Merge Request #%d...\n", mr.IID)
+
+				err = api.UnapproveMR(apiClient, repo.FullName(), mr.IID)
+				if err != nil {
+					return err
+				}
+
+				fmt.Fprintln(f.IO.StdOut, c.GreenCheck(), "Merge Request approval revoked")
 			}
-
-			fmt.Fprintf(f.IO.StdOut, "- Revoking approval for Merge Request #%d...\n", mr.IID)
-
-			err = api.UnapproveMR(apiClient, repo.FullName(), mr.IID)
-			if err != nil {
-				return err
-			}
-
-			fmt.Fprintln(f.IO.StdOut, c.GreenCheck(), "Merge Request approval revoked")
 
 			return nil
 		},
