@@ -52,6 +52,10 @@ func NewCmdClose(f *cmdutils.Factory) *cobra.Command {
 				if err != nil {
 					return err
 				}
+				// Update the value of the merge request to closed so that mrutils.DisplayMR
+				// prints it as red
+				mr.State = "closed"
+
 				fmt.Fprintf(f.IO.StdOut, "%s Closed Merge request !%d\n", c.RedCheck(), mr.IID)
 				fmt.Fprintln(f.IO.StdOut, mrutils.DisplayMR(c, mr))
 			}
