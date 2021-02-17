@@ -18,6 +18,7 @@ func NewCmdApprove(f *cmdutils.Factory) *cobra.Command {
 		Long:  ``,
 		Example: heredoc.Doc(`
 			$ glab mr approve 235
+			$ glab mr approve branch-1
 			$ glab mr approve    # Finds open merge request from current branch
 		`),
 		Args: cobra.MaximumNArgs(1),
