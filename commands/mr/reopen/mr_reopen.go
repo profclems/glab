@@ -3,6 +3,7 @@ package reopen
 import (
 	"fmt"
 
+	"github.com/MakeNowJust/heredoc"
 	"github.com/profclems/glab/api"
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/commands/mr/mrutils"
@@ -13,10 +14,14 @@ import (
 
 func NewCmdReopen(f *cmdutils.Factory) *cobra.Command {
 	var mrReopenCmd = &cobra.Command{
-		Use:     "reopen [<id> | <branch>]",
-		Short:   `Reopen merge requests`,
-		Long:    ``,
-		Args:    cobra.MaximumNArgs(1),
+		Use:   "reopen [<id>... | <branch>...]",
+		Short: `Reopen merge requests`,
+		Example: heredoc.Doc(`
+			$ glab mr reopen 123
+			$ glab mr reopen 123 456 789
+			$ glab mr reopen branch-1 branch-2
+			$ glab mr reopen  # use checked out branch
+		`),
 		Aliases: []string{"open"},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			c := f.IO.Color()
