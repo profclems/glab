@@ -47,7 +47,7 @@ func NewCmdView(f *cmdutils.Factory) *cobra.Command {
 				IncludeDivergedCommitsCount: gitlab.Bool(true),
 				RenderHTML:                  gitlab.Bool(true),
 				IncludeRebaseInProgress:     gitlab.Bool(true),
-			})
+			}, "any")
 			if err != nil {
 				return err
 			}
