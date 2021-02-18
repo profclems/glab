@@ -29,10 +29,11 @@ type CreateOpts struct {
 	Labels      []string
 	Assignees   []string
 
-	Weight       int
-	MileStone    int
-	LinkedMR     int
-	LinkedIssues []int
+	Weight        int
+	MileStone     int
+	LinkedMR      int
+	LinkedIssues  []int
+	IssueLinkType string
 
 	MilestoneFlag string
 
@@ -132,6 +133,7 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 	issueCreateCmd.Flags().BoolVarP(&opts.Yes, "yes", "y", false, "Don't prompt for confirmation to submit the issue")
 	issueCreateCmd.Flags().BoolVar(&opts.Web, "web", false, "continue issue creation with web interface")
 	issueCreateCmd.Flags().IntSliceVarP(&opts.LinkedIssues, "linked-issues", "", []int{}, "The IIDs of issues that this issue links to")
+	issueCreateCmd.Flags().StringVarP(&opts.IssueLinkType, "link-type", "", "relates_to", "Type for the issue link")
 
 	return issueCreateCmd
 }
@@ -341,6 +343,7 @@ func createRun(opts *CreateOpts) error {
 				fmt.Fprintln(opts.IO.StdErr, "- Linking to issue ", targetIssueIID)
 				issue, _, err = api.LinkIssues(apiClient, repo.FullName(), issue.IID, &gitlab.CreateIssueLinkOptions{
 					TargetIssueIID: gitlab.String(strconv.Itoa(targetIssueIID)),
+					LinkType:       gitlab.String(opts.IssueLinkType),
 				})
 				if err != nil {
 					return err
