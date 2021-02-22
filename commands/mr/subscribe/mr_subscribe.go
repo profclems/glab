@@ -21,8 +21,8 @@ func NewCmdSubscribe(f *cmdutils.Factory) *cobra.Command {
 			$ glab mr subscribe 123
 			$ glab mr sub 123
 			$ glab mr subscribe branch
+			$ glab mr subscribe 123 branch  # subscribe to multiple MRs
 		`),
-		Args: cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var err error
 			c := f.IO.Color()
@@ -32,26 +32,28 @@ func NewCmdSubscribe(f *cmdutils.Factory) *cobra.Command {
 				return err
 			}
 
-			mr, repo, err := mrutils.MRFromArgs(f, args)
+			mrs, repo, err := mrutils.MRsFromArgs(f, args)
 			if err != nil {
 				return err
 			}
 
-			if err = mrutils.MRCheckErrors(mr, mrutils.MRCheckErrOptions{
-				Subscribed: true,
-			}); err != nil {
-				return err
+			for _, mr := range mrs {
+				if err = mrutils.MRCheckErrors(mr, mrutils.MRCheckErrOptions{
+					Subscribed: true,
+				}); err != nil {
+					return err
+				}
+
+				fmt.Fprintf(f.IO.StdOut, "- Subscribing to merge request !%d\n", mr.IID)
+
+				mr, err = api.SubscribeToMR(apiClient, repo.FullName(), mr.IID, nil)
+				if err != nil {
+					return err
+				}
+
+				fmt.Fprintf(f.IO.StdOut, "%s You have successfully subscribed to merge request !%d\n", c.GreenCheck(), mr.IID)
+				fmt.Fprintln(f.IO.StdOut, mrutils.DisplayMR(c, mr))
 			}
-
-			fmt.Fprintf(f.IO.StdOut, "- Subscribing to merge request !%d\n", mr.IID)
-
-			mr, err = api.SubscribeToMR(apiClient, repo.FullName(), mr.IID, nil)
-			if err != nil {
-				return err
-			}
-
-			fmt.Fprintf(f.IO.StdOut, "%s You have successfully subscribed to merge request !%d\n", c.GreenCheck(), mr.IID)
-			fmt.Fprintln(f.IO.StdOut, mrutils.DisplayMR(c, mr))
 
 			return nil
 		},
