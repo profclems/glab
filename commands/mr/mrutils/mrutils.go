@@ -152,8 +152,6 @@ func MRFromArgsWithOpts(f *cmdutils.Factory, args []string, opts *gitlab.GetMerg
 		}
 		mrID = mr.IID
 	}
-	// fetching multiple MRs does not return many major params in the payload
-	// so we fetch again using the single mr endpoint
 	mr, err = api.GetMR(apiClient, baseRepo.FullName(), mrID, opts)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to get merge request %d: %w", mrID, err)
