@@ -173,7 +173,7 @@ func MRsFromArgs(f *cmdutils.Factory, args []string, state string) ([]*gitlab.Me
 		}
 		if len(arrIDs) <= 1 {
 			// If there are no args then try to auto-detect from the branch name
-			mr, baseRepo, err := MRFromArgs(f, args)
+			mr, baseRepo, err := MRFromArgs(f, args, state)
 			if err != nil {
 				return nil, nil, err
 			}
