@@ -677,18 +677,6 @@ func repoRemote(labClient *gitlab.Client, opts *CreateOpts, repo glrepo.Interfac
 }
 
 func getTargetBranch(baseRepoRemote *glrepo.Remote, sourceBranch string) string {
-	branchConfig := git.ReadBranchConfig(sourceBranch)
-	// Check if our given git.BranchConfig{} is not empty, otherwise it will fail
-	// if try to access the fields, this is needed because the ReadBranchConfig
-	// function can return an empty struct
-	if branchConfig != (git.BranchConfig{}) {
-		if branchConfig.RemoteName != "" && branchConfig.MergeRef != "" {
-			// The MergeRef takes the form of refs/head/BRANCH_NAME, so split it
-			// by '/' and get the last element
-			branchName := strings.Split(branchConfig.MergeRef, "/")
-			return branchName[len(branchName)-1]
-		}
-	}
 	br, _ := git.GetDefaultBranch(baseRepoRemote.PushURL.String())
 	// we ignore the error since git.GetDefaultBranch returns master and an error
 	// if the default branch cannot be determined
