@@ -143,7 +143,6 @@ func TestNewCmdCreate_tty(t *testing.T) {
 
 	cs, csTeardown := test.InitCmdStubber()
 	defer csTeardown()
-	cs.Stub("")
 	cs.Stub("HEAD branch: master\n")
 	cs.Stub(heredoc.Doc(`
 		deadbeef HEAD
