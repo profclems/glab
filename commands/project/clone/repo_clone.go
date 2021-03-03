@@ -22,6 +22,7 @@ import (
 type CloneOptions struct {
 	GroupName         string
 	IncludeSubgroups  bool
+	PreserveNamespace bool
 	WithMREnabled     bool
 	WithIssuesEnabled bool
 	WithShared        bool
@@ -88,7 +89,7 @@ Clone a GitLab repository/project
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if nArgs := len(args); nArgs > 0 {
 				ctxOpts.Repo = args[0]
-				if nArgs > 1 {
+				if nArgs > 1 && !opts.PreserveNamespace {
 					opts.Dir = args[1]
 				}
 				opts.GitFlags = args[1:]
@@ -137,6 +138,7 @@ Clone a GitLab repository/project
 	}
 
 	repoCloneCmd.Flags().StringVarP(&opts.GroupName, "group", "g", "", "Specify group to clone repositories from")
+	repoCloneCmd.Flags().BoolVarP(&opts.PreserveNamespace, "preserve-namespace", "p", false, "Clone the repo in a subdirectory based on namespace")
 	repoCloneCmd.Flags().BoolVarP(&opts.Archived, "archived", "a", false, "Limit by archived status. Used with --group flag")
 	repoCloneCmd.Flags().BoolVarP(&opts.IncludeSubgroups, "include-subgroups", "G", true, "Include projects in subgroups of this group. Default is true. Used with --group flag")
 	repoCloneCmd.Flags().BoolVarP(&opts.Owned, "mine", "m", false, "Limit by projects in the group owned by the current authenticated user. Used with --group flag")
@@ -234,7 +236,17 @@ func cloneRun(opts *CloneOptions, ctxOpts *ContextOpts) (err error) {
 	} else if !strings.HasSuffix(ctxOpts.Repo, ".git") {
 		ctxOpts.Repo += ".git"
 	}
-	_, err = git.RunClone(ctxOpts.Repo, opts.GitFlags)
+	// We deep copy gitFlags for group clones that preserve namespaces
+	// To preserve namespaces, we
+	var gitFlags []string
+	if opts.PreserveNamespace {
+		namespacedDir := ctxOpts.Project.PathWithNamespace
+		opts.Dir = namespacedDir
+		gitFlags = append([]string{namespacedDir}, opts.GitFlags...)
+	} else {
+		gitFlags = opts.GitFlags
+	}
+	_, err = git.RunClone(ctxOpts.Repo, gitFlags)
 	if err != nil {
 		return
 	}
