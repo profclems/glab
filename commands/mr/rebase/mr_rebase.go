@@ -37,6 +37,12 @@ func NewCmdRebase(f *cmdutils.Factory) *cobra.Command {
 				return err
 			}
 
+			if err := mrutils.MRCheckErrors(mr, mrutils.MRCheckErrOptions{
+				Closed: true,
+			}); err != nil {
+				return err
+			}
+
 			fmt.Fprintln(f.IO.StdOut, "- Sending request...")
 			err = api.RebaseMR(apiClient, repo.FullName(), mr.IID)
 			if err != nil {

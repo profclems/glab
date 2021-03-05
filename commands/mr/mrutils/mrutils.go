@@ -146,7 +146,7 @@ func MRFromArgsWithOpts(f *cmdutils.Factory, args []string, opts *gitlab.GetMerg
 	}
 
 	if mrID == 0 {
-		mr, err = GetOpenMRForBranch(apiClient, baseRepo, branch)
+		mr, err = GetMRForBranch(apiClient, baseRepo, branch)
 		if err != nil {
 			return nil, nil, err
 		}
@@ -204,7 +204,7 @@ func MRsFromArgs(f *cmdutils.Factory, args []string) ([]*gitlab.MergeRequest, gl
 
 }
 
-var GetOpenMRForBranch = func(apiClient *gitlab.Client, baseRepo glrepo.Interface, arg string) (*gitlab.MergeRequest, error) {
+var GetMRForBranch = func(apiClient *gitlab.Client, baseRepo glrepo.Interface, arg string) (*gitlab.MergeRequest, error) {
 	currentBranch := arg // Assume the user is using only 'branch', not 'OWNER:branch'
 	var owner string
 
@@ -219,14 +219,13 @@ var GetOpenMRForBranch = func(apiClient *gitlab.Client, baseRepo glrepo.Interfac
 
 	mrs, err := api.ListMRs(apiClient, baseRepo.FullName(), &gitlab.ListProjectMergeRequestsOptions{
 		SourceBranch: gitlab.String(currentBranch),
-		State:        gitlab.String("opened"),
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to get open merge request for %q: %w", currentBranch, err)
 	}
 
 	if len(mrs) == 0 {
-		return nil, fmt.Errorf("no open merge request available for %q", currentBranch)
+		return nil, fmt.Errorf("no merge request available for %q", currentBranch)
 	}
 
 	// The user gave us an 'OWNER:' so try to match the merge request with it
@@ -238,7 +237,7 @@ var GetOpenMRForBranch = func(apiClient *gitlab.Client, baseRepo glrepo.Interfac
 			}
 		}
 		// No match, error out, tell the user which branch and which username we looked for
-		return nil, fmt.Errorf("no open merge request available for %q owned by @%s", currentBranch, owner)
+		return nil, fmt.Errorf("no merge request available for %q owned by @%s", currentBranch, owner)
 	}
 
 	// This is done after the 'OWNER:' check because we don't want to give the wrong MR
