@@ -79,7 +79,7 @@ func diffRun(opts *DiffOptions) error {
 	if err != nil {
 		return err
 	}
-	mr, baseRepo, err := mrutils.MRFromArgs(opts.factory, opts.Args)
+	mr, baseRepo, err := mrutils.MRFromArgs(opts.factory, opts.Args, "any")
 	if err != nil {
 		return err
 	}

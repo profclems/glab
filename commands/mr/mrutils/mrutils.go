@@ -112,12 +112,17 @@ func DisplayAllMRs(c *iostreams.ColorPalette, mrs []*gitlab.MergeRequest, projec
 }
 
 //MRFromArgs is wrapper around MRFromArgsWithOpts without any custom options
-func MRFromArgs(f *cmdutils.Factory, args []string) (*gitlab.MergeRequest, glrepo.Interface, error) {
-	return MRFromArgsWithOpts(f, args, &gitlab.GetMergeRequestsOptions{})
+func MRFromArgs(f *cmdutils.Factory, args []string, state string) (*gitlab.MergeRequest, glrepo.Interface, error) {
+	return MRFromArgsWithOpts(f, args, &gitlab.GetMergeRequestsOptions{}, state)
 }
 
 //MRFromArgsWithOpts gets MR with custom request options passed down to it
-func MRFromArgsWithOpts(f *cmdutils.Factory, args []string, opts *gitlab.GetMergeRequestsOptions) (*gitlab.MergeRequest, glrepo.Interface, error) {
+func MRFromArgsWithOpts(
+	f *cmdutils.Factory,
+	args []string,
+	opts *gitlab.GetMergeRequestsOptions,
+	state string,
+) (*gitlab.MergeRequest, glrepo.Interface, error) {
 	var mrID int
 	var mr *gitlab.MergeRequest
 
@@ -146,7 +151,7 @@ func MRFromArgsWithOpts(f *cmdutils.Factory, args []string, opts *gitlab.GetMerg
 	}
 
 	if mrID == 0 {
-		mr, err = GetOpenMRForBranch(apiClient, baseRepo, branch)
+		mr, err = getMRForBranch(apiClient, baseRepo, branch, state)
 		if err != nil {
 			return nil, nil, err
 		}
@@ -160,7 +165,7 @@ func MRFromArgsWithOpts(f *cmdutils.Factory, args []string, opts *gitlab.GetMerg
 	return mr, baseRepo, nil
 }
 
-func MRsFromArgs(f *cmdutils.Factory, args []string) ([]*gitlab.MergeRequest, glrepo.Interface, error) {
+func MRsFromArgs(f *cmdutils.Factory, args []string, state string) ([]*gitlab.MergeRequest, glrepo.Interface, error) {
 	if len(args) <= 1 {
 		var arrIDs []string
 		if len(args) == 1 {
@@ -168,7 +173,7 @@ func MRsFromArgs(f *cmdutils.Factory, args []string) ([]*gitlab.MergeRequest, gl
 		}
 		if len(arrIDs) <= 1 {
 			// If there are no args then try to auto-detect from the branch name
-			mr, baseRepo, err := MRFromArgs(f, args)
+			mr, baseRepo, err := MRFromArgs(f, args, state)
 			if err != nil {
 				return nil, nil, err
 			}
@@ -189,7 +194,7 @@ func MRsFromArgs(f *cmdutils.Factory, args []string) ([]*gitlab.MergeRequest, gl
 		errGroup.Go(func() error {
 			// fetching multiple MRs does not return many major params in the payload
 			// so we fetch again using the single mr endpoint
-			mr, _, err := MRFromArgs(f, []string{arg})
+			mr, _, err := MRFromArgs(f, []string{arg}, state)
 			if err != nil {
 				return err
 			}
@@ -204,7 +209,7 @@ func MRsFromArgs(f *cmdutils.Factory, args []string) ([]*gitlab.MergeRequest, gl
 
 }
 
-var GetOpenMRForBranch = func(apiClient *gitlab.Client, baseRepo glrepo.Interface, arg string) (*gitlab.MergeRequest, error) {
+var getMRForBranch = func(apiClient *gitlab.Client, baseRepo glrepo.Interface, arg string, state string) (*gitlab.MergeRequest, error) {
 	currentBranch := arg // Assume the user is using only 'branch', not 'OWNER:branch'
 	var owner string
 
@@ -217,10 +222,18 @@ var GetOpenMRForBranch = func(apiClient *gitlab.Client, baseRepo glrepo.Interfac
 		currentBranch = t[1]
 	}
 
-	mrs, err := api.ListMRs(apiClient, baseRepo.FullName(), &gitlab.ListProjectMergeRequestsOptions{
+	opts := gitlab.ListProjectMergeRequestsOptions{
 		SourceBranch: gitlab.String(currentBranch),
-		State:        gitlab.String("opened"),
-	})
+	}
+
+	// Set the state value if it is not empty, if it is empty then it will look at all possible
+	// values, 'any' is also a descriptive keyword used in the source code that is equivalent to
+	// passing nothing on
+	if state != "" && state != "any" {
+		opts.State = gitlab.String(state)
+	}
+
+	mrs, err := api.ListMRs(apiClient, baseRepo.FullName(), &opts)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get open merge request for %q: %w", currentBranch, err)
 	}

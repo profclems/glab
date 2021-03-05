@@ -58,7 +58,7 @@ func NewCmdUpdate(f *cmdutils.Factory) *cobra.Command {
 				return err
 			}
 
-			mr, repo, err := mrutils.MRFromArgs(f, args)
+			mr, repo, err := mrutils.MRFromArgs(f, args, "any")
 			if err != nil {
 				return err
 			}

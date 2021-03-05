@@ -33,7 +33,7 @@ func NewCmdMerge(f *cmdutils.Factory) *cobra.Command {
 				return err
 			}
 
-			mr, repo, err := mrutils.MRFromArgs(f, args)
+			mr, repo, err := mrutils.MRFromArgs(f, args, "opened")
 			if err != nil {
 				return err
 			}
