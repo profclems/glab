@@ -25,7 +25,7 @@ func NewCmdSearch(f *cmdutils.Factory) *cobra.Command {
 			$ glab project search title
 			$ glab repo search title
 			$ glab project find title
-			$ glab proejct lookup title
+			$ glab project lookup title
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var err error
