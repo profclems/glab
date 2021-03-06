@@ -172,7 +172,7 @@ func Test_resolveNetwork(t *testing.T) {
 		apiClient: &gitlab.Client{},
 	}
 
-	// Override api.GetProejct to not use the network
+	// Override api.GetProject to not use the network
 	mockAPIGetProject := func(_ *gitlab.Client, ProjectID interface{}) (*gitlab.Project, error) {
 		proj := &gitlab.Project{
 			PathWithNamespace: fmt.Sprint(ProjectID),

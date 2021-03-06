@@ -23,7 +23,7 @@ Examples
   $ glab project search title
   $ glab repo search title
   $ glab project find title
-  $ glab proejct lookup title
+  $ glab project lookup title
   
 
 Options
