@@ -121,6 +121,7 @@ func loginRun() error {
 	}
 
 	hostname := opts.Hostname
+	apiHostname := opts.Hostname
 
 	if hostname == "" {
 		var hostType int
@@ -139,10 +140,19 @@ func loginRun() error {
 		isSelfHosted := hostType == 1
 
 		hostname = glinstance.Default()
+		apiHostname = hostname
 		if isSelfHosted {
 			err := survey.AskOne(&survey.Input{
 				Message: "GitLab hostname:",
 			}, &hostname, survey.WithValidator(hostnameValidator))
+			if err != nil {
+				return fmt.Errorf("could not prompt: %w", err)
+			}
+			err = survey.AskOne(&survey.Input{
+				Message: "API hostname:",
+				Help:    "For instances with different hostname for the API endpoint",
+				Default: hostname,
+			}, &apiHostname, survey.WithValidator(hostnameValidator))
 			if err != nil {
 				return fmt.Errorf("could not prompt: %w", err)
 			}
@@ -202,21 +212,42 @@ func loginRun() error {
 	if err != nil {
 		return err
 	}
+	err = cfg.Set(hostname, "api_host", apiHostname)
+	if err != nil {
+		return err
+	}
 
 	gitProtocol := "https"
+	apiProtocol := "https"
 	if opts.Interactive {
 		err = survey.AskOne(&survey.Select{
 			Message: "Choose default git protocol",
 			Options: []string{
-				"HTTPS",
 				"SSH",
+				"HTTPS",
+				"HTTP",
 			},
+			Default: "HTTPS",
 		}, &gitProtocol)
 		if err != nil {
 			return fmt.Errorf("could not prompt: %w", err)
 		}
 
 		gitProtocol = strings.ToLower(gitProtocol)
+
+		err = survey.AskOne(&survey.Select{
+			Message: "Choose host API protocol",
+			Options: []string{
+				"HTTPS",
+				"HTTP",
+			},
+			Default: "HTTPS",
+		}, &apiProtocol)
+		if err != nil {
+			return fmt.Errorf("could not prompt: %w", err)
+		}
+
+		apiProtocol = strings.ToLower(apiProtocol)
 
 		fmt.Fprintf(opts.IO.StdErr, "- glab config set -h %s git_protocol %s\n", hostname, gitProtocol)
 		err = cfg.Set(hostname, "git_protocol", gitProtocol)
@@ -225,8 +256,15 @@ func loginRun() error {
 		}
 
 		fmt.Fprintf(opts.IO.StdErr, "%s Configured git protocol\n", c.GreenCheck())
-	}
 
+		fmt.Fprintf(opts.IO.StdErr, "- glab config set -h %s api_protocol %s\n", hostname, apiProtocol)
+		err = cfg.Set(hostname, "api_protocol", apiProtocol)
+		if err != nil {
+			return err
+		}
+
+		fmt.Fprintf(opts.IO.StdErr, "%s Configured API protocol\n", c.GreenCheck())
+	}
 	apiClient, err := cmdutils.LabClientFunc(hostname, cfg, false)
 	if err != nil {
 		return err

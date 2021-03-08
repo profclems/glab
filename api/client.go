@@ -186,6 +186,11 @@ func NewClientWithCfg(repoHost string, cfg config.Config, isGraphQL bool) (clien
 		apiHost = repoHost
 	}
 
+	apiProtocol, _ := cfg.Get(repoHost, "api_protocol")
+	if apiProtocol != "" {
+		SetProtocol(apiProtocol)
+	}
+
 	token, _ := cfg.Get(repoHost, "token")
 	tlsVerify, _ := cfg.Get(repoHost, "skip_tls_verify")
 	skipTlsVerify := tlsVerify == "true" || tlsVerify == "1"
