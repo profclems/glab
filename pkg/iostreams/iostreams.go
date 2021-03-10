@@ -23,6 +23,8 @@ type IOStreams struct {
 	IsInTTY        bool //stdin is a tty
 	promptDisabled bool //disable prompting for input
 
+	is256ColorEnabled bool
+
 	pagerCommand string
 	pagerProcess *os.Process
 
@@ -41,12 +43,13 @@ func Init() *IOStreams {
 	}
 
 	ioStream := &IOStreams{
-		In:           os.Stdin,
-		StdOut:       NewColorable(os.Stdout),
-		StdErr:       NewColorable(os.Stderr),
-		pagerCommand: pagerCommand,
-		IsaTTY:       stdoutIsTTY,
-		IsErrTTY:     stderrIsTTY,
+		In:                os.Stdin,
+		StdOut:            NewColorable(os.Stdout),
+		StdErr:            NewColorable(os.Stderr),
+		pagerCommand:      pagerCommand,
+		IsaTTY:            stdoutIsTTY,
+		IsErrTTY:          stderrIsTTY,
+		is256ColorEnabled: Is256ColorSupported(),
 	}
 
 	if stdin, ok := ioStream.In.(*os.File); ok {
@@ -67,6 +70,10 @@ func (s *IOStreams) PromptEnabled() bool {
 
 func (s *IOStreams) ColorEnabled() bool {
 	return isColorEnabled() && s.IsaTTY && s.IsErrTTY
+}
+
+func (s *IOStreams) Is256ColorSupported() bool {
+	return s.is256ColorEnabled
 }
 
 func (s *IOStreams) SetPrompt(promptDisabled string) {
@@ -126,7 +133,7 @@ func (s *IOStreams) StopPager() {
 		return
 	}
 
-	s.StdOut.(io.ReadCloser).Close()
+	_ = s.StdOut.(io.ReadCloser).Close()
 	_, _ = s.pagerProcess.Wait()
 	s.pagerProcess = nil
 }
