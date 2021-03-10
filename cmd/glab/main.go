@@ -10,6 +10,9 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/mgutz/ansi"
+
+	surveyCore "github.com/AlecAivazis/survey/v2/core"
 	"github.com/profclems/glab/commands"
 	"github.com/profclems/glab/commands/alias/expand"
 	"github.com/profclems/glab/commands/cmdutils"
@@ -44,6 +47,26 @@ func main() {
 
 	if glHostFromEnv := config.GetFromEnv("host"); glHostFromEnv != "" {
 		glinstance.OverrideDefault(glHostFromEnv)
+	}
+
+	if !cmdFactory.IO.ColorEnabled() {
+		surveyCore.DisableColor = true
+	} else {
+		// Override survey's choice of color for default values
+		// For default values for e.g. `Input` prompts, Survey uses the literal "white" color,
+		// which makes no sense on dark terminals and is literally invisible on light backgrounds.
+		// This overrides Survey to output a gray color for 256-color terminals and "default" for basic terminals.
+		surveyCore.TemplateFuncsWithColor["color"] = func(style string) string {
+			switch style {
+			case "white":
+				if cmdFactory.IO.Is256ColorSupported() {
+					return fmt.Sprintf("\x1b[%d;5;%dm", 38, 242)
+				}
+				return ansi.ColorCode("default")
+			default:
+				return ansi.ColorCode(style)
+			}
+		}
 	}
 
 	rootCmd := commands.NewCmdRoot(cmdFactory, version, build)

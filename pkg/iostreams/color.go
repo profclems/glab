@@ -3,6 +3,7 @@ package iostreams
 import (
 	"io"
 	"os"
+	"strings"
 
 	"github.com/mattn/go-colorable"
 	"github.com/mgutz/ansi"
@@ -74,4 +75,16 @@ func isColorEnabled() bool {
 		checkedNoColor = true
 	}
 	return _isColorEnabled
+}
+
+func Is256ColorSupported() bool {
+	term := os.Getenv("TERM")
+	colorterm := os.Getenv("COLORTERM")
+
+	return strings.Contains(term, "256") ||
+		strings.Contains(term, "24bit") ||
+		strings.Contains(term, "truecolor") ||
+		strings.Contains(colorterm, "256") ||
+		strings.Contains(colorterm, "24bit") ||
+		strings.Contains(colorterm, "truecolor")
 }
