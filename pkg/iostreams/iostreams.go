@@ -11,6 +11,7 @@ import (
 
 	"github.com/briandowns/spinner"
 	"github.com/google/shlex"
+	"github.com/muesli/termenv"
 )
 
 type IOStreams struct {
@@ -29,6 +30,8 @@ type IOStreams struct {
 	pagerProcess *os.Process
 
 	spinner *spinner.Spinner
+
+	backgroundColor string
 }
 
 func Init() *IOStreams {
@@ -164,6 +167,33 @@ func (s *IOStreams) TerminalWidth() int {
 //IsOutputTTY returns true if both stdout and stderr is TTY
 func (s *IOStreams) IsOutputTTY() bool {
 	return s.IsErrTTY && s.IsaTTY
+}
+
+func (s *IOStreams) ResolveBackgroundColor(style string) string {
+	if style == "" {
+		style = os.Getenv("GLAMOUR_STYLE")
+	}
+	if (!s.ColorEnabled()) ||
+		(style != "" && style != "auto") ||
+		(s.pagerProcess != nil) {
+		s.backgroundColor = "none"
+		return "none"
+	}
+
+	if termenv.HasDarkBackground() {
+		s.backgroundColor = "dark"
+		return "dark"
+	}
+
+	s.backgroundColor = "light"
+	return "light"
+}
+
+func (s *IOStreams) BackgroundColor() string {
+	if s.backgroundColor == "" {
+		return "none"
+	}
+	return s.backgroundColor
 }
 
 func Test() (*IOStreams, *bytes.Buffer, *bytes.Buffer, *bytes.Buffer) {

@@ -77,14 +77,15 @@ func NewCmdView(f *cmdutils.Factory) *cobra.Command {
 				}
 			}
 
+			glamourStyle, _ := cfg.Get(baseRepo.RepoHost(), "glamour_style")
+			f.IO.ResolveBackgroundColor(glamourStyle)
 			if err := f.IO.StartPager(); err != nil {
 				return err
 			}
 			defer f.IO.StopPager()
 
 			if f.IO.IsOutputTTY() {
-				glamourStyle, _ := cfg.Get(baseRepo.RepoHost(), "glamour_style")
-				return printTTYMRPreview(opts, mr, notes, glamourStyle)
+				return printTTYMRPreview(opts, mr, notes)
 			}
 			return printRawMRPreview(opts, mr)
 		},
@@ -127,7 +128,7 @@ func mrState(c *iostreams.ColorPalette, mr *gitlab.MergeRequest) (mrState string
 	return mrState
 }
 
-func printTTYMRPreview(opts *ViewOpts, mr *gitlab.MergeRequest, notes []*gitlab.Note, glamourStyle string) error {
+func printTTYMRPreview(opts *ViewOpts, mr *gitlab.MergeRequest, notes []*gitlab.Note) error {
 	c := opts.IO.Color()
 	out := opts.IO.StdOut
 	mrTimeAgo := utils.TimeToPrettyTimeAgo(*mr.CreatedAt)
@@ -140,7 +141,7 @@ func printTTYMRPreview(opts *ViewOpts, mr *gitlab.MergeRequest, notes []*gitlab.
 
 	// Description
 	if mr.Description != "" {
-		mr.Description, _ = utils.RenderMarkdown(mr.Description, glamourStyle)
+		mr.Description, _ = utils.RenderMarkdown(mr.Description, opts.IO.BackgroundColor())
 		fmt.Fprintln(out, mr.Description)
 	}
 
@@ -206,7 +207,7 @@ func printTTYMRPreview(opts *ViewOpts, mr *gitlab.MergeRequest, notes []*gitlab.
 					fmt.Fprintf(out, " %s ", note.Body)
 					fmt.Fprintln(out, c.Gray(createdAt))
 				} else {
-					body, _ := utils.RenderMarkdown(note.Body, glamourStyle)
+					body, _ := utils.RenderMarkdown(note.Body, opts.IO.BackgroundColor())
 					fmt.Fprint(out, " commented ")
 					fmt.Fprintf(out, c.Gray("%s\n"), createdAt)
 					fmt.Fprintln(out, utils.Indent(body, " "))

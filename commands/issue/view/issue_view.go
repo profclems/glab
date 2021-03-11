@@ -26,9 +26,8 @@ type ViewOpts struct {
 	CommentPageNumber int
 	CommentLimit      int
 
-	Notes        []*gitlab.Note
-	Issue        *gitlab.Issue
-	GlamourStyle string
+	Notes []*gitlab.Note
+	Issue *gitlab.Issue
 
 	IO *iostreams.IOStreams
 }
@@ -75,8 +74,6 @@ func NewCmdView(f *cmdutils.Factory) *cobra.Command {
 				return utils.OpenInBrowser(opts.Issue.WebURL, browser)
 			}
 
-			opts.GlamourStyle, _ = cfg.Get(baseRepo.RepoHost(), "glamour_style")
-
 			if opts.ShowComments {
 				l := &gitlab.ListIssueNotesOptions{
 					Sort: gitlab.String("asc"),
@@ -93,6 +90,8 @@ func NewCmdView(f *cmdutils.Factory) *cobra.Command {
 				}
 			}
 
+			glamourStyle, _ := cfg.Get(baseRepo.RepoHost(), "glamour_style")
+			f.IO.ResolveBackgroundColor(glamourStyle)
 			err = f.IO.StartPager()
 			if err != nil {
 				return err
@@ -154,7 +153,7 @@ func printTTYIssuePreview(opts *ViewOpts) error {
 
 	// Description
 	if opts.Issue.Description != "" {
-		opts.Issue.Description, _ = utils.RenderMarkdown(opts.Issue.Description, opts.GlamourStyle)
+		opts.Issue.Description, _ = utils.RenderMarkdown(opts.Issue.Description, opts.IO.BackgroundColor())
 		fmt.Fprintln(opts.IO.StdOut, opts.Issue.Description)
 	}
 
@@ -195,7 +194,7 @@ func printTTYIssuePreview(opts *ViewOpts) error {
 					fmt.Fprintf(opts.IO.StdOut, " %s ", note.Body)
 					fmt.Fprintln(opts.IO.StdOut, c.Gray(createdAt))
 				} else {
-					body, _ := utils.RenderMarkdown(note.Body, opts.GlamourStyle)
+					body, _ := utils.RenderMarkdown(note.Body, opts.IO.BackgroundColor())
 					fmt.Fprint(opts.IO.StdOut, " commented ")
 					fmt.Fprintf(opts.IO.StdOut, c.Gray("%s\n"), createdAt)
 					fmt.Fprintln(opts.IO.StdOut, utils.Indent(body, " "))
