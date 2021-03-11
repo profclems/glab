@@ -25,19 +25,21 @@ func RenderMarkdown(text, glamourStyle string) (string, error) {
 	// we need to ensure that no such characters are present in the output.
 	text = strings.ReplaceAll(text, "\r\n", "\n")
 
-	renderStyle := glamour.WithStandardStyle("dark")
-	if glamourStyle != "" {
-		renderStyle = glamour.WithEnvironmentConfig()
-	}
-
 	tr, err := glamour.NewTermRenderer(
-		renderStyle,
+		glamour.WithStylePath(getStyle(glamourStyle)),
 	)
 	if err != nil {
 		return "", err
 	}
 
 	return tr.Render(text)
+}
+
+func getStyle(glamourStyle string) string {
+	if glamourStyle == "" || glamourStyle == "none" {
+		return "notty"
+	}
+	return glamourStyle
 }
 
 func Pluralize(num int, thing string) string {
