@@ -24,6 +24,7 @@ Examples
   $ glab mr unapprove 123
   $ glab mr revoke branch
   $ glab mr revoke  # use checked out branch
+  $ glab mr revoke 123 branch 456
   
 
 Options inherited from parent commands

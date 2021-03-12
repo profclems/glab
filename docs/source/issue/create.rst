@@ -36,6 +36,8 @@ Options
   -c, --confidential         Set an issue to be confidential. Default is false
   -d, --description string   Supply a description for issue
   -l, --label strings        Add label by name. Multiple labels should be comma separated
+      --link-type string     Type for the issue link (default "relates_to")
+      --linked-issues ints   The IIDs of issues that this issue links to
       --linked-mr int        The IID of a merge request in which to resolve all issues
   -m, --milestone string     The global ID or title of a milestone to assign
       --no-editor            Don't open editor to enter description. If set to true, uses prompt. Default is false

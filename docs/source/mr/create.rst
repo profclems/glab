@@ -48,7 +48,7 @@ Options
   -t, --title string           Supply a title for merge request
   -w, --web                    continue merge request creation on web browser
       --wip                    Mark merge request as a work in progress. Alternative to --draft
-  -y, --yes                    Skip submission confirmation prompt, with --autofill it skips all optional prompts
+  -y, --yes                    Skip submission confirmation prompt, with --fill it skips all optional prompts
 
 Options inherited from parent commands
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

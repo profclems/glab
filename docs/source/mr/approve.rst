@@ -21,6 +21,9 @@ Examples
 ::
 
   $ glab mr approve 235
+  $ glab mr approve 123 345
+  $ glab mr approve branch-1
+  $ glab mr approve branch-2 branch-3
   $ glab mr approve    # Finds open merge request from current branch
   
 

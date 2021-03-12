@@ -23,6 +23,7 @@ Examples
   $ glab mr subscribe 123
   $ glab mr sub 123
   $ glab mr subscribe branch
+  $ glab mr subscribe 123 branch  # subscribe to multiple MRs
   
 
 Options inherited from parent commands

@@ -21,6 +21,7 @@ Examples
 ::
 
   $ glab mr close 1
+  $ glab mr close 1 2 3 4  # close multiple branches at once
   $ glab mr close  # use checked out branch
   $ glab mr close branch
   $ glab mr close username:branch

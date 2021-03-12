@@ -23,6 +23,7 @@ Examples
   $ glab mr unsubscribe 123
   $ glab mr unsub 123
   $ glab mr unsubscribe branch
+  $ glab mr unsubscribe 123 branch  # unsubscribe from multiple MRs
   
 
 Options inherited from parent commands

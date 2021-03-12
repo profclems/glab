@@ -50,6 +50,7 @@ Options
 ::
 
   -g, --group string          Specify group to clone repositories from
+  -p, --preserve-namespace    Clone the repo in a subdirectory based on namespace
   -a, --archived              Limit by archived status. Used with --group flag
   -G, --include-subgroups     Include projects in subgroups of this group. Default is true. Used with --group flag (default true)
   -m, --mine                  Limit by projects in the group owned by the current authenticated user. Used with --group flag
