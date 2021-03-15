@@ -81,7 +81,7 @@ func main() {
 	debugMode, _ = cfg.Get("", "debug")
 	debug = debugMode == "true" || debugMode == "1"
 
-	if pager, _ := cfg.Get("", "pager"); pager != "" {
+	if pager, _ := cfg.Get("", "glab_pager"); pager != "" {
 		cmdFactory.IO.SetPager(pager)
 	}
 
