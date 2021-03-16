@@ -158,8 +158,9 @@ Make sure you have snap installed on your Linux Distro (https://snapcraft.io/doc
 #### Arch Linux
 `glab` is available through the [gitlab-glab-bin](https://aur.archlinux.org/packages/gitlab-glab-bin/) package on the AUR or download and install an archive from the [releases page](https://github.com/profclems/glab/releases/latest). Arch Linux also supports [snap](https://snapcraft.io/docs/installing-snap-on-arch-linux).
 ```sh
-pacman -Sy gitlab-glab-bin
+yay -Sy gitlab-glab-bin
 ```
+or any other [AUR helper](https://wiki.archlinux.org/index.php/AUR_helpers) of your choice.
 
 #### KISS Linux
 `glab` is available on the [KISS Linux Community Repo](https://github.com/kisslinux/community) as `gitlab-glab`.
