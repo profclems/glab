@@ -357,7 +357,15 @@ func fillPlaceholders(value string, opts *ApiOptions) (string, error) {
 
 	filled := placeholderRE.ReplaceAllStringFunc(value, func(m string) string {
 		switch m {
-		case ":group/:namespace/:repo", ":fullpath", ":id":
+		case ":id":
+			h, _ := opts.HttpClient()
+			baseProject, e := api.GetProject(h, baseRepo.FullName())
+			if e == nil && baseProject != nil {
+				return string(rune(baseProject.ID))
+			}
+			err = e
+			return ""
+		case ":group/:namespace/:repo", ":fullpath":
 			return url.PathEscape(baseRepo.FullName())
 		case ":namespace/:repo":
 			return url.PathEscape(baseRepo.RepoNamespace() + "/" + baseRepo.RepoName())
