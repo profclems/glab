@@ -22,6 +22,7 @@ import (
 	"github.com/profclems/glab/internal/glinstance"
 	"github.com/profclems/glab/internal/run"
 	"github.com/profclems/glab/pkg/tableprinter"
+	"github.com/profclems/glab/pkg/utils"
 
 	"github.com/spf13/cobra"
 )
@@ -184,6 +185,9 @@ func maybeOverrideDefaultHost(f *cmdutils.Factory) {
 		glinstance.OverrideDefault(baseRepo.RepoHost())
 	}
 	if glHostFromEnv := config.GetFromEnv("host"); glHostFromEnv != "" {
+		if utils.IsValidURL(glHostFromEnv) {
+			glHostFromEnv, _ = glinstance.StripHostProtocol(glHostFromEnv)
+		}
 		glinstance.OverrideDefault(glHostFromEnv)
 	}
 }
