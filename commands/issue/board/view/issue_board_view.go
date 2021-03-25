@@ -76,19 +76,12 @@ func NewCmdView(f *cmdutils.Factory) *cobra.Command {
 			}
 
 			root := tview.NewFlex()
-			/*
-				AddItem(tview.NewBox().SetBorder(true).SetTitle("Left (1/2 x width of Top)"), 0, 1, false).
-				AddItem(tview.NewFlex().SetDirection(tview.FlexRow).
-					AddItem(tview.NewBox().SetBorder(true).SetTitle("Top"), 0, 1, false).
-					AddItem(tview.NewBox().SetBorder(true).SetTitle("Middle (3 x height of Top)"), 0, 3, false).
-					AddItem(tview.NewBox().SetBorder(true).SetTitle("Bottom (5 rows)"), 5, 1, false), 0, 2, false).
-				AddItem(tview.NewBox().SetBorder(true).SetTitle("Right (20 cols)"), 20, 1, false)
-			*/
 			var issues []*gitlab.Issue
 			// TODO: add `open` and `closed` board list. Both are not returned in the List API response payload
 			for _, list := range boadLists {
 				var boardIssues string
 				issues, err = api.ListIssues(apiClient, repo.FullName(), &gitlab.ListProjectIssuesOptions{
+					State:  gitlab.String("opened"),
 					Labels: gitlab.Labels{list.Label.Name},
 				})
 				if err != nil {
@@ -96,8 +89,6 @@ func NewCmdView(f *cmdutils.Factory) *cobra.Command {
 				}
 				bx := tview.NewTextView().SetDynamicColors(true)
 				for _, issue := range issues {
-					//label, _ := issue.Labels.MarshalJSON()
-					//labelPrint := strings.Split(string(label), ", ")
 					var labelPrint string
 					var assignee string
 					totalLables := len(issue.Labels)
