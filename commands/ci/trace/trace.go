@@ -120,8 +120,33 @@ func TraceRun(opts *TraceOpts) error {
 			re := regexp.MustCompile(`(?s)\((.*)\)`)
 			m := re.FindAllStringSubmatch(selectedJob, -1)
 			opts.JobID = utils.StringToInt(m[0][1])
-		} else {
+		} else if len(jobs) > 0 {
 			opts.JobID = jobs[0].ID
+		} else {
+			// use commit statuses to show external jobs
+			cs, err := api.GetCommitStatuses(apiClient, repo.FullName(), pipeline.SHA)
+			if err != nil {
+				return nil
+			}
+
+			c := opts.IO.Color()
+
+			fmt.Fprint(opts.IO.StdOut, "Getting external jobs...")
+			for _, status := range cs {
+				var s string
+
+				switch status.Status {
+				case "success":
+					s = c.Green(status.Status)
+				case "error":
+					s = c.Red(status.Status)
+				default:
+					s = c.Gray(status.Status)
+				}
+				fmt.Fprintf(opts.IO.StdOut, "(%s) %s\nURL: %s\n\n", s, c.Bold(status.Name), c.Gray(status.TargetURL))
+			}
+
+			return nil
 		}
 	}
 

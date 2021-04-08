@@ -35,6 +35,7 @@ func DisplayMultiplePipelines(c *iostreams.ColorPalette, p []*gitlab.PipelineInf
 			if pipeline.CreatedAt != nil {
 				duration = c.Magenta("(" + utils.TimeToPrettyTimeAgo(*pipeline.CreatedAt) + ")")
 			}
+
 			var pipeState string
 			if pipeline.Status == "success" {
 				pipeState = c.Green(fmt.Sprintf("(%s) • #%d", pipeline.Status, pipeline.ID))
