@@ -45,9 +45,7 @@ func main() {
 
 	cmdFactory := cmdutils.NewFactory()
 
-	if glHostFromEnv := config.GetFromEnv("host"); glHostFromEnv != "" {
-		glinstance.OverrideDefault(glHostFromEnv)
-	}
+	maybeOverrideDefaultHost(cmdFactory)
 
 	if !cmdFactory.IO.ColorEnabled() {
 		surveyCore.DisableColor = true
@@ -177,5 +175,15 @@ func printError(out io.Writer, err error, cmd *cobra.Command, debug bool) {
 			_, _ = fmt.Fprintln(out)
 		}
 		_, _ = fmt.Fprintln(out, cmd.UsageString())
+	}
+}
+
+func maybeOverrideDefaultHost(f *cmdutils.Factory) {
+	baseRepo, err := f.BaseRepo()
+	if err == nil {
+		glinstance.OverrideDefault(baseRepo.RepoHost())
+	}
+	if glHostFromEnv := config.GetFromEnv("host"); glHostFromEnv != "" {
+		glinstance.OverrideDefault(glHostFromEnv)
 	}
 }
