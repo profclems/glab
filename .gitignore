@@ -29,6 +29,7 @@ _test
 
 # VsCode
 .vscode/
+.devcontainer
 
 # Dist binaries created at build with make rt
 /dist
