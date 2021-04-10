@@ -56,7 +56,7 @@ var ListMRs = func(client *gitlab.Client, projectID interface{}, opts *gitlab.Li
 	return mrs, nil
 }
 
-var ListMRsWithAssignees = func(client *gitlab.Client, projectID interface{}, opts *gitlab.ListProjectMergeRequestsOptions, assigneeIds []int) ([]*gitlab.MergeRequest, error) {
+var ListMRsWithAssigneesOrReviewers = func(client *gitlab.Client, projectID interface{}, opts *gitlab.ListProjectMergeRequestsOptions, assigneeIds []int, reviewerIds []int) ([]*gitlab.MergeRequest, error) {
 	if client == nil {
 		client = apiClient.Lab()
 	}
@@ -72,6 +72,15 @@ var ListMRsWithAssignees = func(client *gitlab.Client, projectID interface{}, op
 			return nil, err
 		}
 		mrs = append(mrs, assingeMrs...)
+	}
+	opts.AssigneeID = nil // reset because it's Assignee OR Reviewer
+	for _, id := range reviewerIds {
+		opts.ReviewerID = gitlab.Int(id)
+		reviewerMrs, err := ListMRs(client, projectID, opts)
+		if err != nil {
+			return nil, err
+		}
+		mrs = append(mrs, reviewerMrs...)
 	}
 	return mrs, nil
 }
