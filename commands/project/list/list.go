@@ -9,7 +9,6 @@ import (
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/internal/glrepo"
 	"github.com/profclems/glab/pkg/tableprinter"
-	"github.com/profclems/glab/pkg/utils"
 	"github.com/spf13/cobra"
 	"github.com/xanzy/go-gitlab"
 )
@@ -75,16 +74,13 @@ func runE(opts *Options) error {
 	l.PerPage = opts.PerPage
 	l.Page = opts.Page
 
-	projects, _, err := apiClient.Projects.ListProjects(l)
+	projects, resp, err := apiClient.Projects.ListProjects(l)
 	if err != nil {
 		return err
 	}
 
 	// Title
-	title := utils.NewListTitle("contributor")
-	title.RepoName = "FOO"
-	title.Page = l.Page
-	title.CurrentPageTotal = len(projects)
+	title := fmt.Sprintf("Showing %d of %d projects (Page %d of %d)\n", len(projects), resp.TotalItems, resp.CurrentPage, resp.TotalPages)
 
 	// List
 	table := tableprinter.NewTablePrinter()
@@ -94,6 +90,6 @@ func runE(opts *Options) error {
 		table.EndRow()
 	}
 
-	fmt.Fprintf(opts.IO.StdOut, "%s\n%s\n", title.Describe(), table.String())
+	fmt.Fprintf(opts.IO.StdOut, "%s\n%s\n", title, table.String())
 	return err
 }
