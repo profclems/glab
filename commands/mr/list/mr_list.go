@@ -21,6 +21,7 @@ import (
 type ListOptions struct {
 	// metadata
 	Assignee     []string
+	Reviewer     []string
 	Author       string
 	Labels       []string
 	NotLabels    []string
@@ -64,6 +65,7 @@ func NewCmdList(f *cmdutils.Factory, runE func(opts *ListOptions) error) *cobra.
 			$ glab mr list --all
 			$ glab mr ls -a
 			$ glab mr list --assignee=@me
+			$ glab mr list --reviewer=@me
 			$ glab mr list --source-branch=new-feature
 			$ glab mr list --target-branch=trunk
 			$ glab mr list --search "this adds feature X"
@@ -124,6 +126,7 @@ func NewCmdList(f *cmdutils.Factory, runE func(opts *ListOptions) error) *cobra.
 	mrListCmd.Flags().IntVarP(&opts.Page, "page", "p", 1, "Page number")
 	mrListCmd.Flags().IntVarP(&opts.PerPage, "per-page", "P", 30, "Number of items to list per page")
 	mrListCmd.Flags().StringSliceVarP(&opts.Assignee, "assignee", "a", []string{}, "Get only merge requests assigned to users")
+	mrListCmd.Flags().StringSliceVarP(&opts.Reviewer, "reviewer", "r", []string{}, "Get only merge requests with users as reviewer")
 
 	mrListCmd.Flags().BoolP("opened", "o", false, "Get only open merge requests")
 	_ = mrListCmd.Flags().MarkHidden("opened")
@@ -210,8 +213,19 @@ func listRun(opts *ListOptions) error {
 		}
 	}
 
-	if len(assigneeIds) > 0 {
-		mergeRequests, err = api.ListMRsWithAssignees(apiClient, repo.FullName(), l, assigneeIds)
+	reviewerIds := make([]int, 0)
+	if len(opts.Reviewer) > 0 {
+		users, err := api.UsersByNames(apiClient, opts.Reviewer)
+		if err != nil {
+			return err
+		}
+		for _, user := range users {
+			reviewerIds = append(reviewerIds, user.ID)
+		}
+	}
+
+	if len(assigneeIds) > 0 || len(reviewerIds) > 0 {
+		mergeRequests, err = api.ListMRsWithAssigneesOrReviewers(apiClient, repo.FullName(), l, assigneeIds, reviewerIds)
 
 	} else {
 		mergeRequests, err = api.ListMRs(apiClient, repo.FullName(), l)
