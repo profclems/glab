@@ -24,6 +24,7 @@ func NewCmdStatus(f *cmdutils.Factory) *cobra.Command {
 		Aliases: []string{"stats"},
 		Example: heredoc.Doc(`
 	$ glab ci status --live
+	$ glab ci status --compact // more compact view
 	$ glab ci status --branch=master   // Get pipeline for master branch
 	$ glab ci status   // Get pipeline for current branch
 	`),
@@ -45,6 +46,7 @@ func NewCmdStatus(f *cmdutils.Factory) *cobra.Command {
 
 			branch, _ := cmd.Flags().GetString("branch")
 			live, _ := cmd.Flags().GetBool("live")
+			compact, _ := cmd.Flags().GetBool("compact")
 
 			if branch == "" {
 				branch, err = git.CurrentBranch()
@@ -94,11 +96,17 @@ func NewCmdStatus(f *cmdutils.Factory) *cobra.Command {
 							status = c.Gray(s)
 						}
 						//fmt.Println(job.Tag)
-						fmt.Fprintf(writer, "(%s) • %s\t%s\t\t%s\n", status, c.Gray(duration), job.Stage, job.Name)
+						if compact {
+							fmt.Fprintf(writer, "(%s) • %s [%s]\n", status, job.Name,job.Stage)
+						} else {
+							fmt.Fprintf(writer, "(%s) • %s\t%s\t\t%s\n", status, c.Gray(duration), job.Stage, job.Name)
+						}
 					}
 
-					fmt.Fprintf(writer.Newline(), "\n%s\n", runningPipeline.WebURL)
-					fmt.Fprintf(writer.Newline(), "SHA: %s\n", runningPipeline.SHA)
+					if !compact {
+						fmt.Fprintf(writer.Newline(), "\n%s\n", runningPipeline.WebURL)
+						fmt.Fprintf(writer.Newline(), "SHA: %s\n", runningPipeline.SHA)
+					}
 					fmt.Fprintf(writer.Newline(), "Pipeline State: %s\n\n", runningPipeline.Status)
 
 					if runningPipeline.Status == "running" && live {
@@ -155,6 +163,7 @@ func NewCmdStatus(f *cmdutils.Factory) *cobra.Command {
 	}
 
 	pipelineStatusCmd.Flags().BoolP("live", "l", false, "Show status in real-time till pipeline ends")
+	pipelineStatusCmd.Flags().BoolP("compact", "c", false, "Show status in compact format")
 	pipelineStatusCmd.Flags().StringP("branch", "b", "", "Check pipeline status for a branch. (Default is current branch)")
 
 	return pipelineStatusCmd
