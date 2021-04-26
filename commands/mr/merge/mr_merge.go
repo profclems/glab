@@ -6,13 +6,26 @@ import (
 	"github.com/MakeNowJust/heredoc"
 	"github.com/profclems/glab/api"
 	"github.com/profclems/glab/commands/mr/mrutils"
+	"github.com/profclems/glab/pkg/prompt"
 
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/spf13/cobra"
 	"github.com/xanzy/go-gitlab"
 )
 
+type MergeOpts struct {
+	MergeWhenPipelineSucceeds bool
+	SquashBeforeMerge         bool
+	RemoveSourceBranch        bool
+
+	SquashMessage      string
+	MergeCommitMessage string
+	SHA                string
+}
+
 func NewCmdMerge(f *cmdutils.Factory) *cobra.Command {
+	var opts = &MergeOpts{}
+
 	var mrMergeCmd = &cobra.Command{
 		Use:     "merge {<id> | <branch>}",
 		Short:   `Merge/Accept merge requests`,
@@ -49,37 +62,51 @@ func NewCmdMerge(f *cmdutils.Factory) *cobra.Command {
 				return err
 			}
 
-			opts := &gitlab.AcceptMergeRequestOptions{}
-			if m, _ := cmd.Flags().GetString("message"); m != "" {
-				opts.MergeCommitMessage = gitlab.String(m)
+			if !cmd.Flags().Changed("when-pipeline-succeeds") && f.IO.IsOutputTTY() && mr.Pipeline != nil {
+				_ = prompt.Confirm(&opts.MergeWhenPipelineSucceeds, "Merge when pipeline succeeds?", true)
 			}
-			if m, _ := cmd.Flags().GetString("squash-message"); m != "" {
-				opts.SquashCommitMessage = gitlab.String(m)
+
+			mergeOpts := &gitlab.AcceptMergeRequestOptions{}
+			if opts.MergeCommitMessage != "" {
+				mergeOpts.MergeCommitMessage = gitlab.String(opts.MergeCommitMessage)
 			}
-			if m, _ := cmd.Flags().GetBool("squash"); m {
-				opts.Squash = gitlab.Bool(m)
+			if opts.SquashMessage != "" {
+				mergeOpts.SquashCommitMessage = gitlab.String(opts.SquashMessage)
 			}
-			if m, _ := cmd.Flags().GetBool("remove-source-branch"); m {
-				opts.ShouldRemoveSourceBranch = gitlab.Bool(m)
+			if opts.SquashBeforeMerge {
+				mergeOpts.Squash = gitlab.Bool(true)
 			}
-			if m, _ := cmd.Flags().GetBool("when-pipeline-succeeds"); m {
-				opts.MergeWhenPipelineSucceeds = gitlab.Bool(m)
+			if opts.RemoveSourceBranch {
+				mergeOpts.ShouldRemoveSourceBranch = gitlab.Bool(true)
 			}
-			if m, _ := cmd.Flags().GetString("sha"); m != "" {
-				opts.SHA = gitlab.String(m)
+			if opts.MergeWhenPipelineSucceeds && mr.Pipeline != nil {
+				mergeOpts.MergeWhenPipelineSucceeds = gitlab.Bool(true)
+			}
+			if opts.SHA != "" {
+				mergeOpts.SHA = gitlab.String(opts.SHA)
 			}
 
 			fmt.Fprintf(f.IO.StdOut, "- Merging merge request !%d\n", mr.IID)
 
-			mr, err = api.MergeMR(apiClient, repo.FullName(), mr.IID, opts)
+			mr, err = api.MergeMR(apiClient, repo.FullName(), mr.IID, mergeOpts)
 
 			if err != nil {
 				return err
 			}
 
-			if m, _ := cmd.Flags().GetBool("when-pipeline-succeeds"); m {
-				fmt.Fprintln(f.IO.StdOut, c.GreenCheck(), "Will merge when pipeline succeeds")
-			} else {
+			isMerged := true
+			if opts.MergeWhenPipelineSucceeds {
+				if mr.Pipeline == nil {
+					fmt.Fprintln(f.IO.StdOut, c.WarnIcon(), "No pipeline running on", mr.SourceBranch)
+				} else if mr.Pipeline.Status == "success" {
+					fmt.Fprintln(f.IO.StdOut, c.GreenCheck(), "Pipeline Succeeded")
+				} else {
+					fmt.Fprintln(f.IO.StdOut, c.WarnIcon(), "Pipeline Status:", mr.Pipeline.Status)
+					fmt.Fprintln(f.IO.StdOut, c.GreenCheck(), "Will merge when pipeline succeeds")
+					isMerged = false
+				}
+			}
+			if isMerged {
 				fmt.Fprintln(f.IO.StdOut, c.GreenCheck(), "Merged")
 			}
 			fmt.Fprintln(f.IO.StdOut, mrutils.DisplayMR(c, mr))
@@ -88,12 +115,12 @@ func NewCmdMerge(f *cmdutils.Factory) *cobra.Command {
 		},
 	}
 
-	mrMergeCmd.Flags().StringP("sha", "", "", "Merge Commit sha")
-	mrMergeCmd.Flags().BoolP("remove-source-branch", "d", false, "Remove source branch on merge")
-	mrMergeCmd.Flags().BoolP("when-pipeline-succeeds", "", true, "Merge only when pipeline succeeds")
-	mrMergeCmd.Flags().StringP("message", "m", "", "Custom merge commit message")
-	mrMergeCmd.Flags().StringP("squash-message", "", "", "Custom Squash commit message")
-	mrMergeCmd.Flags().BoolP("squash", "s", false, "Squash commits on merge")
+	mrMergeCmd.Flags().StringVarP(&opts.SHA, "sha", "", "", "Merge Commit sha")
+	mrMergeCmd.Flags().BoolVarP(&opts.RemoveSourceBranch, "remove-source-branch", "d", false, "Remove source branch on merge")
+	mrMergeCmd.Flags().BoolVarP(&opts.MergeWhenPipelineSucceeds, "when-pipeline-succeeds", "", true, "Merge only when pipeline succeeds")
+	mrMergeCmd.Flags().StringVarP(&opts.MergeCommitMessage, "message", "m", "", "Custom merge commit message")
+	mrMergeCmd.Flags().StringVarP(&opts.SquashMessage, "squash-message", "", "", "Custom Squash commit message")
+	mrMergeCmd.Flags().BoolVarP(&opts.SquashBeforeMerge, "squash", "s", false, "Squash commits on merge")
 
 	return mrMergeCmd
 }
