@@ -97,7 +97,7 @@ func NewCmdStatus(f *cmdutils.Factory) *cobra.Command {
 						}
 						//fmt.Println(job.Tag)
 						if compact {
-							fmt.Fprintf(writer, "(%s) • %s [%s]\n", status, job.Name,job.Stage)
+							fmt.Fprintf(writer, "(%s) • %s [%s]\n", status, job.Name, job.Stage)
 						} else {
 							fmt.Fprintf(writer, "(%s) • %s\t%s\t\t%s\n", status, c.Gray(duration), job.Stage, job.Name)
 						}
