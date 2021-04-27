@@ -116,6 +116,14 @@ func assigneesList(mr *gitlab.MergeRequest) string {
 	return strings.Trim(assignees, ", ")
 }
 
+func reviewersList(mr *gitlab.MergeRequest) string {
+	var reviewers string
+	for _, a := range mr.Reviewers {
+		reviewers += " " + a.Username + ","
+	}
+	return strings.Trim(reviewers, ", ")
+}
+
 func mrState(c *iostreams.ColorPalette, mr *gitlab.MergeRequest) (mrState string) {
 	if mr.State == "opened" {
 		mrState = c.Green("open")
@@ -155,6 +163,10 @@ func printTTYMRPreview(opts *ViewOpts, mr *gitlab.MergeRequest, notes []*gitlab.
 	if assignees := assigneesList(mr); assignees != "" {
 		fmt.Fprint(out, c.Bold("Assignees: "))
 		fmt.Fprintln(out, assignees)
+	}
+	if reviewers := reviewersList(mr); reviewers != "" {
+		fmt.Fprint(out, c.Bold("Reviewers: "))
+		fmt.Fprintln(out, reviewers)
 	}
 	if mr.Milestone != nil {
 		fmt.Fprint(out, c.Bold("Milestone: "))
@@ -228,6 +240,7 @@ func printTTYMRPreview(opts *ViewOpts, mr *gitlab.MergeRequest, notes []*gitlab.
 func printRawMRPreview(opts *ViewOpts, mr *gitlab.MergeRequest) error {
 	out := opts.IO.StdOut
 	assignees := assigneesList(mr)
+	reviewers := reviewersList(mr)
 	labels := labelsList(mr)
 
 	fmt.Fprintf(out, "title:\t%s\n", mr.Title)
@@ -235,6 +248,7 @@ func printRawMRPreview(opts *ViewOpts, mr *gitlab.MergeRequest) error {
 	fmt.Fprintf(out, "author:\t%s\n", mr.Author.Username)
 	fmt.Fprintf(out, "labels:\t%s\n", labels)
 	fmt.Fprintf(out, "assignees:\t%s\n", assignees)
+	fmt.Fprintf(out, "reviewers:\t%s\n", reviewers)
 	fmt.Fprintf(out, "comments:\t%d\n", mr.UserNotesCount)
 	if mr.Milestone != nil {
 		fmt.Fprintf(out, "milestone:\t%s\n", mr.Milestone.Title)
