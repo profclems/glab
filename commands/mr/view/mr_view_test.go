@@ -73,6 +73,14 @@ hosts:
 					Username: "lisa",
 				},
 			},
+			Reviewers: []*gitlab.BasicUser{
+				{
+					Username: "lisa",
+				},
+				{
+					Username: "mona",
+				},
+			},
 			WebURL:         fmt.Sprintf("https://%s/%s/-/merge_requests/%d", repo.RepoHost(), repo.FullName(), mrID),
 			CreatedAt:      &timer,
 			UserNotesCount: 2,
@@ -189,6 +197,7 @@ func TestMRView(t *testing.T) {
 		expectedOutputs := []string{
 			`title:\tmrTitle`,
 			`assignees:\tmona, lisa`,
+			`reviewers:\tlisa, mona`,
 			`author:\tjdwick`,
 			`state:\topen`,
 			`comments:\t2`,
