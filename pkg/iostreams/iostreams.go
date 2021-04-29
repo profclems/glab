@@ -2,6 +2,7 @@ package iostreams
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
@@ -141,20 +142,20 @@ func (s *IOStreams) StopPager() {
 	s.pagerProcess = nil
 }
 
-func (s *IOStreams) StartSpinner(loadingMSG string) {
+func (s *IOStreams) StartSpinner(format string, a ...interface{}) {
 	if s.IsOutputTTY() {
 		s.spinner = spinner.New(spinner.CharSets[9], 100*time.Millisecond, spinner.WithWriter(s.StdErr))
-		if loadingMSG != "" {
-			s.spinner.Suffix = " " + loadingMSG
+		if format != "" {
+			s.spinner.Suffix = fmt.Sprintf(" "+format, a...)
 		}
 		s.spinner.Start()
 	}
 }
 
-func (s *IOStreams) StopSpinner(finalMSG string) {
+func (s *IOStreams) StopSpinner(format string, a ...interface{}) {
 	if s.spinner != nil {
 		s.spinner.Suffix = ""
-		s.spinner.FinalMSG = finalMSG
+		s.spinner.FinalMSG = fmt.Sprintf(format, a...)
 		s.spinner.Stop()
 		s.spinner = nil
 	}

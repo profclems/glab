@@ -1,15 +1,11 @@
 package rebase
 
 import (
-	"fmt"
-
 	"github.com/MakeNowJust/heredoc"
-	"github.com/profclems/glab/api"
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/commands/mr/mrutils"
 
 	"github.com/spf13/cobra"
-	"github.com/xanzy/go-gitlab"
 )
 
 func NewCmdRebase(f *cmdutils.Factory) *cobra.Command {
@@ -25,7 +21,6 @@ func NewCmdRebase(f *cmdutils.Factory) *cobra.Command {
 		Args: cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var err error
-			c := f.IO.Color()
 
 			apiClient, err := f.HttpClient()
 			if err != nil {
@@ -37,34 +32,8 @@ func NewCmdRebase(f *cmdutils.Factory) *cobra.Command {
 				return err
 			}
 
-			fmt.Fprintln(f.IO.StdOut, "- Sending request...")
-			err = api.RebaseMR(apiClient, repo.FullName(), mr.IID)
-			if err != nil {
+			if err = mrutils.RebaseMR(f.IO, apiClient, repo, mr); err != nil {
 				return err
-			}
-
-			opts := &gitlab.GetMergeRequestsOptions{}
-			opts.IncludeRebaseInProgress = gitlab.Bool(true)
-			fmt.Fprintln(f.IO.StdOut, "- Checking rebase status...")
-			i := 0
-			for {
-				mr, err := api.GetMR(apiClient, repo.FullName(), mr.IID, opts)
-				if err != nil {
-					return err
-				}
-				if mr.RebaseInProgress {
-					if i == 0 {
-						fmt.Fprintln(f.IO.StdOut, "- Rebase in progress...")
-					}
-				} else {
-					if mr.MergeError != "" && mr.MergeError != "null" {
-						fmt.Fprintln(f.IO.StdErr, mr.MergeError)
-						break
-					}
-					fmt.Fprintln(f.IO.StdOut, c.GreenCheck(), "Rebase successful")
-					break
-				}
-				i++
 			}
 
 			return nil
