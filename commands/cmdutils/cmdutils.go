@@ -99,7 +99,7 @@ func GetEditor(cf func() (config.Config, error)) (string, error) {
 	return editorCommand, nil
 }
 
-func DescriptionPrompt(response *string, templateContent, editorCommand string) error {
+func EditorPrompt(response *string, question, templateContent, editorCommand string) error {
 	defaultBody := *response
 	if templateContent != "" {
 		if defaultBody != "" {
@@ -112,7 +112,7 @@ func DescriptionPrompt(response *string, templateContent, editorCommand string) 
 
 	qs := []*survey.Question{
 		{
-			Name: "Description",
+			Name: question,
 			Prompt: &surveyext.GLabEditor{
 				BlankAllowed:  true,
 				EditorCommand: editorCommand,
@@ -265,6 +265,7 @@ const (
 	PreviewAction
 	AddMetadataAction
 	CancelAction
+	EditCommitMessageAction
 )
 
 func ConfirmSubmission(allowPreview bool, allowAddMetadata bool) (Action, error) {

@@ -324,7 +324,7 @@ func createRun(opts *CreateOpts) error {
 				if err != nil {
 					return err
 				}
-				err = cmdutils.DescriptionPrompt(&opts.Description, templateContents, editor)
+				err = cmdutils.EditorPrompt(&opts.Description, "Description", templateContents, editor)
 				if err != nil {
 					return err
 				}
