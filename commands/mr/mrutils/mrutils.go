@@ -2,6 +2,7 @@ package mrutils
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strconv"
 	"strings"
@@ -278,4 +279,43 @@ var getMRForBranch = func(apiClient *gitlab.Client, baseRepo glrepo.Interface, a
 		return nil, fmt.Errorf("a merge request must be picked: %w", err)
 	}
 	return mrMap[pickedMR], nil
+}
+
+func RebaseMR(ios *iostreams.IOStreams, apiClient *gitlab.Client, repo glrepo.Interface, mr *gitlab.MergeRequest) error {
+	ios.StartSpinner("Sending rebase request...")
+	err := api.RebaseMR(apiClient, repo.FullName(), mr.IID)
+	if err != nil {
+		return err
+	}
+	ios.StopSpinner("")
+
+	opts := &gitlab.GetMergeRequestsOptions{}
+	opts.IncludeRebaseInProgress = gitlab.Bool(true)
+	ios.StartSpinner("Checking rebase status...")
+	errorMSG := ""
+	i := 0
+	for {
+		mr, err := api.GetMR(apiClient, repo.FullName(), mr.IID, opts)
+		if err != nil {
+			errorMSG = err.Error()
+			break
+		}
+		if i == 0 {
+			ios.StopSpinner("")
+			ios.StartSpinner("Rebase in progress...")
+		}
+		if !mr.RebaseInProgress {
+			if mr.MergeError != "" && mr.MergeError != "null" {
+				errorMSG = mr.MergeError
+			}
+			break
+		}
+		i++
+	}
+	ios.StopSpinner("")
+	if errorMSG != "" {
+		return errors.New(errorMSG)
+	}
+	fmt.Fprintln(ios.StdOut, ios.Color().GreenCheck(), "Rebase successful")
+	return nil
 }
