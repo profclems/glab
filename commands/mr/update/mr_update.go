@@ -28,7 +28,8 @@ func NewCmdUpdate(f *cmdutils.Factory) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var err error
 			var actions []string
-			var ua *cmdutils.UserAssignments
+			var ua *cmdutils.UserAssignments // assignees
+			var ur *cmdutils.UserAssignments // reviewers
 			c := f.IO.Color()
 
 			if cmd.Flags().Changed("unassign") && cmd.Flags().Changed("assignee") {
@@ -46,6 +47,20 @@ func NewCmdUpdate(f *cmdutils.Factory) *cobra.Command {
 				err = ua.VerifyAssignees()
 				if err != nil {
 					return &cmdutils.FlagError{Err: fmt.Errorf("--assignee: %w", err)}
+				}
+			}
+
+			if cmd.Flags().Changed("reviewer") {
+				givenReviewers, err := cmd.Flags().GetStringSlice("reviewer")
+				if err != nil {
+					return err
+				}
+				ur = cmdutils.ParseAssignees(givenReviewers)
+				ur.AssignmentType = cmdutils.ReviewerAssignment
+
+				err = ur.VerifyAssignees()
+				if err != nil {
+					return &cmdutils.FlagError{Err: fmt.Errorf("--reviewer: %w", err)}
 				}
 			}
 
@@ -158,6 +173,20 @@ func NewCmdUpdate(f *cmdutils.Factory) *cobra.Command {
 				}
 			}
 
+			if ur != nil {
+				if len(ur.ToReplace) != 0 {
+					l.ReviewerIDs, actions, err = ur.UsersFromReplaces(apiClient, actions)
+					if err != nil {
+						return err
+					}
+				} else if len(ur.ToAdd) != 0 || len(ur.ToRemove) != 0 {
+					l.ReviewerIDs, actions, err = ur.UsersFromAddRemove(nil, mr.Reviewers, apiClient, actions)
+					if err != nil {
+						return err
+					}
+				}
+			}
+
 			if removeSource, _ := cmd.Flags().GetBool("remove-source-branch"); removeSource {
 				actions = append(actions, "enabled removal of source branch on merge")
 				l.RemoveSourceBranch = gitlab.Bool(true)
@@ -189,6 +218,7 @@ func NewCmdUpdate(f *cmdutils.Factory) *cobra.Command {
 	mrUpdateCmd.Flags().StringSliceP("label", "l", []string{}, "add labels")
 	mrUpdateCmd.Flags().StringSliceP("unlabel", "u", []string{}, "remove labels")
 	mrUpdateCmd.Flags().StringSliceP("assignee", "a", []string{}, "assign users via username, prefix with '!' or '-' to remove from existing assignees, '+' to add, otherwise replace existing assignees with given users")
+	mrUpdateCmd.Flags().StringSliceP("reviewer", "", []string{}, "request review from users by their usernames, prefix with '!' or '-' to remove from existing reviewers, '+' to add, otherwise replace existing reviewers with given users")
 	mrUpdateCmd.Flags().Bool("unassign", false, "unassign all users")
 	mrUpdateCmd.Flags().BoolP("remove-source-branch", "", false, "Remove Source Branch on merge")
 	mrUpdateCmd.Flags().StringP("milestone", "m", "", "title of the milestone to assign, pass \"\" or 0 to unassign")
