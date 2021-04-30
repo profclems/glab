@@ -369,10 +369,18 @@ func ParseMilestone(apiClient *gitlab.Client, repo glrepo.Interface, milestoneTi
 // UserAssignments holds 3 slice strings that represent which assignees should be added, removed, and replaced
 // helper functions are also provided
 type UserAssignments struct {
-	ToAdd     []string
-	ToRemove  []string
-	ToReplace []string
+	ToAdd          []string
+	ToRemove       []string
+	ToReplace      []string
+	AssignmentType UserAssignmentType
 }
+
+type UserAssignmentType int
+
+const (
+	AssigneeAssignment UserAssignmentType = iota
+	ReviewerAssignment
+)
 
 // ParseAssignees takes a String Slice and splits them into 3 Slice Strings based on
 // the first character of a string.
@@ -383,7 +391,9 @@ type UserAssignments struct {
 // The 3 String slices are returned regardless if anything was put it in or not the user
 // is responsible for checking the length to see if anything is in it
 func ParseAssignees(assignees []string) *UserAssignments {
-	ua := UserAssignments{}
+	ua := UserAssignments{
+		AssignmentType: AssigneeAssignment,
+	}
 
 	for _, assignee := range assignees {
 		switch string([]rune(assignee)[0]) {
@@ -426,7 +436,11 @@ func (ua *UserAssignments) UsersFromReplaces(apiClient *gitlab.Client, actions [
 		usernames = append(usernames, fmt.Sprintf("@%s", users[i].Username))
 	}
 	if len(usernames) != 0 {
-		actions = append(actions, fmt.Sprintf("assigned to %q", strings.Join(usernames, " ")))
+		if ua.AssignmentType == ReviewerAssignment {
+			actions = append(actions, fmt.Sprintf("requested review from %q", strings.Join(usernames, " ")))
+		} else {
+			actions = append(actions, fmt.Sprintf("assigned to %q", strings.Join(usernames, " ")))
+		}
 	}
 	return IDsFromUsers(users), actions, nil
 }
@@ -473,7 +487,11 @@ func (ua *UserAssignments) UsersFromAddRemove(
 		for _, x := range ua.ToRemove {
 			usernames = append(usernames, fmt.Sprintf("@%s", x))
 		}
-		actions = append(actions, fmt.Sprintf("unassigned %q", strings.Join(usernames, " ")))
+		if ua.AssignmentType == ReviewerAssignment {
+			actions = append(actions, fmt.Sprintf("removed review request for %q", strings.Join(usernames, " ")))
+		} else {
+			actions = append(actions, fmt.Sprintf("unassigned %q", strings.Join(usernames, " ")))
+		}
 	}
 
 	if len(ua.ToAdd) != 0 {
@@ -496,7 +514,11 @@ func (ua *UserAssignments) UsersFromAddRemove(
 		for _, x := range ua.ToAdd {
 			usernames = append(usernames, fmt.Sprintf("@%s", x))
 		}
-		actions = append(actions, fmt.Sprintf("assigned %q", strings.Join(usernames, " ")))
+		if ua.AssignmentType == ReviewerAssignment {
+			actions = append(actions, fmt.Sprintf("requested review from %q", strings.Join(usernames, " ")))
+		} else {
+			actions = append(actions, fmt.Sprintf("assigned %q", strings.Join(usernames, " ")))
+		}
 	}
 
 	// That means that all assignees were removed but we can't pass an empty Slice of Ints so
