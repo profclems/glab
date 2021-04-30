@@ -28,8 +28,8 @@ func NewCmdUpdate(f *cmdutils.Factory) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var err error
 			var actions []string
-			var ua *cmdutils.UserAssignments
-			var ur *cmdutils.UserAssignments
+			var ua *cmdutils.UserAssignments // assignees
+			var ur *cmdutils.UserAssignments // reviewers
 			c := f.IO.Color()
 
 			if cmd.Flags().Changed("unassign") && cmd.Flags().Changed("assignee") {
@@ -56,6 +56,7 @@ func NewCmdUpdate(f *cmdutils.Factory) *cobra.Command {
 					return err
 				}
 				ur = cmdutils.ParseAssignees(givenReviewers)
+				ur.AssignmentType = cmdutils.ReviewerAssignment
 
 				err = ur.VerifyAssignees()
 				if err != nil {
@@ -217,7 +218,7 @@ func NewCmdUpdate(f *cmdutils.Factory) *cobra.Command {
 	mrUpdateCmd.Flags().StringSliceP("label", "l", []string{}, "add labels")
 	mrUpdateCmd.Flags().StringSliceP("unlabel", "u", []string{}, "remove labels")
 	mrUpdateCmd.Flags().StringSliceP("assignee", "a", []string{}, "assign users via username, prefix with '!' or '-' to remove from existing assignees, '+' to add, otherwise replace existing assignees with given users")
-	mrUpdateCmd.Flags().StringSliceP("reviewer", "", []string{}, "assign users via username, prefix with '!' or '-' to remove from existing reviewers, '+' to add, otherwise replace existing reviewers with given users")
+	mrUpdateCmd.Flags().StringSliceP("reviewer", "", []string{}, "request review from users by their usernames, prefix with '!' or '-' to remove from existing reviewers, '+' to add, otherwise replace existing reviewers with given users")
 	mrUpdateCmd.Flags().Bool("unassign", false, "unassign all users")
 	mrUpdateCmd.Flags().BoolP("remove-source-branch", "", false, "Remove Source Branch on merge")
 	mrUpdateCmd.Flags().StringP("milestone", "m", "", "title of the milestone to assign, pass \"\" or 0 to unassign")
