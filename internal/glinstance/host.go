@@ -6,16 +6,25 @@ import (
 	"strings"
 )
 
-const defaultHostname = "gitlab.com"
+const (
+	defaultHostname = "gitlab.com"
+	defaultProtocol = "https"
+)
 
 var hostnameOverride string
+var protocolOverride string
 
 // Default returns the host name of the default GitLab instance
 func Default() string {
 	return defaultHostname
 }
 
-// OverridableDefault is like Default, except it is overridable by the GITLAB_TOKEN environment variable
+// DefaultProtocol returns the protocol of the default GitLab instance
+func DefaultProtocol() string {
+	return defaultProtocol
+}
+
+// OverridableDefault is like Default, except it is overridable by the GITLAB_HOST environment variable
 func OverridableDefault() string {
 	if hostnameOverride != "" {
 		return hostnameOverride
@@ -23,10 +32,25 @@ func OverridableDefault() string {
 	return Default()
 }
 
+// OverridableDefaultProtocol is like DefaultProtocol, except it is overridable by the protocol found in
+// the value of the GITLAB_HOST environment variable if a fully qualified URL is given as value
+func OverridableDefaultProtocol() string {
+	if protocolOverride != "" {
+		return protocolOverride
+	}
+	return DefaultProtocol()
+}
+
 // OverrideDefault overrides the value returned from OverridableDefault. This should only ever be
 // called from the main runtime path, not tests.
 func OverrideDefault(newhost string) {
 	hostnameOverride = newhost
+}
+
+// OverrideDefaultProtocol overrides the value returned from OverridableDefaultProtocol. This should only ever be
+// called from the main runtime path, not tests.
+func OverrideDefaultProtocol(newProtocol string) {
+	protocolOverride = newProtocol
 }
 
 // IsSelfHosted reports whether a non-normalized host name looks like a Self-hosted GitLab instance
@@ -60,7 +84,7 @@ func StripHostProtocol(h string) (hostname, protocol string) {
 // APIEndpoint returns the REST API endpoint prefix for a GitLab instance :)
 func APIEndpoint(hostname, protocol string) string {
 	if protocol == "" {
-		protocol = "https"
+		protocol = OverridableDefaultProtocol()
 	}
 	if IsSelfHosted(hostname) {
 		return fmt.Sprintf("%s://%s/api/v4/", protocol, hostname)
