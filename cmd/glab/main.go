@@ -186,7 +186,9 @@ func maybeOverrideDefaultHost(f *cmdutils.Factory) {
 	}
 	if glHostFromEnv := config.GetFromEnv("host"); glHostFromEnv != "" {
 		if utils.IsValidURL(glHostFromEnv) {
-			glHostFromEnv, _ = glinstance.StripHostProtocol(glHostFromEnv)
+			var protocol string
+			glHostFromEnv, protocol = glinstance.StripHostProtocol(glHostFromEnv)
+			glinstance.OverrideDefaultProtocol(protocol)
 		}
 		glinstance.OverrideDefault(glHostFromEnv)
 	}
