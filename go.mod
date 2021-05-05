@@ -33,9 +33,8 @@ require (
 	github.com/spf13/pflag v1.0.5
 	github.com/stretchr/testify v1.7.0
 	github.com/tidwall/pretty v1.1.0
-	github.com/xanzy/go-gitlab v0.48.0
+	github.com/xanzy/go-gitlab v0.49.0
 	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9
-	golang.org/x/net v0.0.0-20201006153459-a7d1128ccaa0 // indirect
-	golang.org/x/sync v0.0.0-20190423024810-112230192c58
+	golang.org/x/sync v0.0.0-20201020160332-67f06af15bc9
 	gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c
 )
