@@ -25,7 +25,7 @@ require (
 	github.com/mgutz/ansi v0.0.0-20200706080929-d51e80ef957d
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/muesli/termenv v0.8.1
-	github.com/otiai10/copy v1.5.1
+	github.com/otiai10/copy v1.6.0
 	github.com/pkg/errors v0.9.1
 	github.com/rivo/tview v0.0.0-20210117162420-745e4ceeb711
 	github.com/spf13/cast v1.3.1
