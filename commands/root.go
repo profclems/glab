@@ -22,6 +22,7 @@ import (
 	"github.com/profclems/glab/internal/glrepo"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
+    "github.com/rsteube/carapace"
 )
 
 // RootCmd is the main root/parent command
@@ -107,6 +108,9 @@ func NewCmdRoot(f *cmdutils.Factory, version, buildDate string) *cobra.Command {
 	rootCmd.AddCommand(apiCmd.NewCmdApi(f, nil))
 
 	rootCmd.Flags().BoolP("version", "v", false, "show glab version information")
+
+    carapace.Gen(rootCmd)
+
 	return rootCmd
 }
 

@@ -5,9 +5,11 @@ import (
 	"strings"
 
 	"github.com/profclems/glab/pkg/iostreams"
+	"github.com/rsteube/carapace"
 
 	"github.com/profclems/glab/api"
 	"github.com/profclems/glab/commands/cmdutils"
+	"github.com/profclems/glab/commands/cmdutils/action"
 	"github.com/profclems/glab/commands/mr/mrutils"
 	"github.com/profclems/glab/pkg/utils"
 
@@ -96,6 +98,10 @@ func NewCmdView(f *cmdutils.Factory) *cobra.Command {
 	mrViewCmd.Flags().BoolVarP(&opts.OpenInBrowser, "web", "w", false, "Open mr in a browser. Uses default browser or browser specified in BROWSER variable")
 	mrViewCmd.Flags().IntVarP(&opts.CommentPageNumber, "page", "p", 0, "Page number")
 	mrViewCmd.Flags().IntVarP(&opts.CommentLimit, "per-page", "P", 20, "Number of items to list per page")
+
+	carapace.Gen(mrViewCmd).PositionalCompletion(
+      action.ActionMergeRequests(f, &gitlab.ListProjectMergeRequestsOptions{State: gitlab.String("opened")}),
+	)
 
 	return mrViewCmd
 }
