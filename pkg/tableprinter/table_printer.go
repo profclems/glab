@@ -12,11 +12,12 @@ var tp *TablePrinter
 
 func init() {
 	tp = &TablePrinter{
-		TotalRows:     0,
-		Wrap:          false,
-		MaxColWidth:   0,
-		Separator:     "\t",
-		TerminalWidth: 80,
+		TotalRows:       0,
+		Wrap:            false,
+		MaxColWidth:     0,
+		TTYSeparator:    "\t",
+		NonTTYSeparator: "\t",
+		TerminalWidth:   80,
 	}
 }
 
@@ -28,12 +29,16 @@ type TablePrinter struct {
 	Wrap bool
 	// MaxColWidth is the maximum allowed width for cells in the table
 	MaxColWidth int
-	// Separator is the seperator for columns in the table. Default is "\t"
-	Separator string
+	// TTYSeparator is the separator for columns in the table on TTYs. Default is "\t"
+	TTYSeparator string
+	// NonTTYSeparator is the separator for columns in the table on non-TTYs. Default is "\t"
+	NonTTYSeparator string
 	// Rows is the collection of rows in the table
 	Rows []*TableRow
 	// TerminalWidth is the max width of the terminal
 	TerminalWidth int
+	// IsTTY indicates whether output is a TTY or non-TTY
+	IsTTY bool
 }
 
 type TableCell struct {
@@ -41,8 +46,10 @@ type TableCell struct {
 	Value interface{}
 	// Width is the width of the cell
 	Width int
-	// Wrap when true wraps the contents of the cell when the lenght exceeds the width
+	// Wrap when true wraps the contents of the cell when the length exceeds the width
 	Wrap bool
+
+	isaTTY bool
 }
 
 type TableRow struct {
@@ -53,13 +60,23 @@ type TableRow struct {
 
 func NewTablePrinter() *TablePrinter {
 	t := &TablePrinter{
-		Separator:     tp.Separator,
-		MaxColWidth:   tp.MaxColWidth,
-		Wrap:          false,
-		TerminalWidth: tp.TerminalWidth,
+		TTYSeparator:    tp.TTYSeparator,
+		NonTTYSeparator: tp.NonTTYSeparator,
+		MaxColWidth:     tp.MaxColWidth,
+		Wrap:            false,
+		TerminalWidth:   tp.TerminalWidth,
+		IsTTY:           tp.IsTTY,
 	}
 
 	return t
+}
+
+func (t *TablePrinter) Separator() string {
+	if t.IsTTY {
+		return t.TTYSeparator
+	}
+
+	return t.NonTTYSeparator
 }
 
 // SetTerminalWidth sets the maximum width for the terminal
@@ -69,11 +86,26 @@ func (t *TablePrinter) SetTerminalWidth(width int) {
 	t.TerminalWidth = width
 }
 
-// SetSeparator sets the separator for the columns in the table
-func SetSeparator(s string) { tp.SetSeparator(s) }
+// SetIsTTY sets the IsTTY variable which indicates whether terminal
+// output is a TTY or nonTTY
+func SetIsTTY(isTTY bool) { tp.SetIsTTY(isTTY) }
 
-func (t *TablePrinter) SetSeparator(s string) {
-	t.Separator = s
+func (t *TablePrinter) SetIsTTY(isTTY bool) {
+	t.IsTTY = isTTY
+}
+
+// SetTTYSeparator sets the separator for the columns in the table for TTYs
+func SetTTYSeparator(s string) { tp.SetTTYSeparator(s) }
+
+func (t *TablePrinter) SetTTYSeparator(s string) {
+	t.TTYSeparator = s
+}
+
+// SetNonTTYSeparator sets the separator for the columns in the table for non-ttys
+func SetNonTTYSeparator(s string) { tp.SetNonTTYSeparator(s) }
+
+func (t *TablePrinter) SetNonTTYSeparator(s string) {
+	t.NonTTYSeparator = s
 }
 
 func (t *TablePrinter) makeRow() {
@@ -89,10 +121,11 @@ func (t *TablePrinter) AddCell(s interface{}) {
 	row := t.Rows[rowI]
 
 	cell := &TableCell{
-		Value: s,
+		Value:  s,
+		isaTTY: t.IsTTY,
 	}
 
-	row.Separator = t.Separator
+	row.Separator = t.Separator()
 
 	row.Cells = append(row.Cells, cell)
 }
@@ -207,7 +240,7 @@ func (t *TablePrinter) Render() string {
 
 	var lines []string
 	for _, row := range t.Rows {
-		row.Separator = t.Separator
+		row.Separator = t.Separator()
 		for i, cell := range row.Cells {
 			cell.Width = colWidths[i]
 			cell.Wrap = t.Wrap
@@ -239,7 +272,7 @@ func (c *TableCell) String() string {
 	}
 
 	s := cast.ToString(c.Value)
-	if c.Width > 0 {
+	if c.Width > 0 && c.isaTTY {
 		if c.Wrap && len(s) > c.Width {
 			return text.WrapString(s, c.Width)
 		} else {
@@ -269,7 +302,7 @@ func (t *TablePrinter) colWidths() []int {
 		}
 	}
 	numCols := len(colWidths)
-	separatorWidth := (numCols - 1) * len(t.Separator)
+	separatorWidth := (numCols - 1) * len(t.Separator())
 	totalWidth := separatorWidth
 	for _, width := range colWidths {
 		totalWidth += width
