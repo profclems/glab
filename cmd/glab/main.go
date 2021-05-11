@@ -128,10 +128,12 @@ func main() {
 		}
 	}
 
-	// Override the default column separator of tableprinter
-	tableprinter.SetSeparator("  ")
+	// Override the default column separator of tableprinter to double spaces
+	tableprinter.SetTTYSeparator("  ")
 	// Override the default terminal width of tableprinter
 	tableprinter.SetTerminalWidth(cmdFactory.IO.TerminalWidth())
+	// set whether terminal is a TTY or non-TTY
+	tableprinter.SetIsTTY(cmdFactory.IO.IsOutputTTY())
 
 	rootCmd.SetArgs(expandedArgs)
 
