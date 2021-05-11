@@ -10,6 +10,7 @@ import (
 	"github.com/profclems/glab/pkg/prompt"
 
 	"github.com/profclems/glab/api"
+	"github.com/profclems/glab/internal/glinstance"
 	"github.com/profclems/glab/internal/glrepo"
 
 	"github.com/MakeNowJust/heredoc"
@@ -76,13 +77,23 @@ func runCreateProject(cmd *cobra.Command, args []string, f *cmdutils.Factory) er
 	if err != nil {
 		return err
 	}
+	apiClient, err := f.HttpClient()
+	if err != nil {
+		return err
+	}
 
 	if len(args) == 1 {
-		projectPath = args[0]
-		if strings.Contains(projectPath, "/") {
-			pp := strings.Split(projectPath, "/")
-			projectPath = pp[1]
-			namespace = pp[0]
+		var host string
+		host, namespace, projectPath = projectPathFromArgs(args)
+		if host != "" {
+			glinstance.OverrideDefault(host)
+		}
+		user, err := api.CurrentUser(apiClient)
+		if err != nil {
+			return err
+		}
+		if user.Username == namespace {
+			namespace = ""
 		}
 	} else {
 		projectPath, err = git.ToplevelDir()
@@ -91,11 +102,6 @@ func runCreateProject(cmd *cobra.Command, args []string, f *cmdutils.Factory) er
 			return err
 		}
 		isPath = true
-	}
-
-	apiClient, err := f.HttpClient()
-	if err != nil {
-		return err
 	}
 
 	group, err := cmd.Flags().GetString("group")
@@ -253,4 +259,24 @@ func initialiseRepo(projectPath, remoteURL string) error {
 		return err
 	}
 	return nil
+}
+
+func projectPathFromArgs(args []string) (host, namespace, project string) {
+	pathURL, err := url.Parse(args[0])
+	if err == nil {
+		host = pathURL.Host
+		pp := strings.Split(pathURL.Path, "/")
+		if len(pp) >= 3 {
+			project = pp[len(pp)-1]
+			namespace = strings.Join(pp[1:len(pp)-1], "/")
+		}
+		return
+	}
+	project = args[0]
+	if strings.Contains(project, "/") {
+		pp := strings.Split(project, "/")
+		project = pp[1]
+		namespace = pp[0]
+	}
+	return
 }
