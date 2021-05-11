@@ -25,20 +25,24 @@ type RemoteArgs struct {
 // based on the user's git_protocol preference
 func RemoteURL(project *gitlab.Project, a *RemoteArgs) (string, error) {
 	if a.Protocol == "https" {
+		var (
+			username = "oauth2"
+			protocol = "https://"
+			url      = a.Url
+		)
 
-		if a.Username == "" {
-			a.Username = "oauth2"
+		if a.Username != "" {
+			username = a.Username
 		}
 
-		a.Protocol = "https://"
 		if strings.Contains(a.Url, "https://") {
-			a.Url = strings.TrimPrefix(a.Url, "https://")
-		} else if strings.HasPrefix(a.Url, "http://") {
-			a.Url = strings.TrimPrefix(a.Url, "http://")
-			a.Protocol = "http://"
+			url = strings.TrimPrefix(url, "https://")
+		} else if strings.HasPrefix(url, "http://") {
+			url = strings.TrimPrefix(url, "http://")
+			protocol = "http://"
 		}
 		return fmt.Sprintf("%s%s:%s@%s/%s.git",
-			a.Protocol, a.Username, a.Token, a.Url, project.PathWithNamespace), nil
+			protocol, username, a.Token, url, project.PathWithNamespace), nil
 	}
 	return project.SSHURLToRepo, nil
 }
