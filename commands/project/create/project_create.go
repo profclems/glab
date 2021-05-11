@@ -76,13 +76,28 @@ func runCreateProject(cmd *cobra.Command, args []string, f *cmdutils.Factory) er
 	if err != nil {
 		return err
 	}
+	apiClient, err := f.HttpClient()
+	if err != nil {
+		return err
+	}
 
 	if len(args) == 1 {
-		projectPath = args[0]
-		if strings.Contains(projectPath, "/") {
-			pp := strings.Split(projectPath, "/")
-			projectPath = pp[1]
-			namespace = pp[0]
+		var host string
+		host, namespace, projectPath = projectPathFromArgs(args)
+		if host != "" {
+			cfg, _ := f.Config()
+			client, err := api.NewClientWithCfg(host, cfg, false)
+			if err != nil {
+				return err
+			}
+			apiClient = client.Lab()
+		}
+		user, err := api.CurrentUser(apiClient)
+		if err != nil {
+			return err
+		}
+		if user.Username == namespace {
+			namespace = ""
 		}
 	} else {
 		projectPath, err = git.ToplevelDir()
@@ -91,11 +106,6 @@ func runCreateProject(cmd *cobra.Command, args []string, f *cmdutils.Factory) er
 			return err
 		}
 		isPath = true
-	}
-
-	apiClient, err := f.HttpClient()
-	if err != nil {
-		return err
 	}
 
 	group, err := cmd.Flags().GetString("group")
@@ -253,4 +263,15 @@ func initialiseRepo(projectPath, remoteURL string) error {
 		return err
 	}
 	return nil
+}
+
+func projectPathFromArgs(args []string) (host, namespace, project string) {
+	project = args[0]
+	if strings.Contains(project, "/") {
+		pp, _ := glrepo.FromFullName(project)
+		host = pp.RepoHost()
+		project = pp.RepoName()
+		namespace = pp.RepoNamespace()
+	}
+	return
 }
