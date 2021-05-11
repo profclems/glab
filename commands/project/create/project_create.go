@@ -10,7 +10,6 @@ import (
 	"github.com/profclems/glab/pkg/prompt"
 
 	"github.com/profclems/glab/api"
-	"github.com/profclems/glab/internal/glinstance"
 	"github.com/profclems/glab/internal/glrepo"
 
 	"github.com/MakeNowJust/heredoc"
@@ -86,7 +85,12 @@ func runCreateProject(cmd *cobra.Command, args []string, f *cmdutils.Factory) er
 		var host string
 		host, namespace, projectPath = projectPathFromArgs(args)
 		if host != "" {
-			glinstance.OverrideDefault(host)
+			cfg, _ := f.Config()
+			client, err := api.NewClientWithCfg(host, cfg, false)
+			if err != nil {
+				return err
+			}
+			apiClient = client.Lab()
 		}
 		user, err := api.CurrentUser(apiClient)
 		if err != nil {
@@ -262,21 +266,12 @@ func initialiseRepo(projectPath, remoteURL string) error {
 }
 
 func projectPathFromArgs(args []string) (host, namespace, project string) {
-	pathURL, err := url.Parse(args[0])
-	if err == nil {
-		host = pathURL.Host
-		pp := strings.Split(pathURL.Path, "/")
-		if len(pp) >= 3 {
-			project = pp[len(pp)-1]
-			namespace = strings.Join(pp[1:len(pp)-1], "/")
-		}
-		return
-	}
 	project = args[0]
 	if strings.Contains(project, "/") {
-		pp := strings.Split(project, "/")
-		project = pp[1]
-		namespace = pp[0]
+		pp, _ := glrepo.FromFullName(project)
+		host = pp.RepoHost()
+		project = pp.RepoName()
+		namespace = pp.RepoNamespace()
 	}
 	return
 }
