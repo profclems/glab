@@ -125,6 +125,7 @@ func loginRun() error {
 
 	hostname := opts.Hostname
 	apiHostname := opts.Hostname
+	isSelfHosted := false
 
 	if hostname == "" {
 		var hostType int
@@ -140,7 +141,7 @@ func loginRun() error {
 			return fmt.Errorf("could not prompt: %w", err)
 		}
 
-		isSelfHosted := hostType == 1
+		isSelfHosted = hostType == 1
 
 		hostname = glinstance.Default()
 		apiHostname = hostname
@@ -176,24 +177,23 @@ func loginRun() error {
 		}
 
 		user, err := api.CurrentUser(apiClient)
-		if err != nil {
-			return fmt.Errorf("error using api: %w", err)
-		}
-		username := user.Username
-		var keepGoing bool
-		err = survey.AskOne(&survey.Confirm{
-			Message: fmt.Sprintf(
-				"You're already logged into %s as %s. Do you want to re-authenticate?",
-				hostname,
-				username),
-			Default: false,
-		}, &keepGoing)
-		if err != nil {
-			return fmt.Errorf("could not prompt: %w", err)
-		}
+		if err == nil {
+			username := user.Username
+			var keepGoing bool
+			err = survey.AskOne(&survey.Confirm{
+				Message: fmt.Sprintf(
+					"You're already logged into %s as %s. Do you want to re-authenticate?",
+					hostname,
+					username),
+				Default: false,
+			}, &keepGoing)
+			if err != nil {
+				return fmt.Errorf("could not prompt: %w", err)
+			}
 
-		if !keepGoing {
-			return nil
+			if !keepGoing {
+				return nil
+			}
 		}
 	}
 
@@ -250,19 +250,21 @@ func loginRun() error {
 			}
 		}
 
-		err = survey.AskOne(&survey.Select{
-			Message: "Choose host API protocol",
-			Options: []string{
-				"HTTPS",
-				"HTTP",
-			},
-			Default: "HTTPS",
-		}, &apiProtocol)
-		if err != nil {
-			return fmt.Errorf("could not prompt: %w", err)
-		}
+		if isSelfHosted {
+			err = survey.AskOne(&survey.Select{
+				Message: "Choose host API protocol",
+				Options: []string{
+					"HTTPS",
+					"HTTP",
+				},
+				Default: "HTTPS",
+			}, &apiProtocol)
+			if err != nil {
+				return fmt.Errorf("could not prompt: %w", err)
+			}
 
-		apiProtocol = strings.ToLower(apiProtocol)
+			apiProtocol = strings.ToLower(apiProtocol)
+		}
 
 		fmt.Fprintf(opts.IO.StdErr, "- glab config set -h %s git_protocol %s\n", hostname, gitProtocol)
 		err = cfg.Set(hostname, "git_protocol", gitProtocol)
