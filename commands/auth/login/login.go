@@ -4,8 +4,11 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"os"
 	"regexp"
 	"strings"
+
+	"github.com/profclems/glab/commands/auth/authutils"
 
 	"github.com/profclems/glab/pkg/iostreams"
 
@@ -219,6 +222,13 @@ func loginRun() error {
 
 	gitProtocol := "https"
 	apiProtocol := "https"
+
+	glabExecutable := "glab"
+	if exe, err := os.Executable(); err == nil {
+		glabExecutable = exe
+	}
+	credentialFlow := &authutils.GitCredentialFlow{Executable: glabExecutable}
+
 	if opts.Interactive {
 		err = survey.AskOne(&survey.Select{
 			Message: "Choose default git protocol",
@@ -234,6 +244,11 @@ func loginRun() error {
 		}
 
 		gitProtocol = strings.ToLower(gitProtocol)
+		if opts.Interactive && gitProtocol != "ssh" {
+			if err := credentialFlow.Prompt(hostname, gitProtocol); err != nil {
+				return err
+			}
+		}
 
 		err = survey.AskOne(&survey.Select{
 			Message: "Choose host API protocol",
@@ -284,6 +299,13 @@ func loginRun() error {
 	err = cfg.Write()
 	if err != nil {
 		return err
+	}
+
+	if credentialFlow.ShouldSetup() {
+		err := credentialFlow.Setup(hostname, gitProtocol, username, token)
+		if err != nil {
+			return err
+		}
 	}
 
 	fmt.Fprintf(opts.IO.StdErr, "%s Logged in as %s\n", c.GreenCheck(), c.Bold(username))
