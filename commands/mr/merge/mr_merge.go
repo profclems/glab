@@ -188,11 +188,14 @@ func NewCmdMerge(f *cmdutils.Factory) *cobra.Command {
 
 			err = retry.Do(func() error {
 				mr, err = api.MergeMR(apiClient, repo.FullName(), mrIID, mergeOpts)
-				if err != nil {
-					return err
-				}
-				return nil
-			}, retry.Attempts(3), retry.Delay(time.Second*6))
+				return err
+			},
+				retry.RetryIf(func(err error) bool {
+					return err.Error() != "Branch cannot be merged"
+				}),
+				retry.Attempts(3),
+				retry.Delay(time.Second*6),
+			)
 
 			if err != nil {
 				return err
