@@ -137,7 +137,6 @@ func NewCmdList(f *cmdutils.Factory, runE func(opts *ListOptions) error) *cobra.
 }
 
 func listRun(opts *ListOptions) error {
-	c := opts.IO.Color()
 	apiClient, err := opts.HTTPClient()
 	if err != nil {
 		return err
@@ -231,6 +230,6 @@ func listRun(opts *ListOptions) error {
 	}
 	defer opts.IO.StopPager()
 
-	fmt.Fprintf(opts.IO.StdOut, "%s\n%s\n", title.Describe(), issueutils.DisplayIssueList(c, issues, repo.FullName()))
+	fmt.Fprintf(opts.IO.StdOut, "%s\n%s\n", title.Describe(), issueutils.DisplayIssueList(opts.IO, issues, repo.FullName()))
 	return nil
 }
