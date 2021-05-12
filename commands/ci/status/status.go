@@ -81,7 +81,11 @@ func NewCmdStatus(f *cmdutils.Factory) *cobra.Command {
 						return err
 					}
 					for _, job := range jobs {
-						duration := utils.PrettyTimeAgo(time.Duration(job.Duration))
+						end := time.Now()
+						if job.FinishedAt != nil {
+							end = *job.FinishedAt
+						}
+						duration := utils.FmtDuration(end.Sub(*job.StartedAt))
 						var status string
 						switch s := job.Status; s {
 						case "failed":
@@ -109,6 +113,10 @@ func NewCmdStatus(f *cmdutils.Factory) *cobra.Command {
 					}
 					fmt.Fprintf(writer.Newline(), "Pipeline State: %s\n\n", runningPipeline.Status)
 
+					// break loop if output is a TTY to avoid prompting
+					if !f.IO.IsOutputTTY() || !f.IO.PromptEnabled() {
+						break
+					}
 					if runningPipeline.Status == "running" && live {
 						pipes, err = api.GetPipelines(apiClient, l, repo.FullName())
 						if err != nil {

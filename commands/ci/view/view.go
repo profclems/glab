@@ -516,7 +516,7 @@ func jobsView(app *tview.Application, jobsCh chan []*gitlab.Job, inputCh chan st
 			if j.FinishedAt != nil {
 				end = *j.FinishedAt
 			}
-			b.SetText("\n" + fmtDurationWithDur(end.Sub(*j.StartedAt)))
+			b.SetText("\n" + utils.FmtDuration(end.Sub(*j.StartedAt)))
 			b.SetTextAlign(tview.AlignRight)
 		} else {
 			b.SetText("")
@@ -526,13 +526,6 @@ func jobsView(app *tview.Application, jobsCh chan []*gitlab.Job, inputCh chan st
 	}
 	root.SendToFront("jobs-" + curJob.Name)
 
-}
-func fmtDurationWithDur(d time.Duration) string {
-	d = d.Round(time.Second)
-	m := d / time.Minute
-	d -= m * time.Minute
-	s := d / time.Second
-	return fmt.Sprintf("%02dm %02ds", m, s)
 }
 func box(root *tview.Pages, key string, x, y, w, h int) *tview.TextView {
 	b, ok := boxes[key]
