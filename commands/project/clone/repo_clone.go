@@ -35,8 +35,6 @@ type CloneOptions struct {
 	Host              string
 	Protocol          string
 
-	RemoteArgs *glrepo.RemoteArgs
-
 	IO        *iostreams.IOStreams
 	APIClient *api.Client
 	Config    func() (config.Config, error)
@@ -121,13 +119,6 @@ Clone a GitLab repository/project
 			}
 
 			opts.Protocol, _ = cfg.Get(opts.Host, "git_protocol")
-
-			opts.RemoteArgs = &glrepo.RemoteArgs{
-				Protocol: opts.Protocol,
-				Token:    opts.APIClient.Token(),
-				Url:      opts.Host,
-				Username: opts.CurrentUser.Username,
-			}
 
 			if opts.GroupName != "" {
 				return groupClone(opts, ctxOpts)
@@ -229,10 +220,7 @@ func cloneRun(opts *CloneOptions, ctxOpts *ContextOpts) (err error) {
 				return
 			}
 		}
-		ctxOpts.Repo, err = glrepo.RemoteURL(ctxOpts.Project, opts.RemoteArgs)
-		if err != nil {
-			return
-		}
+		ctxOpts.Repo = glrepo.RemoteURL(ctxOpts.Project, opts.Protocol)
 	} else if !strings.HasSuffix(ctxOpts.Repo, ".git") {
 		ctxOpts.Repo += ".git"
 	}
@@ -262,10 +250,7 @@ func cloneRun(opts *CloneOptions, ctxOpts *ContextOpts) (err error) {
 			if err != nil {
 				return err
 			}
-			repoURL, err := glrepo.RemoteURL(fProject, opts.RemoteArgs)
-			if err != nil {
-				return err
-			}
+			repoURL := glrepo.RemoteURL(fProject, opts.Protocol)
 			err = git.AddUpstreamRemote(repoURL, opts.Dir)
 			if err != nil {
 				return err

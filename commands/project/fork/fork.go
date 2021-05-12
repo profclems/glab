@@ -264,17 +264,7 @@ loop:
 				}
 			}
 
-			remoteArgs := &glrepo.RemoteArgs{
-				Protocol: protocol,
-				Token:    apiClient.Token(),
-				Url:      opts.RepoToFork.RepoHost(),
-				Username: opts.CurrentUser.Username,
-			}
-
-			forkedRepoCloneURL, err := glrepo.RemoteURL(forkedProject, remoteArgs)
-			if err != nil {
-				return err
-			}
+			forkedRepoCloneURL := glrepo.RemoteURL(forkedProject, protocol)
 
 			_, err = git.AddRemote(remoteName, forkedRepoCloneURL)
 			if err != nil {
@@ -298,25 +288,16 @@ loop:
 			if err != nil {
 				return err
 			}
-			remoteArgs := &glrepo.RemoteArgs{
-				Protocol: protocol,
-				Token:    apiClient.Token(),
-				Url:      opts.RepoToFork.RepoHost(),
-				Username: opts.CurrentUser.Username,
-			}
-			forkedRepoURL, err := glrepo.RemoteURL(forkedProject, remoteArgs)
-			if err != nil {
-				return err
-			}
+
+			forkedRepoURL := glrepo.RemoteURL(forkedProject, protocol)
+
 			cloneDir, err := git.RunClone(forkedRepoURL, []string{})
 			if err != nil {
 				return fmt.Errorf("failed to clone fork: %w", err)
 			}
 
-			upstreamURL, err := glrepo.RemoteURL(repoToFork, remoteArgs)
-			if err != nil {
-				return err
-			}
+			upstreamURL := glrepo.RemoteURL(repoToFork, protocol)
+
 			err = git.AddUpstreamRemote(upstreamURL, cloneDir)
 			if err != nil {
 				return err

@@ -13,8 +13,8 @@ import (
 
 func Test_RemoteURL(t *testing.T) {
 	type args struct {
-		project *gitlab.Project
-		args    *RemoteArgs
+		project  *gitlab.Project
+		protocol string
 	}
 
 	for _, tt := range []struct {
@@ -27,35 +27,23 @@ func Test_RemoteURL(t *testing.T) {
 			name: "is_https",
 			args: args{
 				project: &gitlab.Project{
-					SSHURLToRepo:      "git@gitlab.com:profclems/glab.git",
-					HTTPURLToRepo:     "https://gitlab.com/profclems/glab.git",
-					PathWithNamespace: "profclems/glab",
+					SSHURLToRepo:  "git@gitlab.com:profclems/glab.git",
+					HTTPURLToRepo: "https://gitlab.com/profclems/glab.git",
 				},
-				args: &RemoteArgs{
-					Protocol: "https",
-					Token:    "token",
-					Url:      "https://gitlab.com",
-					Username: "user",
-				},
+				protocol: "https",
 			},
-			want: "https://user:token@gitlab.com/profclems/glab.git",
+			want: "https://gitlab.com/profclems/glab.git",
 		},
 		{
 			name: "host_is_http",
 			args: args{
 				project: &gitlab.Project{
-					SSHURLToRepo:      "git@gitlab.com:profclems/glab.git",
-					HTTPURLToRepo:     "http://gitlab.example.com/profclems/glab.git",
-					PathWithNamespace: "profclems/glab",
+					SSHURLToRepo:  "git@gitlabedd.com:profclems/glab.git",
+					HTTPURLToRepo: "http://gitlabedd.com/profclems/glab.git",
 				},
-				args: &RemoteArgs{
-					Protocol: "https",
-					Token:    "token",
-					Url:      "http://gitlab.example.com",
-					Username: "user",
-				},
+				protocol: "http",
 			},
-			want: "http://user:token@gitlab.example.com/profclems/glab.git",
+			want: "http://gitlabedd.com/profclems/glab.git",
 		},
 		{
 			name: "is_ssh",
@@ -63,35 +51,13 @@ func Test_RemoteURL(t *testing.T) {
 				project: &gitlab.Project{
 					SSHURLToRepo: "git@gitlab.com:profclems/glab.git",
 				},
-				args: &RemoteArgs{
-					Protocol: "ssh",
-				},
+				protocol: "ssh",
 			},
 			want: "git@gitlab.com:profclems/glab.git",
 		},
-		{
-			name: "no username means oauth2",
-			args: args{
-				project: &gitlab.Project{
-					SSHURLToRepo:      "git@gitlab.com:profclems/glab.git",
-					HTTPURLToRepo:     "https://gitlab.com/profclems/glab.git",
-					PathWithNamespace: "profclems/glab",
-				},
-				args: &RemoteArgs{
-					Protocol: "https",
-					Token:    "token",
-					Url:      "https://gitlab.com",
-				},
-			},
-			want: "https://oauth2:token@gitlab.com/profclems/glab.git",
-		},
 	} {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := RemoteURL(tt.args.project, tt.args.args)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("RemoteURL() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
+			got := RemoteURL(tt.args.project, tt.args.protocol)
 			if got != tt.want {
 				t.Errorf("RemoteURL() got = %v, want %v", got, tt.want)
 			}

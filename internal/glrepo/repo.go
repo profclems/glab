@@ -14,37 +14,13 @@ import (
 	"github.com/xanzy/go-gitlab"
 )
 
-type RemoteArgs struct {
-	Protocol string
-	Token    string
-	Url      string
-	Username string
-}
-
 // RemoteURL returns correct git clone URL of a repo
 // based on the user's git_protocol preference
-func RemoteURL(project *gitlab.Project, a *RemoteArgs) (string, error) {
-	if a.Protocol == "https" {
-		var (
-			username = "oauth2"
-			protocol = "https://"
-			url      = a.Url
-		)
-
-		if a.Username != "" {
-			username = a.Username
-		}
-
-		if strings.Contains(a.Url, "https://") {
-			url = strings.TrimPrefix(url, "https://")
-		} else if strings.HasPrefix(url, "http://") {
-			url = strings.TrimPrefix(url, "http://")
-			protocol = "http://"
-		}
-		return fmt.Sprintf("%s%s:%s@%s/%s.git",
-			protocol, username, a.Token, url, project.PathWithNamespace), nil
+func RemoteURL(project *gitlab.Project, protocol string) string {
+	if protocol == "ssh" {
+		return project.SSHURLToRepo
 	}
-	return project.SSHURLToRepo, nil
+	return project.HTTPURLToRepo
 }
 
 // FullName returns the the repo with its namespace (like profclems/glab). Respects group and subgroups names
