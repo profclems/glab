@@ -182,14 +182,12 @@ func NewCmdMerge(f *cmdutils.Factory) *cobra.Command {
 			f.IO.StartSpinner("Merging merge request !%d", mr.IID)
 
 			err = retry.Do(func() error {
-				retry.Attempts(3)
-				retry.Delay(time.Second * 6)
 				mr, err = api.MergeMR(apiClient, repo.FullName(), mr.IID, mergeOpts)
 				if err != nil {
 					return err
 				}
 				return nil
-			})
+			}, retry.Attempts(3), retry.Delay(time.Second*6))
 
 			if err != nil {
 				return err
