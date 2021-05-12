@@ -191,6 +191,11 @@ func NewCmdMerge(f *cmdutils.Factory) *cobra.Command {
 				return err
 			},
 				retry.RetryIf(func(err error) bool {
+					if !opts.RebaseBeforeMerge {
+						// If we are not rebasing then a `Branch cannot be merged` error
+						// is always relevant and should not be retried
+						return false
+					}
 					return err.Error() != "Branch cannot be merged"
 				}),
 				retry.Attempts(3),
