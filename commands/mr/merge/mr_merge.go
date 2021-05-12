@@ -3,11 +3,13 @@ package merge
 import (
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/profclems/glab/pkg/surveyext"
 
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/MakeNowJust/heredoc"
+	"github.com/avast/retry-go"
 	"github.com/profclems/glab/api"
 	"github.com/profclems/glab/commands/mr/mrutils"
 	"github.com/profclems/glab/pkg/prompt"
@@ -173,7 +175,17 @@ func NewCmdMerge(f *cmdutils.Factory) *cobra.Command {
 			}
 
 			f.IO.StartSpinner("Merging merge request !%d", mr.IID)
-			mr, err = api.MergeMR(apiClient, repo.FullName(), mr.IID, mergeOpts)
+
+			err = retry.Do(func() error {
+				retry.Attempts(3)
+				retry.Delay(time.Second * 6)
+				mr, err = api.MergeMR(apiClient, repo.FullName(), mr.IID, mergeOpts)
+				if err != nil {
+					return err
+				}
+				return nil
+			})
+
 			if err != nil {
 				return err
 			}
