@@ -519,11 +519,11 @@ func Test_DisplayAllMRs(t *testing.T) {
 		},
 	}
 
-	expected := `!1	add tests      	(trunk) ← (new-tests)  
-!2	fix bug        	(trunk) ← (new-feature)
-!1	add new feature	(trunk) ← (new-tests)  
+	expected := `!1	add tests	(trunk) ← (new-tests)
+!2	fix bug	(trunk) ← (new-feature)
+!1	add new feature	(trunk) ← (new-tests)
 `
 
-	got := DisplayAllMRs(streams.Color(), mrs, "unused")
+	got := DisplayAllMRs(streams, mrs, "unused")
 	assert.Equal(t, expected, got)
 }

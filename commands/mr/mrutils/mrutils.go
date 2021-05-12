@@ -100,8 +100,10 @@ func MRState(c *iostreams.ColorPalette, m *gitlab.MergeRequest) string {
 	}
 }
 
-func DisplayAllMRs(c *iostreams.ColorPalette, mrs []*gitlab.MergeRequest, projectID string) string {
+func DisplayAllMRs(streams *iostreams.IOStreams, mrs []*gitlab.MergeRequest, projectID string) string {
+	c := streams.Color()
 	table := tableprinter.NewTablePrinter()
+	table.SetIsTTY(streams.IsOutputTTY())
 	for _, m := range mrs {
 		table.AddCell(MRState(c, m))
 		table.AddCell(m.Title)
