@@ -188,19 +188,14 @@ func NewCmdMerge(f *cmdutils.Factory) *cobra.Command {
 
 			err = retry.Do(func() error {
 				mr, err = api.MergeMR(apiClient, repo.FullName(), mrIID, mergeOpts)
+				if err != nil && (!opts.RebaseBeforeMerge || err.Error() != "Branch cannot be merged") {
+					// Return an unrecoverable error if we are not rebasing OR if the
+					// error isn't the one we are working around, this makes the retry
+					// to quit instead of trying again
+					return retry.Unrecoverable(err)
+				}
 				return err
-			},
-				retry.RetryIf(func(err error) bool {
-					if !opts.RebaseBeforeMerge {
-						// If we are not rebasing then a `Branch cannot be merged` error
-						// is always relevant and should not be retried
-						return false
-					}
-					return err.Error() != "Branch cannot be merged"
-				}),
-				retry.Attempts(3),
-				retry.Delay(time.Second*6),
-			)
+			}, retry.Attempts(3), retry.Delay(time.Second*6))
 
 			if err != nil {
 				return err
