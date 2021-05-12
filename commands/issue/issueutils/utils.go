@@ -21,8 +21,10 @@ import (
 	"github.com/xanzy/go-gitlab"
 )
 
-func DisplayIssueList(c *iostreams.ColorPalette, issues []*gitlab.Issue, projectID string) string {
+func DisplayIssueList(streams *iostreams.IOStreams, issues []*gitlab.Issue, projectID string) string {
+	c := streams.Color()
 	table := tableprinter.NewTablePrinter()
+	table.SetIsTTY(streams.IsOutputTTY())
 	for _, issue := range issues {
 		table.AddCell(IssueState(c, issue))
 		table.AddCell(issue.Title)
