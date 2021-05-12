@@ -79,6 +79,14 @@ func TimeToPrettyTimeAgo(d time.Time) string {
 	return PrettyTimeAgo(ago)
 }
 
+func FmtDuration(d time.Duration) string {
+	d = d.Round(time.Second)
+	m := d / time.Minute
+	d -= m * time.Minute
+	s := d / time.Second
+	return fmt.Sprintf("%02dm %02ds", m, s)
+}
+
 func Humanize(s string) string {
 	// Replaces - and _ with spaces.
 	replace := "_-"
