@@ -187,8 +187,21 @@ func NewCmdMerge(f *cmdutils.Factory) *cobra.Command {
 			mrIID := mr.IID
 
 			err = retry.Do(func() error {
-				mr, err = api.MergeMR(apiClient, repo.FullName(), mrIID, mergeOpts)
-				if err != nil && (!opts.RebaseBeforeMerge || err.Error() != "Branch cannot be merged") {
+				var resp *gitlab.Response
+				mr, resp, err = api.MergeMR(apiClient, repo.FullName(), mrIID, mergeOpts)
+				if err != nil {
+					// https://docs.gitlab.com/ee/api/merge_requests.html#accept-mr
+					// `406` is the documented status code we will receive if the
+					// branch cannot be merged, this will catch situations where
+					// there are actually conflicts in the branch instead of just
+					// the situation we want to workaround (GitLab thinking branch
+					// is not mergeable right after a rebase), but we want to catch
+					// situations where the user rebased via external sources like
+					// the WebUI or running `glab rebase` before trying to merge
+					if resp.StatusCode == 406 {
+						return err
+					}
+
 					// Return an unrecoverable error if we are not rebasing OR if the
 					// error isn't the one we are working around, this makes the retry
 					// to quit instead of trying again
