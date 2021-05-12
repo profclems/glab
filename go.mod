@@ -28,7 +28,7 @@ require (
 	github.com/otiai10/copy v1.5.0
 	github.com/pkg/errors v0.9.1
 	github.com/rivo/tview v0.0.0-20210117162420-745e4ceeb711
-	github.com/rsteube/carapace v0.5.11
+	github.com/rsteube/carapace v0.5.12
 	github.com/spf13/cast v1.3.1
 	github.com/spf13/cobra v1.1.3
 	github.com/spf13/pflag v1.0.5
