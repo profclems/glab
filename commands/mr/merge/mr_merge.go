@@ -181,8 +181,13 @@ func NewCmdMerge(f *cmdutils.Factory) *cobra.Command {
 
 			f.IO.StartSpinner("Merging merge request !%d", mr.IID)
 
+			// Store the IID of the merge request here before overriding the `mr` variable
+			// inside the retry function, if the function fails at first the `mr` is replaced
+			// with `nil` and will cause a crash on the second run
+			mrIID := mr.IID
+
 			err = retry.Do(func() error {
-				mr, err = api.MergeMR(apiClient, repo.FullName(), mr.IID, mergeOpts)
+				mr, err = api.MergeMR(apiClient, repo.FullName(), mrIID, mergeOpts)
 				if err != nil {
 					return err
 				}
