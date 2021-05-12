@@ -32,6 +32,7 @@ type MergeOpts struct {
 	SquashBeforeMerge         bool
 	RebaseBeforeMerge         bool
 	RemoveSourceBranch        bool
+	SkipPrompts               bool
 
 	SquashMessage      string
 	MergeCommitMessage string
@@ -89,11 +90,15 @@ func NewCmdMerge(f *cmdutils.Factory) *cobra.Command {
 				return err
 			}
 
-			if !cmd.Flags().Changed("when-pipeline-succeeds") && f.IO.IsOutputTTY() && mr.Pipeline != nil {
+			if !cmd.Flags().Changed("when-pipeline-succeeds") &&
+				f.IO.IsOutputTTY() &&
+				mr.Pipeline != nil &&
+				f.IO.PromptEnabled() &&
+				!opts.SkipPrompts {
 				_ = prompt.Confirm(&opts.MergeWhenPipelineSucceeds, "Merge when pipeline succeeds?", true)
 			}
 
-			if f.IO.IsOutputTTY() {
+			if f.IO.IsOutputTTY() && !opts.SkipPrompts {
 				if !opts.SquashBeforeMerge && !opts.RebaseBeforeMerge && opts.MergeCommitMessage == "" {
 					opts.MergeMethod, err = mergeMethodSurvey()
 					if err != nil {
@@ -228,7 +233,8 @@ func NewCmdMerge(f *cmdutils.Factory) *cobra.Command {
 	mrMergeCmd.Flags().StringVarP(&opts.MergeCommitMessage, "message", "m", "", "Custom merge commit message")
 	mrMergeCmd.Flags().StringVarP(&opts.SquashMessage, "squash-message", "", "", "Custom Squash commit message")
 	mrMergeCmd.Flags().BoolVarP(&opts.SquashBeforeMerge, "squash", "s", false, "Squash commits on merge")
-	mrMergeCmd.Flags().BoolVarP(&opts.RebaseBeforeMerge, "rebase", "r", false, "Rebase the commits onto the base branch\n")
+	mrMergeCmd.Flags().BoolVarP(&opts.RebaseBeforeMerge, "rebase", "r", false, "Rebase the commits onto the base branch")
+	mrMergeCmd.Flags().BoolVarP(&opts.SkipPrompts, "yes", "y", false, "Skip submission confirmation prompt")
 
 	return mrMergeCmd
 }
