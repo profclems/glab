@@ -100,7 +100,7 @@ func NewCmdView(f *cmdutils.Factory) *cobra.Command {
 	mrViewCmd.Flags().IntVarP(&opts.CommentLimit, "per-page", "P", 20, "Number of items to list per page")
 
 	carapace.Gen(mrViewCmd).PositionalCompletion(
-      action.ActionMergeRequests(f, &gitlab.ListProjectMergeRequestsOptions{State: gitlab.String("opened")}),
+		action.ActionMergeRequests(f, &gitlab.ListProjectMergeRequestsOptions{State: gitlab.String("opened")}),
 	)
 
 	return mrViewCmd

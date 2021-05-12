@@ -7,7 +7,9 @@ import (
 
 	"github.com/profclems/glab/api"
 	"github.com/profclems/glab/commands/cmdutils"
+	"github.com/profclems/glab/commands/cmdutils/action"
 	"github.com/profclems/glab/commands/issue/issueutils"
+	"github.com/rsteube/carapace"
 
 	"github.com/MakeNowJust/heredoc"
 	"github.com/spf13/cobra"
@@ -162,6 +164,10 @@ func NewCmdUpdate(f *cmdutils.Factory) *cobra.Command {
 	issueUpdateCmd.Flags().StringP("milestone", "m", "", "title of the milestone to assign, pass \"\" or 0 to unassign")
 	issueUpdateCmd.Flags().StringSliceP("assignee", "a", []string{}, "assign users via username, prefix with '!' or '-' to remove from existing assignees, '+' to add, otherwise replace existing assignees with given users")
 	issueUpdateCmd.Flags().Bool("unassign", false, "unassign all users")
+
+	carapace.Gen(issueUpdateCmd).PositionalCompletion(
+		action.ActionIssues(f, &gitlab.ListProjectIssuesOptions{State: gitlab.String("opened")}),
+	)
 
 	return issueUpdateCmd
 }
