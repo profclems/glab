@@ -23,6 +23,7 @@ Examples
   $ glab mr list --all
   $ glab mr ls -a
   $ glab mr list --assignee=@me
+  $ glab mr list --reviewer=@me
   $ glab mr list --source-branch=new-feature
   $ glab mr list --target-branch=trunk
   $ glab mr list --search "this adds feature X"
@@ -47,6 +48,7 @@ Options
       --not-label strings      Filter merge requests by not having label <name>
   -p, --page int               Page number (default 1)
   -P, --per-page int           Number of items to list per page (default 30)
+  -r, --reviewer strings       Get only merge requests with users as reviewer
       --search string          Filter by <string> in title and description
   -s, --source-branch string   Filter by source branch <name>
   -t, --target-branch string   Filter by target branch <name>

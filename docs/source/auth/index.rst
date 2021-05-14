@@ -24,6 +24,7 @@ Subcommands
    :glob:
    :maxdepth: 0
 
+   git-credential <git-credential>
    login <login>
    status <status>
    
