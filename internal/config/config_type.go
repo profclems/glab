@@ -24,7 +24,7 @@ const (
 // This interface describes interacting with some persistent configuration for glab.
 type Config interface {
 	Get(string, string) (string, error)
-	GetWithSource(string, string) (string, string, error)
+	GetWithSource(string, string, bool) (string, string, error)
 	Set(string, string, string) error
 	UnsetHost(string)
 	Hosts() ([]string, error)
@@ -289,7 +289,6 @@ func NewBlankRoot() *yaml.Node {
 type fileConfig struct {
 	ConfigMap
 	documentRoot *yaml.Node
-	envSearched  bool
 }
 
 func (c *fileConfig) Root() *yaml.Node {
@@ -297,24 +296,20 @@ func (c *fileConfig) Root() *yaml.Node {
 }
 
 func (c *fileConfig) Get(hostname, key string) (string, error) {
-	env := GetFromEnv(key)
-	c.envSearched = true // set to avoid searching env again
-	if env != "" {
-		return env, nil
-	}
-	key = ConfigKeyEquivalence(key)
-	val, _, err := c.GetWithSource(hostname, key)
-	c.envSearched = false // reset
+	val, _, err := c.GetWithSource(hostname, key, true)
 	return val, err
 }
 
-func (c *fileConfig) GetWithSource(hostname, key string) (string, string, error) {
-	if !c.envSearched {
+func (c *fileConfig) GetWithSource(hostname, key string, searchENVVars bool) (string, string, error) {
+	if searchENVVars {
 		v, s := GetFromEnvWithSource(key)
 		if v != "" {
 			return v, s, nil
 		}
 	}
+
+	key = ConfigKeyEquivalence(key)
+
 	var cfgError error
 
 	if hostname != "" {
