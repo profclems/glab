@@ -7,7 +7,7 @@ require (
 	github.com/MakeNowJust/heredoc v1.0.0
 	github.com/acarl005/stripansi v0.0.0-20180116102854-5a71ef0e047d
 	github.com/alecthomas/assert v0.0.0-20170929043011-405dbfeb8e38
-	github.com/avast/retry-go v3.0.0+incompatible // indirect
+	github.com/avast/retry-go v3.0.0+incompatible
 	github.com/briandowns/spinner v1.12.0
 	github.com/charmbracelet/glamour v0.2.1-0.20200724174618-1246d13c1684
 	github.com/dustin/go-humanize v1.0.0
@@ -34,7 +34,7 @@ require (
 	github.com/spf13/pflag v1.0.5
 	github.com/stretchr/testify v1.7.0
 	github.com/tidwall/pretty v1.1.0
-	github.com/xanzy/go-gitlab v0.49.0
+	github.com/xanzy/go-gitlab v0.50.0
 	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9
 	golang.org/x/sync v0.0.0-20201020160332-67f06af15bc9
 	gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c
