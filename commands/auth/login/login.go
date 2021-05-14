@@ -4,8 +4,11 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"os"
 	"regexp"
 	"strings"
+
+	"github.com/profclems/glab/commands/auth/authutils"
 
 	"github.com/profclems/glab/pkg/iostreams"
 
@@ -122,6 +125,7 @@ func loginRun() error {
 
 	hostname := opts.Hostname
 	apiHostname := opts.Hostname
+	isSelfHosted := false
 
 	if hostname == "" {
 		var hostType int
@@ -137,7 +141,7 @@ func loginRun() error {
 			return fmt.Errorf("could not prompt: %w", err)
 		}
 
-		isSelfHosted := hostType == 1
+		isSelfHosted = hostType == 1
 
 		hostname = glinstance.Default()
 		apiHostname = hostname
@@ -164,7 +168,7 @@ func loginRun() error {
 	if token := config.GetFromEnv("token"); token != "" {
 		fmt.Fprintf(opts.IO.StdErr, "%s you have GITLAB_TOKEN or OAUTH_TOKEN environment variable set. Unset if you don't want to use it for glab\n", c.Yellow("!WARNING:"))
 	}
-	existingToken, _, _ := cfg.GetWithSource(hostname, "token")
+	existingToken, _, _ := cfg.GetWithSource(hostname, "token", false)
 
 	if existingToken != "" && opts.Interactive {
 		apiClient, err := cmdutils.LabClientFunc(hostname, cfg, false)
@@ -173,24 +177,23 @@ func loginRun() error {
 		}
 
 		user, err := api.CurrentUser(apiClient)
-		if err != nil {
-			return fmt.Errorf("error using api: %w", err)
-		}
-		username := user.Username
-		var keepGoing bool
-		err = survey.AskOne(&survey.Confirm{
-			Message: fmt.Sprintf(
-				"You're already logged into %s as %s. Do you want to re-authenticate?",
-				hostname,
-				username),
-			Default: false,
-		}, &keepGoing)
-		if err != nil {
-			return fmt.Errorf("could not prompt: %w", err)
-		}
+		if err == nil {
+			username := user.Username
+			var keepGoing bool
+			err = survey.AskOne(&survey.Confirm{
+				Message: fmt.Sprintf(
+					"You're already logged into %s as %s. Do you want to re-authenticate?",
+					hostname,
+					username),
+				Default: false,
+			}, &keepGoing)
+			if err != nil {
+				return fmt.Errorf("could not prompt: %w", err)
+			}
 
-		if !keepGoing {
-			return nil
+			if !keepGoing {
+				return nil
+			}
 		}
 	}
 
@@ -219,6 +222,13 @@ func loginRun() error {
 
 	gitProtocol := "https"
 	apiProtocol := "https"
+
+	glabExecutable := "glab"
+	if exe, err := os.Executable(); err == nil {
+		glabExecutable = exe
+	}
+	credentialFlow := &authutils.GitCredentialFlow{Executable: glabExecutable}
+
 	if opts.Interactive {
 		err = survey.AskOne(&survey.Select{
 			Message: "Choose default git protocol",
@@ -234,20 +244,27 @@ func loginRun() error {
 		}
 
 		gitProtocol = strings.ToLower(gitProtocol)
-
-		err = survey.AskOne(&survey.Select{
-			Message: "Choose host API protocol",
-			Options: []string{
-				"HTTPS",
-				"HTTP",
-			},
-			Default: "HTTPS",
-		}, &apiProtocol)
-		if err != nil {
-			return fmt.Errorf("could not prompt: %w", err)
+		if opts.Interactive && gitProtocol != "ssh" {
+			if err := credentialFlow.Prompt(hostname, gitProtocol); err != nil {
+				return err
+			}
 		}
 
-		apiProtocol = strings.ToLower(apiProtocol)
+		if isSelfHosted {
+			err = survey.AskOne(&survey.Select{
+				Message: "Choose host API protocol",
+				Options: []string{
+					"HTTPS",
+					"HTTP",
+				},
+				Default: "HTTPS",
+			}, &apiProtocol)
+			if err != nil {
+				return fmt.Errorf("could not prompt: %w", err)
+			}
+
+			apiProtocol = strings.ToLower(apiProtocol)
+		}
 
 		fmt.Fprintf(opts.IO.StdErr, "- glab config set -h %s git_protocol %s\n", hostname, gitProtocol)
 		err = cfg.Set(hostname, "git_protocol", gitProtocol)
@@ -284,6 +301,13 @@ func loginRun() error {
 	err = cfg.Write()
 	if err != nil {
 		return err
+	}
+
+	if credentialFlow.ShouldSetup() {
+		err := credentialFlow.Setup(hostname, gitProtocol, username, token)
+		if err != nil {
+			return err
+		}
 	}
 
 	fmt.Fprintf(opts.IO.StdErr, "%s Logged in as %s\n", c.GreenCheck(), c.Bold(username))

@@ -24,7 +24,7 @@ const (
 // This interface describes interacting with some persistent configuration for glab.
 type Config interface {
 	Get(string, string) (string, error)
-	GetWithSource(string, string) (string, string, error)
+	GetWithSource(string, string, bool) (string, string, error)
 	Set(string, string, string) error
 	UnsetHost(string)
 	Hosts() ([]string, error)
@@ -296,16 +296,20 @@ func (c *fileConfig) Root() *yaml.Node {
 }
 
 func (c *fileConfig) Get(hostname, key string) (string, error) {
-	env := GetFromEnv(key)
-	if env != "" {
-		return env, nil
-	}
-	key = ConfigKeyEquivalence(key)
-	val, _, err := c.GetWithSource(hostname, key)
+	val, _, err := c.GetWithSource(hostname, key, true)
 	return val, err
 }
 
-func (c *fileConfig) GetWithSource(hostname, key string) (string, string, error) {
+func (c *fileConfig) GetWithSource(hostname, key string, searchENVVars bool) (string, string, error) {
+	if searchENVVars {
+		v, s := GetFromEnvWithSource(key)
+		if v != "" {
+			return v, s, nil
+		}
+	}
+
+	key = ConfigKeyEquivalence(key)
+
 	var cfgError error
 
 	if hostname != "" {
@@ -632,10 +636,16 @@ func defaultFor(key string) string {
 // retrieves the value of the environment if any of the matching names has been set.
 // It returns the value, which will be empty if the variable is not present.
 func GetFromEnv(key string) (value string) {
+	value, _ = GetFromEnvWithSource(key)
+	return
+}
+
+func GetFromEnvWithSource(key string) (value, source string) {
 	envEq := EnvKeyEquivalence(key)
 	for _, e := range envEq {
 		if val := os.Getenv(e); val != "" {
 			value = val
+			source = e
 			break
 		}
 	}

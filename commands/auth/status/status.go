@@ -84,7 +84,7 @@ func statusRun(opts *StatusOpts) error {
 			statusInfo[instance] = append(statusInfo[instance], fmt.Sprintf(x, ys...))
 		}
 
-		token, tokenSource, _ := cfg.GetWithSource(instance, "token")
+		token, tokenSource, _ := cfg.GetWithSource(instance, "token", false)
 		apiClient, err := api.NewClientWithCfg(instance, cfg, false)
 		if opts.HttpClientOverride != nil {
 			apiClient, _ = opts.HttpClientOverride(token, instance)

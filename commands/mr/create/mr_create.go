@@ -644,24 +644,7 @@ func repoRemote(labClient *gitlab.Client, opts *CreateOpts, repo glrepo.Interfac
 			return nil, err
 		}
 		gitProtocol, _ := cfg.Get(repo.RepoHost(), "git_protocol")
-		token, _ := cfg.Get(repo.RepoHost(), "token")
-		repoURL := project.SSHURLToRepo
-
-		if gitProtocol != "ssh" {
-			u, err := api.CurrentUser(labClient)
-			if err != nil {
-				return nil, fmt.Errorf("failed to get current user info: %q", err)
-			}
-			remoteArgs := &glrepo.RemoteArgs{
-				Protocol: gitProtocol,
-				Token:    token,
-				Url:      repo.RepoHost(),
-				Username: u.Username,
-			}
-
-			repoURL, _ = glrepo.RemoteURL(project, remoteArgs)
-
-		}
+		repoURL := glrepo.RemoteURL(project, gitProtocol)
 
 		gitRemote, err := git.AddRemote(remoteName, repoURL)
 		if err != nil {

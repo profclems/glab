@@ -32,11 +32,11 @@ func genKey(host, key string) string {
 }
 
 func (c configStub) Get(host, key string) (string, error) {
-	val, _, err := c.GetWithSource(host, key)
+	val, _, err := c.GetWithSource(host, key, true)
 	return val, err
 }
 
-func (c configStub) GetWithSource(host, key string) (string, string, error) {
+func (c configStub) GetWithSource(host, key string, searchENVVars bool) (string, string, error) {
 	if v, found := c[genKey(host, key)]; found {
 		return v, "(memory)", nil
 	}

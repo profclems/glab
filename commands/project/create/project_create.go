@@ -174,22 +174,7 @@ func runCreateProject(cmd *cobra.Command, args []string, f *cmdutils.Factory) er
 			webURL, _ := url.Parse(project.WebURL)
 			protocol, _ := cfg.Get(webURL.Host, "git_protocol")
 
-			remoteArgs := &glrepo.RemoteArgs{
-				Protocol: protocol,
-				Url:      webURL.Host,
-			}
-
-			if protocol != "ssh" {
-				remoteArgs.Token, _ = cfg.Get(webURL.Host, "token")
-				currentUser, err := api.CurrentUser(apiClient)
-				if err == nil {
-					remoteArgs.Username = currentUser.Username
-				}
-			}
-			remote, err := glrepo.RemoteURL(project, remoteArgs)
-			if err != nil {
-				return err
-			}
+			remote := glrepo.RemoteURL(project, protocol)
 			_, err = git.AddRemote("origin", remote)
 			if err != nil {
 				return err
