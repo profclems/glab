@@ -168,7 +168,7 @@ func loginRun() error {
 	if token := config.GetFromEnv("token"); token != "" {
 		fmt.Fprintf(opts.IO.StdErr, "%s you have GITLAB_TOKEN or OAUTH_TOKEN environment variable set. Unset if you don't want to use it for glab\n", c.Yellow("!WARNING:"))
 	}
-	existingToken, _, _ := cfg.GetWithSource(hostname, "token")
+	existingToken, _, _ := cfg.GetWithSource(hostname, "token", false)
 
 	if existingToken != "" && opts.Interactive {
 		apiClient, err := cmdutils.LabClientFunc(hostname, cfg, false)

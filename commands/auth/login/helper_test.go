@@ -11,7 +11,7 @@ import (
 
 type tinyConfig map[string]string
 
-func (c tinyConfig) GetWithSource(host, key string) (string, string, error) {
+func (c tinyConfig) GetWithSource(host, key string, searchENVVars bool) (string, string, error) {
 	return c[fmt.Sprintf("%s:%s", host, key)], c["_source"], nil
 }
 
