@@ -7,7 +7,9 @@ import (
 
 	"github.com/profclems/glab/api"
 	"github.com/profclems/glab/commands/cmdutils"
+	"github.com/profclems/glab/commands/cmdutils/action"
 	"github.com/profclems/glab/pkg/git"
+	"github.com/rsteube/carapace"
 
 	"github.com/MakeNowJust/heredoc"
 	"github.com/spf13/cobra"
@@ -100,6 +102,10 @@ func NewCmdRun(f *cmdutils.Factory) *cobra.Command {
 	}
 	pipelineRunCmd.Flags().StringP("branch", "b", "", "Create pipeline on branch/ref <string>")
 	pipelineRunCmd.Flags().StringSliceP("variables", "", []string{}, "Pass variables to pipeline")
+
+	carapace.Gen(pipelineRunCmd).FlagCompletion(carapace.ActionMap{
+		"branch": action.ActionBranches(pipelineRunCmd, f, &gitlab.ListBranchesOptions{}),
+	})
 
 	return pipelineRunCmd
 }

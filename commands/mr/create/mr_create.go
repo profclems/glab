@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/profclems/glab/pkg/iostreams"
+	"github.com/rsteube/carapace"
 
 	"github.com/MakeNowJust/heredoc"
 	"github.com/profclems/glab/internal/config"
@@ -16,6 +17,7 @@ import (
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/profclems/glab/api"
 	"github.com/profclems/glab/commands/cmdutils"
+	"github.com/profclems/glab/commands/cmdutils/action"
 	"github.com/profclems/glab/commands/mr/mrutils"
 	"github.com/profclems/glab/pkg/git"
 	"github.com/profclems/glab/pkg/prompt"
@@ -156,6 +158,17 @@ func NewCmdCreate(f *cmdutils.Factory, runE func(opts *CreateOpts) error) *cobra
 	mrCreateCmd.Flags().StringVarP(&opts.MRCreateTargetProject, "target-project", "", "", "Add target project by id or OWNER/REPO or GROUP/NAMESPACE/REPO")
 	_ = mrCreateCmd.Flags().MarkHidden("target-project")
 	_ = mrCreateCmd.Flags().MarkDeprecated("target-project", "Use --repo instead")
+
+	carapace.Gen(mrCreateCmd).FlagCompletion(carapace.ActionMap{
+		"assignee": carapace.ActionMultiParts(",", func(c carapace.Context) carapace.Action {
+			return action.ActionProjectMembers(mrCreateCmd, f, &gitlab.ListProjectMembersOptions{}).Invoke(c).Filter(c.Parts).ToA()
+		}),
+		"label": carapace.ActionMultiParts(",", func(c carapace.Context) carapace.Action {
+			return action.ActionLabels(mrCreateCmd, f).Invoke(c).Filter(c.Parts).ToA()
+		}),
+		"source-branch": action.ActionBranches(mrCreateCmd, f, &gitlab.ListBranchesOptions{}),
+		"target-branch": action.ActionBranches(mrCreateCmd, f, &gitlab.ListBranchesOptions{}),
+	})
 
 	return mrCreateCmd
 }

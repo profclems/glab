@@ -4,8 +4,10 @@ import (
 	"fmt"
 
 	"github.com/profclems/glab/pkg/iostreams"
+	"github.com/rsteube/carapace"
 
 	"github.com/profclems/glab/commands/cmdutils"
+	"github.com/profclems/glab/commands/cmdutils/action"
 
 	"github.com/profclems/glab/internal/config"
 	"github.com/spf13/cobra"
@@ -36,6 +38,11 @@ func NewCmdDelete(f *cmdutils.Factory, runF func(*DeleteOptions) error) *cobra.C
 			return deleteRun(cmd, opts)
 		},
 	}
+
+	carapace.Gen(aliasDeleteCmd).PositionalCompletion(
+		action.ActionConfigAliases(),
+	)
+
 	return aliasDeleteCmd
 }
 

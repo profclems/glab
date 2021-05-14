@@ -6,7 +6,10 @@ import (
 	"github.com/MakeNowJust/heredoc"
 	"github.com/profclems/glab/api"
 	"github.com/profclems/glab/commands/cmdutils"
+	"github.com/profclems/glab/commands/cmdutils/action"
 	"github.com/profclems/glab/commands/issue/issueutils"
+	"github.com/rsteube/carapace"
+	"github.com/xanzy/go-gitlab"
 
 	"github.com/spf13/cobra"
 )
@@ -51,6 +54,10 @@ func NewCmdUnsubscribe(f *cmdutils.Factory) *cobra.Command {
 			return nil
 		},
 	}
+
+	carapace.Gen(issueUnsubscribeCmd).PositionalCompletion(
+		action.ActionIssues(issueUnsubscribeCmd, f, &gitlab.ListProjectIssuesOptions{State: gitlab.String("opened")}),
+	)
 
 	return issueUnsubscribeCmd
 }

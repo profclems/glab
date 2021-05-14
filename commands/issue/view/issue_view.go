@@ -5,7 +5,9 @@ import (
 	"strings"
 
 	"github.com/profclems/glab/pkg/iostreams"
+	"github.com/rsteube/carapace"
 
+	"github.com/profclems/glab/commands/cmdutils/action"
 	"github.com/profclems/glab/commands/issue/issueutils"
 
 	"github.com/profclems/glab/api"
@@ -109,6 +111,10 @@ func NewCmdView(f *cmdutils.Factory) *cobra.Command {
 	issueViewCmd.Flags().BoolVarP(&opts.Web, "web", "w", false, "Open mr in a browser. Uses default browser or browser specified in BROWSER variable")
 	issueViewCmd.Flags().IntVarP(&opts.CommentPageNumber, "page", "p", 1, "Page number")
 	issueViewCmd.Flags().IntVarP(&opts.CommentLimit, "per-page", "P", 20, "Number of items to list per page")
+
+	carapace.Gen(issueViewCmd).PositionalCompletion(
+		action.ActionIssues(issueViewCmd, f, &gitlab.ListProjectIssuesOptions{State: gitlab.String("opened")}),
+	)
 
 	return issueViewCmd
 }

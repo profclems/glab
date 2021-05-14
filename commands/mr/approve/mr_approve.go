@@ -6,7 +6,9 @@ import (
 	"github.com/MakeNowJust/heredoc"
 	"github.com/profclems/glab/api"
 	"github.com/profclems/glab/commands/cmdutils"
+	"github.com/profclems/glab/commands/cmdutils/action"
 	"github.com/profclems/glab/commands/mr/mrutils"
+	"github.com/rsteube/carapace"
 	"github.com/spf13/cobra"
 	"github.com/xanzy/go-gitlab"
 )
@@ -65,5 +67,14 @@ func NewCmdApprove(f *cmdutils.Factory) *cobra.Command {
 
 	//mrApproveCmd.Flags().StringP("password", "p", "", "Current user’s password. Required if 'Require user password to approve' is enabled in the project settings.")
 	mrApproveCmd.Flags().StringP("sha", "s", "", "SHA which must match the SHA of the HEAD commit of the merge request")
+
+	carapace.Gen(mrApproveCmd).PositionalAnyCompletion(
+		carapace.ActionCallback(func(c carapace.Context) carapace.Action {
+			branches := action.ActionBranches(mrApproveCmd, f, &gitlab.ListBranchesOptions{}).Invoke(c)
+			mergeRequests := action.ActionMergeRequests(mrApproveCmd, f, &gitlab.ListProjectMergeRequestsOptions{}).Invoke(c)
+			return branches.Merge(mergeRequests).Filter(c.Args).ToA()
+		}),
+	)
+
 	return mrApproveCmd
 }

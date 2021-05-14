@@ -14,8 +14,10 @@ import (
 	"github.com/profclems/glab/api"
 	"github.com/profclems/glab/commands/ci/ciutils"
 	"github.com/profclems/glab/commands/cmdutils"
+	"github.com/profclems/glab/commands/cmdutils/action"
 	"github.com/profclems/glab/pkg/git"
 	"github.com/profclems/glab/pkg/utils"
+	"github.com/rsteube/carapace"
 
 	"github.com/MakeNowJust/heredoc"
 	"github.com/gdamore/tcell/v2"
@@ -100,6 +102,11 @@ func NewCmdView(f *cmdutils.Factory) *cobra.Command {
 	}
 
 	pipelineCIView.Flags().StringVarP(&opts.RefName, "branch", "b", "", "Check pipeline status for a branch/tag. (Default is the current branch)")
+
+	carapace.Gen(pipelineCIView).FlagCompletion(carapace.ActionMap{
+		"branch": action.ActionBranches(pipelineCIView, f, &gitlab.ListBranchesOptions{}),
+	})
+
 	return pipelineCIView
 }
 

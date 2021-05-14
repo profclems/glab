@@ -5,12 +5,14 @@ import (
 	"fmt"
 
 	"github.com/profclems/glab/pkg/iostreams"
+	"github.com/rsteube/carapace"
 
 	"github.com/MakeNowJust/heredoc"
 	"github.com/profclems/glab/internal/glrepo"
 
 	"github.com/profclems/glab/api"
 	"github.com/profclems/glab/commands/cmdutils"
+	"github.com/profclems/glab/commands/cmdutils/action"
 	"github.com/profclems/glab/commands/mr/mrutils"
 	"github.com/profclems/glab/pkg/utils"
 
@@ -135,6 +137,25 @@ func NewCmdList(f *cmdutils.Factory, runE func(opts *ListOptions) error) *cobra.
 	mrListCmd.Flags().BoolVarP(&opts.Mine, "mine", "", false, "Get only merge requests assigned to me")
 	_ = mrListCmd.Flags().MarkHidden("mine")
 	_ = mrListCmd.Flags().MarkDeprecated("mine", "use --assignee=@me")
+
+	carapace.Gen(mrListCmd).FlagCompletion(carapace.ActionMap{
+		"assignee": carapace.ActionMultiParts(",", func(c carapace.Context) carapace.Action {
+			return action.ActionProjectMembers(mrListCmd, f, &gitlab.ListProjectMembersOptions{}).Invoke(c).Filter(c.Parts).ToA()
+		}),
+		"author": action.ActionProjectMembers(mrListCmd, f, &gitlab.ListProjectMembersOptions{}),
+		"label": carapace.ActionMultiParts(",", func(c carapace.Context) carapace.Action {
+			return action.ActionLabels(mrListCmd, f).Invoke(c).Filter(c.Parts).ToA()
+		}),
+		"not-label": carapace.ActionMultiParts(",", func(c carapace.Context) carapace.Action {
+			return action.ActionLabels(mrListCmd, f).Invoke(c).Filter(c.Parts).ToA()
+		}),
+		"milestone": action.ActionMilestones(mrListCmd, f, &gitlab.ListMilestonesOptions{}),
+		"reviewer": carapace.ActionMultiParts(",", func(c carapace.Context) carapace.Action {
+			return action.ActionProjectMembers(mrListCmd, f, &gitlab.ListProjectMembersOptions{}).Invoke(c).Filter(c.Parts).ToA()
+		}),
+		"source-branch": action.ActionBranches(mrListCmd, f, &gitlab.ListBranchesOptions{}),
+		"target-branch": action.ActionBranches(mrListCmd, f, &gitlab.ListBranchesOptions{}),
+	})
 
 	return mrListCmd
 }

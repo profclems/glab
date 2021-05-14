@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/profclems/glab/pkg/iostreams"
+	"github.com/rsteube/carapace"
 
 	"github.com/MakeNowJust/heredoc"
 	"github.com/profclems/glab/internal/config"
@@ -17,6 +18,7 @@ import (
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/profclems/glab/api"
 	"github.com/profclems/glab/commands/cmdutils"
+	"github.com/profclems/glab/commands/cmdutils/action"
 	"github.com/profclems/glab/commands/issue/issueutils"
 	"github.com/profclems/glab/pkg/prompt"
 	"github.com/spf13/cobra"
@@ -134,6 +136,22 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 	issueCreateCmd.Flags().BoolVar(&opts.Web, "web", false, "continue issue creation with web interface")
 	issueCreateCmd.Flags().IntSliceVarP(&opts.LinkedIssues, "linked-issues", "", []int{}, "The IIDs of issues that this issue links to")
 	issueCreateCmd.Flags().StringVarP(&opts.IssueLinkType, "link-type", "", "relates_to", "Type for the issue link")
+
+	carapace.Gen(issueCreateCmd).FlagCompletion(carapace.ActionMap{
+		// TODO more flags
+		"assignee": carapace.ActionMultiParts(",", func(c carapace.Context) carapace.Action {
+			return action.ActionProjectMembers(issueCreateCmd, f, &gitlab.ListProjectMembersOptions{}).Invoke(c).Filter(c.Parts).ToA()
+		}),
+		"label": carapace.ActionMultiParts(",", func(c carapace.Context) carapace.Action {
+			return action.ActionLabels(issueCreateCmd, f).Invoke(c).Filter(c.Parts).ToA()
+		}),
+		"linked-issues": carapace.ActionMultiParts(",", func(c carapace.Context) carapace.Action {
+			return action.ActionIssues(issueCreateCmd, f, &gitlab.ListProjectIssuesOptions{State: gitlab.String("opened")}).Invoke(c).Filter(c.Parts).ToA()
+		}),
+		"linked-mr": action.ActionMergeRequests(issueCreateCmd, f, &gitlab.ListProjectMergeRequestsOptions{State: gitlab.String("opened")}),
+		"link-type": carapace.ActionValues("relates_to", "blocks", "is_blocked_by"),
+		"milestone": action.ActionMilestones(issueCreateCmd, f, &gitlab.ListMilestonesOptions{}),
+	})
 
 	return issueCreateCmd
 }

@@ -4,10 +4,12 @@ import (
 	"fmt"
 
 	"github.com/profclems/glab/pkg/iostreams"
+	"github.com/rsteube/carapace"
 
 	"github.com/MakeNowJust/heredoc"
 	"github.com/profclems/glab/api"
 	"github.com/profclems/glab/commands/cmdutils"
+	"github.com/profclems/glab/commands/cmdutils/action"
 	"github.com/profclems/glab/internal/config"
 	"github.com/profclems/glab/internal/glinstance"
 	"github.com/spf13/cobra"
@@ -47,6 +49,10 @@ func NewCmdStatus(f *cmdutils.Factory, runE func(*StatusOpts) error) *cobra.Comm
 
 	cmd.Flags().StringVarP(&opts.Hostname, "hostname", "h", "", "Check a specific instance's authentication status")
 	cmd.Flags().BoolVarP(&opts.ShowToken, "show-token", "t", false, "Display the auth token")
+
+	carapace.Gen(cmd).FlagCompletion(carapace.ActionMap{
+		"hostname": action.ActionConfigHosts(),
+	})
 
 	return cmd
 }

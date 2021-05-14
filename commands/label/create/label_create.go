@@ -5,8 +5,10 @@ import (
 
 	"github.com/MakeNowJust/heredoc"
 	"github.com/profclems/glab/api"
+	"github.com/rsteube/carapace"
 
 	"github.com/profclems/glab/commands/cmdutils"
+	"github.com/profclems/glab/commands/cmdutils/action"
 	"github.com/spf13/cobra"
 	"github.com/xanzy/go-gitlab"
 )
@@ -62,6 +64,10 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 	_ = labelCreateCmd.MarkFlagRequired("name")
 	labelCreateCmd.Flags().StringP("color", "c", "#428BCA", "Color of label in plain or HEX code. (Default: #428BCA)")
 	labelCreateCmd.Flags().StringP("description", "d", "", "Label description")
+
+	carapace.Gen(labelCreateCmd).FlagCompletion(carapace.ActionMap{
+		"name": action.ActionLabels(labelCreateCmd, f),
+	})
 
 	return labelCreateCmd
 }

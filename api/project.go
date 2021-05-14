@@ -51,15 +51,15 @@ var ForkProject = func(client *gitlab.Client, projectID interface{}, opts *gitla
 	return project, nil
 }
 
-var GetGroup = func(client *gitlab.Client, groupID interface{}) (*gitlab.Group, error) {
+var ListUserProjects = func(client *gitlab.Client, userID interface{}, opts *gitlab.ListProjectsOptions) ([]*gitlab.Project, error) {
 	if client == nil {
 		client = apiClient.Lab()
 	}
-	group, _, err := client.Groups.GetGroup(groupID)
+	project, _, err := client.Projects.ListUserProjects(userID, opts)
 	if err != nil {
 		return nil, err
 	}
-	return group, nil
+	return project, nil
 }
 
 var ListGroupProjects = func(client *gitlab.Client, groupID interface{}, opts *gitlab.ListGroupProjectsOptions) ([]*gitlab.Project, error) {

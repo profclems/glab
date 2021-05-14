@@ -6,6 +6,7 @@ import (
 	"regexp"
 
 	"github.com/profclems/glab/pkg/iostreams"
+	"github.com/rsteube/carapace"
 
 	"github.com/profclems/glab/internal/glrepo"
 	"github.com/profclems/glab/pkg/prompt"
@@ -13,6 +14,7 @@ import (
 	"github.com/profclems/glab/api"
 	"github.com/profclems/glab/commands/ci/ciutils"
 	"github.com/profclems/glab/commands/cmdutils"
+	"github.com/profclems/glab/commands/cmdutils/action"
 	"github.com/profclems/glab/pkg/git"
 	"github.com/profclems/glab/pkg/utils"
 
@@ -73,6 +75,13 @@ func NewCmdTrace(f *cmdutils.Factory, runE func(traceOpts *TraceOpts) error) *co
 	}
 
 	pipelineCITraceCmd.Flags().StringVarP(&opts.Branch, "branch", "b", "", "Check pipeline status for a branch. (Default is the current branch)")
+
+	carapace.Gen(pipelineCITraceCmd).FlagCompletion(carapace.ActionMap{
+		"branch": action.ActionBranches(pipelineCITraceCmd, f, &gitlab.ListBranchesOptions{}),
+	})
+
+	// TODO complete pipeline jobs
+
 	return pipelineCITraceCmd
 }
 

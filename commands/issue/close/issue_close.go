@@ -5,8 +5,10 @@ import (
 
 	"github.com/MakeNowJust/heredoc"
 	"github.com/profclems/glab/api"
+	"github.com/rsteube/carapace"
 
 	"github.com/profclems/glab/commands/cmdutils"
+	"github.com/profclems/glab/commands/cmdutils/action"
 	"github.com/profclems/glab/commands/issue/issueutils"
 	"github.com/spf13/cobra"
 	"github.com/xanzy/go-gitlab"
@@ -51,5 +53,10 @@ func NewCmdClose(f *cmdutils.Factory) *cobra.Command {
 			return nil
 		},
 	}
+
+	carapace.Gen(issueCloseCmd).PositionalCompletion(
+		action.ActionIssues(issueCloseCmd, f, &gitlab.ListProjectIssuesOptions{State: gitlab.String("opened")}),
+	)
+
 	return issueCloseCmd
 }

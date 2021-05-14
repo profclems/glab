@@ -6,7 +6,9 @@ import (
 	"github.com/MakeNowJust/heredoc"
 	"github.com/profclems/glab/api"
 	"github.com/profclems/glab/commands/cmdutils"
+	"github.com/profclems/glab/commands/cmdutils/action"
 	"github.com/profclems/glab/commands/mr/mrutils"
+	"github.com/rsteube/carapace"
 
 	"github.com/spf13/cobra"
 	"github.com/xanzy/go-gitlab"
@@ -58,6 +60,10 @@ func NewCmdReopen(f *cmdutils.Factory) *cobra.Command {
 			return nil
 		},
 	}
+
+	carapace.Gen(mrReopenCmd).PositionalCompletion(
+		action.ActionMergeRequests(mrReopenCmd, f, &gitlab.ListProjectMergeRequestsOptions{State: gitlab.String("closed")}),
+	)
 
 	return mrReopenCmd
 }

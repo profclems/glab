@@ -8,10 +8,12 @@ import (
 	"strings"
 
 	"github.com/profclems/glab/pkg/iostreams"
+	"github.com/rsteube/carapace"
 
 	"github.com/MakeNowJust/heredoc"
 	"github.com/profclems/glab/api"
 	"github.com/profclems/glab/commands/cmdutils"
+	"github.com/profclems/glab/commands/cmdutils/action"
 	"github.com/profclems/glab/internal/glrepo"
 	"github.com/spf13/cobra"
 	"github.com/xanzy/go-gitlab"
@@ -107,6 +109,12 @@ func NewCmdSet(f *cmdutils.Factory, runE func(opts *SetOpts) error) *cobra.Comma
 	cmd.Flags().StringVarP(&opts.Group, "group", "g", "", "Set variable for a group")
 	cmd.Flags().BoolVarP(&opts.Masked, "masked", "m", false, "Whether the variable is masked")
 	cmd.Flags().BoolVarP(&opts.Protected, "protected", "p", false, "Whether the variable is protected")
+
+	carapace.Gen(cmd).FlagCompletion(carapace.ActionMap{
+		"type":  carapace.ActionValues("env_var", "file"),
+		"group": action.ActionGroups(cmd, f, &gitlab.ListGroupsOptions{}),
+	})
+
 	return cmd
 }
 

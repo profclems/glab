@@ -5,12 +5,14 @@ import (
 	"fmt"
 
 	"github.com/profclems/glab/pkg/iostreams"
+	"github.com/rsteube/carapace"
 
 	"github.com/MakeNowJust/heredoc"
 	"github.com/profclems/glab/internal/glrepo"
 
 	"github.com/profclems/glab/api"
 	"github.com/profclems/glab/commands/cmdutils"
+	"github.com/profclems/glab/commands/cmdutils/action"
 	"github.com/profclems/glab/commands/issue/issueutils"
 	"github.com/profclems/glab/pkg/utils"
 
@@ -132,6 +134,27 @@ func NewCmdList(f *cmdutils.Factory, runE func(opts *ListOptions) error) *cobra.
 	issueListCmd.Flags().BoolVarP(&opts.Mine, "mine", "M", false, "Filter only issues issues assigned to me")
 	_ = issueListCmd.Flags().MarkHidden("mine")
 	_ = issueListCmd.Flags().MarkDeprecated("mine", "use --assignee=@me")
+
+	carapace.Gen(issueListCmd).FlagCompletion(carapace.ActionMap{
+		"assignee": action.ActionProjectMembers(issueListCmd, f, &gitlab.ListProjectMembersOptions{}),
+		"not-assignee": carapace.ActionMultiParts(",", func(c carapace.Context) carapace.Action {
+			return action.ActionProjectMembers(issueListCmd, f, &gitlab.ListProjectMembersOptions{}).Invoke(c).Filter(c.Parts).ToA()
+		}),
+		"author": action.ActionProjectMembers(issueListCmd, f, &gitlab.ListProjectMembersOptions{}),
+		"not-author": carapace.ActionMultiParts(",", func(c carapace.Context) carapace.Action {
+			return action.ActionProjectMembers(issueListCmd, f, &gitlab.ListProjectMembersOptions{}).Invoke(c).Filter(c.Parts).ToA()
+		}),
+		"in": carapace.ActionMultiParts(",", func(c carapace.Context) carapace.Action {
+			return carapace.ActionValues("title", "description").Invoke(c).Filter(c.Parts).ToA()
+		}),
+		"label": carapace.ActionMultiParts(",", func(c carapace.Context) carapace.Action {
+			return action.ActionLabels(issueListCmd, f).Invoke(c).Filter(c.Parts).ToA()
+		}),
+		"not-label": carapace.ActionMultiParts(",", func(c carapace.Context) carapace.Action {
+			return action.ActionLabels(issueListCmd, f).Invoke(c).Filter(c.Parts).ToA()
+		}),
+		"milestone": action.ActionMilestones(issueListCmd, f, &gitlab.ListMilestonesOptions{}),
+	})
 
 	return issueListCmd
 }

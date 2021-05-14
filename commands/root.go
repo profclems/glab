@@ -20,6 +20,7 @@ import (
 	variableCmd "github.com/profclems/glab/commands/variable"
 	versionCmd "github.com/profclems/glab/commands/version"
 	"github.com/profclems/glab/internal/glrepo"
+	"github.com/rsteube/carapace"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 )
@@ -107,6 +108,9 @@ func NewCmdRoot(f *cmdutils.Factory, version, buildDate string) *cobra.Command {
 	rootCmd.AddCommand(apiCmd.NewCmdApi(f, nil))
 
 	rootCmd.Flags().BoolP("version", "v", false, "show glab version information")
+
+	carapace.Gen(rootCmd)
+
 	return rootCmd
 }
 

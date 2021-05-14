@@ -4,7 +4,9 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/profclems/glab/commands/cmdutils/action"
 	"github.com/profclems/glab/commands/issue/issueutils"
+	"github.com/rsteube/carapace"
 
 	"github.com/profclems/glab/api"
 	"github.com/profclems/glab/commands/cmdutils"
@@ -61,6 +63,10 @@ func NewCmdNote(f *cmdutils.Factory) *cobra.Command {
 		},
 	}
 	issueNoteCreateCmd.Flags().StringP("message", "m", "", "Comment/Note message")
+
+	carapace.Gen(issueNoteCreateCmd).PositionalCompletion(
+		action.ActionIssues(issueNoteCreateCmd, f, &gitlab.ListProjectIssuesOptions{State: gitlab.String("opened")}),
+	)
 
 	return issueNoteCreateCmd
 }

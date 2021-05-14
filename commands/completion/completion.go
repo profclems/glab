@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/profclems/glab/pkg/iostreams"
+	"github.com/rsteube/carapace"
 
 	"github.com/spf13/cobra"
 )
@@ -47,5 +48,10 @@ For Homebrew, see <https://docs.brew.sh/Shell-Completion>
 	}
 
 	completionCmd.Flags().StringVarP(&shellType, "shell", "s", "bash", "Shell type: {bash|zsh|fish|powershell}")
+
+	carapace.Gen(completionCmd).FlagCompletion(carapace.ActionMap{
+		"shell": carapace.ActionValues("bash", "fish", "powershell", "zsh"),
+	})
+
 	return completionCmd
 }

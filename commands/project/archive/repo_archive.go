@@ -11,6 +11,8 @@ import (
 	"github.com/MakeNowJust/heredoc"
 	"github.com/dustin/go-humanize"
 	"github.com/profclems/glab/commands/cmdutils"
+	"github.com/profclems/glab/commands/cmdutils/action"
+	"github.com/rsteube/carapace"
 	"github.com/spf13/cobra"
 	"github.com/xanzy/go-gitlab"
 )
@@ -104,6 +106,15 @@ func NewCmdArchive(f *cmdutils.Factory) *cobra.Command {
 
 	repoArchiveCmd.Flags().StringP("format", "f", "zip", "Optionally Specify format if you want a downloaded archive: {tar.gz|tar.bz2|tbz|tbz2|tb2|bz2|tar|zip} (Default: zip)")
 	repoArchiveCmd.Flags().StringP("sha", "s", "", "The commit SHA to download. A tag, branch reference, or SHA can be used. This defaults to the tip of the default branch if not specified")
+
+	carapace.Gen(repoArchiveCmd).FlagCompletion(carapace.ActionMap{
+		"format": carapace.ActionValues("tar.gz", "tar.bz2", "tbz", "tbz2", "tb2", "bz2", "tar", "zip"),
+		"sha": carapace.ActionCallback(func(c carapace.Context) carapace.Action {
+			branches := action.ActionBranches(repoArchiveCmd, f, &gitlab.ListBranchesOptions{}).Invoke(c)
+			tags := action.ActionTags(repoArchiveCmd, f, &gitlab.ListTagsOptions{}).Invoke(c)
+			return branches.Merge(tags).ToA() // TODO sha
+		}),
+	})
 
 	return repoArchiveCmd
 }

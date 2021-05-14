@@ -5,8 +5,10 @@ import (
 
 	"github.com/MakeNowJust/heredoc"
 	"github.com/profclems/glab/commands/cmdutils"
+	"github.com/profclems/glab/commands/cmdutils/action"
 	"github.com/profclems/glab/internal/config"
 	"github.com/profclems/glab/internal/glinstance"
+	"github.com/rsteube/carapace"
 	"github.com/spf13/cobra"
 )
 
@@ -77,6 +79,14 @@ func NewCmdConfigGet(f *cmdutils.Factory) *cobra.Command {
 	cmd.Flags().StringVarP(&hostname, "host", "h", "", "Get per-host setting")
 	cmd.Flags().BoolP("global", "g", false, "Read from global config file (~/.config/glab-cli/config.yml). [Default: looks through Environment variables → Local → Global]")
 
+	carapace.Gen(cmd).FlagCompletion(carapace.ActionMap{
+		"host": action.ActionConfigHosts(),
+	})
+
+	carapace.Gen(cmd).PositionalCompletion(
+		action.ActionConfigKeys(),
+	)
+
 	return cmd
 }
 
@@ -129,6 +139,18 @@ Specifying the --hostname flag also saves in the global config file
 
 	cmd.Flags().StringVarP(&hostname, "host", "h", "", "Set per-host setting")
 	cmd.Flags().BoolVarP(&isGlobal, "global", "g", false, "write to global ~/.config/glab-cli/config.yml file rather than the repository .glab-cli/config/config")
+
+	carapace.Gen(cmd).FlagCompletion(carapace.ActionMap{
+		"host": action.ActionConfigHosts(),
+	})
+
+	carapace.Gen(cmd).PositionalCompletion(
+		action.ActionConfigKeys(),
+		carapace.ActionCallback(func(c carapace.Context) carapace.Action {
+			return action.ActionConfigValues(c.Args[0])
+		}),
+	)
+
 	return cmd
 }
 

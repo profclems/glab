@@ -6,10 +6,12 @@ import (
 	"net/url"
 
 	"github.com/profclems/glab/pkg/iostreams"
+	"github.com/rsteube/carapace"
 
 	"github.com/MakeNowJust/heredoc"
 	"github.com/profclems/glab/api"
 	"github.com/profclems/glab/commands/cmdutils"
+	"github.com/profclems/glab/commands/cmdutils/action"
 	"github.com/profclems/glab/internal/config"
 	"github.com/profclems/glab/internal/glrepo"
 	"github.com/profclems/glab/internal/run"
@@ -90,6 +92,10 @@ func NewCmdFork(f *cmdutils.Factory, runE func(*cmdutils.Factory) error) *cobra.
 	forkCmd.Flags().StringVarP(&opts.Path, "path", "p", "", "The path assigned to the resultant project after forking")
 	forkCmd.Flags().BoolVarP(&opts.Clone, "clone", "c", false, "Clone the fork {true|false}")
 	forkCmd.Flags().BoolVar(&opts.AddRemote, "remote", false, "Add remote for fork {true|false}")
+
+	carapace.Gen(forkCmd).PositionalCompletion(
+		action.ActionRepo(forkCmd, f),
+	)
 
 	return forkCmd
 }

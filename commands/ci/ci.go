@@ -10,6 +10,7 @@ import (
 	ciTraceCmd "github.com/profclems/glab/commands/ci/trace"
 	ciViewCmd "github.com/profclems/glab/commands/ci/view"
 	"github.com/profclems/glab/commands/cmdutils"
+	"github.com/profclems/glab/commands/cmdutils/action"
 
 	"github.com/spf13/cobra"
 )
@@ -23,6 +24,7 @@ func NewCmdCI(f *cmdutils.Factory) *cobra.Command {
 	}
 
 	cmdutils.EnableRepoOverride(ciCmd, f)
+	action.EnableRepoOverride(ciCmd, f)
 
 	ciCmd.AddCommand(legacyCICmd.NewCmdCI(f))
 	ciCmd.AddCommand(ciTraceCmd.NewCmdTrace(f, nil))

@@ -6,8 +6,11 @@ import (
 	"github.com/MakeNowJust/heredoc"
 	"github.com/profclems/glab/api"
 	"github.com/profclems/glab/commands/cmdutils"
+	"github.com/profclems/glab/commands/cmdutils/action"
 	"github.com/profclems/glab/commands/issue/issueutils"
+	"github.com/rsteube/carapace"
 	"github.com/spf13/cobra"
+	"github.com/xanzy/go-gitlab"
 )
 
 func NewCmdSubscribe(f *cmdutils.Factory) *cobra.Command {
@@ -50,6 +53,10 @@ func NewCmdSubscribe(f *cmdutils.Factory) *cobra.Command {
 			return nil
 		},
 	}
+
+	carapace.Gen(issueSubscribeCmd).PositionalCompletion(
+		action.ActionIssues(issueSubscribeCmd, f, &gitlab.ListProjectIssuesOptions{State: gitlab.String("opened")}),
+	)
 
 	return issueSubscribeCmd
 }

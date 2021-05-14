@@ -8,12 +8,14 @@ import (
 	"strings"
 
 	"github.com/profclems/glab/pkg/prompt"
+	"github.com/rsteube/carapace"
 
 	"github.com/profclems/glab/api"
 	"github.com/profclems/glab/internal/glrepo"
 
 	"github.com/MakeNowJust/heredoc"
 	"github.com/profclems/glab/commands/cmdutils"
+	"github.com/profclems/glab/commands/cmdutils/action"
 	"github.com/profclems/glab/internal/run"
 	"github.com/profclems/glab/pkg/git"
 	"github.com/spf13/cobra"
@@ -53,6 +55,14 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 	projectCreateCmd.Flags().BoolP("private", "p", false, "Make project private: visible only to project members")
 	projectCreateCmd.Flags().BoolP("public", "P", false, "Make project public: visible without any authentication")
 	projectCreateCmd.Flags().Bool("readme", false, "Initialize project with README.md")
+
+	carapace.Gen(projectCreateCmd).FlagCompletion(carapace.ActionMap{
+		"group": action.ActionGroups(projectCreateCmd, f, &gitlab.ListGroupsOptions{}),
+	})
+
+	carapace.Gen(projectCreateCmd).PositionalCompletion(
+		action.ActionRepo(projectCreateCmd, f),
+	)
 
 	return projectCreateCmd
 }

@@ -11,6 +11,7 @@ import (
 	"github.com/profclems/glab/api"
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/pkg/git"
+	"github.com/rsteube/carapace"
 
 	"github.com/MakeNowJust/heredoc"
 	"github.com/spf13/cobra"
@@ -37,6 +38,10 @@ func NewCmdLint(f *cmdutils.Factory) *cobra.Command {
 			return lintRun(f, path)
 		},
 	}
+
+	carapace.Gen(pipelineCILintCmd).PositionalCompletion(
+		carapace.ActionFiles(".gitlab-ci.yml"),
+	)
 
 	return pipelineCILintCmd
 }

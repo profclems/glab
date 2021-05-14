@@ -5,10 +5,12 @@ import (
 	"strings"
 
 	"github.com/profclems/glab/pkg/iostreams"
+	"github.com/rsteube/carapace"
 
 	"github.com/MakeNowJust/heredoc"
 	"github.com/profclems/glab/api"
 	"github.com/profclems/glab/commands/cmdutils"
+	"github.com/profclems/glab/commands/cmdutils/action"
 	"github.com/profclems/glab/internal/glrepo"
 	"github.com/profclems/glab/pkg/prompt"
 	"github.com/spf13/cobra"
@@ -32,7 +34,7 @@ func NewCmdDelete(f *cmdutils.Factory) *cobra.Command {
 		BaseRepo: f.BaseRepo,
 	}
 
-	var projectCreateCmd = &cobra.Command{
+	var projectDeleteCmd = &cobra.Command{
 		Use:   "delete [<NAMESPACE>/]<NAME>",
 		Short: `Delete an existing repository on GitLab`,
 		Long:  `Delete an existing repository on GitLab`,
@@ -52,9 +54,13 @@ func NewCmdDelete(f *cmdutils.Factory) *cobra.Command {
 	  `),
 	}
 
-	projectCreateCmd.Flags().BoolVarP(&opts.ForceDelete, "yes", "y", false, "Skip the confirmation prompt and immediately delete the repository.")
+	projectDeleteCmd.Flags().BoolVarP(&opts.ForceDelete, "yes", "y", false, "Skip the confirmation prompt and immediately delete the repository.")
 
-	return projectCreateCmd
+	carapace.Gen(projectDeleteCmd).PositionalCompletion(
+		action.ActionRepo(projectDeleteCmd, f),
+	)
+
+	return projectDeleteCmd
 }
 
 func deleteRun(opts *DeleteOpts) error {

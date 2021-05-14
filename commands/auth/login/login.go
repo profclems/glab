@@ -11,11 +11,13 @@ import (
 	"github.com/profclems/glab/commands/auth/authutils"
 
 	"github.com/profclems/glab/pkg/iostreams"
+	"github.com/rsteube/carapace"
 
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/MakeNowJust/heredoc"
 	"github.com/profclems/glab/api"
 	"github.com/profclems/glab/commands/cmdutils"
+	"github.com/profclems/glab/commands/cmdutils/action"
 	"github.com/profclems/glab/internal/config"
 	"github.com/profclems/glab/internal/glinstance"
 	"github.com/spf13/cobra"
@@ -99,6 +101,10 @@ func NewCmdLogin(f *cmdutils.Factory) *cobra.Command {
 	cmd.Flags().StringVarP(&opts.Hostname, "hostname", "h", "", "The hostname of the GitLab instance to authenticate with")
 	cmd.Flags().StringVarP(&opts.Token, "token", "t", "", "Your GitLab access token")
 	cmd.Flags().BoolVar(&tokenStdin, "stdin", false, "Read token from standard input")
+
+	carapace.Gen(cmd).FlagCompletion(carapace.ActionMap{
+		"hostname": action.ActionConfigHosts(),
+	})
 
 	return cmd
 }

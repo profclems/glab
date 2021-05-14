@@ -4,8 +4,10 @@ import (
 	"fmt"
 
 	"github.com/profclems/glab/api"
+	"github.com/profclems/glab/commands/cmdutils/action"
 	"github.com/profclems/glab/commands/mr/mrutils"
 	"github.com/profclems/glab/pkg/tableprinter"
+	"github.com/rsteube/carapace"
 
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/spf13/cobra"
@@ -77,6 +79,14 @@ func NewCmdApprovers(f *cmdutils.Factory) *cobra.Command {
 			return nil
 		},
 	}
+
+	carapace.Gen(mrApproversCmd).PositionalCompletion(
+		carapace.ActionCallback(func(c carapace.Context) carapace.Action {
+			branches := action.ActionBranches(mrApproversCmd, f, &gitlab.ListBranchesOptions{}).Invoke(c)
+			mergeRequests := action.ActionMergeRequests(mrApproversCmd, f, &gitlab.ListProjectMergeRequestsOptions{}).Invoke(c)
+			return branches.Merge(mergeRequests).ToA()
+		}),
+	)
 
 	return mrApproversCmd
 }

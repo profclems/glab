@@ -2,6 +2,7 @@ package release
 
 import (
 	"github.com/profclems/glab/commands/cmdutils"
+	"github.com/profclems/glab/commands/cmdutils/action"
 	releaseListCmd "github.com/profclems/glab/commands/release/list"
 
 	"github.com/spf13/cobra"
@@ -15,6 +16,7 @@ func NewCmdRelease(f *cmdutils.Factory) *cobra.Command {
 	}
 
 	cmdutils.EnableRepoOverride(releaseCmd, f)
+	action.EnableRepoOverride(releaseCmd, f)
 	releaseCmd.AddCommand(releaseListCmd.NewCmdReleaseList(f))
 
 	return releaseCmd

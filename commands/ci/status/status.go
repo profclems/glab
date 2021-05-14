@@ -7,8 +7,11 @@ import (
 	"github.com/profclems/glab/api"
 	ciTraceCmd "github.com/profclems/glab/commands/ci/trace"
 	"github.com/profclems/glab/commands/cmdutils"
+	"github.com/profclems/glab/commands/cmdutils/action"
 	"github.com/profclems/glab/pkg/git"
 	"github.com/profclems/glab/pkg/utils"
+	"github.com/rsteube/carapace"
+	"github.com/xanzy/go-gitlab"
 
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/MakeNowJust/heredoc"
@@ -164,6 +167,10 @@ func NewCmdStatus(f *cmdutils.Factory) *cobra.Command {
 	pipelineStatusCmd.Flags().BoolP("live", "l", false, "Show status in real-time till pipeline ends")
 	pipelineStatusCmd.Flags().BoolP("compact", "c", false, "Show status in compact format")
 	pipelineStatusCmd.Flags().StringP("branch", "b", "", "Check pipeline status for a branch. (Default is current branch)")
+
+	carapace.Gen(pipelineStatusCmd).FlagCompletion(carapace.ActionMap{
+		"branch": action.ActionBranches(pipelineStatusCmd, f, &gitlab.ListBranchesOptions{}),
+	})
 
 	return pipelineStatusCmd
 }

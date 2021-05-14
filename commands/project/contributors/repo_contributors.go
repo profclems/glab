@@ -4,9 +4,11 @@ import (
 	"fmt"
 
 	"github.com/profclems/glab/pkg/iostreams"
+	"github.com/rsteube/carapace"
 
 	"github.com/MakeNowJust/heredoc"
 	"github.com/profclems/glab/commands/cmdutils"
+	"github.com/profclems/glab/commands/cmdutils/action"
 	"github.com/profclems/glab/internal/glrepo"
 	"github.com/profclems/glab/pkg/tableprinter"
 	"github.com/profclems/glab/pkg/utils"
@@ -50,11 +52,18 @@ func NewCmdContributors(f *cmdutils.Factory) *cobra.Command {
 	}
 
 	cmdutils.EnableRepoOverride(repoContributorsCmd, f)
+	action.EnableRepoOverride(repoContributorsCmd, f)
 
 	repoContributorsCmd.Flags().StringVarP(&opts.OrderBy, "order", "o", "commits", "Return contributors ordered by name, email, or commits (orders by commit date) fields")
 	repoContributorsCmd.Flags().StringVarP(&opts.Sort, "sort", "s", "", "Return contributors sorted in asc or desc order")
 	repoContributorsCmd.Flags().IntVarP(&opts.Page, "page", "p", 1, "Page number")
 	repoContributorsCmd.Flags().IntVarP(&opts.PerPage, "per-page", "P", 30, "Number of items to list per page.")
+
+	carapace.Gen(repoContributorsCmd).FlagCompletion(carapace.ActionMap{
+		"order": carapace.ActionValues("name", "email", "commits"),
+		"sort":  carapace.ActionValues("asc", "desc"),
+	})
+
 	return repoContributorsCmd
 }
 

@@ -6,10 +6,12 @@ import (
 	"strings"
 
 	"github.com/profclems/glab/pkg/iostreams"
+	"github.com/rsteube/carapace"
 
 	"github.com/MakeNowJust/heredoc"
 	"github.com/profclems/glab/api"
 	"github.com/profclems/glab/commands/cmdutils"
+	"github.com/profclems/glab/commands/cmdutils/action"
 	"github.com/profclems/glab/internal/config"
 	"github.com/profclems/glab/internal/glinstance"
 	"github.com/profclems/glab/internal/glrepo"
@@ -145,6 +147,15 @@ Clone a GitLab repository/project
 		}
 		return &cmdutils.FlagError{Err: fmt.Errorf("%w\nSeparate git clone flags with '--'.", err)}
 	})
+
+	carapace.Gen(repoCloneCmd).FlagCompletion(carapace.ActionMap{
+		"group":      action.ActionGroups(repoCloneCmd, f, &gitlab.ListGroupsOptions{}),
+		"visibility": carapace.ActionValues("public", "internal", "private"),
+	})
+
+	carapace.Gen(repoCloneCmd).PositionalCompletion(
+		action.ActionRepo(repoCloneCmd, f),
+	)
 
 	return repoCloneCmd
 }

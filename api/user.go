@@ -57,3 +57,14 @@ var UsersByNames = func(client *gitlab.Client, names []string) ([]*gitlab.User, 
 	}
 	return users, nil
 }
+
+var ListUsers = func(client *gitlab.Client, opts *gitlab.ListUsersOptions) ([]*gitlab.User, error) {
+	if client == nil {
+		client = apiClient.Lab()
+	}
+	users, _, err := client.Users.ListUsers(opts)
+	if err != nil {
+		return nil, err
+	}
+	return users, nil
+}

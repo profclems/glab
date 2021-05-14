@@ -3,6 +3,7 @@ package mr
 import (
 	"github.com/MakeNowJust/heredoc"
 	"github.com/profclems/glab/commands/cmdutils"
+	"github.com/profclems/glab/commands/cmdutils/action"
 	mrApproveCmd "github.com/profclems/glab/commands/mr/approve"
 	mrApproversCmd "github.com/profclems/glab/commands/mr/approvers"
 	mrCheckoutCmd "github.com/profclems/glab/commands/mr/checkout"
@@ -47,6 +48,7 @@ func NewCmdMR(f *cmdutils.Factory) *cobra.Command {
 	}
 
 	cmdutils.EnableRepoOverride(mrCmd, f)
+	action.EnableRepoOverride(mrCmd, f)
 
 	mrCmd.AddCommand(mrApproveCmd.NewCmdApprove(f))
 	mrCmd.AddCommand(mrApproversCmd.NewCmdApprovers(f))

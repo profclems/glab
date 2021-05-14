@@ -13,3 +13,15 @@ var CreateBranch = func(client *gitlab.Client, projectID interface{}, opts *gitl
 
 	return branch, nil
 }
+
+var ListBranches = func(client *gitlab.Client, projectID interface{}, opts *gitlab.ListBranchesOptions) ([]*gitlab.Branch, error) {
+	if client == nil {
+		client = apiClient.Lab()
+	}
+	branches, _, err := client.Branches.ListBranches(projectID, opts)
+	if err != nil {
+		return nil, err
+	}
+
+	return branches, nil
+}

@@ -3,6 +3,7 @@ package issue
 import (
 	"github.com/MakeNowJust/heredoc"
 	"github.com/profclems/glab/commands/cmdutils"
+	"github.com/profclems/glab/commands/cmdutils/action"
 	issueBoardCmd "github.com/profclems/glab/commands/issue/board"
 	issueCloseCmd "github.com/profclems/glab/commands/issue/close"
 	issueCreateCmd "github.com/profclems/glab/commands/issue/create"
@@ -39,6 +40,7 @@ func NewCmdIssue(f *cmdutils.Factory) *cobra.Command {
 	}
 
 	cmdutils.EnableRepoOverride(issueCmd, f)
+	action.EnableRepoOverride(issueCmd, f)
 
 	issueCmd.AddCommand(issueCloseCmd.NewCmdClose(f))
 	issueCmd.AddCommand(issueBoardCmd.NewCmdBoard(f))

@@ -7,6 +7,7 @@ import (
 	"github.com/profclems/glab/commands/ci/ciutils"
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/pkg/utils"
+	"github.com/rsteube/carapace"
 
 	"github.com/MakeNowJust/heredoc"
 	"github.com/spf13/cobra"
@@ -77,6 +78,12 @@ func NewCmdList(f *cmdutils.Factory) *cobra.Command {
 	pipelineListCmd.Flags().StringP("sort", "", "desc", "Sort pipeline by {asc|desc}. (Defaults to desc)")
 	pipelineListCmd.Flags().IntP("page", "p", 1, "Page number")
 	pipelineListCmd.Flags().IntP("per-page", "P", 30, "Number of items to list per page. (default 30)")
+
+	carapace.Gen(pipelineListCmd).FlagCompletion(carapace.ActionMap{
+		"orderBy": carapace.ActionValues("id", "status", "ref", "updated_at", "user_id"),
+		"sort":    carapace.ActionValues("asc", "desc"),
+		"status":  carapace.ActionValues("running", "pending", "success", "failed", "canceled", "skipped", "created", "manual"),
+	})
 
 	return pipelineListCmd
 }

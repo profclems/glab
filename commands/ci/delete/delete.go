@@ -7,7 +7,9 @@ import (
 
 	"github.com/profclems/glab/api"
 	"github.com/profclems/glab/commands/cmdutils"
+	"github.com/profclems/glab/commands/cmdutils/action"
 	"github.com/profclems/glab/pkg/utils"
+	"github.com/rsteube/carapace"
 
 	"github.com/MakeNowJust/heredoc"
 	"github.com/spf13/cobra"
@@ -76,6 +78,21 @@ func NewCmdDelete(f *cmdutils.Factory) *cobra.Command {
 	}
 
 	pipelineDeleteCmd.Flags().StringP("status", "s", "", "delete pipelines by status: {running|pending|success|failed|canceled|skipped|created|manual}")
+
+	carapace.Gen(pipelineDeleteCmd).FlagCompletion(carapace.ActionMap{
+		"status": carapace.ActionValues("running", "pending", "success", "failed", "canceled", "skipped", "created", "manual"),
+	})
+
+	carapace.Gen(pipelineDeleteCmd).PositionalCompletion(
+		carapace.ActionMultiParts(",", func(c carapace.Context) carapace.Action {
+			opts := &gitlab.ListProjectPipelinesOptions{}
+			if flag := pipelineDeleteCmd.Flag("status"); flag.Changed {
+				status := gitlab.BuildStateValue(flag.Value.String())
+				opts.Status = &status
+			}
+			return action.ActionPipelines(pipelineDeleteCmd, f, opts).Invoke(c).Filter(c.Args).ToA()
+		}),
+	)
 
 	return pipelineDeleteCmd
 }

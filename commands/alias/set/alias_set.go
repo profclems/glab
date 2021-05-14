@@ -5,8 +5,10 @@ import (
 	"strings"
 
 	"github.com/profclems/glab/pkg/iostreams"
+	"github.com/rsteube/carapace"
 
 	"github.com/profclems/glab/commands/cmdutils"
+	"github.com/profclems/glab/commands/cmdutils/action"
 
 	"github.com/MakeNowJust/heredoc"
 	"github.com/google/shlex"
@@ -74,6 +76,11 @@ func NewCmdSet(f *cmdutils.Factory, runF func(*SetOptions) error) *cobra.Command
 		},
 	}
 	aliasSetCmd.Flags().BoolVarP(&opts.IsShell, "shell", "s", false, "Declare an alias to be passed through a shell interpreter")
+
+	carapace.Gen(aliasSetCmd).PositionalCompletion(
+		action.ActionConfigAliases(),
+	)
+
 	return aliasSetCmd
 }
 
