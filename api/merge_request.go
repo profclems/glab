@@ -109,16 +109,16 @@ var DeleteMR = func(client *gitlab.Client, projectID interface{}, mrID int) erro
 	return nil
 }
 
-var MergeMR = func(client *gitlab.Client, projectID interface{}, mrID int, opts *gitlab.AcceptMergeRequestOptions) (*gitlab.MergeRequest, error) {
+var MergeMR = func(client *gitlab.Client, projectID interface{}, mrID int, opts *gitlab.AcceptMergeRequestOptions) (*gitlab.MergeRequest, *gitlab.Response, error) {
 	if client == nil {
 		client = apiClient.Lab()
 	}
-	mrs, _, err := client.MergeRequests.AcceptMergeRequest(projectID, mrID, opts)
+	mrs, resp, err := client.MergeRequests.AcceptMergeRequest(projectID, mrID, opts)
 	if err != nil {
-		return nil, err
+		return nil, resp, err
 	}
 
-	return mrs, nil
+	return mrs, resp, nil
 }
 
 var CreateMR = func(client *gitlab.Client, projectID interface{}, opts *gitlab.CreateMergeRequestOptions) (*gitlab.MergeRequest, error) {
