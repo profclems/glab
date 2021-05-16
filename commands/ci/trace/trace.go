@@ -88,27 +88,13 @@ func TraceRun(opts *TraceOpts) error {
 	}
 
 	if opts.JobID < 1 {
-		l := &gitlab.ListProjectPipelinesOptions{
-			Ref:  gitlab.String(opts.Branch),
-			Sort: gitlab.String("desc"),
-		}
-
-		l.Page = 1
-		l.PerPage = 1
-
 		fmt.Fprintf(opts.IO.StdOut, "\nSearching for latest pipeline on %s...\n", opts.Branch)
 
-		pipes, err := api.GetPipelines(apiClient, l, repo.FullName())
+		pipeline, err := api.GetLastPipeline(apiClient, repo.FullName(), opts.Branch)
 		if err != nil {
 			return err
 		}
 
-		if len(pipes) == 0 {
-			fmt.Fprintln(opts.IO.StdOut, "No pipeline running or available on "+opts.Branch+"branch")
-			return nil
-		}
-
-		pipeline := pipes[0]
 		fmt.Fprintf(opts.IO.StdOut, "Getting jobs for pipeline %d...\n\n", pipeline.ID)
 
 		jobs, err := api.GetPipelineJobs(apiClient, pipeline.ID, repo.FullName())
