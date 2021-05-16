@@ -3,8 +3,10 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/profclems/glab)](https://goreportcard.com/report/github.com/profclems/glab)
 [![codecov](https://codecov.io/gh/profclems/glab/branch/trunk/graph/badge.svg?token=32J5DT3PQQ)](https://codecov.io/gh/profclems/glab)
 [![pipeline status](https://gitlab.com/profclems/glab/badges/trunk/pipeline.svg)](https://gitlab.com/profclems/glab/-/pipelines)
-[![Documentation Status](https://readthedocs.org/projects/glab/badge/?version=latest)](https://glab.readthedocs.io/en/latest/?badge=latest)
 [![Gitter](https://badges.gitter.im/glabcli/community.svg)](https://gitter.im/glabcli/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
+[![Reddit](https://img.shields.io/reddit/subreddit-subscribers/glab_cli?style=social)](https://reddit.com/r/glab_cli)
+[![Twitter Follow](https://img.shields.io/twitter/follow/glab_cli?style=social)](https://twitter.com/glab_cli)
+[![Donate](https://img.shields.io/badge/Donate-Open%20Collective-informational)](https://opencollective.com/glab/contribute)
 
 GLab is an open source GitLab CLI tool bringing GitLab to your terminal next to where you are already working with `git` and your code without switching between windows and browser tabs. Work with issues, merge requests, **watch running pipelines directly from your CLI** among other features. 
 Inspired by [`gh`](https://github.com/cli/cli), the official GitHub CLI tool.
