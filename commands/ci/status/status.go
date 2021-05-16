@@ -85,7 +85,12 @@ func NewCmdStatus(f *cmdutils.Factory) *cobra.Command {
 						if job.FinishedAt != nil {
 							end = *job.FinishedAt
 						}
-						duration := utils.FmtDuration(end.Sub(*job.StartedAt))
+						var duration string
+						if job.StartedAt != nil {
+							duration = utils.FmtDuration(end.Sub(*job.StartedAt))
+						} else {
+							duration = "not started"
+						}
 						var status string
 						switch s := job.Status; s {
 						case "failed":
