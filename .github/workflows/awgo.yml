@@ -1,0 +1,161 @@
+name: Go
+
+on:
+  push:
+    branches: [ trunk ]
+  pull_request:
+    branches: [ trunk ]
+
+jobs:
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.15
+
+    - name: Build
+      run: go build -v ./...
+
+    - name: Test
+      run: go test -v ./...
+- name: Setup Node.js environment
+  uses: actions/setup-node@v2.1.5
+  with:
+    # Set always-auth in npmrc
+    always-auth: # optional, default is false
+    # Version Spec of the version to use.  Examples: 12.x, 10.15.1, >=10.15.0
+    node-version: # optional
+    # Target architecture for Node to use. Examples: x86, x64. Will use system architecture by default.
+    architecture: # optional
+    # Set this option if you want the action to check for the latest available version that satisfies the version spec
+    check-latest: # optional
+    # Optional registry to set up for auth. Will set the registry in a project level .npmrc and .yarnrc file, and set up auth to read in from env.NODE_AUTH_TOKEN
+    registry-url: # optional
+    # Optional scope for authenticating against scoped registries
+    scope: # optional
+    # Used to pull node distributions from node-versions.  Since there's a default, this is typically not supplied by the user.
+    token: # optional, default is ${{ github.token }}
+    # Deprecated. Use node-version instead. Will not be supported after October 1, 2019
+    version: # optional
+    - name: Continuous Benchmarking for Go
+  # You may pin to the exact commit or the version.
+  # uses: bobheadxi/gobenchdata@e21a86ba8cfd511b29b592415237628293e00c4d
+  uses: bobheadxi/gobenchdata@v1.0.1
+  with:
+    # subdirectory of project to run commands from
+    SUBDIRECTORY: # optional, default is .
+    # benchmarks to run (argument for `-bench`)
+    GO_BENCHMARKS: # optional, default is .
+    # additional flags for `go test`
+    GO_TEST_FLAGS: # optional
+    # packages to test (argument for `go test`)
+    GO_TEST_PKGS: # optional, default is ./...
+    # destination path of benchmark data
+    BENCHMARKS_OUT: # optional, default is benchmarks.json
+    # repository base branch results are published to
+    PUBLISH_REPO: # optional
+    # branch results are published to
+    PUBLISH_BRANCH: # optional, default is gh-pages
+    # enable publishing of benchmark results
+    PUBLISH: # optional
+    # number of past runs to keep (`0` keeps everything)
+    PRUNE_COUNT: # optional, default is 0
+    # the commit message for the benchmark update
+    GIT_COMMIT_MESSAGE: # optional
+    # enable checks on benchmark results
+    CHECKS: # optional
+    # path to checks configuration
+    CHECKS_CONFIG: # optional, default is gobenchdata-checks.yml
+    
+    - name: Continuous Benchmarking for Go
+  # You may pin to the exact commit or the version.
+  # uses: bobheadxi/gobenchdata@e21a86ba8cfd511b29b592415237628293e00c4d
+  uses: bobheadxi/gobenchdata@v1.0.1
+  with:
+    # subdirectory of project to run commands from
+    SUBDIRECTORY: # optional, default is .
+    # benchmarks to run (argument for `-bench`)
+    GO_BENCHMARKS: # optional, default is .
+    # additional flags for `go test`
+    GO_TEST_FLAGS: # optional
+    # packages to test (argument for `go test`)
+    GO_TEST_PKGS: # optional, default is ./...
+    # destination path of benchmark data
+    BENCHMARKS_OUT: # optional, default is benchmarks.json
+    # repository base branch results are published to
+    PUBLISH_REPO: # optional
+    # branch results are published to
+    PUBLISH_BRANCH: # optional, default is gh-pages
+    # enable publishing of benchmark results
+    PUBLISH: # optional
+    # number of past runs to keep (`0` keeps everything)
+    PRUNE_COUNT: # optional, default is 0
+    # the commit message for the benchmark update
+    GIT_COMMIT_MESSAGE: # optional
+    # enable checks on benchmark results
+    CHECKS: # optional
+    # path to checks configuration
+    CHECKS_CONFIG: # optional, default is gobenchdata-checks.yml
+    
+    - name: Continuous Benchmark (.NET)
+  # You may pin to the exact commit or the version.
+  # uses: Happypig375/github-action-benchmark@e7cb068f90622402c0ae5b54e2c781052fcd9343
+  uses: Happypig375/github-action-benchmark@v1.8.2
+  with:
+    # Name of the benchmark. This value must be identical among all benchmarks
+    name: # default is Benchmark
+    # Tool to use get benchmark output. One of "cargo", "go", "benchmarkjs", "pytest"
+    tool: 
+    # A path to file which contains the benchmark output
+    output-file-path: 
+    # Branch for gh-pages
+    gh-pages-branch: # default is gh-pages
+    # Path to directory which contains benchmark files on GitHub pages branch
+    benchmark-data-dir-path: # default is dev/bench
+    # GitHub API token to pull/push GitHub pages branch and deploy GitHub pages. For public repository, this must be personal access token for now. Please read README.md for more details
+    github-token: # optional
+    # Push GitHub Pages branch to remote automatically. This option requires github-token input
+    auto-push: # optional
+    # Skip pulling GitHub Pages branch before generating an auto commit
+    skip-fetch-gh-pages: # optional
+    # Leave a comment with benchmark result comparison. To enable this feature, github-token input must be given as well
+    comment-always: # optional
+    # Save the benchmark data to external file
+    save-data-file: # optional, default is true
+    # Leave an alert comment when current benchmark result is worse than previous. Threshold is specified with alert-comment-threshold input. To enable this feature, github-token input must be given as well
+    comment-on-alert: # optional
+    # Threshold which determines if an alert should happen or not. Percentage value such as "150%". For example, 150% means that an alert happens when current benchmark result is 1.5x worse than previous
+    alert-threshold: # optional, default is 200%
+    # Workflow fails when alert comment happens
+    fail-on-alert: # optional
+    # Threshold which determines if the current workflow fails. Format is the same as alert-threshold input. If this value is not specified, the same value as alert-threshold is used
+    fail-threshold: # optional
+    # Comma separated GitHub user names which start with @ (e.g. "@foo,@bar"). They will be mentioned in commit comment for alert.
+    alert-comment-cc-users: # optional
+    # JSON data file for storing benchmark results. When this input is set, github-action-benchmark no longer uses Git branch to store data. Instead, it reads and appends benchmark data from/to the file. User must store the file anywhere
+    external-data-json-path: # optional
+    # Max data points in a benchmark chart to avoid making the chart too busy. Value must be unsigned integer. No limit by default
+    max-items-in-chart: # optional
+    
+    - name: http-continuous-benchmarking
+  # You may pin to the exact commit or the version.
+  # uses: tomoyane/http-continuous-benchmarking@6002c3fa6b3f40168f1f01ecdd73f8721a8d785a
+  uses: tomoyane/http-continuous-benchmarking@1.0.0
+  with:
+    # Request target url. Start http(s)://xxxxx.
+    target_url: 
+    # Request HTTP Headers. {} format.
+    http_headers: # default is {"Content-Type": "application/json"}
+    # Benchmark thread num.
+    thread_num: # default is 1
+    # Benchmark trial number while 5seconds. If its 5times, the benchmark try 5times * 5seconds. Ex: Case of API 100rps, 100(rps) * 5(seconds) * 5(times)
+    trial_num: # default is 1
+    # Request HTTP Methods ratio. {} format.
+    req_http_method_ratio: # default is {"GET": 10}
+    # HTTP Request Body. {} format. If you use PUT or PATCH or POST, its required.
+    req_body: # optional
