@@ -111,6 +111,39 @@ var GetJobs = func(client *gitlab.Client, repo string, opts *gitlab.ListJobsOpti
 	return jobs, nil
 }
 
+var GetLastPipeline = func(client *gitlab.Client, repo string, ref string) (*gitlab.PipelineInfo, error) {
+	if client == nil {
+		client = apiClient.Lab()
+	}
+
+	c, _, err := client.Commits.GetCommit(repo, ref)
+	if err != nil {
+		return nil, err
+	}
+	if c.LastPipeline != nil {
+		return c.LastPipeline, nil
+	}
+
+	l := &gitlab.ListProjectPipelinesOptions{
+		Ref:  gitlab.String(ref),
+		Sort: gitlab.String("desc"),
+	}
+
+	l.Page = 1
+	l.PerPage = 1
+
+	pipes, err := GetPipelines(client, l, repo)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(pipes) == 0 {
+		return nil, errors.New("No pipeline running or available for ref " + ref)
+	}
+
+	return pipes[0], nil
+}
+
 var GetPipelines = func(client *gitlab.Client, l *gitlab.ListProjectPipelinesOptions, repo interface{}) ([]*gitlab.PipelineInfo, error) {
 	if client == nil {
 		client = apiClient.Lab()
@@ -188,15 +221,10 @@ var GetPipelineFromBranch = func(client *gitlab.Client, ref, repo string) ([]*gi
 	}
 	l.Page = 1
 	l.PerPage = 1
-	pipes, err := GetPipelines(client, l, repo)
+	pipeline, err := GetLastPipeline(client, repo, ref)
 	if err != nil {
 		return nil, err
 	}
-	if len(pipes) == 0 {
-		err = errors.New("No pipelines running or available on " + ref + "branch")
-		return nil, err
-	}
-	pipeline := pipes[0]
 	jobs, err := GetPipelineJobs(client, pipeline.ID, repo)
 	if err != nil {
 		return nil, err

@@ -14,7 +14,6 @@ import (
 	"github.com/MakeNowJust/heredoc"
 	"github.com/gosuri/uilive"
 	"github.com/spf13/cobra"
-	"github.com/xanzy/go-gitlab"
 )
 
 func NewCmdStatus(f *cmdutils.Factory) *cobra.Command {
@@ -54,123 +53,110 @@ func NewCmdStatus(f *cmdutils.Factory) *cobra.Command {
 					return err
 				}
 			}
-			l := &gitlab.ListProjectPipelinesOptions{
-				Ref:  gitlab.String(branch),
-				Sort: gitlab.String("desc"),
-			}
-			l.Page = 1
-			l.PerPage = 1
-
-			pipes, err := api.GetPipelines(apiClient, l, repo.FullName())
+			runningPipeline, err := api.GetLastPipeline(apiClient, repo.FullName(), branch)
 			if err != nil {
+				redCheck := c.Red("✘")
+				fmt.Fprintf(f.IO.StdOut, "%s No pipelines running or available on %s branch\n", redCheck, branch)
 				return err
 			}
 
-			if len(pipes) > 0 {
-				runningPipeline := pipes[0]
-				isRunning := true
-				retry := "Exit"
-				writer := uilive.New()
+			isRunning := true
+			retry := "Exit"
+			writer := uilive.New()
 
-				// start listening for updates and render
-				writer.Start()
-				defer writer.Stop()
-				for isRunning {
-					jobs, err := api.GetPipelineJobs(apiClient, runningPipeline.ID, repo.FullName())
+			// start listening for updates and render
+			writer.Start()
+			defer writer.Stop()
+			for isRunning {
+				jobs, err := api.GetPipelineJobs(apiClient, runningPipeline.ID, repo.FullName())
+				if err != nil {
+					return err
+				}
+				for _, job := range jobs {
+					end := time.Now()
+					if job.FinishedAt != nil {
+						end = *job.FinishedAt
+					}
+					var duration string
+					if job.StartedAt != nil {
+						duration = utils.FmtDuration(end.Sub(*job.StartedAt))
+					} else {
+						duration = "not started"
+					}
+					var status string
+					switch s := job.Status; s {
+					case "failed":
+						if job.AllowFailure {
+							status = c.Yellow(s)
+						} else {
+							status = c.Red(s)
+						}
+					case "success":
+						status = c.Green(s)
+					default:
+						status = c.Gray(s)
+					}
+					//fmt.Println(job.Tag)
+					if compact {
+						fmt.Fprintf(writer, "(%s) • %s [%s]\n", status, job.Name, job.Stage)
+					} else {
+						fmt.Fprintf(writer, "(%s) • %s\t%s\t\t%s\n", status, c.Gray(duration), job.Stage, job.Name)
+					}
+				}
+
+				if !compact {
+					fmt.Fprintf(writer.Newline(), "\n%s\n", runningPipeline.WebURL)
+					fmt.Fprintf(writer.Newline(), "SHA: %s\n", runningPipeline.SHA)
+				}
+				fmt.Fprintf(writer.Newline(), "Pipeline State: %s\n\n", runningPipeline.Status)
+
+				// break loop if output is a TTY to avoid prompting
+				if !f.IO.IsOutputTTY() || !f.IO.PromptEnabled() {
+					break
+				}
+				if runningPipeline.Status == "running" && live {
+					runningPipeline, err = api.GetLastPipeline(apiClient, repo.FullName(), branch)
 					if err != nil {
 						return err
 					}
-					for _, job := range jobs {
-						end := time.Now()
-						if job.FinishedAt != nil {
-							end = *job.FinishedAt
-						}
-						var duration string
-						if job.StartedAt != nil {
-							duration = utils.FmtDuration(end.Sub(*job.StartedAt))
-						} else {
-							duration = "not started"
-						}
-						var status string
-						switch s := job.Status; s {
-						case "failed":
-							if job.AllowFailure {
-								status = c.Yellow(s)
-							} else {
-								status = c.Red(s)
-							}
-						case "success":
-							status = c.Green(s)
-						default:
-							status = c.Gray(s)
-						}
-						//fmt.Println(job.Tag)
-						if compact {
-							fmt.Fprintf(writer, "(%s) • %s [%s]\n", status, job.Name, job.Stage)
-						} else {
-							fmt.Fprintf(writer, "(%s) • %s\t%s\t\t%s\n", status, c.Gray(duration), job.Stage, job.Name)
-						}
+				} else {
+					prompt := &survey.Select{
+						Message: "Choose an action:",
+						Options: []string{"View Logs", "Retry", "Exit"},
+						Default: "Exit",
 					}
-
-					if !compact {
-						fmt.Fprintf(writer.Newline(), "\n%s\n", runningPipeline.WebURL)
-						fmt.Fprintf(writer.Newline(), "SHA: %s\n", runningPipeline.SHA)
-					}
-					fmt.Fprintf(writer.Newline(), "Pipeline State: %s\n\n", runningPipeline.Status)
-
-					// break loop if output is a TTY to avoid prompting
-					if !f.IO.IsOutputTTY() || !f.IO.PromptEnabled() {
-						break
-					}
-					if runningPipeline.Status == "running" && live {
-						pipes, err = api.GetPipelines(apiClient, l, repo.FullName())
-						if err != nil {
-							return err
-						}
-						runningPipeline = pipes[0]
-					} else {
-						prompt := &survey.Select{
-							Message: "Choose an action:",
-							Options: []string{"View Logs", "Retry", "Exit"},
-							Default: "Exit",
-						}
-						_ = survey.AskOne(prompt, &retry)
-						if retry != "" && retry != "Exit" {
-							if retry == "View Logs" {
-								isRunning = false
-							} else {
-								_, err = api.RetryPipeline(apiClient, runningPipeline.ID, repo.FullName())
-								if err != nil {
-									return err
-								}
-								pipes, err = api.GetPipelines(apiClient, l, repo.FullName())
-								if err != nil {
-									return err
-								}
-								runningPipeline = pipes[0]
-								isRunning = true
-							}
-						} else {
+					_ = survey.AskOne(prompt, &retry)
+					if retry != "" && retry != "Exit" {
+						if retry == "View Logs" {
 							isRunning = false
+						} else {
+							_, err = api.RetryPipeline(apiClient, runningPipeline.ID, repo.FullName())
+							if err != nil {
+								return err
+							}
+							runningPipeline, err = api.GetLastPipeline(apiClient, repo.FullName(), branch)
+							if err != nil {
+								return err
+							}
+							isRunning = true
 						}
-					}
-
-					if retry == "View Logs" {
-						// ToDo: bad idea to call another sub-command. should be fixed to avoid cyclo imports
-						//    and the a shared function placed in the ciutils sub-module
-						return ciTraceCmd.TraceRun(&ciTraceCmd.TraceOpts{
-							Branch:     branch,
-							JobID:      0,
-							BaseRepo:   f.BaseRepo,
-							HTTPClient: f.HttpClient,
-							IO:         f.IO,
-						})
+					} else {
+						isRunning = false
 					}
 				}
-				return nil
+
+				if retry == "View Logs" {
+					// ToDo: bad idea to call another sub-command. should be fixed to avoid cyclo imports
+					//    and the a shared function placed in the ciutils sub-module
+					return ciTraceCmd.TraceRun(&ciTraceCmd.TraceOpts{
+						Branch:     branch,
+						JobID:      0,
+						BaseRepo:   f.BaseRepo,
+						HTTPClient: f.HttpClient,
+						IO:         f.IO,
+					})
+				}
 			}
-			redCheck := c.Red("✘")
-			fmt.Fprintf(f.IO.StdOut, "%s No pipelines running or available on %s branch\n", redCheck, branch)
 			return nil
 		},
 	}
