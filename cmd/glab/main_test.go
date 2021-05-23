@@ -6,6 +6,8 @@ import (
 	"net"
 	"testing"
 
+	"github.com/profclems/glab/pkg/iostreams"
+
 	"github.com/pkg/errors"
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/spf13/cobra"
@@ -42,8 +44,8 @@ func Test_printError(t *testing.T) {
 				cmd:   nil,
 				debug: false,
 			},
-			wantOut: `error connecting to https://gitlab.com/api/v4
-check your internet connection or status.gitlab.com or 'Run sudo gitlab-ctl status' on your server if self-hosted
+			wantOut: `x error connecting to https://gitlab.com/api/v4
+• check your internet connection or status.gitlab.com or 'Run sudo gitlab-ctl status' on your server if self-hosted
 `,
 		},
 		{
@@ -56,9 +58,9 @@ check your internet connection or status.gitlab.com or 'Run sudo gitlab-ctl stat
 				debug: true,
 			},
 
-			wantOut: `error connecting to https://gitlab.com/api/v4
-lookup https://gitlab.com/api/v4: 
-check your internet connection or status.gitlab.com or 'Run sudo gitlab-ctl status' on your server if self-hosted
+			wantOut: `x error connecting to https://gitlab.com/api/v4
+x lookup https://gitlab.com/api/v4: 
+• check your internet connection or status.gitlab.com or 'Run sudo gitlab-ctl status' on your server if self-hosted
 `,
 		},
 		{
@@ -83,8 +85,10 @@ check your internet connection or status.gitlab.com or 'Run sudo gitlab-ctl stat
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			streams, _, _, _ := iostreams.Test()
 			out := &bytes.Buffer{}
-			printError(out, tt.args.err, tt.args.cmd, tt.args.debug)
+			streams.StdErr = out
+			printError(streams, tt.args.err, tt.args.cmd, tt.args.debug, false)
 			if gotOut := out.String(); gotOut != tt.wantOut {
 				t.Errorf("printError() = %q, want %q", gotOut, tt.wantOut)
 			}

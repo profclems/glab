@@ -5,6 +5,8 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/xanzy/go-gitlab"
+
 	"github.com/profclems/glab/pkg/git"
 )
 
@@ -57,6 +59,10 @@ func (r Remotes) Less(i, j int) bool {
 type Remote struct {
 	*git.Remote
 	Repo Interface
+}
+
+func (r Remote) Project(client *gitlab.Client) (*gitlab.Project, error) {
+	return r.Repo.Project(client)
 }
 
 func (r Remote) RepoNamespace() string {

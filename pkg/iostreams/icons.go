@@ -19,3 +19,7 @@ func (c *ColorPalette) RedCheck() string {
 func (c *ColorPalette) ProgressIcon() string {
 	return c.Blue("•")
 }
+
+func (c *ColorPalette) DotWarnIcon() string {
+	return c.Yellow("•")
+}
