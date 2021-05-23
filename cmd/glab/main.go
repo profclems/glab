@@ -193,7 +193,9 @@ func printError(streams *iostreams.IOStreams, err error, cmd *cobra.Command, deb
 		}
 	}
 
-	cmd.Print("\n")
+	if cmd != nil {
+		cmd.Print("\n")
+	}
 	if shouldExit {
 		os.Exit(exitCode)
 	}

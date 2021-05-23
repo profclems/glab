@@ -30,7 +30,7 @@ func Test_printError(t *testing.T) {
 			name: "generic error",
 			args: args{
 				err:   errors.New("the app exploded"),
-				cmd:   nil,
+				cmd:   cmd,
 				debug: false,
 			},
 			wantOut: "the app exploded\n",
@@ -41,7 +41,7 @@ func Test_printError(t *testing.T) {
 				err: fmt.Errorf("DNS oopsie: %w", &net.DNSError{
 					Name: "https://gitlab.com/api/v4",
 				}),
-				cmd:   nil,
+				cmd:   cmd,
 				debug: false,
 			},
 			wantOut: `x error connecting to https://gitlab.com/api/v4
@@ -54,7 +54,7 @@ func Test_printError(t *testing.T) {
 				err: fmt.Errorf("DNS oopsie: %w", &net.DNSError{
 					Name: "https://gitlab.com/api/v4",
 				}),
-				cmd:   nil,
+				cmd:   cmd,
 				debug: true,
 			},
 
