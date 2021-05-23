@@ -21,6 +21,7 @@ type ReleaseFile struct {
 	Name  string
 	Label string
 	Path  string
+	Type  *gitlab.LinkTypeValue
 }
 
 func CreateLink(c *gitlab.Client, projectID, tagName string, asset *ReleaseAsset) (*gitlab.ReleaseLink, error) {
@@ -72,6 +73,7 @@ func (c *Context) UploadFiles(projectID, tagName string) error {
 			Name:     &file.Label,
 			URL:      &linkURL,
 			FilePath: &filename,
+			LinkType: file.Type,
 		})
 
 		if err != nil {

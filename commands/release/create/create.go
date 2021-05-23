@@ -1,6 +1,7 @@
 package create
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -8,6 +9,15 @@ import (
 	"os"
 	"strings"
 	"time"
+
+	"github.com/AlecAivazis/survey/v2"
+	"github.com/MakeNowJust/heredoc"
+	"github.com/profclems/glab/internal/config"
+	"github.com/profclems/glab/internal/run"
+	"github.com/profclems/glab/pkg/git"
+	"github.com/profclems/glab/pkg/prompt"
+	"github.com/profclems/glab/pkg/surveyext"
+	"github.com/profclems/glab/pkg/utils"
 
 	"github.com/profclems/glab/commands/release/upload"
 	"github.com/profclems/glab/internal/glinstance"
@@ -28,6 +38,10 @@ type CreateOpts struct {
 	Milestone        []string
 	AssetLinksAsJson string
 	ReleasedAt       string
+	RepoOverride     string
+
+	NoteProvided       bool
+	ReleaseNotesAction string
 
 	AssetLinks []*upload.ReleaseAsset
 	AssetFiles []*upload.ReleaseFile
@@ -35,22 +49,70 @@ type CreateOpts struct {
 	IO         *iostreams.IOStreams
 	HTTPClient func() (*gitlab.Client, error)
 	BaseRepo   func() (glrepo.Interface, error)
+	Config     func() (config.Config, error)
 }
 
 func NewCmdCreate(f *cmdutils.Factory, runE func(opts *CreateOpts) error) *cobra.Command {
 	opts := &CreateOpts{
-		IO: f.IO,
+		IO:     f.IO,
+		Config: f.Config,
 	}
 
 	cmd := &cobra.Command{
 		Use:   "create <tag> [<files>...]",
-		Short: "Create a new GitLab Release for a repository",
-		Long: `Create a new GitLab Release for a repository.
+		Short: "Create a new or update a GitLab Release for a repository",
+		Long: heredoc.Docf(`Create a new or update a GitLab Release for a repository.
 
-You need push access to the repository to create a Release.`,
+				If the release already exists, glab updates the release with the new info provided.
+
+				If a git tag specified does not yet exist, the release will automatically get created
+				from the latest state of the default branch and tagged with the specified tag name.
+				Use %[1]s--ref%[1]s to override this.
+				The %[1]sref%[1]s can be a commit SHA, another tag name, or a branch name.
+				To fetch the new tag locally after the release, do %[1]sgit fetch --tags origin%[1]s.
+
+				To create a release from an annotated git tag, first create one locally with
+				git, push the tag to GitLab, then run this command.
+
+				NB: Developer level access to the project is required to create a release.
+		`, "`"),
 		Args: cmdutils.MinimumArgs(1, "no tag name provided"),
+		Example: heredoc.Doc(`
+			Interactively create a release
+			$ glab release create v1.0.1
+
+			Non-interactively create a release by specifying a note
+			$ glab release create v1.0.1 --notes "bugfix release"
+
+			Use release notes from a file
+			$ glab release create v1.0.1 -F changelog.md
+
+			Upload a release asset with a display name
+			$ glab release create v1.0.1 '/path/to/asset.zip#My display label'
+
+			Upload a release asset with a display name and type
+			$ glab release create v1.0.1 '/path/to/asset.png#My display label#image'
+
+			Upload all assets in a specified folder
+			$ glab release create v1.0.1 ./dist/*
+
+			Upload all tarballs in a specified folder
+			$ glab release create v1.0.1 ./dist/*.tar.gz
+
+			Create a release with assets specified as JSON object
+			$ glab release create v1.0.1 --assets='
+				[
+					{
+						"name": "Asset1", 
+						"url":"https://<domain>/some/location/1", 
+						"link_type": "other", 
+						"filepath": "path/to/file"
+					}
+				]'
+`),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var err error
+			opts.RepoOverride, _ = cmd.Flags().GetString("repo")
 			opts.HTTPClient = f.HttpClient
 			opts.BaseRepo = f.BaseRepo
 
@@ -68,6 +130,7 @@ You need push access to the repository to create a Release.`,
 				}
 			}
 
+			opts.NoteProvided = cmd.Flags().Changed("notes")
 			if opts.NotesFile != "" {
 				var b []byte
 				var err error
@@ -83,6 +146,7 @@ You need push access to the repository to create a Release.`,
 				}
 
 				opts.Notes = string(b)
+				opts.NoteProvided = true
 			}
 
 			if runE != nil {
@@ -94,12 +158,12 @@ You need push access to the repository to create a Release.`,
 	}
 
 	cmd.Flags().StringVarP(&opts.Name, "name", "n", "", "The release name or title")
-	cmd.Flags().StringVarP(&opts.Ref, "ref", "r", "", "If a tag specified doesn’t exist, the release is created from ref and tagged with the specified tag name. It can be a commit SHA, another tag name, or a branch name.")
+	cmd.Flags().StringVarP(&opts.Ref, "ref", "r", "", "If a tag specified doesn't exist, the release is created from ref and tagged with the specified tag name. It can be a commit SHA, another tag name, or a branch name.")
 	cmd.Flags().StringVarP(&opts.Notes, "notes", "N", "", "The release notes/description. You can use Markdown")
-	cmd.Flags().StringVarP(&opts.NotesFile, "notes-file", "F", "", "Read release notes `file`")
+	cmd.Flags().StringVarP(&opts.NotesFile, "notes-file", "F", "", "Read release notes `file`. Specify `-` as value to read from stdin")
 	cmd.Flags().StringVarP(&opts.ReleasedAt, "released-at", "D", "", "The `date` when the release is/was ready. Defaults to the current datetime. Expected in ISO 8601 format (2019-03-15T08:00:00Z)")
 	cmd.Flags().StringSliceVarP(&opts.Milestone, "milestone", "m", []string{}, "The title of each milestone the release is associated with")
-	cmd.Flags().StringVarP(&opts.AssetLinksAsJson, "assets", "a", "", "`JSON` string representation of assets links (e.g. --assets='[{\"name\": \"Asset1\", \"url\":\"https://<domain>/some/location/1\", \"link_type\": \"other\", \"filepath\": \"path/to/file\" }]'")
+	cmd.Flags().StringVarP(&opts.AssetLinksAsJson, "assets", "a", "", "`JSON` string representation of assets links (e.g. `--assets='[{\"name\": \"Asset1\", \"url\":\"https://<domain>/some/location/1\", \"link_type\": \"other\", \"filepath\": \"path/to/file\"}]')`")
 
 	return cmd
 }
@@ -115,15 +179,128 @@ func createRun(opts *CreateOpts) error {
 		return err
 	}
 	color := opts.IO.Color()
+	var tag *gitlab.Tag
+	var resp *gitlab.Response
 
-	fmt.Fprintf(opts.IO.StdErr, "%s creating or updating release %s=%s %s=%s\n",
+	if opts.Ref == "" {
+		opts.IO.Log(color.ProgressIcon(), "Validating tag", opts.TagName)
+		tag, resp, err = client.Tags.GetTag(repo.FullName(), opts.TagName)
+		if err != nil && resp != nil && resp.StatusCode != 404 {
+			return cmdutils.WrapError(err, "could not fetch tag")
+		}
+		if tag == nil && resp != nil && resp.StatusCode == 404 {
+			opts.IO.Log(color.DotWarnIcon(), "Tag does not exist.")
+			opts.IO.Log(color.DotWarnIcon(), "No ref was provided. Tag will be created from the latest state of the default branch")
+			project, err := repo.Project(client)
+			if err == nil {
+				opts.IO.Logf("%s using default branch %q as ref\n", color.ProgressIcon(), project.DefaultBranch)
+				opts.Ref = project.DefaultBranch
+			}
+		}
+		// new line
+		opts.IO.Log()
+	}
+
+	if opts.IO.PromptEnabled() && !opts.NoteProvided {
+		editorCommand, err := cmdutils.GetEditor(opts.Config)
+		if err != nil {
+			return err
+		}
+
+		var tagDescription string
+		var generatedChangelog string
+		if tag == nil {
+			tag, _, _ = client.Tags.GetTag(repo.FullName(), opts.TagName)
+		}
+		if tag != nil {
+			tagDescription = tag.Message
+		}
+		if opts.RepoOverride == "" {
+			headRef := opts.TagName
+			if tagDescription == "" {
+				if opts.Ref != "" {
+					headRef = opts.Ref
+					brCfg := git.ReadBranchConfig(opts.Ref)
+					if brCfg.MergeRef != "" {
+						headRef = brCfg.MergeRef
+					}
+				} else {
+					headRef = "HEAD"
+				}
+			}
+
+			if prevTag, err := detectPreviousTag(headRef); err == nil {
+				commits, _ := changelogForRange(fmt.Sprintf("%s..%s", prevTag, headRef))
+				generatedChangelog = generateChangelog(commits)
+			}
+		}
+
+		editorOptions := []string{"Write my own"}
+		if generatedChangelog != "" {
+			editorOptions = append(editorOptions, "Write using commit log as template")
+		}
+		if tagDescription != "" {
+			editorOptions = append(editorOptions, "Write using git tag message as template")
+		}
+		editorOptions = append(editorOptions, "Leave blank")
+
+		qs := []*survey.Question{
+			{
+				Name: "name",
+				Prompt: &survey.Input{
+					Message: "Release Title (optional)",
+					Default: opts.Name,
+				},
+			},
+			{
+				Name: "releaseNotesAction",
+				Prompt: &survey.Select{
+					Message: "Release notes",
+					Options: editorOptions,
+				},
+			},
+		}
+		err = prompt.Ask(qs, opts)
+		if err != nil {
+			return fmt.Errorf("could not prompt: %w", err)
+		}
+
+		var openEditor bool
+		var editorContents string
+
+		switch opts.ReleaseNotesAction {
+		case "Write my own":
+			openEditor = true
+		case "Write using commit log as template":
+			openEditor = true
+			editorContents = generatedChangelog
+		case "Write using git tag message as template":
+			openEditor = true
+			editorContents = tagDescription
+		case "Leave blank":
+			openEditor = false
+		default:
+			return fmt.Errorf("invalid action: %v", opts.ReleaseNotesAction)
+		}
+
+		if openEditor {
+			txt, err := surveyext.Edit(editorCommand, "*.md", editorContents, opts.IO.In, opts.IO.StdOut, opts.IO.StdErr, nil)
+			if err != nil {
+				return err
+			}
+			opts.Notes = txt
+		}
+	}
+	start := time.Now()
+
+	opts.IO.Logf("%s creating or updating release %s=%s %s=%s\n",
 		color.ProgressIcon(),
 		color.Blue("repo"), repo.FullName(),
 		color.Blue("tag"), opts.TagName)
 
 	release, resp, err := client.Releases.GetRelease(repo.FullName(), opts.TagName)
 	if err != nil && (resp == nil || resp.StatusCode != 403) {
-		return err
+		return releaseFailedErr(err, start)
 	}
 
 	var releasedAt time.Time
@@ -133,58 +310,75 @@ func createRun(opts *CreateOpts) error {
 		// From the API docs "Expected in ISO 8601 format (2019-03-15T08:00:00Z)".
 		releasedAt, err = time.Parse(time.RFC3339[:len(opts.ReleasedAt)], opts.ReleasedAt)
 		if err != nil {
-			return err
+			return releaseFailedErr(err, start)
 		}
 	}
 
-	if resp.StatusCode == 403 || release == nil {
-		release, _, err = client.Releases.CreateRelease(repo.FullName(), &gitlab.CreateReleaseOptions{
-			Name:        &opts.Name,
-			Description: &opts.Notes,
-			Ref:         &opts.Ref,
-			TagName:     &opts.TagName,
-			ReleasedAt:  &releasedAt,
-			Milestones:  opts.Milestone,
-		})
+	if opts.Name == "" {
+		opts.Name = opts.TagName
+	}
 
-		if err != nil {
-			return err
+	if resp.StatusCode == 403 || release == nil {
+		createOpts := &gitlab.CreateReleaseOptions{
+			Name:    &opts.Name,
+			TagName: &opts.TagName,
 		}
-		fmt.Fprintf(opts.IO.StdErr, "%s, release created\t%s=%s\n", color.ProgressIcon(),
-			color.Blue("url"), fmt.Sprintf("%s://%s/%s/releases/tag/%s",
-				glinstance.OverridableDefaultProtocol(), glinstance.OverridableDefault(),
-				repo.FullName(), release.TagName))
-	} else {
-		apiOpts := &gitlab.UpdateReleaseOptions{}
+
 		if opts.Notes != "" {
-			apiOpts.Description = &opts.Notes
+			createOpts.Description = &opts.Notes
 		}
-		if opts.Name != "" {
-			apiOpts.Name = &opts.Name
+
+		if opts.Ref != "" {
+			createOpts.Ref = &opts.Ref
 		}
 
 		if opts.ReleasedAt != "" {
-			apiOpts.ReleasedAt = &releasedAt
+			createOpts.ReleasedAt = &releasedAt
 		}
 
 		if len(opts.Milestone) > 0 {
-			apiOpts.Milestones = opts.Milestone
+			createOpts.Milestones = opts.Milestone
 		}
 
-		release, _, err = client.Releases.UpdateRelease(repo.FullName(), opts.TagName, apiOpts)
+		release, _, err = client.Releases.CreateRelease(repo.FullName(), createOpts)
+
 		if err != nil {
-			return err
+			return releaseFailedErr(err, start)
+		}
+		opts.IO.Logf("%s release created\t%s=%s\n", color.GreenCheck(),
+			color.Blue("url"), fmt.Sprintf("%s://%s/%s/-/releases/%s",
+				glinstance.OverridableDefaultProtocol(), glinstance.OverridableDefault(),
+				repo.FullName(), release.TagName))
+	} else {
+		updateOpts := &gitlab.UpdateReleaseOptions{
+			Name: &opts.Name,
+		}
+		if opts.Notes != "" {
+			updateOpts.Description = &opts.Notes
 		}
 
-		fmt.Fprintf(opts.IO.StdErr, "%s release updated\t%s=%s\n", color.ProgressIcon(),
-			color.Blue("url"), fmt.Sprintf("%s://%s/%s/-/releases/tag/%s",
+		if opts.ReleasedAt != "" {
+			updateOpts.ReleasedAt = &releasedAt
+		}
+
+		if len(opts.Milestone) > 0 {
+			updateOpts.Milestones = opts.Milestone
+		}
+
+		release, _, err = client.Releases.UpdateRelease(repo.FullName(), opts.TagName, updateOpts)
+		if err != nil {
+			return releaseFailedErr(err, start)
+		}
+
+		opts.IO.Logf("%s release updated\t%s=%s\n", color.GreenCheck(),
+			color.Blue("url"), fmt.Sprintf("%s://%s/%s/-/releases/%s",
 				glinstance.OverridableDefaultProtocol(), glinstance.OverridableDefault(),
 				repo.FullName(), release.TagName))
 	}
 
 	// upload files and create asset link
 	if opts.AssetFiles != nil || opts.AssetLinks != nil {
-		fmt.Fprintf(opts.IO.StdErr, "\n%s Uploading release assets\n", color.ProgressIcon())
+		opts.IO.Logf("\n%s Uploading release assets\n", color.ProgressIcon())
 		uploadCtx := upload.Context{
 			IO:          opts.IO,
 			Client:      client,
@@ -192,12 +386,12 @@ func createRun(opts *CreateOpts) error {
 			AssetFiles:  opts.AssetFiles,
 		}
 		if err = uploadCtx.UploadFiles(repo.FullName(), release.TagName); err != nil {
-			return err
+			return releaseFailedErr(err, start)
 		}
 
 		// create asset link for assets provided as json
 		if err = uploadCtx.CreateReleaseAssetLinks(repo.FullName(), release.TagName); err != nil {
-			return err
+			return releaseFailedErr(err, start)
 		}
 	}
 	if len(opts.Milestone) > 0 {
@@ -210,14 +404,18 @@ func createRun(opts *CreateOpts) error {
 			// stop loading
 			opts.IO.StopSpinner("")
 			if err != nil {
-				fmt.Fprintln(opts.IO.StdErr, color.FailedIcon(), err.Error())
+				opts.IO.Log(color.FailedIcon(), err.Error())
 			} else {
-				fmt.Fprintf(opts.IO.StdErr, "%s closed milestone %q\n", color.GreenCheck(), milestone)
+				opts.IO.Logf("%s closed milestone %q\n", color.GreenCheck(), milestone)
 			}
 		}
 	}
-	fmt.Fprintf(opts.IO.StdErr, "%s release succeeded", color.GreenCheck())
+	opts.IO.Logf(color.Bold("%s release succeeded after %0.2fs\n"), color.GreenCheck(), time.Since(start).Seconds())
 	return nil
+}
+
+func releaseFailedErr(err error, start time.Time) error {
+	return cmdutils.WrapError(err, fmt.Sprintf("release failed after %0.2fs", time.Since(start).Seconds()))
 }
 
 func getMilestoneByTitle(c *CreateOpts, title string) (*gitlab.Milestone, error) {
@@ -300,10 +498,16 @@ func closeMilestone(c *CreateOpts, title string) error {
 func AssetsFromArgs(args []string) (assets []*upload.ReleaseFile, err error) {
 	for _, arg := range args {
 		var label string
+		var linkType string
 		fn := arg
-		if idx := strings.IndexRune(arg, '#'); idx > 0 {
-			fn = arg[0:idx]
-			label = arg[idx+1:]
+		if arr := strings.SplitN(arg, "#", 3); len(arr) > 0 {
+			fn = arr[0]
+			if len(arr) > 1 {
+				label = arr[1]
+			}
+			if len(arr) > 2 {
+				linkType = arr[2]
+			}
 		}
 
 		var fi os.FileInfo
@@ -315,6 +519,10 @@ func AssetsFromArgs(args []string) (assets []*upload.ReleaseFile, err error) {
 		if label == "" {
 			label = fi.Name()
 		}
+		var linkTypeVal gitlab.LinkTypeValue
+		if linkType != "" {
+			linkTypeVal = gitlab.LinkTypeValue(linkType)
+		}
 
 		assets = append(assets, &upload.ReleaseFile{
 			Open: func() (io.ReadCloser, error) {
@@ -323,7 +531,60 @@ func AssetsFromArgs(args []string) (assets []*upload.ReleaseFile, err error) {
 			Name:  fi.Name(),
 			Label: label,
 			Path:  fn,
+			Type:  &linkTypeVal,
 		})
 	}
 	return
+}
+
+func detectPreviousTag(headRef string) (string, error) {
+	cmd := git.GitCommand("describe", "--tags", "--abbrev=0", fmt.Sprintf("%s^", headRef))
+	b, err := run.PrepareCmd(cmd).Output()
+	return strings.TrimSpace(string(b)), err
+}
+
+type logEntry struct {
+	Subject string
+	Body    string
+}
+
+func changelogForRange(refRange string) ([]logEntry, error) {
+	cmd := git.GitCommand("-c", "log.ShowSignature=false", "log", "--first-parent", "--reverse", "--pretty=format:%B%x00", refRange)
+
+	b, err := run.PrepareCmd(cmd).Output()
+	if err != nil {
+		return nil, err
+	}
+
+	var entries []logEntry
+	for _, cb := range bytes.Split(b, []byte{'\000'}) {
+		c := strings.ReplaceAll(string(cb), "\r\n", "\n")
+		c = strings.TrimPrefix(c, "\n")
+		if len(c) == 0 {
+			continue
+		}
+		parts := strings.SplitN(c, "\n\n", 2)
+		var body string
+		subject := strings.ReplaceAll(parts[0], "\n", " ")
+		if len(parts) > 1 {
+			body = parts[1]
+		}
+		entries = append(entries, logEntry{
+			Subject: subject,
+			Body:    body,
+		})
+	}
+
+	return entries, nil
+}
+
+func generateChangelog(commits []logEntry) string {
+	var parts []string
+	for _, c := range commits {
+		parts = append(parts, fmt.Sprintf("* %s", c.Subject))
+		if c.Body != "" {
+			parts = append(parts, utils.Indent(c.Body, "  "))
+		}
+	}
+	return strings.Join(parts, "\n\n")
 }

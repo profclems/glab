@@ -6,6 +6,8 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/profclems/glab/api"
+
 	"github.com/profclems/glab/internal/config"
 
 	"github.com/profclems/glab/internal/glinstance"
@@ -59,6 +61,7 @@ type Interface interface {
 	RepoGroup() string
 	RepoHost() string
 	FullName() string
+	Project(*gitlab.Client) (*gitlab.Project, error)
 }
 
 // New instantiates a GitLab repository from owner and repo name arguments
@@ -199,6 +202,32 @@ type glRepo struct {
 	fullname  string
 	hostname  string
 	namespace string
+
+	project *Project
+}
+
+type Project struct {
+	*gitlab.Project
+	// for cache invalidation
+	fullname string
+	// for cache invalidation
+	hostname string
+}
+
+func (r glRepo) Project(client *gitlab.Client) (*gitlab.Project, error) {
+	if r.project != nil && r.project.fullname == r.fullname && r.project.hostname == r.hostname {
+		return r.project.Project, nil
+	}
+	p, err := api.GetProject(client, r.fullname)
+	if err != nil {
+		return nil, err
+	}
+	r.project = &Project{
+		Project:  p,
+		fullname: r.fullname,
+		hostname: r.hostname,
+	}
+	return r.project.Project, err
 }
 
 // RepoNamespace returns the namespace of the project. Eg. if project path is :group/:namespace:/repo

@@ -827,7 +827,7 @@ func Test_MilestonesPrompt(t *testing.T) {
 			ID:    240,
 		},
 		{
-			Title: "Get rid of low quality code",
+			Title: "Get rid of low quality Code",
 			ID:    650,
 		},
 	}

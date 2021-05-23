@@ -197,13 +197,14 @@ func (s *IOStreams) BackgroundColor() string {
 	return s.backgroundColor
 }
 
-func Test() (*IOStreams, *bytes.Buffer, *bytes.Buffer, *bytes.Buffer) {
-	in := &bytes.Buffer{}
-	out := &bytes.Buffer{}
-	errOut := &bytes.Buffer{}
-	return &IOStreams{
+func Test() (streams *IOStreams, in *bytes.Buffer, out *bytes.Buffer, errOut *bytes.Buffer) {
+	in = &bytes.Buffer{}
+	out = &bytes.Buffer{}
+	errOut = &bytes.Buffer{}
+	streams = &IOStreams{
 		In:     ioutil.NopCloser(in),
 		StdOut: out,
 		StdErr: errOut,
-	}, in, out, errOut
+	}
+	return
 }
