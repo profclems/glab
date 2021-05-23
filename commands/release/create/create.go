@@ -560,7 +560,7 @@ func changelogForRange(refRange string) ([]logEntry, error) {
 	for _, cb := range bytes.Split(b, []byte{'\000'}) {
 		c := strings.ReplaceAll(string(cb), "\r\n", "\n")
 		c = strings.TrimPrefix(c, "\n")
-		if len(c) == 0 {
+		if c == "" {
 			continue
 		}
 		parts := strings.SplitN(c, "\n\n", 2)
