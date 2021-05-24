@@ -2,6 +2,11 @@ package releaseutils
 
 import (
 	"fmt"
+	"io"
+	"os"
+	"strings"
+
+	"github.com/profclems/glab/commands/release/releaseutils/upload"
 
 	"github.com/profclems/glab/pkg/iostreams"
 
@@ -47,4 +52,46 @@ func DisplayRelease(c *iostreams.ColorPalette, r *gitlab.Release, glamourStyle s
 		c.Bold(r.Name), r.Author.Name, duration, r.Commit.ShortID, r.TagName, description, c.Bold("ASSETS"),
 		RenderReleaseAssertLinks(r.Assets.Links), c.Bold("SOURCES"), assetsSources,
 	)
+}
+
+func AssetsFromArgs(args []string) (assets []*upload.ReleaseFile, err error) {
+	for _, arg := range args {
+		var label string
+		var linkType string
+		fn := arg
+		if arr := strings.SplitN(arg, "#", 3); len(arr) > 0 {
+			fn = arr[0]
+			if len(arr) > 1 {
+				label = arr[1]
+			}
+			if len(arr) > 2 {
+				linkType = arr[2]
+			}
+		}
+
+		var fi os.FileInfo
+		fi, err = os.Stat(fn)
+		if err != nil {
+			return
+		}
+
+		if label == "" {
+			label = fi.Name()
+		}
+		var linkTypeVal gitlab.LinkTypeValue
+		if linkType != "" {
+			linkTypeVal = gitlab.LinkTypeValue(linkType)
+		}
+
+		assets = append(assets, &upload.ReleaseFile{
+			Open: func() (io.ReadCloser, error) {
+				return os.Open(fn)
+			},
+			Name:  fi.Name(),
+			Label: label,
+			Path:  fn,
+			Type:  &linkTypeVal,
+		})
+	}
+	return
 }
