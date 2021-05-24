@@ -2,6 +2,9 @@ package cmdutils
 
 import (
 	"errors"
+	"fmt"
+
+	"github.com/AlecAivazis/survey/v2/terminal"
 
 	"github.com/spf13/cobra"
 )
@@ -38,6 +41,13 @@ func WrapErrorWithCode(err error, code int, details string) *ExitError {
 
 func WrapError(err error, log string) *ExitError {
 	return WrapErrorWithCode(err, 1, log)
+}
+
+func CancelError(log ...interface{}) error {
+	if len(log) < 1 {
+		return WrapErrorWithCode(terminal.InterruptErr, 2, "action cancelled")
+	}
+	return WrapErrorWithCode(terminal.InterruptErr, 2, fmt.Sprint(log...))
 }
 
 func (e *ExitError) Error() string {
