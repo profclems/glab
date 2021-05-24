@@ -4,11 +4,12 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io"
 	"io/ioutil"
-	"os"
 	"strings"
 	"time"
+
+	"github.com/profclems/glab/commands/release/releaseutils"
+	"github.com/profclems/glab/commands/release/releaseutils/upload"
 
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/MakeNowJust/heredoc"
@@ -19,7 +20,6 @@ import (
 	"github.com/profclems/glab/pkg/surveyext"
 	"github.com/profclems/glab/pkg/utils"
 
-	"github.com/profclems/glab/commands/release/upload"
 	"github.com/profclems/glab/internal/glinstance"
 	"github.com/profclems/glab/internal/glrepo"
 	"github.com/profclems/glab/pkg/iostreams"
@@ -100,7 +100,7 @@ func NewCmdCreate(f *cmdutils.Factory, runE func(opts *CreateOpts) error) *cobra
 			$ glab release create v1.0.1 ./dist/*.tar.gz
 
 			Create a release with assets specified as JSON object
-			$ glab release create v1.0.1 --assets='
+			$ glab release create v1.0.1 --assets-links='
 				[
 					{
 						"name": "Asset1", 
@@ -118,7 +118,7 @@ func NewCmdCreate(f *cmdutils.Factory, runE func(opts *CreateOpts) error) *cobra
 
 			opts.TagName = args[0]
 
-			opts.AssetFiles, err = AssetsFromArgs(args[1:])
+			opts.AssetFiles, err = releaseutils.AssetsFromArgs(args[1:])
 			if err != nil {
 				return err
 			}
@@ -163,7 +163,7 @@ func NewCmdCreate(f *cmdutils.Factory, runE func(opts *CreateOpts) error) *cobra
 	cmd.Flags().StringVarP(&opts.NotesFile, "notes-file", "F", "", "Read release notes `file`. Specify `-` as value to read from stdin")
 	cmd.Flags().StringVarP(&opts.ReleasedAt, "released-at", "D", "", "The `date` when the release is/was ready. Defaults to the current datetime. Expected in ISO 8601 format (2019-03-15T08:00:00Z)")
 	cmd.Flags().StringSliceVarP(&opts.Milestone, "milestone", "m", []string{}, "The title of each milestone the release is associated with")
-	cmd.Flags().StringVarP(&opts.AssetLinksAsJson, "assets", "a", "", "`JSON` string representation of assets links (e.g. `--assets='[{\"name\": \"Asset1\", \"url\":\"https://<domain>/some/location/1\", \"link_type\": \"other\", \"filepath\": \"path/to/file\"}]')`")
+	cmd.Flags().StringVarP(&opts.AssetLinksAsJson, "assets-links", "a", "", "`JSON` string representation of assets links (e.g. `--assets='[{\"name\": \"Asset1\", \"url\":\"https://<domain>/some/location/1\", \"link_type\": \"other\", \"filepath\": \"path/to/file\"}]')`")
 
 	return cmd
 }
@@ -493,48 +493,6 @@ func closeMilestone(c *CreateOpts, title string) error {
 	)
 
 	return err
-}
-
-func AssetsFromArgs(args []string) (assets []*upload.ReleaseFile, err error) {
-	for _, arg := range args {
-		var label string
-		var linkType string
-		fn := arg
-		if arr := strings.SplitN(arg, "#", 3); len(arr) > 0 {
-			fn = arr[0]
-			if len(arr) > 1 {
-				label = arr[1]
-			}
-			if len(arr) > 2 {
-				linkType = arr[2]
-			}
-		}
-
-		var fi os.FileInfo
-		fi, err = os.Stat(fn)
-		if err != nil {
-			return
-		}
-
-		if label == "" {
-			label = fi.Name()
-		}
-		var linkTypeVal gitlab.LinkTypeValue
-		if linkType != "" {
-			linkTypeVal = gitlab.LinkTypeValue(linkType)
-		}
-
-		assets = append(assets, &upload.ReleaseFile{
-			Open: func() (io.ReadCloser, error) {
-				return os.Open(fn)
-			},
-			Name:  fi.Name(),
-			Label: label,
-			Path:  fn,
-			Type:  &linkTypeVal,
-		})
-	}
-	return
 }
 
 func detectPreviousTag(headRef string) (string, error) {
