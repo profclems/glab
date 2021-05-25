@@ -14,7 +14,7 @@ import (
 	"github.com/xanzy/go-gitlab"
 )
 
-type CreateOpts struct {
+type DeleteOpts struct {
 	ForceDelete bool
 	DeleteTag   bool
 	TagName     string
@@ -28,8 +28,8 @@ type CreateOpts struct {
 	Config     func() (config.Config, error)
 }
 
-func NewCmdDelete(f *cmdutils.Factory, runE func(opts *CreateOpts) error) *cobra.Command {
-	opts := &CreateOpts{
+func NewCmdDelete(f *cmdutils.Factory, runE func(opts *DeleteOpts) error) *cobra.Command {
+	opts := &DeleteOpts{
 		IO:     f.IO,
 		Config: f.Config,
 	}
@@ -77,7 +77,7 @@ func NewCmdDelete(f *cmdutils.Factory, runE func(opts *CreateOpts) error) *cobra
 	return cmd
 }
 
-func deleteRun(opts *CreateOpts) error {
+func deleteRun(opts *DeleteOpts) error {
 	client, err := opts.HTTPClient()
 	if err != nil {
 		return err

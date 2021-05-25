@@ -29,11 +29,15 @@ func NewCmdReleaseList(f *cmdutils.Factory) *cobra.Command {
 		},
 	}
 	releaseListCmd.Flags().StringP("tag", "t", "", "Filter releases by tag <name>")
+	// deprecate in favour of the `release view` command
+	releaseListCmd.Flags().MarkDeprecated("tag", "use `glab release view <tag>` instead")
+	// make it hidden but still accessible
+	// TODO: completely remove before a major release (v2.0.0+)
+	releaseListCmd.Flags().MarkHidden("tag")
 	return releaseListCmd
 }
 
 func listReleases(cmd *cobra.Command, args []string) error {
-	c := factory.IO.Color()
 	l := &gitlab.ListReleasesOptions{}
 
 	tag, err := cmd.Flags().GetString("tag")
@@ -60,7 +64,15 @@ func listReleases(cmd *cobra.Command, args []string) error {
 
 		cfg, _ := factory.Config()
 		glamourStyle, _ := cfg.Get(repo.RepoHost(), "glamour_style")
-		fmt.Fprintln(factory.IO.StdOut, releaseutils.DisplayRelease(c, release, glamourStyle))
+		factory.IO.ResolveBackgroundColor(glamourStyle)
+
+		err = factory.IO.StartPager()
+		if err != nil {
+			return err
+		}
+		defer factory.IO.StopPager()
+
+		fmt.Fprintln(factory.IO.StdOut, releaseutils.DisplayRelease(factory.IO, release))
 	} else {
 		l.PerPage = 30
 
@@ -73,8 +85,13 @@ func listReleases(cmd *cobra.Command, args []string) error {
 		title.RepoName = repo.FullName()
 		title.Page = 0
 		title.CurrentPageTotal = len(releases)
+		err = factory.IO.StartPager()
+		if err != nil {
+			return err
+		}
+		defer factory.IO.StopPager()
 
-		fmt.Fprintf(factory.IO.StdOut, "%s\n%s\n", title.Describe(), releaseutils.DisplayAllReleases(c, releases, repo.FullName()))
+		fmt.Fprintf(factory.IO.StdOut, "%s\n%s\n", title.Describe(), releaseutils.DisplayAllReleases(factory.IO, releases, repo.FullName()))
 	}
 	return nil
 }

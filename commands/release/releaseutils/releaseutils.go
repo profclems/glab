@@ -16,7 +16,8 @@ import (
 	"github.com/xanzy/go-gitlab"
 )
 
-func DisplayAllReleases(c *iostreams.ColorPalette, releases []*gitlab.Release, repoName string) string {
+func DisplayAllReleases(io *iostreams.IOStreams, releases []*gitlab.Release, repoName string) string {
+	c := io.Color()
 	table := tableprinter.NewTablePrinter()
 	for _, r := range releases {
 		table.AddRow(r.Name, r.TagName, c.Gray(utils.TimeToPrettyTimeAgo(*r.CreatedAt)))
@@ -26,19 +27,21 @@ func DisplayAllReleases(c *iostreams.ColorPalette, releases []*gitlab.Release, r
 }
 
 func RenderReleaseAssertLinks(assets []*gitlab.ReleaseLink) string {
-	var assetsPrint string
 	if len(assets) == 0 {
 		return "There are no assets for this release"
 	}
+	t := tableprinter.NewTablePrinter()
 	for _, asset := range assets {
-		assetsPrint += asset.URL + "\n"
+		t.AddRow(asset.Name, asset.LinkType, asset.DirectAssetURL)
+		//assetsPrint += asset.DirectAssetURL + "\n"
 	}
-	return assetsPrint
+	return t.String()
 }
 
-func DisplayRelease(c *iostreams.ColorPalette, r *gitlab.Release, glamourStyle string) string {
+func DisplayRelease(io *iostreams.IOStreams, r *gitlab.Release) string {
+	c := io.Color()
 	duration := utils.TimeToPrettyTimeAgo(*r.CreatedAt)
-	description, err := utils.RenderMarkdown(r.Description, glamourStyle)
+	description, err := utils.RenderMarkdown(r.Description, io.BackgroundColor())
 	if err != nil {
 		description = r.Description
 
