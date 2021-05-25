@@ -33,8 +33,8 @@ func NewCmdView(f *cmdutils.Factory, runE func(opts *ViewOpts) error) *cobra.Com
 
 	cmd := &cobra.Command{
 		Use:   "view <tag>",
-		Short: "View information about a GitHub Release",
-		Long: heredoc.Docf(`View information about a GitHub Release.
+		Short: "View information about a GitLab Release",
+		Long: heredoc.Docf(`View information about a GitLab Release.
 
 			Without an explicit tag name argument, the latest release in the project is shown.
 		`, "`"),
@@ -62,7 +62,7 @@ func NewCmdView(f *cmdutils.Factory, runE func(opts *ViewOpts) error) *cobra.Com
 		},
 	}
 
-	cmd.Flags().BoolVarP(&opts.OpenInBrowser, "yes", "y", false, "Skip confirmation prompt")
+	cmd.Flags().BoolVarP(&opts.OpenInBrowser, "web", "w", false, "Open the release in the browser")
 
 	return cmd
 }
