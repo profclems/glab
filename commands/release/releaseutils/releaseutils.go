@@ -6,6 +6,9 @@ import (
 	"os"
 	"strings"
 
+	"github.com/profclems/glab/internal/glinstance"
+	"github.com/profclems/glab/internal/glrepo"
+
 	"github.com/profclems/glab/commands/release/releaseutils/upload"
 
 	"github.com/profclems/glab/pkg/iostreams"
@@ -38,7 +41,7 @@ func RenderReleaseAssertLinks(assets []*gitlab.ReleaseLink) string {
 	return t.String()
 }
 
-func DisplayRelease(io *iostreams.IOStreams, r *gitlab.Release) string {
+func DisplayRelease(io *iostreams.IOStreams, r *gitlab.Release, repo glrepo.Interface) string {
 	c := io.Color()
 	duration := utils.TimeToPrettyTimeAgo(*r.CreatedAt)
 	description, err := utils.RenderMarkdown(r.Description, io.BackgroundColor())
@@ -51,9 +54,13 @@ func DisplayRelease(io *iostreams.IOStreams, r *gitlab.Release) string {
 	for _, asset := range r.Assets.Sources {
 		assetsSources += asset.URL + "\n"
 	}
-	return fmt.Sprintf("%s\n%s released this %s \n%s - %s \n%s \n%s \n%s \n%s \n%s", // whoops
+	url := fmt.Sprintf("%s://%s/%s/-/releases/%s",
+		glinstance.OverridableDefaultProtocol(), glinstance.OverridableDefault(),
+		repo.FullName(), r.TagName)
+	footer := fmt.Sprintf(c.Gray("View this release on GitLab at %s"), url)
+	return fmt.Sprintf("%s\n%s released this %s\n%s - %s\n%s\n%s\n%s\n%s\n%s\n\n%s", // whoops
 		c.Bold(r.Name), r.Author.Name, duration, r.Commit.ShortID, r.TagName, description, c.Bold("ASSETS"),
-		RenderReleaseAssertLinks(r.Assets.Links), c.Bold("SOURCES"), assetsSources,
+		RenderReleaseAssertLinks(r.Assets.Links), c.Bold("SOURCES"), assetsSources, footer,
 	)
 }
 
