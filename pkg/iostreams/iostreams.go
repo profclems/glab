@@ -174,8 +174,11 @@ func (s *IOStreams) ResolveBackgroundColor(style string) string {
 	if style == "" {
 		style = os.Getenv("GLAMOUR_STYLE")
 	}
+	if style != "" && style != "auto" {
+		s.backgroundColor = style
+		return style
+	}
 	if (!s.ColorEnabled()) ||
-		(style != "" && style != "auto") ||
 		(s.pagerProcess != nil) {
 		s.backgroundColor = "none"
 		return "none"
