@@ -8,7 +8,7 @@
 /CHANGELOG.md
 
 # GLab local config dir
-/.glab-cli
+.glab-cli
 /test/testdata/.glab-cli
 
 # Test binary, built with `go test -c`
@@ -45,4 +45,4 @@ test/testdata-*
 
 coverage*
 vendor
-log.txt
+log.txt.glab-cli
