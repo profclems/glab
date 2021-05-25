@@ -81,27 +81,27 @@ func deleteRun(opts *ViewOpts) error {
 	cfg, _ := opts.Config()
 
 	var resp *gitlab.Response
+	var release *gitlab.Release
 
 	if opts.TagName == "" {
-		tags, resp, err := client.Tags.ListTags(repo.FullName(), &gitlab.ListTagsOptions{
-			OrderBy: gitlab.String("updated"),
-			Sort:    gitlab.String("desc"),
-		})
-		if err != nil && resp != nil && resp.StatusCode != 404 {
-			return cmdutils.WrapError(err, "could not fetch tag")
+		releases, _, err := client.Releases.ListReleases(repo.FullName(), &gitlab.ListReleasesOptions{})
+		if err != nil {
+			return cmdutils.WrapError(err, "could not fetch latest release")
 		}
-		if len(tags) < 1 {
-			return cmdutils.WrapError(err, "no tags found. Create a new tag, push to GitLab and try this command again.")
+		if len(releases) < 1 {
+			return cmdutils.WrapError(err, fmt.Sprintf("no release found for %q", repo.FullName()))
 		}
-		opts.TagName = tags[0].Name
-	}
 
-	release, resp, err := client.Releases.GetRelease(repo.FullName(), opts.TagName)
-	if err != nil {
-		if resp != nil && (resp.StatusCode == 404 || resp.StatusCode == 403) {
-			return cmdutils.WrapError(err, "release does not exist.")
+		release = releases[0]
+		opts.TagName = release.TagName
+	} else {
+		release, resp, err = client.Releases.GetRelease(repo.FullName(), opts.TagName)
+		if err != nil {
+			if resp != nil && (resp.StatusCode == 404 || resp.StatusCode == 403) {
+				return cmdutils.WrapError(err, "release does not exist.")
+			}
+			return cmdutils.WrapError(err, "failed to fetch release")
 		}
-		return cmdutils.WrapError(err, "failed to fetch release")
 	}
 
 	if opts.OpenInBrowser { //open in browser if --web flag is specified
