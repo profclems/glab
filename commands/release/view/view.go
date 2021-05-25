@@ -2,6 +2,7 @@ package view
 
 import (
 	"fmt"
+
 	"github.com/MakeNowJust/heredoc"
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/commands/release/releaseutils"
@@ -15,7 +16,7 @@ import (
 )
 
 type ViewOpts struct {
-	TagName     string
+	TagName       string
 	OpenInBrowser bool
 
 	IO         *iostreams.IOStreams
@@ -84,7 +85,7 @@ func deleteRun(opts *ViewOpts) error {
 	if opts.TagName == "" {
 		tags, resp, err := client.Tags.ListTags(repo.FullName(), &gitlab.ListTagsOptions{
 			OrderBy: gitlab.String("updated"),
-			Sort: gitlab.String("desc"),
+			Sort:    gitlab.String("desc"),
 		})
 		if err != nil && resp != nil && resp.StatusCode != 404 {
 			return cmdutils.WrapError(err, "could not fetch tag")
@@ -109,7 +110,7 @@ func deleteRun(opts *ViewOpts) error {
 			repo.FullName(), release.TagName)
 
 		if opts.IO.IsOutputTTY() {
-			opts.IO.Logf("Opening %s in your browser.\n", release)
+			opts.IO.Logf("Opening %s in your browser.\n", url)
 		}
 
 		browser, _ := cfg.Get(repo.RepoHost(), "browser")
