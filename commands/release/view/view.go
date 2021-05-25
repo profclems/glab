@@ -1,6 +1,7 @@
 package view
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/MakeNowJust/heredoc"
@@ -89,7 +90,7 @@ func deleteRun(opts *ViewOpts) error {
 			return cmdutils.WrapError(err, "could not fetch latest release")
 		}
 		if len(releases) < 1 {
-			return cmdutils.WrapError(err, fmt.Sprintf("no release found for %q", repo.FullName()))
+			return cmdutils.WrapError(errors.New("not found"), fmt.Sprintf("no release found for %q", repo.FullName()))
 		}
 
 		release = releases[0]

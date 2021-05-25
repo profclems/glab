@@ -98,7 +98,7 @@ func deleteRun(opts *DeleteOpts) error {
 	release, resp, err := client.Releases.GetRelease(repo.FullName(), opts.TagName)
 	if err != nil {
 		if resp != nil && (resp.StatusCode == 404 || resp.StatusCode == 403) {
-			return cmdutils.WrapError(err, "release does not exist.")
+			return cmdutils.WrapError(err, fmt.Sprintf("no release found for %q", repo.FullName()))
 		}
 		return cmdutils.WrapError(err, "failed to fetch release")
 	}
