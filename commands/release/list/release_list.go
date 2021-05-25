@@ -74,7 +74,7 @@ func listReleases(cmd *cobra.Command, args []string) error {
 		}
 		defer factory.IO.StopPager()
 
-		fmt.Fprintln(factory.IO.StdOut, releaseutils.DisplayRelease(factory.IO, release))
+		fmt.Fprintln(factory.IO.StdOut, releaseutils.DisplayRelease(factory.IO, release, repo))
 	} else {
 		l.PerPage = 30
 

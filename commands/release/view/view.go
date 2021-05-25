@@ -126,6 +126,6 @@ func deleteRun(opts *ViewOpts) error {
 	}
 	defer opts.IO.StopPager()
 
-	opts.IO.LogInfo(releaseutils.DisplayRelease(opts.IO, release))
+	opts.IO.LogInfo(releaseutils.DisplayRelease(opts.IO, release, repo))
 	return nil
 }
