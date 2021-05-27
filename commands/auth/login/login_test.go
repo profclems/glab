@@ -177,6 +177,14 @@ func Test_hostnameValidator(t *testing.T) {
 			hostname: "salsa.debian.org",
 		},
 		{
+			name:     "valid-external-instance-ip",
+			hostname: "1.1.1.1",
+		},
+		{
+			name:     "valid-external-instance-ip-with-port",
+			hostname: "1.1.1.1:8080",
+		},
+		{
 			name:     "empty",
 			hostname: "",
 			expected: "a value is required",
@@ -187,7 +195,11 @@ func Test_hostnameValidator(t *testing.T) {
 			expected: `invalid hostname "local/host"`,
 		},
 		{
-			name:     "invalid-hostname-colon",
+			name:     "hostname-with-valid-port",
+			hostname: "gitlab.mycompany.com:4000",
+		},
+		{
+			name:     "hostname-with-invalid-port",
 			hostname: "local:host",
 			expected: `invalid hostname "local:host"`,
 		},
