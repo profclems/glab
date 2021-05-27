@@ -15,3 +15,11 @@ func (c *ColorPalette) WarnIcon() string {
 func (c *ColorPalette) RedCheck() string {
 	return c.Red("✓")
 }
+
+func (c *ColorPalette) ProgressIcon() string {
+	return c.Blue("•")
+}
+
+func (c *ColorPalette) DotWarnIcon() string {
+	return c.Yellow("•")
+}

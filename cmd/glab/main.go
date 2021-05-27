@@ -3,12 +3,13 @@ package main
 import (
 	"errors"
 	"fmt"
-	"io"
 	"net"
 	"os"
 	"os/exec"
 	"strconv"
 	"strings"
+
+	"github.com/profclems/glab/pkg/iostreams"
 
 	"github.com/mgutz/ansi"
 
@@ -72,7 +73,7 @@ func main() {
 
 	cfg, err := cmdFactory.Config()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "failed to read configuration:  %s\n", err)
+		cmdFactory.IO.Logf("failed to read configuration:  %s\n", err)
 		os.Exit(2)
 	}
 
@@ -99,7 +100,7 @@ func main() {
 		isShell := false
 		expandedArgs, isShell, err = expand.ExpandAlias(cfg, os.Args, nil)
 		if err != nil {
-			fmt.Fprintf(os.Stdout, "Failed to process alias: %s\n", err)
+			cmdFactory.IO.LogInfof("Failed to process alias: %s\n", err)
 			os.Exit(2)
 		}
 
@@ -120,7 +121,7 @@ func main() {
 					os.Exit(ee.ExitCode())
 				}
 
-				fmt.Fprintf(os.Stdout, "failed to run external command: %s", err)
+				cmdFactory.IO.LogInfof("failed to run external command: %s", err)
 				os.Exit(3)
 			}
 
@@ -138,9 +139,7 @@ func main() {
 	rootCmd.SetArgs(expandedArgs)
 
 	if cmd, err := rootCmd.ExecuteC(); err != nil {
-		printError(os.Stderr, err, cmd, debug)
-		cmd.Print("\n")
-		os.Exit(1)
+		printError(cmdFactory.IO, err, cmd, debug, true)
 	}
 
 	if help.HasFailed() {
@@ -151,33 +150,54 @@ func main() {
 	if checkUpdate, err := strconv.ParseBool(checkUpdate); err == nil && checkUpdate {
 		err = update.CheckUpdate(cmdFactory.IO, version, true)
 		if err != nil && debug {
-			printError(os.Stderr, err, rootCmd, debug)
+			printError(cmdFactory.IO, err, rootCmd, debug, false)
 		}
 	}
 }
 
-func printError(out io.Writer, err error, cmd *cobra.Command, debug bool) {
+func printError(streams *iostreams.IOStreams, err error, cmd *cobra.Command, debug, shouldExit bool) {
 	if err == cmdutils.SilentError {
 		return
 	}
+	color := streams.Color()
+	printMore := true
+	exitCode := 1
 
 	var dnsError *net.DNSError
 	if errors.As(err, &dnsError) {
-		_, _ = fmt.Fprintf(out, "error connecting to %s\n", dnsError.Name)
+		streams.Logf("%s error connecting to %s\n", color.FailedIcon(), dnsError.Name)
 		if debug {
-			_, _ = fmt.Fprintln(out, dnsError)
+			streams.Log(color.FailedIcon(), dnsError)
 		}
-		_, _ = fmt.Fprintln(out, "check your internet connection or status.gitlab.com or 'Run sudo gitlab-ctl status' on your server if self-hosted")
-		return
+		streams.Logf("%s check your internet connection or status.gitlab.com or 'Run sudo gitlab-ctl status' on your server if self-hosted\n", color.DotWarnIcon())
+		printMore = false
 	}
-	_, _ = fmt.Fprintln(out, err)
-
-	var flagError *cmdutils.FlagError
-	if errors.As(err, &flagError) || strings.HasPrefix(err.Error(), "unknown command ") {
-		if !strings.HasSuffix(err.Error(), "\n") {
-			_, _ = fmt.Fprintln(out)
+	if printMore {
+		var exitError *cmdutils.ExitError
+		if errors.As(err, &exitError) {
+			streams.Logf("%s %s %s=%s\n", color.FailedIcon(), color.Bold(exitError.Details), color.Red("error"), exitError.Err)
+			exitCode = exitError.Code
+			printMore = false
 		}
-		_, _ = fmt.Fprintln(out, cmd.UsageString())
+
+		if printMore {
+			streams.Log(err)
+
+			var flagError *cmdutils.FlagError
+			if errors.As(err, &flagError) || strings.HasPrefix(err.Error(), "unknown command ") {
+				if !strings.HasSuffix(err.Error(), "\n") {
+					streams.Log()
+				}
+				streams.Log(cmd.UsageString())
+			}
+		}
+	}
+
+	if cmd != nil {
+		cmd.Print("\n")
+	}
+	if shouldExit {
+		os.Exit(exitCode)
 	}
 }
 
