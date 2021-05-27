@@ -139,10 +139,7 @@ func MRFromArgsWithOpts(
 		return nil, nil, err
 	}
 
-	branch, err := f.Branch()
-	if err != nil {
-		return nil, nil, err
-	}
+	var branch string
 
 	if len(args) > 0 {
 		mrID, err = strconv.Atoi(args[0])
@@ -150,6 +147,13 @@ func MRFromArgsWithOpts(
 			branch = args[0]
 		} else if mrID == 0 { // to check for cases where the user explicitly specified mrID to be zero
 			return nil, nil, fmt.Errorf("invalid merge request ID provided")
+		}
+	}
+
+	if branch == "" {
+		branch, err = f.Branch()
+		if err != nil {
+			return nil, nil, err
 		}
 	}
 
