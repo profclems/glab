@@ -359,9 +359,9 @@ func fillPlaceholders(value string, opts *ApiOptions) (string, error) {
 		switch m {
 		case ":id":
 			h, _ := opts.HttpClient()
-			baseProject, e := api.GetProject(h, baseRepo.FullName())
-			if e == nil && baseProject != nil {
-				return string(rune(baseProject.ID))
+			project, e := baseRepo.Project(h)
+			if e == nil && project != nil {
+				return strconv.Itoa(project.ID)
 			}
 			err = e
 			return ""
