@@ -16,6 +16,7 @@ require (
 	github.com/google/renameio v0.1.0
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510
 	github.com/gosuri/uilive v0.0.4
+	github.com/hashicorp/go-retryablehttp v0.6.8 // indirect
 	github.com/hashicorp/go-version v1.3.0
 	github.com/jarcoal/httpmock v1.0.8
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51

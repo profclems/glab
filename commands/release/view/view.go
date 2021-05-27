@@ -59,7 +59,7 @@ func NewCmdView(f *cmdutils.Factory, runE func(opts *ViewOpts) error) *cobra.Com
 				return runE(opts)
 			}
 
-			return deleteRun(opts)
+			return viewRun(opts)
 		},
 	}
 
@@ -68,7 +68,7 @@ func NewCmdView(f *cmdutils.Factory, runE func(opts *ViewOpts) error) *cobra.Com
 	return cmd
 }
 
-func deleteRun(opts *ViewOpts) error {
+func viewRun(opts *ViewOpts) error {
 	client, err := opts.HTTPClient()
 	if err != nil {
 		return err

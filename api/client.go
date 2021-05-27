@@ -4,10 +4,13 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net"
 	"net/http"
 	"net/url"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/profclems/glab/internal/config"
@@ -80,9 +83,9 @@ func (c *Client) HTTPClient() *http.Client {
 		return c.httpClientOverride
 	}
 	if c.httpClient != nil {
-		return &http.Client{}
+		return c.httpClient
 	}
-	return c.httpClient
+	return &http.Client{}
 }
 
 // OverrideHTTPClient overrides the default http client
@@ -250,6 +253,48 @@ func (c *Client) Lab() *gitlab.Client {
 // BaseURL returns a copy of the BaseURL
 func (c *Client) BaseURL() *url.URL {
 	return c.Lab().BaseURL()
+}
+
+func NewHTTPRequest(c *Client, method string, baseURL *url.URL, body io.Reader, headers []string, bodyIsJSON bool) (*http.Request, error) {
+	req, err := http.NewRequest(method, baseURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, h := range headers {
+		idx := strings.IndexRune(h, ':')
+		if idx == -1 {
+			return nil, fmt.Errorf("header %q requires a value separated by ':'", h)
+		}
+		name, value := h[0:idx], strings.TrimSpace(h[idx+1:])
+		if strings.EqualFold(name, "Content-Length") {
+			length, err := strconv.ParseInt(value, 10, 0)
+			if err != nil {
+				return nil, err
+			}
+			req.ContentLength = length
+		} else {
+			req.Header.Add(name, value)
+		}
+	}
+
+	if bodyIsJSON && req.Header.Get("Content-Type") == "" {
+		req.Header.Set("Content-Type", "application/json; charset=utf-8")
+	}
+
+	if c.Lab().UserAgent != "" {
+		req.Header.Set("User-Agent", c.Lab().UserAgent)
+	}
+
+	// TODO: support GITLAB_CI_TOKEN
+	switch c.AuthType {
+	case OAuthToken:
+		req.Header.Set("Authorization", "Bearer "+c.Token())
+	case PrivateToken:
+		req.Header.Set("PRIVATE-TOKEN", c.Token())
+	}
+
+	return req, nil
 }
 
 func TestClient(httpClient *http.Client, token, host string, isGraphQL bool) (*Client, error) {
