@@ -43,12 +43,19 @@ run-tests:
   variables:
     GOPATH: "/builds/go"
     GIT_CLONE_PATH: $GOPATH/src/github.com/profclems/glab
-    GITLAB_TOKEN: "qRC87Xg9Wd46RhB8J8sp"
-    CODECOV_TOKEN: "1597edbc-8760-42c1-ab79-c192ad151717"
+    GITLAB_TOKEN: $GITLAB_TOKEN
+    CODECOV_TOKEN: $CODECOV_TOKEN
+  before_script:
+    - mkdir ~/.ssh && chmod 700 ~/.ssh
+    - echo -e "Host *\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
+    - echo -e $SSH_PUBLIC_KEY > ~/.ssh/id_rsa.pub
+    - echo -e $SSH_PRIVATE_KEY > ~/.ssh/id_rsa
+    - chmod 600 ~/.ssh/id_rsa*
+    - eval `ssh-agent -s`
+    - ssh-add ~/.ssh/id_rsa
   script:
     - go version
     - export PATH=$GOPATH/bin:$PATH
     - go get -t -v ./...
     - make test
-  after_script:
     - bash <(curl -s https://codecov.io/bash)
