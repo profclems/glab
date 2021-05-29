@@ -19,8 +19,18 @@ stages:
 default:
   image: golang:1.15
 
+.go-cache:
+  variables:
+    GOPATH: $CI_PROJECT_DIR/.go
+  before_script:
+    - mkdir -p .go
+  cache:
+    paths:
+      - .go/pkg/mod/
+
 lint:
   stage: lint
+  extends: .go-cache
   before_script:
     - go mod verify
     - go mod download
@@ -35,14 +45,14 @@ build-minimum:
 
 build-maximum:
   stage: build
+  extends: .go-cache
   script:
     - make build
 
 run-tests:
   stage: test
+  extends: .go-cache
   variables:
-    GOPATH: "/builds/go"
-    GIT_CLONE_PATH: $GOPATH/src/github.com/profclems/glab
     GITLAB_TOKEN: $GITLAB_TOKEN
     CODECOV_TOKEN: $CODECOV_TOKEN
   before_script:
@@ -54,8 +64,6 @@ run-tests:
     - eval `ssh-agent -s`
     - ssh-add ~/.ssh/id_rsa
   script:
-    - go version
-    - export PATH=$GOPATH/bin:$PATH
     - go get -t -v ./...
     - make test
     - bash <(curl -s https://codecov.io/bash)
