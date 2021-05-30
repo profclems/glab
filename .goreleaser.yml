@@ -6,6 +6,7 @@ release:
 before:
   hooks:
     - go mod tidy
+    - make manpage
     
 builds:
   - <<: &build_defaults
@@ -71,6 +72,7 @@ nfpms:
     description: An open source gitlab cli tool
     license: MIT
     formats:
+      - apk
       - deb
       - rpm
     dependencies:
@@ -78,6 +80,8 @@ nfpms:
     # Override default /usr/local/bin destination for binaries
     # Since glab is already archived in the bin directory it would install in /usr/bin/glab
     bindir: /usr
+    files:
+      "./share/man/man1/glab*.1": "/usr/share/man/man1"
 
 checksum:
   name_template: 'checksums.txt'
