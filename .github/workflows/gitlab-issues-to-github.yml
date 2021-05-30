@@ -25,7 +25,7 @@ jobs:
 
       - name: Get GitLab Issues
         run: |
-          glab api /projects/:id/issues -f labels=gh-new -f state=opened -X GET --paginate >> issues.json
+          glab api /projects/:fullpath/issues -f labels=gh-new -f state=opened -X GET --paginate >> issues.json
 
       - name: Clone New Issues on GitHub
         run: |
