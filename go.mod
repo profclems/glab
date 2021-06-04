@@ -8,7 +8,7 @@ require (
 	github.com/acarl005/stripansi v0.0.0-20180116102854-5a71ef0e047d
 	github.com/alecthomas/assert v0.0.0-20170929043011-405dbfeb8e38
 	github.com/avast/retry-go v3.0.0+incompatible
-	github.com/briandowns/spinner v1.13.0
+	github.com/briandowns/spinner v1.15.0
 	github.com/charmbracelet/glamour v0.2.1-0.20200724174618-1246d13c1684
 	github.com/dustin/go-humanize v1.0.0
 	github.com/gdamore/tcell/v2 v2.3.8
