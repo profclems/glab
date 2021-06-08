@@ -2,7 +2,6 @@ project_name: glab
 
 release:
   prerelease: auto
-  discussion_category_name: Announcements
   
 before:
   hooks:
