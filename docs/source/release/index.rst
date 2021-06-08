@@ -31,7 +31,12 @@ Subcommands
    :glob:
    :maxdepth: 0
 
+   create <create>
+   delete <delete>
+   download <download>
    list <list>
+   upload <upload>
+   view <view>
    
 
 
