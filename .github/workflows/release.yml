@@ -71,7 +71,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.BOT_TOKEN }}
         run: |
           if [[ $GITHUB_REF == refs/tags/v* ]]; then
-            goreleaser release --rm-dist --release-notes=CHANGELOG.md
+            goreleaser release --release-notes=CHANGELOG.md
           elif [[ $GITHUB_REF == refs/heads/trunk ]]; then
             goreleaser --snapshot
           fi
