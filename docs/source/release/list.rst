@@ -15,13 +15,6 @@ List releases in a repository
 
   glab release list [flags]
 
-Options
-~~~~~~~
-
-::
-
-  -t, --tag string   Filter releases by tag <name>
-
 Options inherited from parent commands
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
