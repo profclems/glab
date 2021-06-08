@@ -33,8 +33,8 @@ builds:
 
 dockers:
   - image_templates:
-      - 'profclems/glab:{{ .Tag }}'
-      - 'ghcr.io/profclems/glab:{{ .Tag }}'
+      - 'profclems/glab:{{ .Tag }}-amd64'
+      - 'ghcr.io/profclems/glab:{{ .Tag }}-amd64'
     dockerfile: Dockerfile
     use_buildx: true
     build_flag_templates:
@@ -47,16 +47,39 @@ dockers:
       - "--platform=linux/amd64"
     extra_files:
       - scripts/entrypoint.sh
+  - image_templates:
+      - 'profclems/glab:{{ .Tag }}-arm64'
+      - 'ghcr.io/profclems/glab:{{ .Tag }}-arm64'
+    dockerfile: Dockerfile
+    use_buildx: true
+    build_flag_templates:
+      - "--pull"
+      - "--label=org.opencontainers.image.created={{.Date}}"
+      - "--label=org.opencontainers.image.name={{.ProjectName}}"
+      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+      - "--label=org.opencontainers.image.version={{.Version}}"
+      - "--label=org.opencontainers.image.source={{.GitURL}}"
+      - "--platform=linux/arm64"
+    goarch: arm64
+    extra_files:
+      - scripts/entrypoint.sh
 docker_manifests:
   - name_template: 'profclems/glab:{{ .Tag }}'
     image_templates:
-      - 'profclems/glab:{{ .Tag }}'
+      - 'profclems/glab:{{ .Tag }}-amd64'
+      - 'profclems/glab:{{ .Tag }}-arm64'
+  - name_template: 'ghcr.io/profclems/glab:{{ .Tag }}'
+    image_templates:
+      - 'ghcr.io/profclems/glab:{{ .Tag }}-amd64'
+      - 'ghcr.io/profclems/glab:{{ .Tag }}-arm64'
   - name_template: 'profclems/glab:latest'
     image_templates:
-      - 'profclems/glab:{{ .Tag }}'
+      - 'profclems/glab:{{ .Tag }}-amd64'
+      - 'profclems/glab:{{ .Tag }}-arm64'
   - name_template: 'ghcr.io/profclems/glab:latest'
     image_templates:
-      - 'ghcr.io/profclems/glab:{{ .Tag }}'
+      - 'ghcr.io/profclems/glab:{{ .Tag }}-amd64'
+      - 'ghcr.io/profclems/glab:{{ .Tag }}-arm64'
 
 archives:
   - id: nix
