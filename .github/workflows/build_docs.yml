@@ -6,14 +6,20 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout
+        uses: actions/checkout@v2
         with:
           ref: trunk
           fetch-depth: 0
-      - run: |
+      - name: Get Latest Version Tag
+        id: get_version
+        uses: battila7/get-version-action@v2
+
+      - name: Update docs
+        run: |
           git config user.name github-actions
           git config user.email github-actions@github.com
           make gen-docs
           git add docs
-          git commit -m "docs(update): latest" || echo "No document(s) updates found!"
+          git commit -m "docs(update): ${{ steps.get_version.outputs.version }}" || echo "No document(s) updates found!"
           git push
