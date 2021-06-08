@@ -57,21 +57,25 @@ jobs:
           echo "GORELEASER_CURRENT_TAG=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
           git fetch --unshallow
           scripts/changelog | tee CHANGELOG.md
-      
-      - name: Run GoReleaser
+
+      - name: Install GoReleaser
         uses: goreleaser/goreleaser-action@v2
         with:
           version: latest
           install-only: true
         env:
           GITHUB_TOKEN: ${{ secrets.BOT_TOKEN }}
+
+      - name: Run GoReleaser
+        env:
+          GITHUB_TOKEN: ${{ secrets.BOT_TOKEN }}
         run: |
           if [[ $GITHUB_REF == refs/tags/v* ]]; then
             goreleaser release --rm-dist --release-notes=CHANGELOG.md
-          elif [[ $GITHUB_REF == refs/heads/master ]]; then
+          elif [[ $GITHUB_REF == refs/heads/trunk ]]; then
             goreleaser --snapshot
           fi
-      
+
       - name: Bump Homebrew formula
         uses: mislav/bump-homebrew-formula-action@v1
         if: "!contains(github.ref, '-') && startsWith(github.ref, 'refs/tags/v')" # skip prereleases and run on tags
@@ -79,7 +83,7 @@ jobs:
           formula-name: glab
         env:
           COMMITTER_TOKEN: ${{ secrets.PS_TOKEN }}
-      
+
       - name: Move project cards
         continue-on-error: true
         if: startsWith(github.ref, 'refs/tags/v')
@@ -124,7 +128,7 @@ jobs:
         id: buildwin
         run: |
           make build && Get-ChildItem bin
-      
+
       - name: Get Latest Version Tag
         id: get_version
         uses: battila7/get-version-action@v2
