@@ -30,6 +30,33 @@ builds:
     goos: [windows]
     goarch: [386, amd64]
 
+dockers:
+  - image_templates:
+      - 'profclems/glab:{{ .Tag }}'
+      - 'ghcr.io/profclems/glab:{{ .Tag }}'
+    dockerfile: Dockerfile
+    use_buildx: true
+    build_flag_templates:
+      - "--pull"
+      - "--label=org.opencontainers.image.created={{.Date}}"
+      - "--label=org.opencontainers.image.name={{.ProjectName}}"
+      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+      - "--label=org.opencontainers.image.version={{.Version}}"
+      - "--label=org.opencontainers.image.source={{.GitURL}}"
+      - "--platform=linux/amd64"
+    extra_files:
+      - scripts/entrypoint.sh
+docker_manifests:
+  - name_template: 'profclems/glab:{{ .Tag }}'
+    image_templates:
+      - 'profclems/glab:{{ .Tag }}'
+  - name_template: 'profclems/glab:latest'
+    image_templates:
+      - 'profclems/glab:{{ .Tag }}'
+  - name_template: 'ghcr.io/profclems/glab:latest'
+    image_templates:
+      - 'ghcr.io/profclems/glab:{{ .Tag }}'
+
 archives:
   - id: nix
     builds: [macos, linux]
@@ -80,8 +107,9 @@ nfpms:
     # Override default /usr/local/bin destination for binaries
     # Since glab is already archived in the bin directory it would install in /usr/bin/glab
     bindir: /usr
-    files:
-      "./share/man/man1/glab*.1": "/usr/share/man/man1"
+    contents:
+      - src: "./share/man/man1/glab*.1"
+        dst: "/usr/share/man/man1"
 
 checksum:
   name_template: 'checksums.txt'

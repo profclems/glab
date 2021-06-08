@@ -1,4 +1,4 @@
-FROM golang:1.16-alpine
+FROM alpine:latest
 
 RUN apk add --no-cache bash \
                        curl \
@@ -14,5 +14,5 @@ CMD [ "-h" ]
 COPY scripts/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
-COPY dist/glab_*.apk /tmp/
+COPY glab_*.apk /tmp/
 RUN apk add --allow-untrusted /tmp/glab_*.apk
