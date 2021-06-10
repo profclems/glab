@@ -27,7 +27,7 @@ Please avoid:
 Prerequisites:
 - Go 1.13+
 
-Build with: `make` or `go build -o bin/glab ./cmd/main.go`
+Build with: `make` or `go build -o bin/glab ./cmd/glab/main.go`
 
 Run the new binary as: `./bin/glab`
 
