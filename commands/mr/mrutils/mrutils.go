@@ -150,7 +150,7 @@ func MRFromArgsWithOpts(
 		}
 	}
 
-	if branch == "" {
+	if branch == "" && mrID == 0 {
 		branch, err = f.Branch()
 		if err != nil {
 			return nil, nil, err
