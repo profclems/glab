@@ -11,7 +11,7 @@ require (
 	github.com/briandowns/spinner v1.15.0
 	github.com/charmbracelet/glamour v0.2.1-0.20200724174618-1246d13c1684
 	github.com/dustin/go-humanize v1.0.0
-	github.com/gdamore/tcell/v2 v2.3.9
+	github.com/gdamore/tcell/v2 v2.3.10
 	github.com/golang/protobuf v1.4.2 // indirect
 	github.com/google/renameio v0.1.0
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510
