@@ -232,13 +232,13 @@ var GetPipelineFromBranch = func(client *gitlab.Client, ref, repo string) ([]*gi
 	return jobs, nil
 }
 
-var PipelineJobTraceWithSha = func(client *gitlab.Client, pid interface{}, sha, name string) (io.Reader, *gitlab.Job, error) {
+var PipelineJobWithSha = func(client *gitlab.Client, pid interface{}, sha, name string) (*gitlab.Job, error) {
 	if client == nil {
 		client = apiClient.Lab()
 	}
 	jobs, err := PipelineJobsWithSha(client, pid, sha)
 	if len(jobs) == 0 || err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 	var (
 		job          *gitlab.Job
@@ -267,12 +267,7 @@ var PipelineJobTraceWithSha = func(client *gitlab.Client, pid interface{}, sha, 
 	if job == nil {
 		job = jobs[len(jobs)-1]
 	}
-	r, _, err := client.Jobs.GetTraceFile(pid, job.ID)
-	if err != nil {
-		return nil, job, err
-	}
-
-	return r, job, err
+	return job, err
 }
 
 type JobSort struct {

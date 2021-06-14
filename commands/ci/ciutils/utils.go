@@ -54,14 +54,22 @@ func DisplayMultiplePipelines(c *iostreams.ColorPalette, p []*gitlab.PipelineInf
 	return "No Pipelines available on " + projectID
 }
 
-func RunTrace(ctx context.Context, apiClient *gitlab.Client, w io.Writer, pid interface{}, sha, name string) error {
+func RunTraceSha(ctx context.Context, apiClient *gitlab.Client, w io.Writer, pid interface{}, sha, name string) error {
+	job, err := api.PipelineJobWithSha(apiClient, pid, sha, name)
+	if err != nil || job == nil {
+		return errors.Wrap(err, "failed to find job")
+	}
+	return RunTrace(ctx, apiClient, w, pid, job, name)
+}
+
+func RunTrace(ctx context.Context, apiClient *gitlab.Client, w io.Writer, pid interface{}, job *gitlab.Job, name string) error {
 	fmt.Fprintln(w, "Getting job trace...")
 	for range time.NewTicker(time.Second * 3).C {
 		if ctx.Err() == context.Canceled {
 			break
 		}
-		trace, job, err := api.PipelineJobTraceWithSha(apiClient, pid, sha, name)
-		if err != nil || job == nil || trace == nil {
+		trace, _, err := apiClient.Jobs.GetTraceFile(pid, job.ID)
+		if err != nil || trace == nil {
 			return errors.Wrap(err, "failed to find job")
 		}
 		switch job.Status {

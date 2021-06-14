@@ -247,7 +247,7 @@ func inputCapture(app *tview.Application, root *tview.Pages, navi navigator, inp
 			app.Suspend(func() {
 				ctx, cancel := context.WithCancel(context.Background())
 				go func() {
-					err := ciutils.RunTrace(ctx, opts.ApiClient, opts.Output, opts.ProjectID, opts.CommitSHA, curJob.Name)
+					err := ciutils.RunTraceSha(ctx, opts.ApiClient, opts.Output, opts.ProjectID, opts.CommitSHA, curJob.Name)
 					if err != nil {
 						app.Stop()
 						log.Fatal(err)
@@ -410,7 +410,7 @@ func jobsView(app *tview.Application, jobsCh chan []*gitlab.Job, inputCh chan st
 			tv.SetBorderPadding(0, 0, 1, 1).SetBorder(true)
 
 			go func() {
-				err := ciutils.RunTrace(context.Background(), opts.ApiClient, vtclean.NewWriter(tview.ANSIWriter(tv), true), opts.ProjectID, opts.CommitSHA, curJob.Name)
+				err := ciutils.RunTraceSha(context.Background(), opts.ApiClient, vtclean.NewWriter(tview.ANSIWriter(tv), true), opts.ProjectID, opts.CommitSHA, curJob.Name)
 				if err != nil {
 					app.Stop()
 					log.Fatal(err)
