@@ -1,3 +1,5 @@
+# GLab
+
 ![GLab](https://user-images.githubusercontent.com/9063085/90530075-d7a58580-e14a-11ea-9727-4f592f7dcf2e.png)
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/profclems/glab)](https://goreportcard.com/report/github.com/profclems/glab)
@@ -8,7 +10,7 @@
 [![Twitter Follow](https://img.shields.io/twitter/follow/glab_cli?style=social)](https://twitter.com/glab_cli)
 [![Donate](https://img.shields.io/badge/Donate-Open%20Collective-informational)](https://opencollective.com/glab/contribute)
 
-GLab is an open source GitLab CLI tool bringing GitLab to your terminal next to where you are already working with `git` and your code without switching between windows and browser tabs. Work with issues, merge requests, **watch running pipelines directly from your CLI** among other features. 
+GLab is an open source GitLab CLI tool bringing GitLab to your terminal next to where you are already working with `git` and your code without switching between windows and browser tabs. Work with issues, merge requests, **watch running pipelines directly from your CLI** among other features.
 Inspired by [`gh`](https://github.com/cli/cli), the official GitHub CLI tool.
 
 `glab` is available for repositories hosted on GitLab.com and self-hosted GitLab Instances. `glab` supports multiple authenticated GitLab instances and automatically detects the authenticated hostname from the remotes available in the working git directory.
@@ -19,40 +21,40 @@ Table of Contents
 =================
 
 * [Usage](#usage)
-   * [Core Commands](#core-commands)
-   * [Additional Commands](#additional-commands)
-   * [Examples](#examples)
+  * [Core Commands](#core-commands)
+  * [Additional Commands](#additional-commands)
+  * [Examples](#examples)
 * [Demo](#demo)
 * [Learn More](#learn-more)
 * [Installation](#installation)
-   * [Quick Install (Bash)](#quick-install-bash)
-   * [Windows](#windows)
-      * [WinGet](#winget)
-      * [Scoop](#scoop)
-      * [EXE Installer](#exe-installer)
-   * [Linux](#linux)
-      * [Linuxbrew (Homebrew)](#linuxbrew-homebrew)
-      * [Snapcraft](#snapcraft)
-      * [Arch Linux](#arch-linux)
-      * [KISS Linux](#kiss-linux)
-      * [Alpine Linux](#alpine-linux)
-         * [Install a pinned version from edge](#install-a-pinned-version-from-edge)
-         * [Alpine Linux Docker-way](#alpine-linux-docker-way)
-      * [Nix/NixOS](#nixnixos)
-   * [macOS](#macos)
-      * [Homebrew](#homebrew)
-      * [MacPorts](#macports)
-   * [Building From Source](#building-from-source)
-      * [Prerequisites](#prerequisites-for-building-from-source-are)
+  * [Quick Install (Bash)](#quick-install-bash)
+  * [Windows](#windows)
+    * [WinGet](#winget)
+    * [Scoop](#scoop)
+    * [EXE Installer](#exe-installer)
+  * [Linux](#linux)
+    * [Linuxbrew (Homebrew)](#linuxbrew-homebrew)
+    * [Snapcraft](#snapcraft)
+    * [Arch Linux](#arch-linux)
+    * [KISS Linux](#kiss-linux)
+    * [Alpine Linux](#alpine-linux)
+      * [Install a pinned version from edge](#install-a-pinned-version-from-edge)
+      * [Alpine Linux Docker-way](#alpine-linux-docker-way)
+    * [Nix/NixOS](#nixnixos)
+  * [macOS](#macos)
+    * [Homebrew](#homebrew)
+    * [MacPorts](#macports)
+  * [Building From Source](#building-from-source)
+    * [Prerequisites](#prerequisites-for-building-from-source-are)
 * [Authentication](#authentication)
 * [Configuration](#configuration)
 * [Environment Variables](#environment-variables)
 * [What about lab](#what-about-lab)
 * [Issues](#issues)
 * [Contributing](#contributing)
-   * [Support glab <g-emoji class="g-emoji" alias="sparkling_heart" fallback-src="https://github.githubassets.com/images/icons/emoji/unicode/1f496.png">💖</g-emoji>](#support-glab-)
-      * [Individuals](#individuals)
-      * [Backers](#backers)
+  * [Support glab <g-emoji class="g-emoji" alias="sparkling_heart" fallback-src="https://github.githubassets.com/images/icons/emoji/unicode/1f496.png">💖</g-emoji>](#support-glab-)
+    * [Individuals](#individuals)
+    * [Backers](#backers)
 * [License](#license)
 
 ## Usage
@@ -62,48 +64,59 @@ Table of Contents
 
 ### Core Commands
 ```bash
-  api:         Make authenticated REST/GRAPHQL requests to the GitLab API
-  auth:        Manage glab's authentication state
-  issue:       Work with GitLab issues
-  label:       Manage labels on remote
-  mr:          Create, view and manage merge requests
-  ci:          Work with GitLab CI pipelines and jobs
-  release:     Manage GitLab releases
-  repo:        Work with GitLab repositories and projects
-  
+  api:          Make authenticated REST/GRAPHQL requests to the GitLab API
+  auth:         Manage glab's authentication state
+  issue:        Work with GitLab issues
+  label:        Manage labels on remote
+  mr:           Create, view and manage merge requests
+  ci:           Work with GitLab CI pipelines and jobs
+  release:      Manage GitLab releases
+  repo:         Work with GitLab repositories and projects
+
 ```
 
 ### Additional Commands
 ```bash
-  alias:       Create, list and delete aliases
+  alias:        Create, list and delete aliases
   check-update: Check for latest glab releases
-  completion:  Generate shell completion scripts
-  config:      Set and get glab settings
-  help:        Help about any command
-  version:     show glab version information
+  completion:   Generate shell completion scripts
+  config:       Set and get glab settings
+  help:         Help about any command
+  version:      show glab version information
 ```
 
 ### Examples
   ```bash
-  $ glab issue create --title="This is an issue title" --description="This is a really long description"
-  $ glab issue list --closed
-  $ glab ci view -b master    # to watch the latest pipeline on master
-  $ glab ci status    # classic ci view
+  glab issue create --title="This is an issue title" --description="This is a really long description"
+  glab issue list --closed
+  glab ci view -b master    # to watch the latest pipeline on master
+  glab ci status    # classic ci view
   ```
-  
+
 ## Demo
 [![asciicast](https://asciinema.org/a/368622.svg)](https://asciinema.org/a/368622)
-  
+
 ## Learn More
 Read the [documentation](https://glab.readthedocs.io/) for more information on this tool.
 
 ## Installation
 Download a binary suitable for your OS at the [releases page](https://github.com/profclems/glab/releases/latest).
 
-### Quick Install (shell)
+### Quick Install
 **Supported Platforms**: Linux and macOS
 
-You can install or update `glab` with:
+#### Homebrew
+
+```sh
+brew install glab
+```
+
+Updating (Homebrew):
+```sh
+brew upgrade glab
+```
+
+Alternatively, you can install `glab` by shell script:
 ```sh
 curl -sL https://j.mp/glab-cli | sudo sh
 ```
@@ -122,7 +135,8 @@ Available for download via [WinGet](https://github.com/microsoft/winget-cli), [s
 ```sh
 winget install glab
 ```
-Updating:
+
+Updating (WinGet):
 ```sh
 winget install glab
 ```
@@ -131,7 +145,8 @@ winget install glab
 ```sh
 scoop install glab
 ```
-Updating:
+
+Updating (Scoop):
 ```sh
 scoop update glab
 ```
@@ -146,14 +161,15 @@ Prebuilt binaries available at the [releases page](https://github.com/profclems/
 ```sh
 brew install glab
 ```
-Updating:
+
+Updating (Homebrew):
 ```sh
 brew upgrade glab
 ```
 #### Snapcraft
 [![Get it from the Snap Store](https://snapcraft.io/static/images/badges/en/snap-store-black.svg)](https://snapcraft.io/glab)
 
-Make sure you have snap installed on your Linux Distro (https://snapcraft.io/docs/installing-snapd).
+Make sure you have [snap installed on your Linux Distro](https://snapcraft.io/docs/installing-snapd).
 1. `sudo snap install --edge glab`
 1. `sudo snap connect glab:ssh-keys` to grant ssh access
 
@@ -165,12 +181,13 @@ yay -Sy gitlab-glab-bin
 or any other [AUR helper](https://wiki.archlinux.org/index.php/AUR_helpers) of your choice.
 
 #### KISS Linux
+> WARNING: It seems that KISS Linux may no longer be actively maintained, so links to its web domain have been removed from this README.
+
 `glab` is available on the [KISS Linux Community Repo](https://github.com/kisslinux/community) as `gitlab-glab`.
 If you already have the community repo configured in your `KISS_PATH` you can install `glab` through your terminal.
 ```sh
 kiss b gitlab-glab && kiss i gitlab-glab
 ```
-If you do not have the community repo configured in your `KISS_PATH`, follow the guide on the official guide [Here](https://k1ss.org/install#3.0) to learn how to setup it up.
 
 #### Alpine Linux
 
@@ -252,7 +269,7 @@ sudo port selfupdate && sudo port upgrade glab
 ### Building From Source
 If a supported binary for your OS is not found at the [releases page](https://github.com/profclems/glab/releases/latest), you can build from source:
 
-#### Prerequisites for building from source are:
+#### Prerequisites for building from source
 - `make`
 - Go 1.13+
 
@@ -268,46 +285,46 @@ If a supported binary for your OS is not found at the [releases page](https://gi
 2. Clone this repository
 
    ```sh
-   $ git clone https://github.com/profclems/glab.git
-   $ cd glab
+   git clone https://github.com/profclems/glab.git
+   cd glab
    ```
    If you have $GOPATH/bin or $GOBIN in your $PATH, you can just install with `make install` (install glab in $GOPATH/bin) and **skip steps 3 and 4**.
 
 3. Build the project
-   ```
-   $ make
+   ```sh
+   make
    ```
 
 4. Change PATH to find newly compiled `glab`
 
    ```sh
-   $ export PATH=$PWD/bin:$PATH
+   export PATH=$PWD/bin:$PATH
    ```
 
-4. Run `glab version` to check if it worked and `glab config init` to set up
+4. Run `glab version` to confirm that it worked
 
 ## Authentication
 
-Get a GitLab access token at https://gitlab.com/profile/personal_access_tokens or https://gitlab.example.com/profile/personal_access_tokens if self-hosted
+Get a GitLab access token at <https://gitlab.com/profile/personal_access_tokens> or <https://gitlab.example.com/profile/personal_access_tokens> if self-hosted
 
 - start interactive setup
 ```sh
-$ glab auth login
+glab auth login
 ```
 
 - authenticate against gitlab.com by reading the token from a file
 ```sh
-$ glab auth login --stdin < myaccesstoken.txt
+glab auth login --stdin < myaccesstoken.txt
 ```
 
 - authenticate against a self-hosted GitLab instance by reading from a file
 ```sh
-$ glab auth login --hostname salsa.debian.org --stdin < myaccesstoken.txt
+glab auth login --hostname salsa.debian.org --stdin < myaccesstoken.txt
 ```
 
 - authenticate with token and hostname (Not recommended for shared environments)
 ```sh
-$ glab auth login --hostname gitlab.example.org --token xxxxx
+glab auth login --hostname gitlab.example.org --token xxxxx
 ```
 
 ## Configuration
@@ -317,13 +334,13 @@ $ glab auth login --hostname gitlab.example.org --token xxxxx
 **To set configuration globally**
 
 ```sh
-$ glab config set --global editor vim
+glab config set --global editor vim
 ```
 
 **To set configuration for current directory (must be a git repository)**
 
 ```sh
-$ glab config set editor vim
+glab config set editor vim
 ```
 
 **To set configuration for a specific host**
@@ -331,7 +348,7 @@ $ glab config set editor vim
 Use the `--host` flag to set configuration for a specific host. This is always stored in the global config file with or without the `global` flag.
 
 ```sh
-$ glab config set editor vim --host gitlab.example.org
+glab config set editor vim --host gitlab.example.org
 ```
 
 
@@ -357,8 +374,8 @@ $ glab config set editor vim --host gitlab.example.org
   GLAMOUR_STYLE: environment variable to set your desired markdown renderer style
   Available options are (dark|light|notty) or set a custom style
   https://github.com/charmbracelet/glamour#styles
-  
-  NO_COLOR: set to any value to avoid printing ANSI escape sequences for color output. 
+
+  NO_COLOR: set to any value to avoid printing ANSI escape sequences for color output.
   ```
 
 ## What about [Lab](https://github.com/zaquestion/lab)?

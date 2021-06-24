@@ -1,4 +1,4 @@
-## Contributing
+# Contributing
 
 [legal]: https://help.github.com/articles/github-terms-of-service/#6-contributions-under-repository-license
 [license]: ../LICENSE
@@ -31,9 +31,9 @@ Build with: `make` or `go build -o bin/glab ./cmd/glab/main.go`
 
 Run the new binary as: `./bin/glab`
 
-Run tests with: make test or go test ./...
+Run tests with: `make test` or `go test ./...`
 
-WARNING: Do not run `make test` outside of an isolated environment, it will overwrite your global config.
+> WARNING: Do not run `make test` outside of an isolated environment, it will overwrite your global config.
 
 ## Submitting a pull request
 
@@ -43,14 +43,14 @@ WARNING: Do not run `make test` outside of an isolated environment, it will over
 
 ## Commits Message
 
-#### TLDR: Your commit message should be semantic
+### TL;DR: Your commit message should be semantic
 
 A commit message consists of a header, a body and a footer, separated by a blank line.
 
 Any line of the commit message cannot be longer than 100 characters! This allows the message to be easier to read on GitHub as well as in various git tools.
 
-```
-<type>[optional scope]: <description> 
+```sh
+<type>[optional scope]: <description>
 <BLANK LINE>
 [optional body]
 <BLANK LINE>
@@ -62,7 +62,9 @@ Ideally, the commit message heading which contains the description, should not b
 
 The message header is a single line that contains a succinct description of the change containing a type, an optional scope, and a subject.
 
-#####`<type>` This describes the kind of change that this commit is providing.
+#### `<type>`
+
+This describes the kind of change that this commit is providing
 
 - feat (feature)
 - fix (bug fix)
@@ -72,9 +74,13 @@ The message header is a single line that contains a succinct description of the 
 - test (when adding missing tests)
 - chore (maintain)
 
-#####`<scope>` Scope can be anything specifying the place of the commit change. For example events, kafka, userModel, authorization, authentication, loginPage, etc...
+#### `<scope>`
 
-#####`<subject>` This is a very short description of the change.
+Scope can be anything specifying the place of the commit change. For example events, kafka, userModel, authorization, authentication, loginPage, etc
+
+#### `<description>`
+
+This is a very short description of the change
 
 * `use imperative, present tense: “change” not “changed” nor “changes”`
 * `don't capitalize the first letter`
@@ -85,9 +91,9 @@ The message header is a single line that contains a succinct description of the 
 - just as in subject use imperative, present tense: “change” not “changed” nor “changes”
 - includes motivation for the change and contrasts with previous behavior
 
-http://365git.tumblr.com/post/3308646748/writing-git-commit-messages
+<http://365git.tumblr.com/post/3308646748/writing-git-commit-messages>
 
-http://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html
+<http://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html>
 
 ## Message Footer
 
@@ -97,7 +103,7 @@ Finished, fixed or delivered stories should be listed on a separate line in the 
 
 ## Message Example
 
-```
+```sh
 feat(kafka): implement exactly once delivery
 
 - ensure every event published to kafka is delivered exactly once
@@ -105,14 +111,14 @@ feat(kafka): implement exactly once delivery
 
 Delivers #065
 ```
-```
+
+```sh
 fix(login): allow provided user preferences to override default preferences
 
 - This allows the preferences associated with a user account to override and customize the default app preference like theme, timezone e.t.c
 
 Fixes #025
 ```
-
 
 Contributions to this project are made available to public under the [project's open source license][license].
 Please note that this project adheres to a [Contributor Code of Conduct](https://github.com/profclems/glab/tree/trunk/.github/CODE_OF_CONDUCT.md). By participating in this project you agree to abide by its terms.
