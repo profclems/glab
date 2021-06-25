@@ -126,7 +126,7 @@ curl -s https://raw.githubusercontent.com/profclems/glab/trunk/scripts/install.s
 ```
 *Installs into `usr/bin`*
 
-**NOTE**: Please take care when running scripts in this fashion. Consider peaking at the install script itself and verify that it works as intended.
+**NOTE**: Please take care when running scripts in this fashion. Consider peeking at the install script itself and verify that it works as intended.
 
 ### Windows
 Available for download via [WinGet](https://github.com/microsoft/winget-cli), [scoop](https://scoop.sh), or downloadable EXE installer file.
