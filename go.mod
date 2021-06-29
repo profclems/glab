@@ -3,7 +3,7 @@ module github.com/profclems/glab
 go 1.13
 
 require (
-	github.com/AlecAivazis/survey/v2 v2.2.12
+	github.com/AlecAivazis/survey/v2 v2.2.13
 	github.com/MakeNowJust/heredoc v1.0.0
 	github.com/acarl005/stripansi v0.0.0-20180116102854-5a71ef0e047d
 	github.com/alecthomas/assert v0.0.0-20170929043011-405dbfeb8e38
