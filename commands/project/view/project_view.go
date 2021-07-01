@@ -6,7 +6,6 @@ import (
 	"github.com/MakeNowJust/heredoc"
 	"github.com/profclems/glab/api"
 	"github.com/profclems/glab/commands/cmdutils"
-	"github.com/profclems/glab/pkg/git"
 	"github.com/profclems/glab/pkg/iostreams"
 	"github.com/profclems/glab/pkg/utils"
 	"github.com/spf13/cobra"
@@ -16,7 +15,7 @@ import (
 
 type ViewOptions struct {
 	ProjectID    string
-	ApiClient    *gitlab.Client
+	APIClient    *gitlab.Client
 	Web          bool
 	Branch       string
 	Browser      string
@@ -50,7 +49,7 @@ func NewCmdView(f *cmdutils.Factory) *cobra.Command {
 			}
 
 			if opts.Branch == "" {
-				opts.Branch, err = git.CurrentBranch()
+				opts.Branch, err = f.Branch()
 				if err != nil {
 					return err
 				}
@@ -71,7 +70,7 @@ func NewCmdView(f *cmdutils.Factory) *cobra.Command {
 				return err
 			}
 
-			opts.ApiClient = apiClient
+			opts.APIClient = apiClient
 
 			return runViewProject(&opts)
 		},
@@ -94,25 +93,24 @@ func runViewProject(opts *ViewOptions) error {
 	repoPath := opts.ProjectID
 
 	if !strings.Contains(repoPath, "/") {
-		currentUser, err := api.CurrentUser(opts.ApiClient)
+		currentUser, err := api.CurrentUser(opts.APIClient)
 
 		if err != nil {
-			fmt.Fprintf(opts.IO.StdErr, "Failed to retrieve your current user: %s", err)
-
-			return err
+			return cmdutils.WrapError(err, "Failed to retrieve your current user")
 		}
 
 		repoPath = currentUser.Username + "/" + repoPath
 	}
 
-	project, err := api.GetProject(opts.ApiClient, repoPath)
+	project, err := api.GetProject(opts.APIClient, repoPath)
 	if err != nil {
-		fmt.Fprintf(opts.IO.StdErr, "Failed to access project API: %s", err)
-
-		return err
+		return cmdutils.WrapError(err, "Failed to retrieve project information")
 	}
 
-	readmeFile := getReadmeFile(opts, project)
+	readmeFile, err := getReadmeFile(opts, project)
+	if err != nil {
+		return err
+	}
 
 	if opts.Web {
 		openURL := generateProjectURL(project, opts.Branch)
@@ -124,6 +122,11 @@ func runViewProject(opts *ViewOptions) error {
 		return utils.OpenInBrowser(openURL, opts.Browser)
 	} else {
 		if opts.IO.IsaTTY {
+			if err := opts.IO.StartPager(); err != nil {
+				return err
+			}
+			defer opts.IO.StopPager()
+
 			printProjectContentTTY(opts, project, readmeFile)
 		} else {
 			printProjectContentRaw(opts, project, readmeFile)
@@ -133,33 +136,29 @@ func runViewProject(opts *ViewOptions) error {
 	return nil
 }
 
-func getReadmeFile(opts *ViewOptions, project *gitlab.Project) *gitlab.File {
+func getReadmeFile(opts *ViewOptions, project *gitlab.Project) (*gitlab.File, error) {
 	if project.ReadmeURL == "" {
-		return nil
+		return nil, nil
 	}
 
 	readmePath := strings.Replace(project.ReadmeURL, project.WebURL+"/-/blob/", "", 1)
 	readmePathComponents := strings.Split(readmePath, "/")
 	readmeRef := readmePathComponents[0]
 	readmeFileName := readmePathComponents[1]
-	readmeFile, err := api.GetFile(opts.ApiClient, project.PathWithNamespace, readmeFileName, readmeRef)
+	readmeFile, err := api.GetFile(opts.APIClient, project.PathWithNamespace, readmeFileName, readmeRef)
 
 	if err != nil {
-		fmt.Fprintf(opts.IO.StdErr, "Failed to retrieve README file: %s", err)
-
-		return nil
+		return nil, cmdutils.WrapError(err, "Failed to retrieve README file")
 	}
 
 	decoded, err := base64.StdEncoding.DecodeString(readmeFile.Content)
 	if err != nil {
-		fmt.Fprintf(opts.IO.StdErr, "Failed to decode README file: %s", err)
-
-		return nil
+		return nil, cmdutils.WrapError(err, "Failed to decode README file")
 	}
 
 	readmeFile.Content = string(decoded)
 
-	return readmeFile
+	return readmeFile, nil
 }
 
 func generateProjectURL(project *gitlab.Project, branch string) string {
