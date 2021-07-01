@@ -11,6 +11,8 @@ import (
 	"github.com/profclems/glab/pkg/browser"
 )
 
+type MarkdownRenderOpts []glamour.TermRendererOption
+
 // OpenInBrowser opens the url in a web browser based on OS and $BROWSER environment variable
 func OpenInBrowser(url, browserType string) error {
 	browseCmd, err := browser.Command(url, browserType)
@@ -21,18 +23,47 @@ func OpenInBrowser(url, browserType string) error {
 }
 
 func RenderMarkdown(text, glamourStyle string) (string, error) {
+	opts := MarkdownRenderOpts{
+		glamour.WithStylePath(getStyle(glamourStyle)),
+	}
+
+	return renderMarkdown(text, opts)
+}
+
+func RenderMarkdownWithoutIndentations(text, glamourStyle string) (string, error) {
+	opts := MarkdownRenderOpts{
+		glamour.WithStylePath(getStyle(glamourStyle)),
+		markdownWithoutIndentation(),
+	}
+
+	return renderMarkdown(text, opts)
+}
+
+func renderMarkdown(text string, opts MarkdownRenderOpts) (string, error) {
 	// Glamour rendering preserves carriage return characters in code blocks, but
 	// we need to ensure that no such characters are present in the output.
 	text = strings.ReplaceAll(text, "\r\n", "\n")
 
-	tr, err := glamour.NewTermRenderer(
-		glamour.WithStylePath(getStyle(glamourStyle)),
-	)
+	tr, err := glamour.NewTermRenderer(opts...)
 	if err != nil {
 		return "", err
 	}
 
 	return tr.Render(text)
+}
+
+func markdownWithoutIndentation() glamour.TermRendererOption {
+	overrides := []byte(`
+	  {
+			"document": {
+				"margin": 0
+			},
+			"code_block": {
+				"margin": 0
+			}
+	  }`)
+
+	return glamour.WithStylesFromJSONBytes(overrides)
 }
 
 func getStyle(glamourStyle string) string {
