@@ -182,7 +182,7 @@ func printProjectContentTTY(opts *ViewOptions, project *gitlab.Project, readme *
 			description = project.Description
 		}
 	} else {
-		description = "(No description provided)"
+		description = "\n(No description provided)\n\n"
 	}
 
 	if readme != nil {
