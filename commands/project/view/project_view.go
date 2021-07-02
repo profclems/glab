@@ -198,10 +198,11 @@ func printProjectContentTTY(opts *ViewOptions, project *gitlab.Project, readme *
 	fmt.Fprint(opts.IO.StdOut, c.Bold(fullName))
 	fmt.Fprint(opts.IO.StdOut, c.Gray(description))
 
+	// Readme
 	if readme != nil {
 		fmt.Fprint(opts.IO.StdOut, readmeContent)
 	} else {
-		fmt.Fprint(opts.IO.StdOut, c.Gray("This repository does not have a README file"))
+		fmt.Fprintln(opts.IO.StdOut, c.Gray("(This repository does not have a README file)"))
 	}
 
 	fmt.Fprintln(opts.IO.StdOut)
