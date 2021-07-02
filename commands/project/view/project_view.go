@@ -35,24 +35,19 @@ func NewCmdView(f *cmdutils.Factory) *cobra.Command {
 		Long:  `Display the description and README of a project or open it in the browser.`,
 		Args:  cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			repo, err := f.BaseRepo()
-			if err != nil {
-				return err
-			}
+			var err error
+			repo, _ := f.BaseRepo()
 
 			if opts.ProjectID == "" {
 				if len(args) == 1 {
 					opts.ProjectID = args[0]
-				} else {
+				} else if repo != nil {
 					opts.ProjectID = repo.FullName()
 				}
 			}
 
 			if opts.Branch == "" {
-				opts.Branch, err = f.Branch()
-				if err != nil {
-					return err
-				}
+				opts.Branch, _ = f.Branch()
 			}
 
 			cfg, err := f.Config()
@@ -60,16 +55,20 @@ func NewCmdView(f *cmdutils.Factory) *cobra.Command {
 				return err
 			}
 
-			browser, _ := cfg.Get(repo.RepoHost(), "browser")
+			var repoHost string
+			if repo != nil {
+				repoHost = repo.RepoHost()
+			}
+
+			browser, _ := cfg.Get(repoHost, "browser")
 			opts.Browser = browser
 
-			opts.GlamourStyle, _ = cfg.Get(repo.RepoHost(), "glamour_style")
+			opts.GlamourStyle, _ = cfg.Get(repoHost, "glamour_style")
 
 			apiClient, err := f.HttpClient()
 			if err != nil {
 				return err
 			}
-
 			opts.APIClient = apiClient
 
 			return runViewProject(&opts)
