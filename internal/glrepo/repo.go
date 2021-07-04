@@ -190,8 +190,10 @@ func normalizeHostname(h string) string {
 
 // IsSame compares two GitLab repositories
 func IsSame(a, b Interface) bool {
-	return strings.EqualFold(a.RepoOwner(), b.RepoOwner()) &&
-		strings.EqualFold(a.RepoName(), b.RepoName()) &&
+	if a == nil || b == nil {
+		return false
+	}
+	return strings.EqualFold(a.FullName(), b.FullName()) &&
 		normalizeHostname(a.RepoHost()) == normalizeHostname(b.RepoHost())
 }
 
