@@ -240,7 +240,7 @@ func NewBlankRoot() *yaml.Node {
 										Value: "gitlab.com",
 									},
 									{
-										HeadComment: "Your GitLab access token. Get an access token at https://gitlab.com/profile/personal_access_tokens",
+										HeadComment: "Your GitLab access token. Get an access token at https://gitlab.com/-/profile/personal_access_tokens",
 										Kind:        yaml.ScalarNode,
 										Value:       "token",
 									},
