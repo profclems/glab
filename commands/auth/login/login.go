@@ -333,6 +333,6 @@ func getAccessTokenTip(hostname string) string {
 		glHostname = glinstance.OverridableDefault()
 	}
 	return fmt.Sprintf(`
-	Tip: you can generate a Personal Access Token here https://%s/profile/personal_access_tokens
+	Tip: you can generate a Personal Access Token here https://%s/-/profile/personal_access_tokens
 	The minimum required scopes are 'api' and 'write_repository'.`, glHostname)
 }

@@ -305,7 +305,7 @@ If a supported binary for your OS is not found at the [releases page](https://gi
 
 ## Authentication
 
-Get a GitLab access token at <https://gitlab.com/profile/personal_access_tokens> or <https://gitlab.example.com/profile/personal_access_tokens> if self-hosted
+Get a GitLab access token at <https://gitlab.com/-/profile/personal_access_tokens> or <https://gitlab.example.com/-/profile/personal_access_tokens> if self-hosted
 
 - start interactive setup
 ```sh
