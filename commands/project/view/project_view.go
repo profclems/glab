@@ -3,14 +3,16 @@ package view
 import (
 	"encoding/base64"
 	"fmt"
+	"strings"
+
 	"github.com/MakeNowJust/heredoc"
 	"github.com/profclems/glab/api"
 	"github.com/profclems/glab/commands/cmdutils"
+	"github.com/profclems/glab/internal/glrepo"
 	"github.com/profclems/glab/pkg/iostreams"
 	"github.com/profclems/glab/pkg/utils"
 	"github.com/spf13/cobra"
 	"github.com/xanzy/go-gitlab"
-	"strings"
 )
 
 type ViewOptions struct {
@@ -21,7 +23,8 @@ type ViewOptions struct {
 	Browser      string
 	GlamourStyle string
 
-	IO *iostreams.IOStreams
+	IO   *iostreams.IOStreams
+	Repo glrepo.Interface
 }
 
 func NewCmdView(f *cmdutils.Factory) *cobra.Command {
@@ -40,47 +43,74 @@ func NewCmdView(f *cmdutils.Factory) *cobra.Command {
 
 			# view project information of specified name
 			$ glab repo view my-project
-
 			$ glab repo view user/repo
-
 			$ glab repo view group/namespace/repo
+
+			# specify repo by full [git] URL
+			$ glab repo view git@gitlab.com:user/repo.git
+			$ glab repo view https://gitlab.company.org/user/repo
+			$ glab repo view https://gitlab.company.org/user/repo.git
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var err error
-			repo, _ := f.BaseRepo()
-
-			if opts.ProjectID == "" {
-				if len(args) == 1 {
-					opts.ProjectID = args[0]
-				} else if repo != nil {
-					opts.ProjectID = repo.FullName()
-				}
-			}
-
-			if opts.Branch == "" {
-				opts.Branch, _ = f.Branch()
-			}
 
 			cfg, err := f.Config()
 			if err != nil {
 				return err
 			}
 
-			var repoHost string
-			if repo != nil {
-				repoHost = repo.RepoHost()
+			if len(args) == 1 {
+				opts.ProjectID = args[0]
 			}
-
-			browser, _ := cfg.Get(repoHost, "browser")
-			opts.Browser = browser
-
-			opts.GlamourStyle, _ = cfg.Get(repoHost, "glamour_style")
 
 			apiClient, err := f.HttpClient()
 			if err != nil {
 				return err
 			}
 			opts.APIClient = apiClient
+
+			if opts.ProjectID == "" {
+				opts.Repo, err = f.BaseRepo()
+				if err != nil {
+					return cmdutils.WrapError(err, "`repository` is required when not running in a git repository")
+				}
+				opts.ProjectID = opts.Repo.FullName()
+			}
+
+			if opts.ProjectID != "" {
+				if !strings.Contains(opts.ProjectID, "/") {
+					currentUser, err := api.CurrentUser(opts.APIClient)
+					if err != nil {
+						return cmdutils.WrapError(err, "Failed to retrieve your current user")
+					}
+
+					opts.ProjectID = currentUser.Username + "/" + opts.ProjectID
+				}
+
+				repo, err := glrepo.FromFullName(opts.ProjectID)
+				if err != nil {
+					return err
+				}
+
+				if !glrepo.IsSame(repo, opts.Repo) {
+					client, err := api.NewClientWithCfg(repo.RepoHost(), cfg, false)
+					if err != nil {
+						return err
+					}
+					opts.APIClient = client.Lab()
+				}
+				opts.Repo = repo
+				opts.ProjectID = repo.FullName()
+			}
+
+			if opts.Branch == "" {
+				opts.Branch, _ = f.Branch()
+			}
+
+			browser, _ := cfg.Get(opts.Repo.RepoHost(), "browser")
+			opts.Browser = browser
+
+			opts.GlamourStyle, _ = cfg.Get(opts.Repo.RepoHost(), "glamour_style")
 
 			return runViewProject(&opts)
 		},
@@ -93,19 +123,7 @@ func NewCmdView(f *cmdutils.Factory) *cobra.Command {
 }
 
 func runViewProject(opts *ViewOptions) error {
-	repoPath := opts.ProjectID
-
-	if !strings.Contains(repoPath, "/") {
-		currentUser, err := api.CurrentUser(opts.APIClient)
-
-		if err != nil {
-			return cmdutils.WrapError(err, "Failed to retrieve your current user")
-		}
-
-		repoPath = currentUser.Username + "/" + repoPath
-	}
-
-	project, err := api.GetProject(opts.APIClient, repoPath)
+	project, err := opts.Repo.Project(opts.APIClient)
 	if err != nil {
 		return cmdutils.WrapError(err, "Failed to retrieve project information")
 	}
