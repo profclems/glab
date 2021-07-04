@@ -34,6 +34,17 @@ func NewCmdView(f *cmdutils.Factory) *cobra.Command {
 		Short: "View a project/repository",
 		Long:  `Display the description and README of a project or open it in the browser.`,
 		Args:  cobra.MaximumNArgs(1),
+		Example: heredoc.Doc(`
+			# view project information for the current directory
+			$ glab repo view
+
+			# view project information of specified name
+			$ glab repo view my-project
+
+			$ glab repo view user/repo
+
+			$ glab repo view group/namespace/repo
+		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var err error
 			repo, _ := f.BaseRepo()
@@ -73,13 +84,6 @@ func NewCmdView(f *cmdutils.Factory) *cobra.Command {
 
 			return runViewProject(&opts)
 		},
-		Example: heredoc.Doc(`
-			# view project information for the current directory
-			$ glab repo view
-
-			# view project information of specified name
-			$ glab repo view my-project
-		`),
 	}
 
 	projectViewCmd.Flags().BoolVarP(&opts.Web, "web", "w", false, "Open a project in the browser")
