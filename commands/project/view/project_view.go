@@ -59,6 +59,8 @@ func NewCmdView(f *cmdutils.Factory) *cobra.Command {
 				return err
 			}
 
+			opts.Branch = strings.TrimSpace(opts.Branch)
+
 			if len(args) == 1 {
 				opts.ProjectID = args[0]
 			}
@@ -75,6 +77,10 @@ func NewCmdView(f *cmdutils.Factory) *cobra.Command {
 					return cmdutils.WrapError(err, "`repository` is required when not running in a git repository")
 				}
 				opts.ProjectID = opts.Repo.FullName()
+
+				if opts.Branch == "" {
+					opts.Branch, _ = f.Branch()
+				}
 			}
 
 			if opts.ProjectID != "" {
@@ -101,10 +107,6 @@ func NewCmdView(f *cmdutils.Factory) *cobra.Command {
 				}
 				opts.Repo = repo
 				opts.ProjectID = repo.FullName()
-			}
-
-			if opts.Branch == "" {
-				opts.Branch, _ = f.Branch()
 			}
 
 			browser, _ := cfg.Get(opts.Repo.RepoHost(), "browser")
@@ -166,10 +168,15 @@ func getReadmeFile(opts *ViewOptions, project *gitlab.Project) (*gitlab.File, er
 	readmePathComponents := strings.Split(readmePath, "/")
 	readmeRef := readmePathComponents[0]
 	readmeFileName := readmePathComponents[1]
-	readmeFile, err := api.GetFile(opts.APIClient, project.PathWithNamespace, readmeFileName, readmeRef)
+
+	if opts.Branch == "" {
+		opts.Branch = readmeRef
+	}
+
+	readmeFile, err := api.GetFile(opts.APIClient, project.PathWithNamespace, readmeFileName, opts.Branch)
 
 	if err != nil {
-		return nil, cmdutils.WrapError(err, "Failed to retrieve README file")
+		return nil, cmdutils.WrapError(err, fmt.Sprintf("Failed to retrieve README file on the %s branch", opts.Branch))
 	}
 
 	decoded, err := base64.StdEncoding.DecodeString(readmeFile.Content)
@@ -183,7 +190,7 @@ func getReadmeFile(opts *ViewOptions, project *gitlab.Project) (*gitlab.File, er
 }
 
 func generateProjectURL(project *gitlab.Project, branch string) string {
-	if project.DefaultBranch != branch {
+	if branch != "" && project.DefaultBranch != branch {
 		return project.WebURL + "/-/tree/" + branch
 	}
 
