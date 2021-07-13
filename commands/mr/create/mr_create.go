@@ -83,7 +83,7 @@ func NewCmdCreate(f *cmdutils.Factory, runE func(opts *CreateOpts) error) *cobra
 			$ glab mr new
 			$ glab mr create -a username -t "fix annoying bug"
 			$ glab mr create -f --draft --label RFC
-			$ glab mr create --autofill --yes --web
+			$ glab mr create --fill --yes --web
 		`),
 		Args: cobra.ExactArgs(0),
 		PreRun: func(cmd *cobra.Command, args []string) {
@@ -112,7 +112,7 @@ func NewCmdCreate(f *cmdutils.Factory, runE func(opts *CreateOpts) error) *cobra
 
 			if hasTitle && hasDescription && opts.Autofill {
 				return &cmdutils.FlagError{
-					Err: errors.New("usage of --title and --description completely override --autofill"),
+					Err: errors.New("usage of --title and --description completely override --fill"),
 				}
 			}
 			if opts.IsInteractive && !opts.IO.PromptEnabled() && !opts.Autofill {
