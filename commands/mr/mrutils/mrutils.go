@@ -142,7 +142,7 @@ func MRFromArgsWithOpts(
 	var branch string
 
 	if len(args) > 0 {
-		mrID, err = strconv.Atoi(args[0])
+		mrID, err = strconv.Atoi(strings.TrimPrefix(args[0], "!"))
 		if err != nil {
 			branch = args[0]
 		} else if mrID == 0 { // to check for cases where the user explicitly specified mrID to be zero
