@@ -224,6 +224,14 @@ func SetUpstream(remote string, branch string, cmdOut, cmdErr io.Writer) error {
 	return run.PrepareCmd(setCmd).Run()
 }
 
+// Rebase rebases the current branch on top of its tracking branch
+func Rebase(cmdOut, cmdErr io.Writer) error {
+	rebaseCmd := GitCommand("rebase")
+	rebaseCmd.Stdout = cmdOut
+	rebaseCmd.Stderr = cmdErr
+	return run.PrepareCmd(rebaseCmd).Run()
+}
+
 type BranchConfig struct {
 	RemoteName string
 	RemoteURL  *url.URL
