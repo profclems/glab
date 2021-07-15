@@ -10,30 +10,60 @@ workflow:
     - if: '$CI_COMMIT_TAG'
     # For stable branches, create a pipeline.
     - if: '$CI_COMMIT_BRANCH =~ /^[\d-]+-stable$/'
-    #
+
+stages:
+  - lint
+  - build
+  - test
 
 default:
   image: golang:1.15
 
-# Disable DIND for SAST because we need to execute a before_script in the gosec-sast job
-variables:
-  SAST_DISABLE_DIND: "true"
-
-include:
-  - template: Security/SAST.gitlab-ci.yml
-  - template: Security/Dependency-Scanning.gitlab-ci.yml
-
-gosec-sast:
+.go-cache:
+  variables:
+    GOPATH: $CI_PROJECT_DIR/.go
   before_script:
-    - apk add make
-    - make install
+    - mkdir -p .go
+  cache:
+    paths:
+      - .go/pkg/mod/
 
-code_navigation:
-  image: golang:latest
-  allow_failure: true
+lint:
+  stage: lint
+  extends: .go-cache
+  before_script:
+    - go mod verify
+    - go mod download
   script:
-    - go get github.com/sourcegraph/lsif-go/cmd/lsif-go
-    - lsif-go
-  artifacts:
-    reports:
-      lsif: dump.lsif
+    - make lint
+
+build-minimum:
+  stage: build
+  image: golang:1.13
+  script:
+    - make build
+
+build-maximum:
+  stage: build
+  extends: .go-cache
+  script:
+    - make build
+
+run-tests:
+  stage: test
+  extends: .go-cache
+  variables:
+    GITLAB_TOKEN: $GITLAB_TOKEN
+    CODECOV_TOKEN: $CODECOV_TOKEN
+  before_script:
+    - mkdir ~/.ssh && chmod 700 ~/.ssh
+    - echo -e "Host *\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
+    - echo -e $SSH_PUBLIC_KEY > ~/.ssh/id_rsa.pub
+    - echo -e $SSH_PRIVATE_KEY > ~/.ssh/id_rsa
+    - chmod 600 ~/.ssh/id_rsa*
+    - eval `ssh-agent -s`
+    - ssh-add ~/.ssh/id_rsa
+  script:
+    - go get -t -v ./...
+    - make test
+    - bash <(curl -s https://codecov.io/bash)

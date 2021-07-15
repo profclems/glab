@@ -52,7 +52,7 @@ BUILDLOC ?= ./bin/glab
 
 # Dependency versions
 GOTESTSUM_VERSION = 0.6.0
-GOLANGCI_VERSION = 1.32.2
+GOLANGCI_VERSION = 1.39.0
 
 # Add the ability to override some variables
 # Use with care
@@ -134,7 +134,7 @@ bin/golangci-lint-${GOLANGCI_VERSION}:
 
 .PHONY: lint
 lint: bin/golangci-lint ## Run linter
-	$(GOLINT) run
+	$(GOLINT) run --timeout=3m
 
 .PHONY: fix
 fix: bin/golangci-lint ## Fix lint violations
