@@ -178,6 +178,56 @@ func NewClientWithCustomCA(host, token, caFile string, isGraphQL bool) (*Client,
 	return apiClient, err
 }
 
+// NewClientWithCustomCAClientCert initializes the global api client with a self-signed certificate and client certificates
+func NewClientWithCustomCAClientCert(host, token, caFile string, certFile string, keyFile string, isGraphQL bool) (*Client, error) {
+	apiClient.host = host
+	apiClient.token = token
+	apiClient.caFile = caFile
+	apiClient.isGraphQL = isGraphQL
+
+	if apiClient.httpClientOverride == nil {
+		caCert, err := ioutil.ReadFile(apiClient.caFile)
+		if err != nil {
+			return nil, fmt.Errorf("error reading cert file: %w", err)
+		}
+		// use system cert pool as a baseline
+		caCertPool, err := x509.SystemCertPool()
+		if err != nil {
+			return nil, err
+		}
+		caCertPool.AppendCertsFromPEM(caCert)
+
+		clientCert, err := tls.LoadX509KeyPair(certFile, keyFile)
+		if err != nil {
+			return nil, err
+		}
+
+		clientCerts := []tls.Certificate{clientCert}
+
+		apiClient.httpClient = &http.Client{
+			Transport: &http.Transport{
+				Proxy: http.ProxyFromEnvironment,
+				DialContext: (&net.Dialer{
+					Timeout:   30 * time.Second,
+					KeepAlive: 30 * time.Second,
+				}).DialContext,
+				ForceAttemptHTTP2:     true,
+				MaxIdleConns:          100,
+				IdleConnTimeout:       90 * time.Second,
+				TLSHandshakeTimeout:   10 * time.Second,
+				ExpectContinueTimeout: 1 * time.Second,
+				TLSClientConfig: &tls.Config{
+					RootCAs:      caCertPool,
+					Certificates: clientCerts,
+				},
+			},
+		}
+	}
+	apiClient.refreshLabInstance = true
+	err := apiClient.NewLab()
+	return apiClient, err
+}
+
 // NewClientWithCfg initializes the global api with the config data
 func NewClientWithCfg(repoHost string, cfg config.Config, isGraphQL bool) (client *Client, err error) {
 	if repoHost == "" {
@@ -198,7 +248,11 @@ func NewClientWithCfg(repoHost string, cfg config.Config, isGraphQL bool) (clien
 	tlsVerify, _ := cfg.Get(repoHost, "skip_tls_verify")
 	skipTlsVerify := tlsVerify == "true" || tlsVerify == "1"
 	caCert, _ := cfg.Get(repoHost, "ca_cert")
-	if caCert != "" {
+	clientCert, _ := cfg.Get(repoHost, "client_cert")
+	keyFile, _ := cfg.Get(repoHost, "client_key")
+	if caCert != "" && clientCert != "" && keyFile != "" {
+		client, err = NewClientWithCustomCAClientCert(apiHost, token, caCert, clientCert, keyFile, isGraphQL)
+	} else if caCert != "" {
 		client, err = NewClientWithCustomCA(apiHost, token, caCert, isGraphQL)
 	} else {
 		client, err = NewClient(apiHost, token, skipTlsVerify, isGraphQL)
