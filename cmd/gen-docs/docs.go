@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -32,6 +33,7 @@ func main() {
 	var flagErr pflag.ErrorHandling
 	docsCmd := pflag.NewFlagSet("", flagErr)
 	manpage := docsCmd.BoolP("manpage", "m", false, "Generate manual pages instead of web docs")
+	markdown := docsCmd.BoolP("markdown", "M", false, "Generate web docs in markdown")
 	path := docsCmd.StringP("path", "p", "./docs/source/", "Path where you want the generated docs saved")
 	help := docsCmd.BoolP("help", "h", false, "Help about any command")
 
@@ -56,6 +58,50 @@ func main() {
 	if *manpage {
 		if err := genManPage(glabCli, *path); err != nil {
 			fatal(err)
+		}
+	} else if *markdown {
+		if err := doc.GenMarkdownTree(glabCli, *path); err != nil {
+			fatal(err)
+		}
+
+		f, err := os.Open(*path)
+		if err != nil {
+			fatal(err)
+		}
+		fileNames, err := f.Readdirnames(-1)
+		defer f.Close()
+		if err != nil {
+			fatal(err)
+		}
+
+		for _, name := range fileNames {
+			oldPath := fmt.Sprintf("%s/%s", *path, name)
+			name = strings.TrimPrefix(name, "glab_")
+			name = strings.Replace(name, "_", "/", -1)
+			newPath := fmt.Sprintf("%s/%s", *path, name)
+
+			parts := strings.Split(name, "/")
+
+			if oldPath == newPath && !strings.HasSuffix(newPath, "glab.md") {
+				continue
+			}
+
+			crtPath := ""
+			if len(parts) > 1 {
+				crtPath = strings.TrimSuffix(newPath, parts[len(parts)-1])
+			} else if strings.HasSuffix(newPath, "glab.md") {
+				newPath = fmt.Sprintf("%s/%s", *path, "index.md")
+			} else {
+				crtPath = strings.TrimSuffix(newPath, ".md")
+				newPath = fmt.Sprintf("%s/%s/%s", *path, strings.TrimSuffix(name, ".md"), "index.md")
+			}
+			_ = os.MkdirAll(crtPath, 0750)
+
+			err = os.Rename(oldPath, newPath)
+			if err != nil {
+				fatal(err)
+			}
+			log.Println(oldPath, "-->", newPath)
 		}
 	} else {
 		if err := genWebDocs(glabCli, *path); err != nil {
