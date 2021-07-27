@@ -91,6 +91,10 @@ release:
 manpage: ## Generate manual pages
 	go run ./cmd/gen-docs/docs.go --manpage --path ./share/man/man1
 
+.PHONY: markdown
+markdown: ## Generate web docs in markdown
+	go run ./cmd/gen-docs/docs.go --markdown --path ./docs/mdx
+
 .PHONY: gen-docs
 gen-docs: ## Generate web docs
 	go run ./cmd/gen-docs/docs.go
