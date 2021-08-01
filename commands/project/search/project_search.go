@@ -39,10 +39,11 @@ func NewCmdSearch(f *cmdutils.Factory) *cobra.Command {
 			page, _ := cmd.Flags().GetInt("page")
 			perPage, _ := cmd.Flags().GetInt("per-page")
 
-			projects, _, err := apiClient.Search.Projects(search, &gitlab.SearchOptions{
+			listOpts := gitlab.ListOptions{
 				Page:    page,
 				PerPage: perPage,
-			})
+			}
+			projects, _, err := apiClient.Search.Projects(search, &gitlab.SearchOptions{ListOptions: listOpts})
 
 			if err != nil {
 				return err
