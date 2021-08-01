@@ -3,7 +3,7 @@ module github.com/profclems/glab
 go 1.13
 
 require (
-	github.com/AlecAivazis/survey/v2 v2.2.13
+	github.com/AlecAivazis/survey/v2 v2.2.15
 	github.com/MakeNowJust/heredoc v1.0.0
 	github.com/acarl005/stripansi v0.0.0-20180116102854-5a71ef0e047d
 	github.com/alecthomas/assert v0.0.0-20170929043011-405dbfeb8e38
@@ -11,8 +11,8 @@ require (
 	github.com/briandowns/spinner v1.16.0
 	github.com/charmbracelet/glamour v0.3.0
 	github.com/dustin/go-humanize v1.0.0
-	github.com/gdamore/tcell/v2 v2.3.11
-	github.com/google/renameio v0.1.0
+	github.com/gdamore/tcell/v2 v2.4.0
+	github.com/google/renameio v1.0.1
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510
 	github.com/gosuri/uilive v0.0.4
 	github.com/hashicorp/go-version v1.3.0
@@ -27,14 +27,14 @@ require (
 	github.com/muesli/termenv v0.9.0
 	github.com/otiai10/copy v1.6.0
 	github.com/pkg/errors v0.9.1
-	github.com/rivo/tview v0.0.0-20210117162420-745e4ceeb711
-	github.com/spf13/cast v1.3.1
+	github.com/rivo/tview v0.0.0-20210624165335-29d673af0ce2
+	github.com/spf13/cast v1.4.0
 	github.com/spf13/cobra v1.2.1
 	github.com/spf13/pflag v1.0.5
 	github.com/stretchr/testify v1.7.0
 	github.com/tidwall/pretty v1.2.0
-	github.com/xanzy/go-gitlab v0.50.0
-	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9
+	github.com/xanzy/go-gitlab v0.50.1
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
+	golang.org/x/term v0.0.0-20210503060354-a79de5458b56
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
 )
