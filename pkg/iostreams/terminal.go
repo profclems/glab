@@ -10,7 +10,7 @@ import (
 
 	"github.com/mattn/go-isatty"
 	"github.com/profclems/glab/pkg/execext"
-	"golang.org/x/crypto/ssh/terminal"
+	"golang.org/x/term"
 )
 
 var (
@@ -37,7 +37,7 @@ func IsCygwinTerminal(f *os.File) bool {
 
 var TerminalSize = func(w interface{}) (int, int, error) {
 	if f, isFile := w.(*os.File); isFile {
-		return terminal.GetSize(int(f.Fd()))
+		return term.GetSize(int(f.Fd()))
 	}
 
 	return 0, 0, fmt.Errorf("%v is not a file", w)
