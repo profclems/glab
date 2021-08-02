@@ -13,6 +13,17 @@ var CreateProjectVariable = func(client *gitlab.Client, projectID interface{}, o
 
 	return vars, nil
 }
+var ListProjectVariables = func(client *gitlab.Client, projectID interface{}, opts *gitlab.ListProjectVariablesOptions) ([]*gitlab.ProjectVariable, error) {
+	if client == nil {
+		client = apiClient.Lab()
+	}
+	vars, _, err := client.ProjectVariables.ListVariables(projectID, opts)
+	if err != nil {
+		return nil, err
+	}
+
+	return vars, nil
+}
 
 var CreateGroupVariable = func(client *gitlab.Client, groupID interface{}, opts *gitlab.CreateGroupVariableOptions) (*gitlab.GroupVariable, error) {
 	if client == nil {
