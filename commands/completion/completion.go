@@ -48,9 +48,15 @@ For Homebrew, see <https://docs.brew.sh/Shell-Completion>
 			case "bash":
 				return rootCmd.GenBashCompletionV2(out, !excludeDesc)
 			case "zsh":
+				if excludeDesc {
+					return rootCmd.GenZshCompletionNoDesc(out)
+				}
 				return rootCmd.GenZshCompletion(out)
 			case "powershell":
-				return rootCmd.GenPowerShellCompletion(out)
+				if excludeDesc {
+					return rootCmd.GenPowerShellCompletion(out)
+				}
+				return rootCmd.GenPowerShellCompletionWithDesc(out)
 			case "fish":
 				return rootCmd.GenFishCompletion(out, !excludeDesc)
 			default:
@@ -60,6 +66,6 @@ For Homebrew, see <https://docs.brew.sh/Shell-Completion>
 	}
 
 	completionCmd.Flags().StringVarP(&shellType, "shell", "s", "bash", "Shell type: {bash|zsh|fish|powershell}")
-	completionCmd.Flags().BoolVarP(&excludeDesc, "no-desc", "", false, "Do not include shell completion description. Only for bash and fish")
+	completionCmd.Flags().BoolVarP(&excludeDesc, "no-desc", "", false, "Do not include shell completion description")
 	return completionCmd
 }
