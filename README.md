@@ -3,15 +3,12 @@
 ![GLab](https://user-images.githubusercontent.com/9063085/90530075-d7a58580-e14a-11ea-9727-4f592f7dcf2e.png)
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/profclems/glab)](https://goreportcard.com/report/github.com/profclems/glab)
-[![codecov](https://codecov.io/gh/profclems/glab/branch/trunk/graph/badge.svg?token=32J5DT3PQQ)](https://codecov.io/gh/profclems/glab)
-[![pipeline status](https://gitlab.com/profclems/glab/badges/trunk/pipeline.svg)](https://gitlab.com/profclems/glab/-/pipelines)
 [![Gitter](https://badges.gitter.im/glabcli/community.svg)](https://gitter.im/glabcli/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 [![Reddit](https://img.shields.io/reddit/subreddit-subscribers/glab_cli?style=social)](https://reddit.com/r/glab_cli)
 [![Twitter Follow](https://img.shields.io/twitter/follow/glab_cli?style=social)](https://twitter.com/glab_cli)
-[![Donate](https://img.shields.io/badge/Donate-Open%20Collective-informational)](https://opencollective.com/glab/contribute)
 
 GLab is an open source GitLab CLI tool bringing GitLab to your terminal next to where you are already working with `git` and your code without switching between windows and browser tabs. Work with issues, merge requests, **watch running pipelines directly from your CLI** among other features.
-Inspired by [`gh`](https://github.com/cli/cli), the official GitHub CLI tool.
+Inspired by [gh], the official GitHub CLI tool.
 
 `glab` is available for repositories hosted on GitLab.com and self-hosted GitLab Instances. `glab` supports multiple authenticated GitLab instances and automatically detects the authenticated hostname from the remotes available in the working git directory.
 
@@ -21,11 +18,8 @@ Table of Contents
 =================
 
 * [Usage](#usage)
-  * [Core Commands](#core-commands)
-  * [Additional Commands](#additional-commands)
-  * [Examples](#examples)
 * [Demo](#demo)
-* [Learn More](#learn-more)
+* [Documentation](#documentation)
 * [Installation](#installation)
   * [Quick Install (Bash)](#quick-install-bash)
   * [Windows](#windows)
@@ -62,42 +56,11 @@ Table of Contents
   glab <command> <subcommand> [flags]
   ```
 
-### Core Commands
-```bash
-  api:          Make authenticated REST/GRAPHQL requests to the GitLab API
-  auth:         Manage glab's authentication state
-  issue:        Work with GitLab issues
-  label:        Manage labels on remote
-  mr:           Create, view and manage merge requests
-  ci:           Work with GitLab CI pipelines and jobs
-  release:      Manage GitLab releases
-  repo:         Work with GitLab repositories and projects
-
-```
-
-### Additional Commands
-```bash
-  alias:        Create, list and delete aliases
-  check-update: Check for latest glab releases
-  completion:   Generate shell completion scripts
-  config:       Set and get glab settings
-  help:         Help about any command
-  version:      show glab version information
-```
-
-### Examples
-  ```bash
-  glab issue create --title="This is an issue title" --description="This is a really long description"
-  glab issue list --closed
-  glab ci view -b master    # to watch the latest pipeline on master
-  glab ci status    # classic ci view
-  ```
-
 ## Demo
 [![asciicast](https://asciinema.org/a/368622.svg)](https://asciinema.org/a/368622)
 
-## Learn More
-Read the [documentation](https://glab.readthedocs.io/) for more information on this tool.
+## Documentation
+Read the [documentation](https://glab.readthedocs.io/) for usage instructions.
 
 ## Installation
 Download a binary suitable for your OS at the [releases page](https://github.com/profclems/glab/releases/latest).
@@ -308,24 +271,24 @@ If a supported binary for your OS is not found at the [releases page](https://gi
 Get a GitLab access token at <https://gitlab.com/-/profile/personal_access_tokens> or <https://gitlab.example.com/-/profile/personal_access_tokens> if self-hosted
 
 - start interactive setup
-```sh
-glab auth login
-```
+  ```sh
+  glab auth login
+  ```
 
 - authenticate against gitlab.com by reading the token from a file
-```sh
-glab auth login --stdin < myaccesstoken.txt
-```
+  ```sh
+  glab auth login --stdin < myaccesstoken.txt
+  ```
 
 - authenticate against a self-hosted GitLab instance by reading from a file
-```sh
-glab auth login --hostname salsa.debian.org --stdin < myaccesstoken.txt
-```
+  ```sh
+  glab auth login --hostname salsa.debian.org --stdin < myaccesstoken.txt
+  ```
 
 - authenticate with token and hostname (Not recommended for shared environments)
-```sh
-glab auth login --hostname gitlab.example.org --token xxxxx
-```
+  ```sh
+  glab auth login --hostname gitlab.example.org --token xxxxx
+  ```
 
 ## Configuration
 
@@ -378,7 +341,7 @@ glab config set editor vim --host gitlab.example.org
   NO_COLOR: set to any value to avoid printing ANSI escape sequences for color output.
   ```
 
-## What about [Lab](https://github.com/zaquestion/lab)?
+## What about [Lab]?
 
 Both `glab` and [lab] are open-source tools with the same goal of bringing GitLab to your command line and simplifying the developer workflow. In many ways `lab` is to [hub], while `glab` is to [gh].
 
@@ -396,18 +359,16 @@ If you have an issue: report it on the [issue tracker](https://github.com/profcl
 ## Contributing
 Feel like contributing? That's awesome! We have a [contributing guide](https://github.com/profclems/glab/blob/trunk/.github/CONTRIBUTING.md) and [Code of conduct](https://github.com/profclems/glab/blob/trunk/.github/CODE_OF_CONDUCT.md) to help guide you
 
-### Support `glab` 💖
-By donating $5 or more you can support the ongoing development of this project. We'll appreciate some support. Thank you to all our supporters! 🙏 [[Contribute](https://opencollective.com/glab/contribute)]
+### Contributors
 
 #### Individuals
 
 This project exists thanks to all the people who contribute. [[Contribute](https://github.com/profclems/glab/blob/trunk/.github/CONTRIBUTING.md)].
 <a href="https://opencollective.com/glab/contribute"><img src="https://opencollective.com/glab/contributors.svg?width=890" /></a>
 
-#### Backers
+#### Organizations
 
-Thank you to all our backers! 🙏 [[Become a backer](https://opencollective.com/glab/contribute)]
-<a href="https://opencollective.com/glab#backers" target="_blank"><img src="https://opencollective.com/glab/backers.svg?width=890"></a>
+[![Fosshost.org](https://fosshost.org/img/FosshostLogo.png)](https://fosshost.org)
 
 ## License
 Copyright © [Clement Sam](https://clementsam.tech)
