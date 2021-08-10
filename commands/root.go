@@ -15,6 +15,7 @@ import (
 	mrCmd "github.com/profclems/glab/commands/mr"
 	projectCmd "github.com/profclems/glab/commands/project"
 	releaseCmd "github.com/profclems/glab/commands/release"
+	sshCmd "github.com/profclems/glab/commands/ssh-key"
 	updateCmd "github.com/profclems/glab/commands/update"
 	userCmd "github.com/profclems/glab/commands/user"
 	variableCmd "github.com/profclems/glab/commands/variable"
@@ -24,7 +25,7 @@ import (
 	"github.com/spf13/pflag"
 )
 
-// RootCmd is the main root/parent command
+// NewCmdRoot is the main root/parent command
 func NewCmdRoot(f *cmdutils.Factory, version, buildDate string) *cobra.Command {
 	c := f.IO.Color()
 	var rootCmd = &cobra.Command{
@@ -102,6 +103,7 @@ func NewCmdRoot(f *cmdutils.Factory, version, buildDate string) *cobra.Command {
 	rootCmd.AddCommand(pipelineCmd.NewCmdCI(f))
 	rootCmd.AddCommand(projectCmd.NewCmdRepo(f))
 	rootCmd.AddCommand(releaseCmd.NewCmdRelease(f))
+	rootCmd.AddCommand(sshCmd.NewCmdSSHKey(f))
 	rootCmd.AddCommand(userCmd.NewCmdUser(f))
 	rootCmd.AddCommand(variableCmd.NewVariableCmd(f))
 	rootCmd.AddCommand(apiCmd.NewCmdApi(f, nil))
