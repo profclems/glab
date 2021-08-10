@@ -42,7 +42,7 @@ func NewCmdGet(f *cmdutils.Factory, runE func(*GetOpts) error) *cobra.Command {
 			opts.HTTPClient = f.HttpClient
 			opts.BaseRepo = f.BaseRepo
 
-			if len(args) == 0 && !opts.IO.IsOutputTTY() {
+			if len(args) == 0 && !opts.IO.PromptEnabled() {
 				return cmdutils.FlagError{Err: errors.New("<key-id> argument is required when running in non-ttys")}
 			}
 
