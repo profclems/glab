@@ -181,7 +181,7 @@ func runCreateProject(cmd *cobra.Command, args []string, f *cmdutils.Factory) er
 			}
 			fmt.Fprintf(f.IO.StdOut, "%s Added remote %s\n", greenCheck, remote)
 
-		} else if f.IO.IsaTTY {
+		} else if f.IO.PromptEnabled() {
 			var doSetup bool
 			err := prompt.Confirm(&doSetup, fmt.Sprintf("Create a local project directory for %s?", project.NameWithNamespace), true)
 			if err != nil {
