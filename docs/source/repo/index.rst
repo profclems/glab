@@ -31,6 +31,7 @@ Subcommands
    delete <delete>
    fork <fork>
    search <search>
+   view <view>
    
 
 

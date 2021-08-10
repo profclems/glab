@@ -23,7 +23,7 @@ Examples
   $ glab mr new
   $ glab mr create -a username -t "fix annoying bug"
   $ glab mr create -f --draft --label RFC
-  $ glab mr create --autofill --yes --web
+  $ glab mr create --fill --yes --web
   
 
 Options

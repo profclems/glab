@@ -31,6 +31,7 @@ Subcommands
    :glob:
    :maxdepth: 0
 
+   list <list>
    set <set>
    
 
