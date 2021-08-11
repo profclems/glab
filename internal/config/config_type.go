@@ -45,7 +45,7 @@ type HostConfig struct {
 	Host string
 }
 
-// This type implements a low-level get/set config that is backed by an in-memory tree of Yaml
+// ConfigMap type implements a low-level get/set config that is backed by an in-memory tree of Yaml
 // nodes. It allows us to interact with a yaml-based config programmatically, preserving any
 // comments that were present when the yaml was parsed.
 type ConfigMap struct {

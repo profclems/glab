@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"path"
+	"path/filepath"
 
 	"gopkg.in/yaml.v3"
 )
@@ -13,16 +14,23 @@ type LocalConfig struct {
 	Parent Config
 }
 
+const oldLocalConfigFile = ".glab-cli/config/config.yml"
+
 // LocalConfigDir returns the local config path in map
 // which must be joined for complete path
 var LocalConfigDir = func() []string {
-	return []string{".glab-cli", "config"}
+	return []string{".git", "glab-cli"}
 }
 
 // LocalConfigFile returns the config file name with full path
 var LocalConfigFile = func() string {
 	configFile := append(LocalConfigDir(), "config.yml")
 	return path.Join(configFile...)
+}
+
+// OldLocalConfigFile returns the path to the old local config path.
+func OldLocalConfigFile() string {
+	return filepath.Clean(oldLocalConfigFile)
 }
 
 func (a *LocalConfig) Get(key string) (string, bool) {
@@ -70,14 +78,6 @@ func (a *LocalConfig) Write() error {
 
 	if err != nil {
 		return fmt.Errorf("failed to write config: %w", err)
-	}
-
-	// Append local config dir if not already ignored in the .gitignore file
-	if !CheckFileHasLine(".gitignore", LocalConfigDir()[0]) {
-		err := ReadAndAppend(".gitignore", LocalConfigDir()[0]+"\n")
-		if err != nil {
-			return fmt.Errorf("failed to write file to .gitignore: %w", err)
-		}
 	}
 
 	return nil
