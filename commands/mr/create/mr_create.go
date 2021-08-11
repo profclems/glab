@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/url"
 	"os"
+	"regexp"
 	"strings"
 
 	"github.com/profclems/glab/pkg/iostreams"
@@ -40,14 +41,15 @@ type CreateOpts struct {
 	RemoveSourceBranch bool
 	AllowCollaboration bool
 
-	Autofill      bool
-	IsDraft       bool
-	IsWIP         bool
-	ShouldPush    bool
-	NoEditor      bool
-	IsInteractive bool
-	Yes           bool
-	Web           bool
+	Autofill       bool
+	FillCommitBody bool
+	IsDraft        bool
+	IsWIP          bool
+	ShouldPush     bool
+	NoEditor       bool
+	IsInteractive  bool
+	Yes            bool
+	Web            bool
 
 	IO       *iostreams.IOStreams
 	Branch   func() (string, error)
@@ -84,6 +86,7 @@ func NewCmdCreate(f *cmdutils.Factory, runE func(opts *CreateOpts) error) *cobra
 			$ glab mr create -a username -t "fix annoying bug"
 			$ glab mr create -f --draft --label RFC
 			$ glab mr create --fill --yes --web
+			$ glab mr create --fill --fill-commit-body --yes
 		`),
 		Args: cobra.ExactArgs(0),
 		PreRun: func(cmd *cobra.Command, args []string) {
@@ -121,6 +124,9 @@ func NewCmdCreate(f *cmdutils.Factory, runE func(opts *CreateOpts) error) *cobra
 			if cmd.Flags().Changed("wip") && cmd.Flags().Changed("draft") {
 				return &cmdutils.FlagError{Err: errors.New("specify either of --draft or --wip")}
 			}
+			if !opts.Autofill && opts.FillCommitBody {
+				return &cmdutils.FlagError{Err: errors.New("--fill-commit-body should be used with --fill")}
+			}
 			// Remove this once --yes does more than just skip the prompts that --web happen to skip
 			// by design
 			if opts.Yes && opts.Web {
@@ -135,6 +141,7 @@ func NewCmdCreate(f *cmdutils.Factory, runE func(opts *CreateOpts) error) *cobra
 		},
 	}
 	mrCreateCmd.Flags().BoolVarP(&opts.Autofill, "fill", "f", false, "Do not prompt for title/description and just use commit info")
+	mrCreateCmd.Flags().BoolVarP(&opts.FillCommitBody, "fill-commit-body", "", false, "Fill description with each commit body when multiple commits. Can only be used with --fill")
 	mrCreateCmd.Flags().BoolVarP(&opts.IsDraft, "draft", "", false, "Mark merge request as a draft")
 	mrCreateCmd.Flags().BoolVarP(&opts.IsWIP, "wip", "", false, "Mark merge request as a work in progress. Alternative to --draft")
 	mrCreateCmd.Flags().BoolVarP(&opts.ShouldPush, "push", "", false, "Push committed changes after creating merge request. Make sure you have committed changes")
@@ -501,7 +508,18 @@ func mrBodyAndTitle(opts *CreateOpts) error {
 		if opts.Description == "" {
 			var body strings.Builder
 			for i := len(commits) - 1; i >= 0; i-- {
-				fmt.Fprintf(&body, "- %s\n", commits[i].Title)
+				// adds 2 spaces for markdown line wrapping
+				fmt.Fprintf(&body, "- %s  \n", commits[i].Title)
+
+				if opts.FillCommitBody {
+					commitBody, err := git.CommitBody(commits[i].Sha)
+					if err != nil {
+						return err
+					}
+					re := regexp.MustCompile(`\r?\n\n`)
+					commitBody = re.ReplaceAllString(commitBody, "  \n")
+					fmt.Fprintf(&body, "%s\n", commitBody)
+				}
 			}
 			opts.Description = body.String()
 		}
