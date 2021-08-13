@@ -31,7 +31,7 @@ func NewCmdAdd(f *cmdutils.Factory, runE func(*AddOpts) error) *cobra.Command {
 		IO: f.IO,
 	}
 	cmd := &cobra.Command{
-		Use:   "add <title> [key-file]",
+		Use:   "add [key-file]",
 		Short: "Add an SSH key to your GitLab account",
 		Long: heredoc.Doc(`
 		Creates a new SSH key owned by the currently authenticated user.
