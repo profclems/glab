@@ -1,7 +1,7 @@
 # Contributing
 
 [legal]: https://help.github.com/articles/github-terms-of-service/#6-contributions-under-repository-license
-[license]: ../LICENSE
+[license]: LICENSE
 
 Hi! Thanks for your interest in contributing to this project!
 
