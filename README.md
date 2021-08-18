@@ -357,7 +357,7 @@ Some `glab` commands such as `ci view` and `ci trace` were adopted from [lab].
 If you have an issue: report it on the [issue tracker](https://github.com/profclems/glab/issues)
 
 ## Contributing
-Feel like contributing? That's awesome! We have a [contributing guide](https://github.com/profclems/glab/blob/trunk/.github/CONTRIBUTING.md) and [Code of conduct](https://github.com/profclems/glab/blob/trunk/.github/CODE_OF_CONDUCT.md) to help guide you
+Feel like contributing? That's awesome! We have a [contributing guide](https://github.com/profclems/glab/blob/trunk/CONTRIBUTING.md) and [Code of conduct](https://github.com/profclems/glab/blob/trunk/CODE_OF_CONDUCT.md) to help guide you
 
 ### Contributors
 
