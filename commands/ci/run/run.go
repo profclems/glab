@@ -70,7 +70,7 @@ func NewCmdRun(f *cmdutils.Factory) *cobra.Command {
 					if !re.MatchString(v) {
 						return fmt.Errorf("Bad pipeline variable : \"%s\" should be of format KEY:VALUE", v)
 					}
-					s := strings.Split(v, ":")
+					s := strings.SplitN(v, ":", 2)
 					pipelineVars = append(pipelineVars, &gitlab.PipelineVariable{
 						Key:          s[0],
 						Value:        s[1],
