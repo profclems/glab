@@ -163,10 +163,25 @@ var GetPipelineJobs = func(client *gitlab.Client, pid int, repo string) ([]*gitl
 	if client == nil {
 		client = apiClient.Lab()
 	}
-	l := &gitlab.ListJobsOptions{}
-	pipeJobs, _, err := client.Jobs.ListPipelineJobs(repo, pid, l)
-	if err != nil {
-		return nil, err
+	pipeJobs := make([]*gitlab.Job, 0, 10)
+	listOptions := &gitlab.ListJobsOptions{
+		ListOptions: gitlab.ListOptions{
+			PerPage: 100,
+		},
+	}
+	for {
+		pageJobs, resp, err := client.Jobs.ListPipelineJobs(repo, pid, listOptions)
+		if err != nil {
+			return nil, err
+		}
+		pipeJobs = append(pipeJobs, pageJobs...)
+		if resp.CurrentPage == resp.TotalPages {
+			break
+		}
+		listOptions.Page = resp.NextPage
+		if resp.CurrentPage >= resp.TotalPages {
+			break
+		}
 	}
 	return pipeJobs, nil
 }
