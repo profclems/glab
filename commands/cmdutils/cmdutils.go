@@ -174,13 +174,14 @@ func LabelsPrompt(response *[]string, apiClient *gitlab.Client, repoRemote *glre
 
 func MilestonesPrompt(response *int, apiClient *gitlab.Client, repoRemote *glrepo.Remote, io *iostreams.IOStreams) (err error) {
 	var milestoneOptions []string
-	milestoneMap := map[string]*gitlab.Milestone{}
+	milestoneMap := map[string]int{}
 
-	lOpts := &gitlab.ListMilestonesOptions{
-		State: gitlab.String("active"),
+	lOpts := &api.ListMilestonesOptions{
+		IncludeParentMilestones: gitlab.Bool(true),
+		State:                   gitlab.String("active"),
+		PerPage:                 100,
 	}
-	lOpts.PerPage = 100
-	milestones, err := api.ListMilestones(apiClient, repoRemote.FullName(), lOpts)
+	milestones, err := api.ListAllMilestones(apiClient, repoRemote.FullName(), lOpts)
 	if err != nil {
 		return err
 	}
@@ -191,7 +192,7 @@ func MilestonesPrompt(response *int, apiClient *gitlab.Client, repoRemote *glrep
 
 	for i := range milestones {
 		milestoneOptions = append(milestoneOptions, milestones[i].Title)
-		milestoneMap[milestones[i].Title] = milestones[i]
+		milestoneMap[milestones[i].Title] = milestones[i].ID
 	}
 
 	var selectedMilestone string
@@ -199,7 +200,7 @@ func MilestonesPrompt(response *int, apiClient *gitlab.Client, repoRemote *glrep
 	if err != nil {
 		return err
 	}
-	*response = milestoneMap[selectedMilestone].ID
+	*response = milestoneMap[selectedMilestone]
 
 	return nil
 }
@@ -359,7 +360,7 @@ func ParseMilestone(apiClient *gitlab.Client, repo glrepo.Interface, milestoneTi
 		return milestoneID, nil
 	}
 
-	milestone, err := api.MilestoneByTitle(apiClient, repo.FullName(), milestoneTitle)
+	milestone, err := api.ProjectMilestoneByTitle(apiClient, repo.FullName(), milestoneTitle)
 	if err != nil {
 		return 0, err
 	}

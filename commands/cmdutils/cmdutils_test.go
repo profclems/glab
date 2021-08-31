@@ -479,7 +479,7 @@ func Test_ParseMilestoneTitleIsID(t *testing.T) {
 	expectedMilestoneID := 1
 
 	// Override function to return an error, it should never reach this
-	api.MilestoneByTitle = func(client *gitlab.Client, projectID interface{}, name string) (*gitlab.Milestone, error) {
+	api.ProjectMilestoneByTitle = func(client *gitlab.Client, projectID interface{}, name string) (*gitlab.Milestone, error) {
 		return nil, fmt.Errorf("We shouldn't have reached here")
 	}
 
@@ -497,7 +497,7 @@ func Test_ParseMilestoneAPIFail(t *testing.T) {
 	want := "api call failed in api.MilestoneByTitle()"
 
 	// Override function to return an error simulating an API call failure
-	api.MilestoneByTitle = func(client *gitlab.Client, projectID interface{}, name string) (*gitlab.Milestone, error) {
+	api.ProjectMilestoneByTitle = func(client *gitlab.Client, projectID interface{}, name string) (*gitlab.Milestone, error) {
 		return nil, fmt.Errorf("api call failed in api.MilestoneByTitle()")
 	}
 
@@ -515,7 +515,7 @@ func Test_ParseMilestoneTitleToID(t *testing.T) {
 	expectedID := 3
 
 	// Override function so it returns the correct milestone
-	api.MilestoneByTitle = func(client *gitlab.Client, projectID interface{}, name string) (*gitlab.Milestone, error) {
+	api.ProjectMilestoneByTitle = func(client *gitlab.Client, projectID interface{}, name string) (*gitlab.Milestone, error) {
 		return &gitlab.Milestone{
 				Title: "kind: testing",
 				ID:    3,
@@ -817,7 +817,7 @@ func Test_AssigneesPrompt(t *testing.T) {
 }
 
 func Test_MilestonesPrompt(t *testing.T) {
-	mockMilestones := []*gitlab.Milestone{
+	mockMilestones := []*api.Milestone{
 		{
 			Title: "New Release",
 			ID:    5,
@@ -833,7 +833,7 @@ func Test_MilestonesPrompt(t *testing.T) {
 	}
 
 	// Override API.ListMilestones so it doesn't make any network calls
-	api.ListMilestones = func(_ *gitlab.Client, _ interface{}, _ *gitlab.ListMilestonesOptions) ([]*gitlab.Milestone, error) {
+	api.ListAllMilestones = func(_ *gitlab.Client, _ interface{}, _ *api.ListMilestonesOptions) ([]*api.Milestone, error) {
 		return mockMilestones, nil
 	}
 
@@ -908,8 +908,8 @@ func Test_MilestonesPromptNoPrompts(t *testing.T) {
 	// Override api.ListMilestones so it returns an empty slice, we are testing if MilestonesPrompt()
 	// will print the correct message to `stderr` when it tries to get the list of Milestones in a
 	// project but the project has no milestones
-	api.ListMilestones = func(_ *gitlab.Client, _ interface{}, _ *gitlab.ListMilestonesOptions) ([]*gitlab.Milestone, error) {
-		return []*gitlab.Milestone{}, nil
+	api.ListAllMilestones = func(_ *gitlab.Client, _ interface{}, _ *api.ListMilestonesOptions) ([]*api.Milestone, error) {
+		return []*api.Milestone{}, nil
 	}
 
 	// mock glrepo.Remote object
@@ -936,7 +936,7 @@ func Test_MilestonesPromptNoPrompts(t *testing.T) {
 func TestMilestonesPromptFailures(t *testing.T) {
 	// Override api.ListMilestones so it returns an error, we are testing to see if error
 	// handling from the usage of api.ListMilestones is correct
-	api.ListMilestones = func(_ *gitlab.Client, _ interface{}, _ *gitlab.ListMilestonesOptions) ([]*gitlab.Milestone, error) {
+	api.ListAllMilestones = func(_ *gitlab.Client, _ interface{}, _ *api.ListMilestonesOptions) ([]*api.Milestone, error) {
 		return nil, errors.New("api.ListMilestones() failed")
 	}
 
