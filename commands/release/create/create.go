@@ -299,7 +299,7 @@ func createRun(opts *CreateOpts) error {
 		color.Blue("tag"), opts.TagName)
 
 	release, resp, err := client.Releases.GetRelease(repo.FullName(), opts.TagName)
-	if err != nil && (resp == nil || resp.StatusCode != 403) {
+	if err != nil && (resp == nil || (resp.StatusCode != 403 && resp.StatusCode != 404)) {
 		return releaseFailedErr(err, start)
 	}
 
@@ -318,7 +318,7 @@ func createRun(opts *CreateOpts) error {
 		opts.Name = opts.TagName
 	}
 
-	if resp.StatusCode == 403 || release == nil {
+	if (resp.StatusCode == 403 || resp.StatusCode == 404) || release == nil {
 		createOpts := &gitlab.CreateReleaseOptions{
 			Name:    &opts.Name,
 			TagName: &opts.TagName,
