@@ -14,7 +14,7 @@ func NewCmdSSHKey(f *cmdutils.Factory) *cobra.Command {
 		Short: "Manage SSH keys",
 		Long:  "Manage SSH keys registered with your GitLab account",
 	}
-	
+
 	cmdutils.EnableRepoOverride(cmd, f)
 
 	cmd.AddCommand(cmdAdd.NewCmdAdd(f, nil))
