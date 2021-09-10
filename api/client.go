@@ -71,7 +71,7 @@ func RefreshClient() {
 	}
 }
 
-// GetAPIClient returns the global DotEnv instance.
+// GetClient returns the global Client instance.
 func GetClient() *Client {
 	return apiClient
 }
