@@ -55,7 +55,7 @@ var GetGroup = func(client *gitlab.Client, groupID interface{}) (*gitlab.Group, 
 	if client == nil {
 		client = apiClient.Lab()
 	}
-	group, _, err := client.Groups.GetGroup(groupID)
+	group, _, err := client.Groups.GetGroup(groupID, &gitlab.GetGroupOptions{})
 	if err != nil {
 		return nil, err
 	}
