@@ -125,6 +125,7 @@ func loginRun() error {
 
 	hostname := opts.Hostname
 	apiHostname := opts.Hostname
+	defaultHostname := glinstance.Default()
 	isSelfHosted := false
 
 	if hostname == "" {
@@ -132,7 +133,7 @@ func loginRun() error {
 		err := survey.AskOne(&survey.Select{
 			Message: "What GitLab instance do you want to log into?",
 			Options: []string{
-				"GitLab.com",
+				defaultHostname,
 				"GitLab Self-hosted Instance",
 			},
 		}, &hostType)
@@ -143,7 +144,7 @@ func loginRun() error {
 
 		isSelfHosted = hostType == 1
 
-		hostname = glinstance.Default()
+		hostname = defaultHostname
 		apiHostname = hostname
 		if isSelfHosted {
 			err := survey.AskOne(&survey.Input{
