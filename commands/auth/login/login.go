@@ -125,7 +125,7 @@ func loginRun() error {
 
 	hostname := opts.Hostname
 	apiHostname := opts.Hostname
-	defaultHostname := glinstance.Default()
+	defaultHostname := glinstance.OverridableDefault()
 	isSelfHosted := false
 
 	if hostname == "" {
