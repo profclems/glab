@@ -20,8 +20,8 @@ import (
 	"github.com/profclems/glab/commands/help"
 	"github.com/profclems/glab/commands/update"
 	"github.com/profclems/glab/internal/config"
-	"github.com/profclems/glab/internal/glinstance"
 	"github.com/profclems/glab/internal/run"
+	"github.com/profclems/glab/pkg/glinstance"
 	"github.com/profclems/glab/pkg/tableprinter"
 	"github.com/profclems/glab/pkg/utils"
 

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/profclems/glab/internal/glinstance"
+	"github.com/profclems/glab/pkg/glinstance"
 	"github.com/profclems/glab/pkg/iostreams"
 	"github.com/xanzy/go-gitlab"
 )

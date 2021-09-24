@@ -14,7 +14,7 @@ import (
 	"time"
 
 	"github.com/profclems/glab/internal/config"
-	"github.com/profclems/glab/internal/glinstance"
+	"github.com/profclems/glab/pkg/glinstance"
 	"github.com/xanzy/go-gitlab"
 )
 
