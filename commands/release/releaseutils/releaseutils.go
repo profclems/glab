@@ -6,8 +6,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/profclems/glab/internal/glinstance"
 	"github.com/profclems/glab/internal/glrepo"
+	"github.com/profclems/glab/pkg/glinstance"
 
 	"github.com/profclems/glab/commands/release/releaseutils/upload"
 

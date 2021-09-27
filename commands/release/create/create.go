@@ -20,8 +20,8 @@ import (
 	"github.com/profclems/glab/pkg/surveyext"
 	"github.com/profclems/glab/pkg/utils"
 
-	"github.com/profclems/glab/internal/glinstance"
 	"github.com/profclems/glab/internal/glrepo"
+	"github.com/profclems/glab/pkg/glinstance"
 	"github.com/profclems/glab/pkg/iostreams"
 
 	"github.com/profclems/glab/commands/cmdutils"
