@@ -16,7 +16,7 @@ The --title flag is always required
 
 ::
 
-  glab ssh-key add <title> [key-file] [flags]
+  glab ssh-key add [key-file] [flags]
 
 Examples
 ~~~~~~~~
@@ -43,5 +43,6 @@ Options inherited from parent commands
 
 ::
 
-      --help   Show help for command
+      --help              Show help for command
+  -R, --repo OWNER/REPO   Select another repository using the OWNER/REPO or `GROUP/NAMESPACE/REPO` format or full URL or git URL
 

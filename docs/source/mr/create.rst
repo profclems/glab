@@ -24,6 +24,7 @@ Examples
   $ glab mr create -a username -t "fix annoying bug"
   $ glab mr create -f --draft --label RFC
   $ glab mr create --fill --yes --web
+  $ glab mr create --fill --fill-commit-body --yes
   
 
 Options
@@ -37,6 +38,7 @@ Options
   -d, --description string     Supply a description for merge request
       --draft                  Mark merge request as a draft
   -f, --fill                   Do not prompt for title/description and just use commit info
+      --fill-commit-body       Fill description with each commit body when multiple commits. Can only be used with --fill
   -H, --head OWNER/REPO        Select another head repository using the OWNER/REPO or `GROUP/NAMESPACE/REPO` format or the project ID or full URL
   -l, --label strings          Add label by name. Multiple labels should be comma separated
   -m, --milestone string       The global ID or title of a milestone to assign
