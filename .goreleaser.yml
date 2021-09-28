@@ -127,7 +127,7 @@ nfpms:
       - rpm
     dependencies:
       - git
-    bindir: /usr/bin
+    bindir: /usr
     contents:
       - src: "./share/man/man1/glab*.1"
         dst: "/usr/share/man/man1"
