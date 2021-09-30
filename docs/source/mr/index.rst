@@ -16,7 +16,7 @@ Examples
 
 ::
 
-  $ glab mr create --autofill --labels bugfix
+  $ glab mr create --fill --labels bugfix
   $ glab mr merge 123
   $ glab mr note -m "needs to do X before it can be merged" branch-foo
   
