@@ -33,6 +33,7 @@ type CreateOpts struct {
 	TargetTrackingBranch  string
 	Labels                []string
 	Assignees             []string
+	Reviewers             []string
 	MileStone             int
 	MilestoneFlag         string
 	MRCreateTargetProject string
@@ -149,6 +150,7 @@ func NewCmdCreate(f *cmdutils.Factory, runE func(opts *CreateOpts) error) *cobra
 	mrCreateCmd.Flags().StringVarP(&opts.Description, "description", "d", "", "Supply a description for merge request")
 	mrCreateCmd.Flags().StringSliceVarP(&opts.Labels, "label", "l", []string{}, "Add label by name. Multiple labels should be comma separated")
 	mrCreateCmd.Flags().StringSliceVarP(&opts.Assignees, "assignee", "a", []string{}, "Assign merge request to people by their `usernames`")
+	mrCreateCmd.Flags().StringSliceVarP(&opts.Reviewers, "reviewer", "", []string{}, "Request review from users by their `usernames`")
 	mrCreateCmd.Flags().StringVarP(&opts.SourceBranch, "source-branch", "s", "", "The Branch you are creating the merge request. Default is the current branch.")
 	mrCreateCmd.Flags().StringVarP(&opts.TargetBranch, "target-branch", "b", "", "The target or base branch into which you want your code merged")
 	mrCreateCmd.Flags().BoolVarP(&opts.CreateSourceBranch, "create-source-branch", "", false, "Create source branch if it does not exist")
@@ -442,6 +444,14 @@ func createRun(opts *CreateOpts) error {
 			return err
 		}
 		mrCreateOpts.AssigneeIDs = cmdutils.IDsFromUsers(users)
+	}
+
+	if len(opts.Reviewers) > 0 {
+		users, err := api.UsersByNames(labClient, opts.Reviewers)
+		if err != nil {
+			return err
+		}
+		mrCreateOpts.ReviewerIDs = cmdutils.IDsFromUsers(users)
 	}
 
 	if opts.MileStone != 0 {
