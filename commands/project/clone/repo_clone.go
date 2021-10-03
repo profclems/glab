@@ -1,6 +1,7 @@
 package clone
 
 import (
+	"errors"
 	"fmt"
 	"strconv"
 	"strings"
@@ -140,7 +141,7 @@ Clone a GitLab repository/project
 
 	repoCloneCmd.Flags().SortFlags = false
 	repoCloneCmd.SetFlagErrorFunc(func(cmd *cobra.Command, err error) error {
-		if err == pflag.ErrHelp {
+		if errors.Is(err, pflag.ErrHelp) {
 			return err
 		}
 		return &cmdutils.FlagError{Err: fmt.Errorf("%w\nSeparate git clone flags with '--'.", err)}
