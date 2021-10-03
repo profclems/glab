@@ -33,6 +33,8 @@ type IOStreams struct {
 	spinner *spinner.Spinner
 
 	backgroundColor string
+
+	displayHyperlinks bool
 }
 
 func Init() *IOStreams {
@@ -54,6 +56,7 @@ func Init() *IOStreams {
 		IsaTTY:            stdoutIsTTY,
 		IsErrTTY:          stderrIsTTY,
 		is256ColorEnabled: Is256ColorSupported(),
+		displayHyperlinks: stdoutIsTTY,
 	}
 
 	if stdin, ok := ioStream.In.(*os.File); ok {
@@ -198,6 +201,17 @@ func (s *IOStreams) BackgroundColor() string {
 		return "none"
 	}
 	return s.backgroundColor
+}
+
+func (s *IOStreams) DisplayHyperlinks() bool {
+	return s.displayHyperlinks
+}
+
+func (s *IOStreams) MakeHyperlink(displayText, targetURL string) string {
+	openSequence := fmt.Sprintf("\x1b]8;;%s\x1b\\", targetURL)
+	closeSequence := "\x1b]8;;\x1b\\"
+
+	return openSequence + displayText + closeSequence
 }
 
 func Test() (streams *IOStreams, in *bytes.Buffer, out *bytes.Buffer, errOut *bytes.Buffer) {
