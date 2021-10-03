@@ -368,7 +368,7 @@ This project exists thanks to all the people who contribute. [[Contribute](https
 
 #### Organizations
 
-[![Fosshost.org](https://fosshost.org/img/FosshostLogo.png)](https://fosshost.org)
+[![Fosshost.org](https://fosshost.org/img/fosshost-logo.png)](https://fosshost.org)
 
 ## License
 Copyright © [Clement Sam](https://clementsam.tech)
