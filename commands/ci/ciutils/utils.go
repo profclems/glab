@@ -23,7 +23,16 @@ var (
 	offset int64
 )
 
-func DisplayMultiplePipelines(c *iostreams.ColorPalette, p []*gitlab.PipelineInfo, projectID string) string {
+func makeHyperlink(s *iostreams.IOStreams, pipeline *gitlab.PipelineInfo) string {
+	if s.DisplayHyperlinks() {
+		return s.MakeHyperlink(fmt.Sprintf("%d", pipeline.ID), pipeline.WebURL)
+	} else {
+		return fmt.Sprintf("%d", pipeline.ID)
+	}
+}
+
+func DisplayMultiplePipelines(s *iostreams.IOStreams, p []*gitlab.PipelineInfo, projectID string) string {
+	c := s.Color()
 
 	table := tableprinter.NewTablePrinter()
 
@@ -38,11 +47,11 @@ func DisplayMultiplePipelines(c *iostreams.ColorPalette, p []*gitlab.PipelineInf
 
 			var pipeState string
 			if pipeline.Status == "success" {
-				pipeState = c.Green(fmt.Sprintf("(%s) • #%d", pipeline.Status, pipeline.ID))
+				pipeState = c.Green(fmt.Sprintf("(%s) • #%s", pipeline.Status, makeHyperlink(s, pipeline)))
 			} else if pipeline.Status == "failed" {
-				pipeState = c.Red(fmt.Sprintf("(%s) • #%d", pipeline.Status, pipeline.ID))
+				pipeState = c.Red(fmt.Sprintf("(%s) • #%s", pipeline.Status, makeHyperlink(s, pipeline)))
 			} else {
-				pipeState = c.Gray(fmt.Sprintf("(%s) • #%d", pipeline.Status, pipeline.ID))
+				pipeState = c.Gray(fmt.Sprintf("(%s) • #%s", pipeline.Status, makeHyperlink(s, pipeline)))
 			}
 
 			table.AddRow(pipeState, pipeline.Ref, duration)

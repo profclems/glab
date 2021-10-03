@@ -26,7 +26,11 @@ func DisplayIssueList(streams *iostreams.IOStreams, issues []*gitlab.Issue, proj
 	table := tableprinter.NewTablePrinter()
 	table.SetIsTTY(streams.IsOutputTTY())
 	for _, issue := range issues {
-		table.AddCell(IssueState(c, issue))
+		if streams.DisplayHyperlinks() {
+			table.AddCell(streams.MakeHyperlink(IssueState(c, issue), issue.WebURL))
+		} else {
+			table.AddCell(IssueState(c, issue))
+		}
 		table.AddCell(issue.Title)
 
 		if len(issue.Labels) > 0 {
