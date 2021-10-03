@@ -48,6 +48,7 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 	projectCreateCmd.Flags().StringP("group", "g", "", "Namespace/group for the new project (defaults to the current user’s namespace)")
 	projectCreateCmd.Flags().StringP("description", "d", "", "Description of the new project")
 	projectCreateCmd.Flags().String("defaultBranch", "", "Default branch of the project. If not provided, `master` by default.")
+	projectCreateCmd.Flags().String("remoteName", "origin", "Remote name for the Git repository you're in. If not provided, `origin` by default.")
 	projectCreateCmd.Flags().StringArrayP("tag", "t", []string{}, "The list of tags for the project.")
 	projectCreateCmd.Flags().Bool("internal", false, "Make project internal: visible to any authenticated user (default)")
 	projectCreateCmd.Flags().BoolP("private", "p", false, "Make project private: visible only to project members")
@@ -69,6 +70,10 @@ func runCreateProject(cmd *cobra.Command, args []string, f *cmdutils.Factory) er
 	c := f.IO.Color()
 
 	defaultBranch, err := cmd.Flags().GetString("defaultBranch")
+	if err != nil {
+		return err
+	}
+	remoteName, err := cmd.Flags().GetString("remoteName")
 	if err != nil {
 		return err
 	}
@@ -175,7 +180,7 @@ func runCreateProject(cmd *cobra.Command, args []string, f *cmdutils.Factory) er
 			protocol, _ := cfg.Get(webURL.Host, "git_protocol")
 
 			remote := glrepo.RemoteURL(project, protocol)
-			_, err = git.AddRemote("origin", remote)
+			_, err = git.AddRemote(remoteName, remote)
 			if err != nil {
 				return err
 			}
