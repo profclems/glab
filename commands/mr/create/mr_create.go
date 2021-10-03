@@ -40,6 +40,7 @@ type CreateOpts struct {
 	CreateSourceBranch bool
 	RemoveSourceBranch bool
 	AllowCollaboration bool
+	Squash bool
 
 	Autofill       bool
 	FillCommitBody bool
@@ -155,6 +156,7 @@ func NewCmdCreate(f *cmdutils.Factory, runE func(opts *CreateOpts) error) *cobra
 	mrCreateCmd.Flags().StringVarP(&opts.MilestoneFlag, "milestone", "m", "", "The global ID or title of a milestone to assign")
 	mrCreateCmd.Flags().BoolVarP(&opts.AllowCollaboration, "allow-collaboration", "", false, "Allow commits from other members")
 	mrCreateCmd.Flags().BoolVarP(&opts.RemoveSourceBranch, "remove-source-branch", "", false, "Remove Source Branch on merge")
+	mrCreateCmd.Flags().BoolVarP(&opts.Squash, "squash", "", false, "Squash commits into a single commit when merging")
 	mrCreateCmd.Flags().BoolVarP(&opts.NoEditor, "no-editor", "", false, "Don't open editor to enter description. If set to true, uses prompt. Default is false")
 	mrCreateCmd.Flags().StringP("head", "H", "", "Select another head repository using the `OWNER/REPO` or `GROUP/NAMESPACE/REPO` format or the project ID or full URL")
 	mrCreateCmd.Flags().BoolVarP(&opts.Yes, "yes", "y", false, "Skip submission confirmation prompt, with --fill it skips all optional prompts")
@@ -352,12 +354,19 @@ func createRun(opts *CreateOpts) error {
 	mrCreateOpts.Description = gitlab.String(opts.Description)
 	mrCreateOpts.SourceBranch = gitlab.String(opts.SourceBranch)
 	mrCreateOpts.TargetBranch = gitlab.String(opts.TargetBranch)
+
 	if opts.AllowCollaboration {
 		mrCreateOpts.AllowCollaboration = gitlab.Bool(true)
 	}
+
 	if opts.RemoveSourceBranch {
 		mrCreateOpts.RemoveSourceBranch = gitlab.Bool(true)
 	}
+
+	if opts.Squash {
+		mrCreateOpts.Squash = gitlab.Bool(true)
+	}
+
 	if opts.TargetProject != nil {
 		mrCreateOpts.TargetProjectID = gitlab.Int(opts.TargetProject.ID)
 	}
