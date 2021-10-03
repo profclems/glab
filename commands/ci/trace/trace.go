@@ -2,6 +2,7 @@ package trace
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"regexp"
 
@@ -17,6 +18,7 @@ import (
 	"github.com/profclems/glab/pkg/utils"
 
 	"github.com/AlecAivazis/survey/v2"
+	"github.com/AlecAivazis/survey/v2/terminal"
 	"github.com/MakeNowJust/heredoc"
 	"github.com/spf13/cobra"
 	"github.com/xanzy/go-gitlab"
@@ -114,7 +116,14 @@ func TraceRun(opts *TraceOpts) error {
 			Options: jobOptions,
 		}
 
-		_ = prompt.AskOne(promptOpts, &selectedJob)
+		err = prompt.AskOne(promptOpts, &selectedJob)
+		if err != nil {
+			if errors.Is(err, terminal.InterruptErr) {
+				return nil
+			}
+
+			return err
+		}
 
 		if selectedJob != "" {
 			re := regexp.MustCompile(`(?s)\((.*)\)`)
