@@ -45,6 +45,7 @@ Options
       --no-editor              Don't open editor to enter description. If set to true, uses prompt. Default is false
       --push                   Push committed changes after creating merge request. Make sure you have committed changes
       --remove-source-branch   Remove Source Branch on merge
+      --reviewer usernames     Request review from users by their usernames
   -s, --source-branch string   The Branch you are creating the merge request. Default is the current branch.
   -b, --target-branch string   The target or base branch into which you want your code merged
   -t, --title string           Supply a title for merge request
