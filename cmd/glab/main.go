@@ -89,6 +89,10 @@ func main() {
 		cmdFactory.IO.SetPrompt(promptDisabled)
 	}
 
+	if displayHyperlinks, _ := cfg.Get("", "display_hyperlinks"); displayHyperlinks != "" {
+		cmdFactory.IO.SetDisplayHyperlinks(displayHyperlinks)
+	}
+
 	var expandedArgs []string
 	if len(os.Args) > 0 {
 		expandedArgs = os.Args[1:]
