@@ -192,12 +192,12 @@ func NewCmdUpdate(f *cmdutils.Factory) *cobra.Command {
 				l.RemoveSourceBranch = gitlab.Bool(true)
 			}
 
-			if squash, _ := cmd.Flags().GetBool("squash"); squash {
+			if squashBeforeMerge, _ := cmd.Flags().GetBool("squash-before-merge"); squashBeforeMerge {
 
-				if(mr.Squash){
-					actions = append(actions, "disabled squashing of commits on merge")
+				if mr.Squash {
+					actions = append(actions, "disabled squashing of commits before merge")
 				} else {
-					actions = append(actions, "enabled squashing of commits on merge")
+					actions = append(actions, "enabled squashing of commits before merge")
 				}
 
 				l.Squash = gitlab.Bool(!mr.Squash)
@@ -231,7 +231,7 @@ func NewCmdUpdate(f *cmdutils.Factory) *cobra.Command {
 	mrUpdateCmd.Flags().StringSliceP("assignee", "a", []string{}, "assign users via username, prefix with '!' or '-' to remove from existing assignees, '+' to add, otherwise replace existing assignees with given users")
 	mrUpdateCmd.Flags().StringSliceP("reviewer", "", []string{}, "request review from users by their usernames, prefix with '!' or '-' to remove from existing reviewers, '+' to add, otherwise replace existing reviewers with given users")
 	mrUpdateCmd.Flags().Bool("unassign", false, "unassign all users")
-	mrUpdateCmd.Flags().BoolP("squash", "", false, "Toggles the option to squash commits into a single commit when merging")
+	mrUpdateCmd.Flags().BoolP("squash-before-merge", "", false, "Toggles the option to squash commits into a single commit when merging")
 	mrUpdateCmd.Flags().BoolP("remove-source-branch", "", false, "Remove Source Branch on merge")
 	mrUpdateCmd.Flags().StringP("milestone", "m", "", "title of the milestone to assign, pass \"\" or 0 to unassign")
 	mrUpdateCmd.Flags().String("target-branch", "", "set target branch")
