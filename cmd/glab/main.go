@@ -156,7 +156,7 @@ func main() {
 }
 
 func printError(streams *iostreams.IOStreams, err error, cmd *cobra.Command, debug, shouldExit bool) {
-	if err == cmdutils.SilentError {
+	if errors.Is(err, cmdutils.SilentError) {
 		return
 	}
 	color := streams.Color()

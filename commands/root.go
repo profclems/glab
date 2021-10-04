@@ -1,6 +1,8 @@
 package commands
 
 import (
+	"errors"
+
 	"github.com/MakeNowJust/heredoc"
 	aliasCmd "github.com/profclems/glab/commands/alias"
 	apiCmd "github.com/profclems/glab/commands/api"
@@ -75,7 +77,7 @@ func NewCmdRoot(f *cmdutils.Factory, version, buildDate string) *cobra.Command {
 	})
 	rootCmd.SetUsageFunc(help.RootUsageFunc)
 	rootCmd.SetFlagErrorFunc(func(cmd *cobra.Command, err error) error {
-		if err == pflag.ErrHelp {
+		if errors.Is(err, pflag.ErrHelp) {
 			return err
 		}
 		return &cmdutils.FlagError{Err: err}
