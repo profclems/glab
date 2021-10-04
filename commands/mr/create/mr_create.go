@@ -41,17 +41,17 @@ type CreateOpts struct {
 	CreateSourceBranch bool
 	RemoveSourceBranch bool
 	AllowCollaboration bool
-	SquashBeforeMerge  bool
 
-	Autofill       bool
-	FillCommitBody bool
-	IsDraft        bool
-	IsWIP          bool
-	ShouldPush     bool
-	NoEditor       bool
-	IsInteractive  bool
-	Yes            bool
-	Web            bool
+	Autofill          bool
+	FillCommitBody    bool
+	IsDraft           bool
+	IsWIP             bool
+	ShouldPush        bool
+	NoEditor          bool
+	IsInteractive     bool
+	SquashBeforeMerge bool
+	Yes               bool
+	Web               bool
 
 	IO       *iostreams.IOStreams
 	Branch   func() (string, error)
