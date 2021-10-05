@@ -24,11 +24,7 @@ var (
 )
 
 func makeHyperlink(s *iostreams.IOStreams, pipeline *gitlab.PipelineInfo) string {
-	if s.DisplayHyperlinks() {
-		return s.MakeHyperlink(fmt.Sprintf("%d", pipeline.ID), pipeline.WebURL)
-	} else {
-		return fmt.Sprintf("%d", pipeline.ID)
-	}
+	return s.Hyperlink(fmt.Sprintf("%d", pipeline.ID), pipeline.WebURL)
 }
 
 func DisplayMultiplePipelines(s *iostreams.IOStreams, p []*gitlab.PipelineInfo, projectID string) string {

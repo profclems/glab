@@ -207,7 +207,7 @@ func (s *IOStreams) SetDisplayHyperlinks(displayHyperlinks string) {
 	s.displayHyperlinks = displayHyperlinks
 }
 
-func (s *IOStreams) DisplayHyperlinks() bool {
+func (s *IOStreams) shouldDisplayHyperlinks() bool {
 	switch s.displayHyperlinks {
 	case "always":
 		return true
@@ -218,7 +218,11 @@ func (s *IOStreams) DisplayHyperlinks() bool {
 	}
 }
 
-func (s *IOStreams) MakeHyperlink(displayText, targetURL string) string {
+func (s *IOStreams) Hyperlink(displayText, targetURL string) string {
+	if !s.shouldDisplayHyperlinks() {
+		return displayText
+	}
+
 	openSequence := fmt.Sprintf("\x1b]8;;%s\x1b\\", targetURL)
 	closeSequence := "\x1b]8;;\x1b\\"
 
