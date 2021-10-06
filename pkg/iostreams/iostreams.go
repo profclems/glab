@@ -56,7 +56,7 @@ func Init() *IOStreams {
 		IsaTTY:            stdoutIsTTY,
 		IsErrTTY:          stderrIsTTY,
 		is256ColorEnabled: Is256ColorSupported(),
-		displayHyperlinks: "auto",
+		displayHyperlinks: "never",
 	}
 
 	if stdin, ok := ioStream.In.(*os.File); ok {
@@ -211,10 +211,10 @@ func (s *IOStreams) shouldDisplayHyperlinks() bool {
 	switch s.displayHyperlinks {
 	case "always":
 		return true
-	case "never":
-		return false
-	default:
+	case "auto":
 		return s.IsaTTY
+	default:
+		return false
 	}
 }
 
