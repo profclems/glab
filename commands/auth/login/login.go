@@ -59,7 +59,7 @@ func NewCmdLogin(f *cmdutils.Factory) *cobra.Command {
 			$ glab auth login --hostname salsa.debian.org
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if !opts.IO.PromptEnabled() && (!tokenStdin || opts.Token == "") {
+			if !opts.IO.PromptEnabled() && !tokenStdin && opts.Token == "" {
 				return &cmdutils.FlagError{Err: errors.New("--stdin or --token required when not running interactively")}
 			}
 
