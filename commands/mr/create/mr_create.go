@@ -41,7 +41,7 @@ type CreateOpts struct {
 	CreateSourceBranch bool
 	RemoveSourceBranch bool
 	AllowCollaboration bool
-	SquashBeforeMerge bool
+	SquashBeforeMerge  bool
 
 	Autofill       bool
 	FillCommitBody bool
