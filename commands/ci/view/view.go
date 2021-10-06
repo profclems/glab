@@ -107,7 +107,7 @@ func drawView(opts ViewOpts) error {
 	root := tview.NewPages()
 	root.SetBorderPadding(1, 1, 2, 2).
 		SetBorder(true).
-		SetTitle(fmt.Sprintf(" Pipeline #%d triggered %s by %s ", opts.Commit.LastPipeline.ID, utils.TimeToPrettyTimeAgo(*opts.Commit.AuthoredDate), opts.Commit.AuthorName))
+		SetTitle(fmt.Sprintf(" Pipeline #%d triggered %s by %s ", opts.Commit.LastPipeline.ID, utils.TimeToPrettyTimeAgo(*opts.Commit.LastPipeline.CreatedAt), opts.Commit.AuthorName))
 
 	boxes = make(map[string]*tview.TextView)
 	jobsCh := make(chan []*gitlab.Job)
