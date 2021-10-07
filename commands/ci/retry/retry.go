@@ -35,6 +35,12 @@ func NewCmdRetry(f *cmdutils.Factory) *cobra.Command {
 			}
 
 			jobID := utils.StringToInt(args[0])
+
+			if jobID < 1 {
+				fmt.Fprintln(f.IO.StdErr, "invalid job id:", args[0])
+				return cmdutils.SilentError
+			}
+
 			job, err := api.RetryPipelineJob(apiClient, jobID, repo.FullName())
 			if err != nil {
 				return cmdutils.WrapError(err, fmt.Sprintf("Could not retry job with ID: %d", jobID))
