@@ -1,4 +1,4 @@
-package run
+package retry
 
 import (
 	"fmt"
@@ -13,7 +13,7 @@ import (
 
 func NewCmdRetry(f *cmdutils.Factory) *cobra.Command {
 	var pipelineRetryCmd = &cobra.Command{
-		Use:     "retry <id>",
+		Use:     "retry <job-id>",
 		Short:   `Retry a CI job`,
 		Aliases: []string{},
 		Example: heredoc.Doc(`
@@ -37,8 +37,7 @@ func NewCmdRetry(f *cmdutils.Factory) *cobra.Command {
 			jobID := utils.StringToInt(args[0])
 			job, err := api.RetryPipelineJob(apiClient, jobID, repo.FullName())
 			if err != nil {
-				fmt.Fprintf(f.IO.StdOut, "Could not retry a job with ID %d\n", jobID)
-				return err
+				return cmdutils.WrapError(err, fmt.Sprintf("Could not retry job with ID: %d", jobID))
 			}
 			fmt.Fprintln(f.IO.StdOut, "Retried job (id:", job.ID, "), status:", job.Status, ", ref:", job.Ref, ", weburl: ", job.WebURL, ")")
 
