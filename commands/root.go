@@ -60,6 +60,8 @@ func NewCmdRoot(f *cmdutils.Factory, version, buildDate string) *cobra.Command {
 			NO_PROMPT: set to 1 (true) or 0 (false) to disable and enable prompts respectively
 
 			NO_COLOR: set to any value to avoid printing ANSI escape sequences for color output.
+
+			FORCE_HYPERLINKS: set to 1 to force hyperlinks to be output, even when not outputing to a TTY
 		`),
 			"help:feedback": heredoc.Docf(`
 			Encountered a bug or want to suggest a feature?
