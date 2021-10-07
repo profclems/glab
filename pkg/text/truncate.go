@@ -1,9 +1,6 @@
 package text
 
-import (
-	"bytes"
-	"strings"
-)
+import "bytes"
 
 // Truncate resizes the string with the given length. It ellipses with '...' when the string's length exceeds
 // the desired length or pads spaces to the right of the string when length is smaller than desired
@@ -17,64 +14,58 @@ func Truncate(s string, length int) string {
 	s = PadRight(s, n, ' ')
 
 	if slen > n {
-		var buf bytes.Buffer
+		buf := bytes.Buffer{}
 		w := 0
+		dotsWritten := 0
 
 		hyperlinkMatches := hyperlinkOSCRegexp.FindAllStringIndex(s, -1)
-		if hyperlinkMatches == nil {
-			hyperlinkMatches = [][]int{{0, 0}}
-		}
 
-		firstLinkPos := hyperlinkMatches[0][0]
-		if firstLinkPos > 0 {
-			for _, r := range s[:firstLinkPos] {
+		// append a faked match so that we always have something in
+		// hyperlinkMatches[0] and can avoid nil checks
+		hyperlinkMatches = append(hyperlinkMatches, []int{len(s), len(s)})
+
+		for i, r := range s {
+			startPos := hyperlinkMatches[0][0]
+			endPos := hyperlinkMatches[0][1]
+
+			if i >= startPos && i < endPos {
+				// write runes inside hyperlink OSC sequences - this doesn't count
+				// against our grapheme total
+				buf.WriteRune(r)
+			} else if w == 0 {
+				// always write the first character
 				buf.WriteRune(r)
 				w += RuneWidth(r)
-				if w >= n-3 {
+			} else {
+				rw := RuneWidth(r)
+
+				if w+rw <= n-3 {
+					// if we have room before the ellipsis, go ahead and write it
+					buf.WriteRune(r)
+					w += rw
+				} else if dotsWritten < 3 {
+					buf.WriteRune('.')
+					w++
+					dotsWritten++
+				} else {
 					break
 				}
 			}
-		}
 
-		if w < n-3 {
-			for i, match := range hyperlinkMatches {
-				startPos := match[0]
-				endPos := match[1]
-
-				isClosingSequence := s[startPos:endPos] == "\x1b]8;;\x1b\\"
-
-				if w < n-3 || isClosingSequence {
-					buf.WriteString(s[startPos:endPos]) // this doesn't count against our character total
-				}
-
-				if w >= n-3 {
-					break
-				}
-
-				// determine the substring containing the next chunk of non-hyperlink OSC text
-				nextStartPos := len(s)
-				if i+1 < len(hyperlinkMatches) {
-					nextStartPos = hyperlinkMatches[i+1][0]
-				}
-
-				for _, r := range s[endPos:nextStartPos] {
-					if w >= n {
-						break
-					} else {
-						if w >= n-3 {
-							buf.WriteRune('.')
-							w++
-						} else {
-							buf.WriteRune(r)
-							w += RuneWidth(r)
-						}
-					}
-				}
+			if i == endPos-1 {
+				// we're at the end of this hyperlink OSC sequence - get ready
+				// to check for the next one
+				hyperlinkMatches = hyperlinkMatches[1:]
 			}
 		}
 
-		if w < n {
-			buf.WriteString(strings.Repeat(".", n-w))
+		// if we currently have an "open" hyperlink OSC sequence, we need to write
+		// a closing sequence
+		nextOSC := s[hyperlinkMatches[0][0]:hyperlinkMatches[0][1]]
+		isNextOSCClosing := nextOSC == "\x1b]8;;\x1b\\"
+
+		if isNextOSCClosing {
+			buf.WriteString(nextOSC)
 		}
 
 		s = buf.String()
