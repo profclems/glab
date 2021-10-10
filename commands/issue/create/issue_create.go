@@ -416,7 +416,7 @@ func generateIssueWebURL(opts *CreateOpts) (string, error) {
 	u.Path += "/-/issues/new"
 	u.RawQuery = fmt.Sprintf(
 		"utf8=✓&issue[title]=%s&issue[description]=%s",
-		url.PathEscape(opts.Title),
-		url.PathEscape(description))
+		strings.ReplaceAll(url.PathEscape(opts.Title), "+", "%2B"),
+		strings.ReplaceAll(url.PathEscape(description), "+", "%2B"))
 	return u.String(), nil
 }
