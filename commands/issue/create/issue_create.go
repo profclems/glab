@@ -416,7 +416,7 @@ func generateIssueWebURL(opts *CreateOpts, repo glrepo.Interface) (string, error
 	u.Path += "/-/issues/new"
 	u.RawQuery = fmt.Sprintf(
 		"utf8=✓&issue[title]=%s&issue[description]=%s",
-		opts.Title,
-		url.QueryEscape(description))
+		url.PathEscape(opts.Title),
+		url.PathEscape(description))
 	return u.String(), nil
 }
