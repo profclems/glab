@@ -629,7 +629,7 @@ func generateMRCompareURL(opts *CreateOpts) (string, error) {
 	}
 	u.Path += "/-/merge_requests/new"
 	u.RawQuery = fmt.Sprintf(
-		"utf8=✓&merge_request[title]=%s&merge_request[description]=%s&merge_request[source_branch]=%s&merge_request[target_branch]=%s&merge_request[source_project_id]=%d&merge_request[target_project_id]=%d",
+		"merge_request[title]=%s&merge_request[description]=%s&merge_request[source_branch]=%s&merge_request[target_branch]=%s&merge_request[source_project_id]=%d&merge_request[target_project_id]=%d",
 		strings.ReplaceAll(url.PathEscape(opts.Title), "+", "%2B"),
 		strings.ReplaceAll(url.PathEscape(description), "+", "%2B"),
 		opts.SourceBranch,
