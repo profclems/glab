@@ -402,7 +402,7 @@ func generateIssueWebURL(opts *CreateOpts, repo glrepo.Interface) (string, error
 	}
 	if opts.Weight != 0 {
 		// this uses the slash commands to add weight to the description
-		description += fmt.Sprintf("\n/weight %%%d", opts.Weight)
+		description += fmt.Sprintf("\n/weight %d", opts.Weight)
 	}
 	if opts.IsConfidential {
 		// this uses the slash commands to add confidential to the description
