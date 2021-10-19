@@ -137,7 +137,7 @@ func NewCmdFor(f *cmdutils.Factory) *cobra.Command {
 				return err
 			}
 
-			fmt.Fprintln(f.IO.StdOut, mrutils.DisplayMR(f.IO.Color(), mr))
+			fmt.Fprintln(f.IO.StdOut, mrutils.DisplayMR(f.IO.Color(), mr, f.IO.IsaTTY))
 
 			return nil
 		},

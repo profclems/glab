@@ -84,10 +84,13 @@ func MRCheckErrors(mr *gitlab.MergeRequest, err MRCheckErrOptions) error {
 	return nil
 }
 
-func DisplayMR(c *iostreams.ColorPalette, mr *gitlab.MergeRequest) string {
+func DisplayMR(c *iostreams.ColorPalette, mr *gitlab.MergeRequest, isTTY bool) string {
 	mrID := MRState(c, mr)
-	return fmt.Sprintf("%s %s (%s)\n %s\n",
-		mrID, mr.Title, mr.SourceBranch, mr.WebURL)
+	if isTTY {
+		return fmt.Sprintf("%s %s (%s)\n %s\n", mrID, mr.Title, mr.SourceBranch, mr.WebURL)
+	} else {
+		return mr.WebURL
+	}
 }
 
 func MRState(c *iostreams.ColorPalette, m *gitlab.MergeRequest) string {
