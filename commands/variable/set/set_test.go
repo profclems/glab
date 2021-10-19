@@ -83,10 +83,11 @@ func Test_getValue(t *testing.T) {
 			_, err := stdin.WriteString(tt.stdin)
 			assert.NoError(t, err)
 
+			args := []string{tt.valueArg}
 			value, err := getValue(&SetOpts{
 				Value: tt.valueArg,
 				IO:    io,
-			})
+			}, args)
 			assert.NoError(t, err)
 
 			assert.Equal(t, value, tt.want)
