@@ -212,7 +212,7 @@ func (s *IOStreams) shouldDisplayHyperlinks() bool {
 	case "always":
 		return true
 	case "auto":
-		return s.IsaTTY
+		return s.IsaTTY && s.pagerProcess == nil
 	default:
 		return false
 	}
