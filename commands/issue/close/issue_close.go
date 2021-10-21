@@ -46,7 +46,7 @@ func NewCmdClose(f *cmdutils.Factory) *cobra.Command {
 					return err
 				}
 				fmt.Fprintf(f.IO.StdOut, "%s Closed Issue #%d\n", c.RedCheck(), issue.IID)
-				fmt.Fprintln(f.IO.StdOut, issueutils.DisplayIssue(c, issue))
+				fmt.Fprintln(f.IO.StdOut, issueutils.DisplayIssue(c, issue, f.IO.IsaTTY))
 			}
 			return nil
 		},
