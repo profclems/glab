@@ -100,29 +100,53 @@ func NewCmdMirror(f *cmdutils.Factory) *cobra.Command {
 }
 
 func runProjectMirror(f *cmdutils.Factory, opts *MirrorOptions) error {
+
+	if opts.Direction == "push" {
+		return createPushMirror(f, opts)
+	} else {
+		return createPullMirror(f, opts)
+	}
+}
+
+func createPushMirror(f *cmdutils.Factory, opts *MirrorOptions) error {
 	var pm *gitlab.ProjectMirror
 	var err error
-	if opts.Direction == "push" {
-		pm, err = api.CreatePushMirror(
-			opts.APIClient,
-			opts.ProjectID,
-			opts.URL,
-			opts.Enabled,
-			opts.ProtectedBranchesOnly,
-			opts.AllowDivergence,
-		)
-		if err != nil {
-			return cmdutils.WrapError(err, "Failed to create mirror")
-		}
-		greenCheck := f.IO.Color().Green("✓")
-		fmt.Fprintf(
-			f.IO.StdOut,
-			"%s Created %s Mirror for %s (%d) on GitLab at %s (%d)\n",
-			greenCheck, strings.ToTitle(opts.Direction), pm.URL, pm.ID, opts.ProjectName, opts.ProjectID,
-		)
-	} else {
-		_, err = api.CreatePullMirror()
+	pm, err = api.CreatePushMirror(
+		opts.APIClient,
+		opts.ProjectID,
+		opts.URL,
+		opts.Enabled,
+		opts.ProtectedBranchesOnly,
+		opts.AllowDivergence,
+	)
+	if err != nil {
+		return cmdutils.WrapError(err, "Failed to create mirror")
 	}
+	greenCheck := f.IO.Color().Green("✓")
+	fmt.Fprintf(
+		f.IO.StdOut,
+		"%s Created Push Mirror for %s (%d) on GitLab at %s (%d)\n",
+		greenCheck, pm.URL, pm.ID, opts.ProjectName, opts.ProjectID,
+	)
+	return err
+}
 
+func createPullMirror(f *cmdutils.Factory, opts *MirrorOptions) error {
+	err := api.CreatePullMirror(
+		opts.APIClient,
+		opts.ProjectID,
+		opts.URL,
+		opts.Enabled,
+		opts.ProtectedBranchesOnly,
+	)
+	if err != nil {
+		return cmdutils.WrapError(err, "Failed to create mirror")
+	}
+	greenCheck := f.IO.Color().Green("✓")
+	fmt.Fprintf(
+		f.IO.StdOut,
+		"%s Created Pull Mirror for %s on GitLab at %s (%d)\n",
+		greenCheck, opts.URL, opts.ProjectName, opts.ProjectID,
+	)
 	return err
 }

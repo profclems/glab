@@ -1,8 +1,16 @@
 package api
 
 import (
+	"fmt"
+
 	"github.com/xanzy/go-gitlab"
 )
+
+type AddPullMirrorOptions struct {
+	URL                   *string `url:"import_url,omitempty" json:"import_url,omitempty"`
+	Enabled               *bool   `url:"mirror,omitempty" json:"mirror,omitempty"`
+	OnlyProtectedBranches *bool   `url:"only_mirror_protected_branches,omitempty" json:"only_mirror_protected_branches,omitempty"`
+}
 
 var CreatePushMirror = func(
 	client *gitlab.Client,
@@ -25,6 +33,20 @@ var CreatePushMirror = func(
 	return pm, err
 }
 
-var CreatePullMirror = func() (*gitlab.ProjectMirror, error) {
-	return nil, nil
+var CreatePullMirror = func(
+	client *gitlab.Client,
+	projectID int,
+	url string,
+	enabled bool,
+	onlyProtectedBranches bool,
+) error {
+	opt := &AddPullMirrorOptions{
+		URL:                   &url,
+		Enabled:               &enabled,
+		OnlyProtectedBranches: &onlyProtectedBranches,
+	}
+	u := fmt.Sprintf("projects/%d/remote_mirrors/", projectID)
+	// TODO
+	fmt.Println(u, opt)
+	return nil
 }
