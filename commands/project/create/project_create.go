@@ -23,8 +23,8 @@ import (
 func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 	var projectCreateCmd = &cobra.Command{
 		Use:   "create [path] [flags]",
-		Short: `Create a new Gitlab project/repository`,
-		Long:  `Create a new GitHub repository.`,
+		Short: `Create a new GitLab project/repository`,
+		Long:  `Create a new GitLab repository.`,
 		Args:  cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runCreateProject(cmd, args, f)
