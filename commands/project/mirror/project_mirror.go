@@ -111,19 +111,18 @@ func runProjectMirror(f *cmdutils.Factory, opts *MirrorOptions) error {
 			opts.ProtectedBranchesOnly,
 			opts.AllowDivergence,
 		)
-
+		if err != nil {
+			return cmdutils.WrapError(err, "Failed to create mirror")
+		}
+		greenCheck := f.IO.Color().Green("✓")
+		fmt.Fprintf(
+			f.IO.StdOut,
+			"%s Created %s Mirror for %s (%d) on GitLab at %s (%d)\n",
+			greenCheck, strings.ToTitle(opts.Direction), pm.URL, pm.ID, opts.ProjectName, opts.ProjectID,
+		)
 	} else {
-		pm, err = api.CreatePullMirror()
-	}
-	if err != nil {
-		return cmdutils.WrapError(err, "Failed to create mirror")
+		_, err = api.CreatePullMirror()
 	}
 
-	greenCheck := f.IO.Color().Green("✓")
-	fmt.Fprintf(
-		f.IO.StdOut,
-		"%s Created %s Mirror for %s (%d) on GitLab at %s (%d)\n",
-		greenCheck, strings.ToTitle(opts.Direction), pm.URL, pm.ID, opts.ProjectName, opts.ProjectID,
-	)
 	return err
 }
