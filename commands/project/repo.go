@@ -8,6 +8,7 @@ import (
 	repoCmdCreate "github.com/profclems/glab/commands/project/create"
 	repoCmdDelete "github.com/profclems/glab/commands/project/delete"
 	repoCmdFork "github.com/profclems/glab/commands/project/fork"
+	repoCmdMirror "github.com/profclems/glab/commands/project/mirror"
 	repoCmdSearch "github.com/profclems/glab/commands/project/search"
 	repoCmdView "github.com/profclems/glab/commands/project/view"
 
@@ -30,6 +31,7 @@ func NewCmdRepo(f *cmdutils.Factory) *cobra.Command {
 	repoCmd.AddCommand(repoCmdFork.NewCmdFork(f, nil))
 	repoCmd.AddCommand(repoCmdSearch.NewCmdSearch(f))
 	repoCmd.AddCommand(repoCmdView.NewCmdView(f))
+	repoCmd.AddCommand(repoCmdMirror.NewCmdMirror(f))
 
 	return repoCmd
 }
