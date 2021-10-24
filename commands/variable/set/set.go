@@ -29,8 +29,6 @@ type SetOpts struct {
 	Protected bool
 	Masked    bool
 	Group     string
-
-	ValueSet bool
 }
 
 func NewCmdSet(f *cmdutils.Factory, runE func(opts *SetOpts) error) *cobra.Command {
@@ -67,11 +65,8 @@ func NewCmdSet(f *cmdutils.Factory, runE func(opts *SetOpts) error) *cobra.Comma
 			}
 
 			if opts.Value != "" && len(args) == 2 {
-				if opts.Value != "" {
-					err = cmdutils.FlagError{Err: errors.New("specify value either by second positional argument or --value flag")}
-					return
-				}
-				opts.Value = args[1]
+				err = cmdutils.FlagError{Err: errors.New("specify value either by second positional argument or --value flag")}
+				return
 			}
 
 			if cmd.Flags().Changed("scope") && opts.Group != "" {
@@ -79,8 +74,7 @@ func NewCmdSet(f *cmdutils.Factory, runE func(opts *SetOpts) error) *cobra.Comma
 				return
 			}
 
-			opts.ValueSet = cmd.Flags().Changed("value") || len(args) == 2
-			opts.Value, err = getValue(opts)
+			opts.Value, err = getValue(opts, args)
 			if err != nil {
 				return
 			}
@@ -156,9 +150,11 @@ func setRun(opts *SetOpts) error {
 	return nil
 }
 
-func getValue(opts *SetOpts) (string, error) {
-	if opts.Value != "" || opts.ValueSet {
+func getValue(opts *SetOpts, args []string) (string, error) {
+	if opts.Value != "" {
 		return opts.Value, nil
+	} else if len(args) == 2 {
+		return args[1], nil
 	}
 
 	if opts.IO.IsInTTY {
