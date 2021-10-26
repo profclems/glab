@@ -56,18 +56,18 @@ func NewCmdMirror(f *cmdutils.Factory) *cobra.Command {
 			if opts.Direction != "pull" && opts.Direction != "push" {
 				return cmdutils.WrapError(
 					errors.New("invalid choice for --direction"),
-					"argument direction value should be pull or push, default is pull",
+					"argument direction value should be pull or push",
+				)
+			}
+
+			if opts.Direction == "pull" && opts.AllowDivergence {
+				fmt.Fprintf(
+					f.IO.StdOut,
+					"[Warning] allow-divergence flag has no effect for pull mirror and is ignored.\n",
 				)
 			}
 
 			opts.URL = strings.TrimSpace(opts.URL)
-
-			if opts.URL == "" {
-				return cmdutils.WrapError(
-					errors.New("argument URL is required"),
-					"argument URL must be provided",
-				)
-			}
 
 			apiClient, err := f.HttpClient()
 			if err != nil {
@@ -89,6 +89,9 @@ func NewCmdMirror(f *cmdutils.Factory) *cobra.Command {
 	projectMirrorCmd.Flags().BoolVar(&opts.ProtectedBranchesOnly, "protected-branches-only", false, "Determines if only protected branches are mirrored.")
 	projectMirrorCmd.Flags().BoolVar(&opts.AllowDivergence, "allow-divergence", false, "Determines if divergent refs are skipped.")
 
+	_ = projectMirrorCmd.MarkFlagRequired("url")
+	_ = projectMirrorCmd.MarkFlagRequired("direction")
+
 	return projectMirrorCmd
 }
 
@@ -104,13 +107,16 @@ func runProjectMirror(f *cmdutils.Factory, opts *MirrorOptions) error {
 func createPushMirror(f *cmdutils.Factory, opts *MirrorOptions) error {
 	var pm *gitlab.ProjectMirror
 	var err error
+	var pushOptions = api.CreatePushMirrorOptions{
+		Url:                   opts.URL,
+		Enabled:               opts.Enabled,
+		OnlyProtectedBranches: opts.ProtectedBranchesOnly,
+		KeepDivergentRefs:     opts.AllowDivergence,
+	}
 	pm, err = api.CreatePushMirror(
 		opts.APIClient,
 		opts.ProjectID,
-		opts.URL,
-		opts.Enabled,
-		opts.ProtectedBranchesOnly,
-		opts.AllowDivergence,
+		&pushOptions,
 	)
 	if err != nil {
 		return cmdutils.WrapError(err, "Failed to create Push Mirror")
@@ -125,12 +131,15 @@ func createPushMirror(f *cmdutils.Factory, opts *MirrorOptions) error {
 }
 
 func createPullMirror(f *cmdutils.Factory, opts *MirrorOptions) error {
+	var pullOptions = api.CreatePullMirrorOptions{
+		Url:                   opts.URL,
+		Enabled:               opts.Enabled,
+		OnlyProtectedBranches: opts.ProtectedBranchesOnly,
+	}
 	err := api.CreatePullMirror(
 		opts.APIClient,
 		opts.ProjectID,
-		opts.URL,
-		opts.Enabled,
-		opts.ProtectedBranchesOnly,
+		&pullOptions,
 	)
 	if err != nil {
 		return cmdutils.WrapError(err, "Failed to create Pull Mirror")
