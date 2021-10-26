@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"regexp"
 	"strings"
 
 	"github.com/profclems/glab/pkg/iostreams"
@@ -12,6 +11,7 @@ import (
 	"github.com/MakeNowJust/heredoc"
 	"github.com/profclems/glab/api"
 	"github.com/profclems/glab/commands/cmdutils"
+	"github.com/profclems/glab/commands/variable/variableutils"
 	"github.com/profclems/glab/internal/glrepo"
 	"github.com/spf13/cobra"
 	"github.com/xanzy/go-gitlab"
@@ -36,8 +36,6 @@ func NewCmdSet(f *cmdutils.Factory, runE func(opts *SetOpts) error) *cobra.Comma
 		IO: f.IO,
 	}
 
-	validKeyMsg := "A valid key must have no more than 255 characters; only A-Z, a-z, 0-9, and _ are allowed"
-
 	cmd := &cobra.Command{
 		Use:     "set <key> <value>",
 		Short:   "Create a new project or group variable",
@@ -59,8 +57,8 @@ func NewCmdSet(f *cmdutils.Factory, runE func(opts *SetOpts) error) *cobra.Comma
 
 			opts.Key = args[0]
 
-			if !isValidKey(opts.Key) {
-				err = cmdutils.FlagError{Err: fmt.Errorf("invalid key provided.\n%s", validKeyMsg)}
+			if !variableutils.IsValidKey(opts.Key) {
+				err = cmdutils.FlagError{Err: fmt.Errorf("invalid key provided.\n%s", variableutils.ValidKeyMsg)}
 				return
 			}
 
@@ -168,16 +166,4 @@ func getValue(opts *SetOpts, args []string) (string, error) {
 		return "", fmt.Errorf("failed to read value from STDIN: %w", err)
 	}
 	return strings.TrimSpace(string(value)), nil
-}
-
-// isValidKey checks if a key is valid if it follows the following criteria:
-// must have no more than 255 characters;
-// only A-Z, a-z, 0-9, and _ are allowed
-func isValidKey(key string) bool {
-	// check if key falls within range of 1-255
-	if len(key) > 255 || len(key) < 1 {
-		return false
-	}
-	keyRE := regexp.MustCompile(`^[A-Za-z0-9_]+$`)
-	return keyRE.MatchString(key)
 }
