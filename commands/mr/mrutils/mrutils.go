@@ -105,7 +105,7 @@ func DisplayAllMRs(streams *iostreams.IOStreams, mrs []*gitlab.MergeRequest, pro
 	table := tableprinter.NewTablePrinter()
 	table.SetIsTTY(streams.IsOutputTTY())
 	for _, m := range mrs {
-		table.AddCell(MRState(c, m))
+		table.AddCell(streams.Hyperlink(MRState(c, m), m.WebURL))
 		table.AddCell(m.Title)
 		table.AddCell(c.Cyan(fmt.Sprintf("(%s) ← (%s)", m.TargetBranch, m.SourceBranch)))
 		table.EndRow()

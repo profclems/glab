@@ -89,6 +89,12 @@ func main() {
 		cmdFactory.IO.SetPrompt(promptDisabled)
 	}
 
+	if forceHyperlinks := os.Getenv("FORCE_HYPERLINKS"); forceHyperlinks != "" && forceHyperlinks != "0" {
+		cmdFactory.IO.SetDisplayHyperlinks("always")
+	} else if displayHyperlinks, _ := cfg.Get("", "display_hyperlinks"); displayHyperlinks == "true" {
+		cmdFactory.IO.SetDisplayHyperlinks("auto")
+	}
+
 	var expandedArgs []string
 	if len(os.Args) > 0 {
 		expandedArgs = os.Args[1:]

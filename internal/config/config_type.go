@@ -207,6 +207,15 @@ func NewBlankRoot() *yaml.Node {
 						Value: "false",
 					},
 					{
+						HeadComment: "Whether or not to display hyperlink escapes when listing things like issues or MRs",
+						Kind:        yaml.ScalarNode,
+						Value:       "display_hyperlinks",
+					},
+					{
+						Kind:  yaml.ScalarNode,
+						Value: "false",
+					},
+					{
 						HeadComment: "configuration specific for gitlab instances",
 						Kind:        yaml.ScalarNode,
 						Value:       "hosts",

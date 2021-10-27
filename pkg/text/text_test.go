@@ -59,6 +59,10 @@ func TestStrip(t *testing.T) {
 			args: args{"\033[0;30mSome text"},
 			want: "Some text",
 		},
+		{
+			args: args{"\033]8;;https://example.com\033\\Example\033]8;;\033\\"},
+			want: "Example",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -87,6 +91,11 @@ func TestStringWidth(t *testing.T) {
 			name: "without colors",
 			args: args{"Some text"},
 			want: 9,
+		},
+		{
+			name: "hyperlink",
+			args: args{"\033]8;;https://example.com\033\\Example\033]8;;\033\\"},
+			want: 7,
 		},
 	}
 	for _, tt := range tests {
