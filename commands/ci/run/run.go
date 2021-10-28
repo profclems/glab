@@ -47,6 +47,8 @@ func NewCmdRun(f *cmdutils.Factory) *cobra.Command {
 		Example: heredoc.Doc(`
 	$ glab ci run
 	$ glab ci run -b trunk
+	$ glab ci run -b trunk --variables MYKEY:some_value
+  	$ glab ci run -b trunk --variables MYKEY:some_value --variables KEY2:another_value
 	`),
 		Long: ``,
 		Args: cobra.ExactArgs(0),
