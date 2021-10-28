@@ -72,7 +72,6 @@ func NewCmdView(f *cmdutils.Factory) *cobra.Command {
 
 			type info struct {
 				id    int
-				kind  string
 				group *gitlab.Group
 			}
 
