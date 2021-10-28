@@ -34,7 +34,7 @@ func NewCmdSet(f *cmdutils.Factory, runE func(opts *DeleteOpts) error) *cobra.Co
 	cmd := &cobra.Command{
 		Use:     "delete <key>",
 		Short:   "Delete a project or group variable",
-		Aliases: []string{"delete", "remove"},
+		Aliases: []string{"remove"},
 		Args:    cobra.ExactArgs(1),
 		Example: heredoc.Doc(`
 			$ glab variable delete VAR_NAME
