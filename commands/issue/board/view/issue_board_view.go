@@ -53,6 +53,9 @@ func NewCmdView(f *cmdutils.Factory) *cobra.Command {
 			// list the groups that are ancestors to project:
 			// https://docs.gitlab.com/ee/api/projects.html#list-a-projects-groups
 			projectGroups, err := api.ListProjectGroups(apiClient, project.ID, &gitlab.ListProjectGroupOptions{})
+			if err != nil {
+				return err
+			}
 
 			// get group issue boards for each ancestor group returned:
 			// https://docs.gitlab.com/ee/api/group_boards.html#list-all-group-issue-boards-in-a-group
@@ -179,6 +182,9 @@ func NewCmdView(f *cmdutils.Factory) *cobra.Command {
 						return err
 					}
 					issues, err = api.ListGroupIssues(apiClient, boardInfo[selectedBoard].group.ID, opts)
+					if err != nil {
+						return err
+					}
 				}
 
 				if boardInfo[selectedBoard].group == nil {
@@ -187,6 +193,9 @@ func NewCmdView(f *cmdutils.Factory) *cobra.Command {
 						return err
 					}
 					issues, err = api.ListProjectIssues(apiClient, repo.FullName(), opts)
+					if err != nil {
+						return err
+					}
 				}
 
 				if err != nil {
