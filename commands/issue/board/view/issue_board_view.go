@@ -100,7 +100,7 @@ func NewCmdView(f *cmdutils.Factory) *cobra.Command {
 			}
 			selectedBoard := strings.Split(selectedOption, " ")[0]
 
-			boardLists := []*gitlab.BoardList{}
+			var boardLists []*gitlab.BoardList
 			if boardInfo[selectedBoard].group != nil {
 				boardLists, err = api.GetGroupIssueBoardLists(apiClient, boardInfo[selectedBoard].group.ID,
 					boardInfo[selectedBoard].id, &gitlab.ListGroupIssueBoardListsOptions{})
