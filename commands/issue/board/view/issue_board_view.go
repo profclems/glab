@@ -107,7 +107,9 @@ func NewCmdView(f *cmdutils.Factory) *cobra.Command {
 				if err != nil {
 					return err
 				}
-			} else {
+			}
+
+			if boardInfo[selectedBoard].group == nil {
 				boardLists, err = api.GetPojectIssueBoardLists(apiClient, repo.FullName(),
 					boardInfo[selectedBoard].id, &gitlab.GetIssueBoardListsOptions{})
 				if err != nil {
@@ -148,7 +150,9 @@ func NewCmdView(f *cmdutils.Factory) *cobra.Command {
 				if list.Label == nil {
 					listTitle = "Unnamed"
 					listColor = "#FFA500" // orange
-				} else {
+				}
+
+				if list.Label != nil {
 					listTitle = list.Label.Name
 					listColor = list.Label.Color
 				}
