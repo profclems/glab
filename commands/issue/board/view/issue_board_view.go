@@ -22,9 +22,16 @@ var (
 	repo      glrepo.Interface
 )
 
+type IssueBoardViewOptions struct {
+	AssigneeUsername string
+	AssigneeID       int
+	Labels           string
+	Milestone        string
+	State            string
+}
+
 func NewCmdView(f *cmdutils.Factory) *cobra.Command {
-	var assigneeUsername, labels, milestone, state string
-	var assigneeID int
+	var opts = &IssueBoardViewOptions{}
 	var viewCmd = &cobra.Command{
 		Use:   "view [flags]",
 		Short: `View project issue board.`,
@@ -160,11 +167,11 @@ func NewCmdView(f *cmdutils.Factory) *cobra.Command {
 				// automatically request using state for default "open" and "closed" lists
 				// this is required because these lists aren't returned with the board lists api call
 				if list.Label.Name == "Closed" {
-					state = "closed"
+					opts.State = "closed"
 				}
 
 				if list.Label.Name == "Open" {
-					state = "opened"
+					opts.State = "opened"
 				}
 
 				// "closed" and "open" are considered special lists since they
@@ -172,31 +179,32 @@ func NewCmdView(f *cmdutils.Factory) *cobra.Command {
 				isSpecialList := list.Label.Name == "Open" || list.Label.Name == "Closed"
 
 				// append list name label to labels from cli
-				reqLabels := labels
+				reqLabels := opts.Labels
 				if reqLabels == "" && !isSpecialList {
 					reqLabels = list.Label.Name
 				}
+
 				if reqLabels != "" && !isSpecialList {
 					reqLabels = reqLabels + "," + list.Label.Name
 				}
 
 				if boardInfo[selectedBoard].group != nil {
-					opts, err := parseListGroupIssueOptions(assigneeID, assigneeUsername, reqLabels, milestone, state)
+					parsedOpts, err := parseListGroupIssueOptions(opts)
 					if err != nil {
 						return err
 					}
-					issues, err = api.ListGroupIssues(apiClient, boardInfo[selectedBoard].group.ID, opts)
+					issues, err = api.ListGroupIssues(apiClient, boardInfo[selectedBoard].group.ID, parsedOpts)
 					if err != nil {
 						return err
 					}
 				}
 
 				if boardInfo[selectedBoard].group == nil {
-					opts, err := parseListProjectIssueOptions(assigneeID, assigneeUsername, labels, milestone, state)
+					parsedOpts, err := parseListProjectIssueOptions(opts)
 					if err != nil {
 						return err
 					}
-					issues, err = api.ListProjectIssues(apiClient, repo.FullName(), opts)
+					issues, err = api.ListProjectIssues(apiClient, repo.FullName(), parsedOpts)
 					if err != nil {
 						return err
 					}
@@ -235,70 +243,70 @@ func NewCmdView(f *cmdutils.Factory) *cobra.Command {
 		},
 	}
 
-	viewCmd.Flags().StringVarP(&assigneeUsername, "assignee-username", "u", "", "Filter board issues by assignee username")
-	viewCmd.Flags().IntVarP(&assigneeID, "assignee-id", "i", 0, "Filter board issues by assignee id")
-	viewCmd.Flags().StringVarP(&labels, "labels", "l", "", "Filter board issues by labels (comma separated)")
-	viewCmd.Flags().StringVarP(&milestone, "milestone", "m", "", "Filter board issues by milestone")
-	viewCmd.Flags().StringVarP(&milestone, "state", "s", "", "Filter board issues by state")
+	viewCmd.Flags().StringVarP(&opts.AssigneeUsername, "assignee-username", "u", "", "Filter board issues by assignee username")
+	viewCmd.Flags().IntVarP(&opts.AssigneeID, "assignee-id", "i", 0, "Filter board issues by assignee id")
+	viewCmd.Flags().StringVarP(&opts.Labels, "labels", "l", "", "Filter board issues by labels (comma separated)")
+	viewCmd.Flags().StringVarP(&opts.Milestone, "milestone", "m", "", "Filter board issues by milestone")
+	viewCmd.Flags().StringVarP(&opts.State, "state", "s", "", "Filter board issues by state")
 	return viewCmd
 }
 
-func parseListProjectIssueOptions(assigneeID int, assigneeUsername, labels, milestone, state string) (*gitlab.ListProjectIssuesOptions, error) {
-	if assigneeID != 0 && assigneeUsername != "" {
+func parseListProjectIssueOptions(opts *IssueBoardViewOptions) (*gitlab.ListProjectIssuesOptions, error) {
+	if opts.AssigneeID != 0 && opts.AssigneeUsername != "" {
 		return &gitlab.ListProjectIssuesOptions{}, fmt.Errorf("can't request assigneeID and assigneeUsername simultaneously")
 	}
 
-	opts := &gitlab.ListProjectIssuesOptions{}
+	parsedOpts := &gitlab.ListProjectIssuesOptions{}
 
-	if assigneeID != 0 {
-		opts.AssigneeID = &assigneeID
+	if opts.AssigneeID != 0 {
+		parsedOpts.AssigneeID = &opts.AssigneeID
 	}
 
-	if assigneeUsername != "" {
-		opts.AssigneeUsername = &assigneeUsername
+	if opts.AssigneeUsername != "" {
+		parsedOpts.AssigneeUsername = &opts.AssigneeUsername
 	}
 
-	if labels != "" {
-		opts.Labels = gitlab.Labels(strings.Split(labels, ","))
+	if opts.Labels != "" {
+		parsedOpts.Labels = gitlab.Labels(strings.Split(opts.Labels, ","))
 	}
 
-	if state != "" {
-		opts.State = &state
+	if opts.State != "" {
+		parsedOpts.State = &opts.State
 	}
 
-	if milestone != "" {
-		opts.Milestone = &milestone
+	if opts.Milestone != "" {
+		parsedOpts.Milestone = &opts.Milestone
 	}
-	return opts, nil
+	return parsedOpts, nil
 }
 
-func parseListGroupIssueOptions(assigneeID int, assigneeUsername, labels, milestone, state string) (*gitlab.ListGroupIssuesOptions, error) {
-	if assigneeID != 0 && assigneeUsername != "" {
+func parseListGroupIssueOptions(opts *IssueBoardViewOptions) (*gitlab.ListGroupIssuesOptions, error) {
+	if opts.AssigneeID != 0 && opts.AssigneeUsername != "" {
 		return &gitlab.ListGroupIssuesOptions{}, fmt.Errorf("can't request assigneeID and assigneeUsername simultaneously")
 	}
 
-	opts := &gitlab.ListGroupIssuesOptions{}
+	parsedOpts := &gitlab.ListGroupIssuesOptions{}
 
-	if assigneeID != 0 {
-		opts.AssigneeID = &assigneeID
+	if opts.AssigneeID != 0 {
+		parsedOpts.AssigneeID = &opts.AssigneeID
 	}
 
-	if assigneeUsername != "" {
-		opts.AssigneeUsername = &assigneeUsername
+	if opts.AssigneeUsername != "" {
+		parsedOpts.AssigneeUsername = &opts.AssigneeUsername
 	}
 
-	if labels != "" {
-		opts.Labels = gitlab.Labels(strings.Split(labels, ","))
+	if opts.Labels != "" {
+		parsedOpts.Labels = gitlab.Labels(strings.Split(opts.Labels, ","))
 	}
 
-	if state != "" {
-		opts.State = &state
+	if opts.State != "" {
+		parsedOpts.State = &opts.State
 	}
 
-	if milestone != "" {
-		opts.Milestone = &milestone
+	if opts.Milestone != "" {
+		parsedOpts.Milestone = &opts.Milestone
 	}
-	return opts, nil
+	return parsedOpts, nil
 }
 
 func recoverPanic(app *tview.Application) {
