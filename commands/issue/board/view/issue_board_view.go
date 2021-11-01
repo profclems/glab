@@ -189,22 +189,22 @@ func NewCmdView(f *cmdutils.Factory) *cobra.Command {
 				}
 
 				if boardInfo[selectedBoard].group != nil {
-					parsedOpts, err := parseListGroupIssueOptions(opts)
+					reqOpts, err := parseListGroupIssueOptions(opts)
 					if err != nil {
 						return err
 					}
-					issues, err = api.ListGroupIssues(apiClient, boardInfo[selectedBoard].group.ID, parsedOpts)
+					issues, err = api.ListGroupIssues(apiClient, boardInfo[selectedBoard].group.ID, reqOpts)
 					if err != nil {
 						return err
 					}
 				}
 
 				if boardInfo[selectedBoard].group == nil {
-					parsedOpts, err := parseListProjectIssueOptions(opts)
+					reqOpts, err := parseListProjectIssueOptions(opts)
 					if err != nil {
 						return err
 					}
-					issues, err = api.ListProjectIssues(apiClient, repo.FullName(), parsedOpts)
+					issues, err = api.ListProjectIssues(apiClient, repo.FullName(), reqOpts)
 					if err != nil {
 						return err
 					}
@@ -256,28 +256,28 @@ func parseListProjectIssueOptions(opts *IssueBoardViewOptions) (*gitlab.ListProj
 		return &gitlab.ListProjectIssuesOptions{}, fmt.Errorf("can't request assigneeID and assigneeUsername simultaneously")
 	}
 
-	parsedOpts := &gitlab.ListProjectIssuesOptions{}
+	reqOpts := &gitlab.ListProjectIssuesOptions{}
 
 	if opts.AssigneeID != 0 {
-		parsedOpts.AssigneeID = &opts.AssigneeID
+		reqOpts.AssigneeID = &opts.AssigneeID
 	}
 
 	if opts.AssigneeUsername != "" {
-		parsedOpts.AssigneeUsername = &opts.AssigneeUsername
+		reqOpts.AssigneeUsername = &opts.AssigneeUsername
 	}
 
 	if opts.Labels != "" {
-		parsedOpts.Labels = gitlab.Labels(strings.Split(opts.Labels, ","))
+		reqOpts.Labels = gitlab.Labels(strings.Split(opts.Labels, ","))
 	}
 
 	if opts.State != "" {
-		parsedOpts.State = &opts.State
+		reqOpts.State = &opts.State
 	}
 
 	if opts.Milestone != "" {
-		parsedOpts.Milestone = &opts.Milestone
+		reqOpts.Milestone = &opts.Milestone
 	}
-	return parsedOpts, nil
+	return reqOpts, nil
 }
 
 func parseListGroupIssueOptions(opts *IssueBoardViewOptions) (*gitlab.ListGroupIssuesOptions, error) {
@@ -285,28 +285,28 @@ func parseListGroupIssueOptions(opts *IssueBoardViewOptions) (*gitlab.ListGroupI
 		return &gitlab.ListGroupIssuesOptions{}, fmt.Errorf("can't request assigneeID and assigneeUsername simultaneously")
 	}
 
-	parsedOpts := &gitlab.ListGroupIssuesOptions{}
+	reqOpts := &gitlab.ListGroupIssuesOptions{}
 
 	if opts.AssigneeID != 0 {
-		parsedOpts.AssigneeID = &opts.AssigneeID
+		reqOpts.AssigneeID = &opts.AssigneeID
 	}
 
 	if opts.AssigneeUsername != "" {
-		parsedOpts.AssigneeUsername = &opts.AssigneeUsername
+		reqOpts.AssigneeUsername = &opts.AssigneeUsername
 	}
 
 	if opts.Labels != "" {
-		parsedOpts.Labels = gitlab.Labels(strings.Split(opts.Labels, ","))
+		reqOpts.Labels = gitlab.Labels(strings.Split(opts.Labels, ","))
 	}
 
 	if opts.State != "" {
-		parsedOpts.State = &opts.State
+		reqOpts.State = &opts.State
 	}
 
 	if opts.Milestone != "" {
-		parsedOpts.Milestone = &opts.Milestone
+		reqOpts.Milestone = &opts.Milestone
 	}
-	return parsedOpts, nil
+	return reqOpts, nil
 }
 
 func recoverPanic(app *tview.Application) {
