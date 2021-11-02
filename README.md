@@ -67,7 +67,7 @@ Table of Contents
 Read the [documentation](https://glab.readthedocs.io/) for usage instructions.
 
 ## Installation
-Download a binary suitable for your OS at the [releases page](https://github.com/profclems/glab/releases/latest).
+Download a binary suitable for your OS at the [releases page](https://github.com/profclems/glab/releases/latest)
 
 ### Quick Install
 **Supported Platforms**: Linux and macOS
