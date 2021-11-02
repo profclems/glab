@@ -98,9 +98,10 @@ Table of Contents
 
 ## Learn More
 Read the [documentation](https://glab.readthedocs.io/) for more information on this tool.
+Get the new documentation on [`https://glab-cli.io`](https://glab-cli.io) and contribute to the new documentation on [https://github.com/braswelljr/glab-docs](https://github.com/braswelljr/glab-docs).
 
 ## Installation
-Download a binary suitable for your OS at the [releases page](https://github.com/profclems/glab/releases/latest).
+Download a binary suitable for your OS at the [releases page](https://github.com/profclems/glab/releases/latest)
 
 ### Quick Install
 **Supported Platforms**: Linux and macOS
