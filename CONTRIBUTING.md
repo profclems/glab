@@ -25,7 +25,7 @@ Please avoid:
 ## Building the project
 
 Prerequisites:
-- Go 1.13+
+- Go 1.16+
 
 Build with: `make` or `go build -o bin/glab ./cmd/glab/main.go`
 
