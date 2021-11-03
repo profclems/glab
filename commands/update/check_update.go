@@ -43,7 +43,7 @@ func CheckUpdate(s *iostreams.IOStreams, version string, silentErr bool) error {
 			return nil
 		}
 		fmt.Fprintf(s.StdOut, "%v %v", c.GreenCheck(),
-			c.Green("You are already using the latest version of glab"))
+			c.Green("You are already using the latest version of glab\n"))
 	}
 	return nil
 }
