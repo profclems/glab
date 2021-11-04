@@ -180,12 +180,12 @@ func NewCmdView(f *cmdutils.Factory) *cobra.Command {
 
 				// append list name label to labels from cli
 				reqLabels := opts.Labels
-				if reqLabels == "" && !isSpecialList {
-					reqLabels = list.Label.Name
-				}
-
 				if reqLabels != "" && !isSpecialList {
 					reqLabels = reqLabels + "," + list.Label.Name
+				}
+
+				if reqLabels == "" && !isSpecialList {
+					reqLabels = list.Label.Name
 				}
 
 				if boardInfo[selectedBoard].group != nil {
