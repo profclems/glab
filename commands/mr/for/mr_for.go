@@ -153,5 +153,7 @@ func NewCmdFor(f *cmdutils.Factory) *cobra.Command {
 	mrForCmd.Flags().StringP("target-branch", "b", "", "The target or base branch into which you want your code merged")
 	mrForCmd.Flags().BoolP("with-labels", "", false, "Copy labels from issue to the merge request")
 
+	mrForCmd.Deprecated = "use `glab mr create --related-issue <issueID>`"
+
 	return mrForCmd
 }

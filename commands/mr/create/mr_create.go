@@ -8,18 +8,20 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/AlecAivazis/survey/v2"
+	"github.com/profclems/glab/commands/issue/issueutils"
+	"github.com/profclems/glab/pkg/prompt"
+
 	"github.com/profclems/glab/pkg/iostreams"
 
 	"github.com/MakeNowJust/heredoc"
 	"github.com/profclems/glab/internal/config"
 	"github.com/profclems/glab/internal/glrepo"
 
-	"github.com/AlecAivazis/survey/v2"
 	"github.com/profclems/glab/api"
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/commands/mr/mrutils"
 	"github.com/profclems/glab/pkg/git"
-	"github.com/profclems/glab/pkg/prompt"
 	"github.com/profclems/glab/pkg/utils"
 	"github.com/spf13/cobra"
 	"github.com/xanzy/go-gitlab"
@@ -37,6 +39,9 @@ type CreateOpts struct {
 	MileStone             int
 	MilestoneFlag         string
 	MRCreateTargetProject string
+
+	RelatedIssue    string
+	CopyIssueLabels bool
 
 	CreateSourceBranch bool
 	RemoveSourceBranch bool
@@ -135,6 +140,10 @@ func NewCmdCreate(f *cmdutils.Factory, runE func(opts *CreateOpts) error) *cobra
 				return &cmdutils.FlagError{Err: errors.New("--web already skips all prompts currently skipped by --yes")}
 			}
 
+			if opts.CopyIssueLabels && opts.RelatedIssue == "" {
+				return &cmdutils.FlagError{Err: errors.New("--copy-issue-labels can only be used with --related-issue")}
+			}
+
 			if runE != nil {
 				return runE(opts)
 			}
@@ -163,12 +172,23 @@ func NewCmdCreate(f *cmdutils.Factory, runE func(opts *CreateOpts) error) *cobra
 	mrCreateCmd.Flags().StringP("head", "H", "", "Select another head repository using the `OWNER/REPO` or `GROUP/NAMESPACE/REPO` format or the project ID or full URL")
 	mrCreateCmd.Flags().BoolVarP(&opts.Yes, "yes", "y", false, "Skip submission confirmation prompt, with --fill it skips all optional prompts")
 	mrCreateCmd.Flags().BoolVarP(&opts.Web, "web", "w", false, "continue merge request creation on web browser")
+	mrCreateCmd.Flags().BoolVarP(&opts.CopyIssueLabels, "copy-issue-labels", "", false, "Copy labels from issue to the merge request. Used with --related-issue")
+	mrCreateCmd.Flags().StringVarP(&opts.RelatedIssue, "related-issue", "i", "", "Create merge request for an issue. The merge request title will be created from the issue if --title is not provided.")
 
 	mrCreateCmd.Flags().StringVarP(&opts.MRCreateTargetProject, "target-project", "", "", "Add target project by id or OWNER/REPO or GROUP/NAMESPACE/REPO")
 	_ = mrCreateCmd.Flags().MarkHidden("target-project")
 	_ = mrCreateCmd.Flags().MarkDeprecated("target-project", "Use --repo instead")
 
 	return mrCreateCmd
+}
+
+func parseIssue(apiClient *gitlab.Client, opts *CreateOpts) (*gitlab.Issue, error) {
+	issue, _, err := issueutils.IssueFromArg(apiClient, opts.BaseRepo, opts.RelatedIssue)
+	if err != nil {
+		return nil, err
+	}
+
+	return issue, nil
 }
 
 func createRun(opts *CreateOpts) error {
@@ -221,7 +241,7 @@ func createRun(opts *CreateOpts) error {
 		return cmdutils.SilentError
 	}
 
-	headRepoRemote, err := repoRemote(labClient, opts, headRepo, opts.SourceProject, "glab-head")
+	headRepoRemote, err := repoRemote(opts, headRepo, opts.SourceProject, "glab-head")
 	if err != nil {
 		return nil
 	}
@@ -232,7 +252,7 @@ func createRun(opts *CreateOpts) error {
 	if glrepo.IsSame(baseRepo, headRepo) {
 		baseRepoRemote = headRepoRemote
 	} else {
-		baseRepoRemote, err = repoRemote(labClient, opts, baseRepo, opts.TargetProject, "glab-base")
+		baseRepoRemote, err = repoRemote(opts, baseRepo, opts.TargetProject, "glab-base")
 		if err != nil {
 			return nil
 		}
@@ -247,7 +267,7 @@ func createRun(opts *CreateOpts) error {
 
 	if opts.CreateSourceBranch && opts.SourceBranch == "" {
 		opts.SourceBranch = utils.ReplaceNonAlphaNumericChars(opts.Title, "-")
-	} else if opts.SourceBranch == "" {
+	} else if opts.SourceBranch == "" && opts.RelatedIssue == "" {
 		opts.SourceBranch, err = opts.Branch()
 		if err != nil {
 			return err
@@ -255,93 +275,128 @@ func createRun(opts *CreateOpts) error {
 	}
 
 	if opts.TargetBranch == "" {
-		opts.TargetBranch = getTargetBranch(baseRepoRemote, opts.SourceBranch)
+		opts.TargetBranch = getTargetBranch(baseRepoRemote)
 	}
 
-	opts.TargetTrackingBranch = fmt.Sprintf("%s/%s", baseRepoRemote.Name, opts.TargetBranch)
-	if opts.SourceBranch == opts.TargetBranch && glrepo.IsSame(baseRepo, headRepo) {
-		fmt.Fprintf(opts.IO.StdErr, "You must be on a different branch other than %q\n", opts.TargetBranch)
-		return cmdutils.SilentError
-	}
-
-	if opts.Autofill {
-		if err = mrBodyAndTitle(opts); err != nil {
+	if opts.RelatedIssue != "" {
+		issue, err := parseIssue(labClient, opts)
+		if err != nil {
 			return err
 		}
-		_, err = api.GetCommit(labClient, baseRepo.FullName(), opts.TargetBranch)
-		if err != nil {
-			return fmt.Errorf("target branch %s does not exist on remote. Specify target branch with --target-branch flag",
-				opts.TargetBranch)
+
+		if opts.CopyIssueLabels {
+			mrCreateOpts.Labels = issue.Labels
+		}
+		opts.Description = fmt.Sprintf("Closes #%d", issue.IID)
+		opts.Title = fmt.Sprintf("Resolve \"%s\"", issue.Title)
+		if !opts.IsDraft && !opts.IsWIP {
+			opts.IsDraft = true
 		}
 
-		opts.ShouldPush = true
-	} else if opts.IsInteractive {
-		var templateName string
-		var templateContents string
-		if opts.Description == "" {
-			if opts.NoEditor {
-				err = prompt.AskMultiline(&opts.Description, "description", "Description:", "")
+		if opts.SourceBranch == "" {
+			sourceBranch := fmt.Sprintf("%d-%s", issue.IID, utils.ReplaceNonAlphaNumericChars(strings.ToLower(issue.Title), "-"))
+			branchOpts := &gitlab.CreateBranchOptions{
+				Branch: &sourceBranch,
+				Ref:    &opts.TargetBranch,
+			}
+
+			_, err = api.CreateBranch(labClient, baseRepo.FullName(), branchOpts)
+			if err != nil {
+				for branchErr, branchCount := err, 1; branchErr != nil; branchCount++ {
+					sourceBranch = fmt.Sprintf("%d-%s-%d", issue.IID, strings.ReplaceAll(strings.ToLower(issue.Title), " ", "-"), branchCount)
+					_, branchErr = api.CreateBranch(labClient, baseRepo.FullName(), branchOpts)
+				}
+			}
+			opts.SourceBranch = sourceBranch
+		}
+	} else {
+		opts.TargetTrackingBranch = fmt.Sprintf("%s/%s", baseRepoRemote.Name, opts.TargetBranch)
+		if opts.SourceBranch == opts.TargetBranch && glrepo.IsSame(baseRepo, headRepo) {
+			fmt.Fprintf(opts.IO.StdErr, "You must be on a different branch other than %q\n", opts.TargetBranch)
+			return cmdutils.SilentError
+		}
+
+		if opts.Autofill {
+			if err = mrBodyAndTitle(opts); err != nil {
+				return err
+			}
+			_, err = api.GetCommit(labClient, baseRepo.FullName(), opts.TargetBranch)
+			if err != nil {
+				return fmt.Errorf("target branch %s does not exist on remote. Specify target branch with --target-branch flag",
+					opts.TargetBranch)
+			}
+
+			opts.ShouldPush = true
+		} else if opts.IsInteractive {
+			var templateName string
+			var templateContents string
+			if opts.Description == "" {
+				if opts.NoEditor {
+					err = prompt.AskMultiline(&opts.Description, "description", "Description:", "")
+					if err != nil {
+						return err
+					}
+				} else {
+					templateResponse := struct {
+						Index int
+					}{}
+					templateNames, err := cmdutils.ListGitLabTemplates(cmdutils.MergeRequestTemplate)
+					if err != nil {
+						return fmt.Errorf("error getting templates: %w", err)
+					}
+
+					templateNames = append(templateNames, "Open a blank merge request")
+
+					selectQs := []*survey.Question{
+						{
+							Name: "index",
+							Prompt: &survey.Select{
+								Message: "Choose a template",
+								Options: templateNames,
+							},
+						},
+					}
+
+					if err := prompt.Ask(selectQs, &templateResponse); err != nil {
+						return fmt.Errorf("could not prompt: %w", err)
+					}
+					if templateResponse.Index != len(templateNames) {
+						templateName = templateNames[templateResponse.Index]
+						templateContents, err = cmdutils.LoadGitLabTemplate(cmdutils.MergeRequestTemplate, templateName)
+						if err != nil {
+							return fmt.Errorf("failed to get template contents: %w", err)
+						}
+					}
+				}
+			}
+
+			if opts.Title == "" {
+				err = prompt.AskQuestionWithInput(&opts.Title, "title", "Title:", "", true)
 				if err != nil {
 					return err
 				}
-			} else {
-				templateResponse := struct {
-					Index int
-				}{}
-				templateNames, err := cmdutils.ListGitLabTemplates(cmdutils.MergeRequestTemplate)
-				if err != nil {
-					return fmt.Errorf("error getting templates: %w", err)
-				}
-
-				templateNames = append(templateNames, "Open a blank merge request")
-
-				selectQs := []*survey.Question{
-					{
-						Name: "index",
-						Prompt: &survey.Select{
-							Message: "Choose a template",
-							Options: templateNames,
-						},
-					},
-				}
-
-				if err := prompt.Ask(selectQs, &templateResponse); err != nil {
-					return fmt.Errorf("could not prompt: %w", err)
-				}
-				if templateResponse.Index != len(templateNames) {
-					templateName = templateNames[templateResponse.Index]
-					templateContents, err = cmdutils.LoadGitLabTemplate(cmdutils.MergeRequestTemplate, templateName)
+			}
+			if opts.Description == "" {
+				if opts.NoEditor {
+					err = prompt.AskMultiline(&opts.Description, "description", "Description:", "")
 					if err != nil {
-						return fmt.Errorf("failed to get template contents: %w", err)
+						return err
+					}
+				} else {
+					editor, err := cmdutils.GetEditor(opts.Config)
+					if err != nil {
+						return err
+					}
+					err = cmdutils.EditorPrompt(&opts.Description, "Description", templateContents, editor)
+					if err != nil {
+						return err
 					}
 				}
 			}
 		}
+	}
 
-		if opts.Title == "" {
-			err = prompt.AskQuestionWithInput(&opts.Title, "title", "Title:", "", true)
-			if err != nil {
-				return err
-			}
-		}
-		if opts.Description == "" {
-			if opts.NoEditor {
-				err = prompt.AskMultiline(&opts.Description, "description", "Description:", "")
-				if err != nil {
-					return err
-				}
-			} else {
-				editor, err := cmdutils.GetEditor(opts.Config)
-				if err != nil {
-					return err
-				}
-				err = cmdutils.EditorPrompt(&opts.Description, "Description", templateContents, editor)
-				if err != nil {
-					return err
-				}
-			}
-		}
-	} else if opts.Title == "" {
+	if opts.Title == "" {
 		return fmt.Errorf("title can't be blank")
 	}
 
@@ -352,10 +407,10 @@ func createRun(opts *CreateOpts) error {
 			opts.Title = "WIP: " + opts.Title
 		}
 	}
-	mrCreateOpts.Title = gitlab.String(opts.Title)
-	mrCreateOpts.Description = gitlab.String(opts.Description)
-	mrCreateOpts.SourceBranch = gitlab.String(opts.SourceBranch)
-	mrCreateOpts.TargetBranch = gitlab.String(opts.TargetBranch)
+	mrCreateOpts.Title = &opts.Title
+	mrCreateOpts.Description = &opts.Description
+	mrCreateOpts.SourceBranch = &opts.SourceBranch
+	mrCreateOpts.TargetBranch = &opts.TargetBranch
 
 	if opts.AllowCollaboration {
 		mrCreateOpts.AllowCollaboration = gitlab.Bool(true)
@@ -370,13 +425,13 @@ func createRun(opts *CreateOpts) error {
 	}
 
 	if opts.TargetProject != nil {
-		mrCreateOpts.TargetProjectID = gitlab.Int(opts.TargetProject.ID)
+		mrCreateOpts.TargetProjectID = &opts.TargetProject.ID
 	}
 
 	if opts.CreateSourceBranch {
 		lb := &gitlab.CreateBranchOptions{
-			Branch: gitlab.String(opts.SourceBranch),
-			Ref:    gitlab.String(opts.TargetBranch),
+			Branch: &opts.SourceBranch,
+			Ref:    &opts.TargetBranch,
 		}
 		fmt.Fprintln(opts.IO.StdErr, "\nCreating related branch...")
 		branch, err := api.CreateBranch(labClient, headRepo.FullName(), lb)
@@ -445,7 +500,7 @@ func createRun(opts *CreateOpts) error {
 
 	// These actions need to be done here, after the `Add metadata` prompt because
 	// they are metadata that can be modified by the prompt
-	mrCreateOpts.Labels = opts.Labels
+	mrCreateOpts.Labels = append(mrCreateOpts.Labels, opts.Labels...)
 
 	if len(opts.Assignees) > 0 {
 		users, err := api.UsersByNames(labClient, opts.Assignees)
@@ -669,7 +724,7 @@ func headRepoOverride(opts *CreateOpts, repo string) error {
 	return nil
 }
 
-func repoRemote(labClient *gitlab.Client, opts *CreateOpts, repo glrepo.Interface, project *gitlab.Project, remoteName string) (*glrepo.Remote, error) {
+func repoRemote(opts *CreateOpts, repo glrepo.Interface, project *gitlab.Project, remoteName string) (*glrepo.Remote, error) {
 	remotes, err := opts.Remotes()
 	if err != nil {
 		return nil, err
@@ -696,7 +751,7 @@ func repoRemote(labClient *gitlab.Client, opts *CreateOpts, repo glrepo.Interfac
 	return repoRemote, nil
 }
 
-func getTargetBranch(baseRepoRemote *glrepo.Remote, sourceBranch string) string {
+func getTargetBranch(baseRepoRemote *glrepo.Remote) string {
 	br, _ := git.GetDefaultBranch(baseRepoRemote.PushURL.String())
 	// we ignore the error since git.GetDefaultBranch returns master and an error
 	// if the default branch cannot be determined
