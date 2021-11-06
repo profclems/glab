@@ -1,4 +1,4 @@
-package set
+package update
 
 import (
 	"bytes"
@@ -20,7 +20,7 @@ func Test_NewCmdSet(t *testing.T) {
 	tests := []struct {
 		name     string
 		cli      string
-		wants    SetOpts
+		wants    UpdateOpts
 		stdinTTY bool
 		wantsErr bool
 	}{
@@ -48,7 +48,7 @@ func Test_NewCmdSet(t *testing.T) {
 		{
 			name: "protected var",
 			cli:  `cool_secret -v"a secret" -p`,
-			wants: SetOpts{
+			wants: UpdateOpts{
 				Key:       "cool_secret",
 				Protected: true,
 				Value:     "a secret",
@@ -58,7 +58,7 @@ func Test_NewCmdSet(t *testing.T) {
 		{
 			name: "protected var in group",
 			cli:  `cool_secret --group coolGroup -v"cool"`,
-			wants: SetOpts{
+			wants: UpdateOpts{
 				Key:       "cool_secret",
 				Protected: false,
 				Value:     "cool",
@@ -68,7 +68,7 @@ func Test_NewCmdSet(t *testing.T) {
 		{
 			name: "leading numbers in name",
 			cli:  `123_TOKEN -v"cool"`,
-			wants: SetOpts{
+			wants: UpdateOpts{
 				Key:       "123_TOKEN",
 				Protected: false,
 				Value:     "cool",
@@ -94,8 +94,8 @@ func Test_NewCmdSet(t *testing.T) {
 			argv, err := shlex.Split(tt.cli)
 			assert.NoError(t, err)
 
-			var gotOpts *SetOpts
-			cmd := NewCmdSet(f, func(opts *SetOpts) error {
+			var gotOpts *UpdateOpts
+			cmd := NewCmdSet(f, func(opts *UpdateOpts) error {
 				gotOpts = opts
 				return nil
 			})
@@ -118,15 +118,15 @@ func Test_NewCmdSet(t *testing.T) {
 	}
 }
 
-func Test_setRun_project(t *testing.T) {
+func Test_updateRun_project(t *testing.T) {
 	reg := &httpmock.Mocker{}
 	defer reg.Verify(t)
 
-	reg.RegisterResponder("POST", "/projects/owner/repo/variables",
+	reg.RegisterResponder("PUT", "/projects/owner/repo/variables/TEST_VARIABLE",
 		httpmock.NewStringResponse(201, `
 			{
-    			"key": "NEW_VARIABLE",
-    			"value": "new value",
+    			"key": "TEST_VARIABLE",
+    			"value": "foo",
     			"variable_type": "env_var",
     			"protected": false,
     			"masked": false
@@ -136,7 +136,7 @@ func Test_setRun_project(t *testing.T) {
 
 	io, _, stdout, _ := iostreams.Test()
 
-	opts := &SetOpts{
+	opts := &UpdateOpts{
 		HTTPClient: func() (*gitlab.Client, error) {
 			a, _ := api.TestClient(&http.Client{Transport: reg}, "", "gitlab.com", false)
 			return a.Lab(), nil
@@ -145,26 +145,26 @@ func Test_setRun_project(t *testing.T) {
 			return glrepo.FromFullName("owner/repo")
 		},
 		IO:    io,
-		Key:   "NEW_VARIABLE",
-		Value: "new value",
+		Key:   "TEST_VARIABLE",
+		Value: "foo",
 		Scope: "*",
 	}
 	_, _ = opts.HTTPClient()
 
-	err := setRun(opts)
+	err := updateRun(opts)
 	assert.NoError(t, err)
-	assert.Equal(t, stdout.String(), "✓ Created variable NEW_VARIABLE for owner/repo with scope *\n")
+	assert.Equal(t, stdout.String(), "✓ Updated variable TEST_VARIABLE for project owner/repo with scope *\n")
 }
 
-func Test_setRun_group(t *testing.T) {
+func Test_updateRun_group(t *testing.T) {
 	reg := &httpmock.Mocker{}
 	defer reg.Verify(t)
 
-	reg.RegisterResponder("POST", "/groups/mygroup/variables",
+	reg.RegisterResponder("PUT", "/groups/mygroup/variables/TEST_VARIABLE",
 		httpmock.NewStringResponse(201, `
 			{
-    			"key": "NEW_VARIABLE",
-    			"value": "new value",
+    			"key": "TEST_VARIABLE",
+    			"value": "blargh",
     			"variable_type": "env_var",
     			"protected": false,
     			"masked": false
@@ -174,7 +174,7 @@ func Test_setRun_group(t *testing.T) {
 
 	io, _, stdout, _ := iostreams.Test()
 
-	opts := &SetOpts{
+	opts := &UpdateOpts{
 		HTTPClient: func() (*gitlab.Client, error) {
 			a, _ := api.TestClient(&http.Client{Transport: reg}, "", "gitlab.com", false)
 			return a.Lab(), nil
@@ -183,13 +183,13 @@ func Test_setRun_group(t *testing.T) {
 			return glrepo.FromFullName("owner/repo")
 		},
 		IO:    io,
-		Key:   "NEW_VARIABLE",
-		Value: "new value",
+		Key:   "TEST_VARIABLE",
+		Value: "blargh",
 		Group: "mygroup",
 	}
 	_, _ = opts.HTTPClient()
 
-	err := setRun(opts)
+	err := updateRun(opts)
 	assert.NoError(t, err)
-	assert.Equal(t, stdout.String(), "✓ Created variable NEW_VARIABLE for group mygroup\n")
+	assert.Equal(t, stdout.String(), "✓ Updated variable TEST_VARIABLE for group mygroup\n")
 }
