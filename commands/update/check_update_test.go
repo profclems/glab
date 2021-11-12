@@ -43,7 +43,7 @@ func TestNewCheckUpdateCmd(t *testing.T) {
 				s:       ioStream,
 				version: "v1.11.1",
 			},
-			stdOut: "✓ You are already using the latest version of glab",
+			stdOut: "✓ You are already using the latest version of glab\n",
 			stdErr: "",
 		},
 		{
