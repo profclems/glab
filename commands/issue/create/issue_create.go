@@ -368,7 +368,7 @@ func previewIssue(opts *CreateOpts) error {
 		return err
 	}
 
-	openURL, err := generateIssueWebURL(opts, repo)
+	openURL, err := generateIssueWebURL(opts)
 	if err != nil {
 		return err
 	}
@@ -380,7 +380,7 @@ func previewIssue(opts *CreateOpts) error {
 	return utils.OpenInBrowser(openURL, browser)
 }
 
-func generateIssueWebURL(opts *CreateOpts, repo glrepo.Interface) (string, error) {
+func generateIssueWebURL(opts *CreateOpts) (string, error) {
 	description := opts.Description
 
 	if len(opts.Labels) > 0 {
@@ -415,8 +415,8 @@ func generateIssueWebURL(opts *CreateOpts, repo glrepo.Interface) (string, error
 	}
 	u.Path += "/-/issues/new"
 	u.RawQuery = fmt.Sprintf(
-		"utf8=✓&issue[title]=%s&issue[description]=%s",
-		opts.Title,
-		url.QueryEscape(description))
+		"issue[title]=%s&issue[description]=%s",
+		strings.ReplaceAll(url.PathEscape(opts.Title), "+", "%2B"),
+		strings.ReplaceAll(url.PathEscape(description), "+", "%2B"))
 	return u.String(), nil
 }
