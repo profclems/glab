@@ -241,7 +241,7 @@ func NewCmdMerge(f *cmdutils.Factory) *cobra.Command {
 				}
 				fmt.Fprintln(f.IO.StdOut, c.GreenCheck(), action)
 			}
-			fmt.Fprintln(f.IO.StdOut, mrutils.DisplayMR(c, mr))
+			fmt.Fprintln(f.IO.StdOut, mrutils.DisplayMR(c, mr, f.IO.IsaTTY))
 			return nil
 		},
 	}

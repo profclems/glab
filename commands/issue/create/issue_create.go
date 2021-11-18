@@ -350,7 +350,7 @@ func createRun(opts *CreateOpts) error {
 				}
 			}
 		}
-		fmt.Fprintln(opts.IO.StdOut, issueutils.DisplayIssue(opts.IO.Color(), issue))
+		fmt.Fprintln(opts.IO.StdOut, issueutils.DisplayIssue(opts.IO.Color(), issue, opts.IO.IsaTTY))
 		return nil
 	}
 

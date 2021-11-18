@@ -17,9 +17,10 @@ import (
 
 func Test_DisplayMR(t *testing.T) {
 	testCases := []struct {
-		name   string
-		mr     *gitlab.MergeRequest
-		output string
+		name        string
+		mr          *gitlab.MergeRequest
+		output      string
+		outputToTTY bool
 	}{
 		{
 			name: "opened",
@@ -30,7 +31,8 @@ func Test_DisplayMR(t *testing.T) {
 				SourceBranch: "trunk",
 				WebURL:       "https://gitlab.com/profclems/glab/-/merge_requests/1",
 			},
-			output: "!1 This is open (trunk)\n https://gitlab.com/profclems/glab/-/merge_requests/1\n",
+			output:      "!1 This is open (trunk)\n https://gitlab.com/profclems/glab/-/merge_requests/1\n",
+			outputToTTY: true,
 		},
 		{
 			name: "merged",
@@ -41,7 +43,8 @@ func Test_DisplayMR(t *testing.T) {
 				SourceBranch: "trunk",
 				WebURL:       "https://gitlab.com/profclems/glab/-/merge_requests/2",
 			},
-			output: "!2 This is merged (trunk)\n https://gitlab.com/profclems/glab/-/merge_requests/2\n",
+			output:      "!2 This is merged (trunk)\n https://gitlab.com/profclems/glab/-/merge_requests/2\n",
+			outputToTTY: true,
 		},
 		{
 			name: "closed",
@@ -52,13 +55,26 @@ func Test_DisplayMR(t *testing.T) {
 				SourceBranch: "trunk",
 				WebURL:       "https://gitlab.com/profclems/glab/-/merge_requests/3",
 			},
-			output: "!3 This is closed (trunk)\n https://gitlab.com/profclems/glab/-/merge_requests/3\n",
+			output:      "!3 This is closed (trunk)\n https://gitlab.com/profclems/glab/-/merge_requests/3\n",
+			outputToTTY: true,
+		},
+		{
+			name: "non-tty terse output",
+			mr: &gitlab.MergeRequest{
+				IID:          4,
+				State:        "open",
+				Title:        "This shouldn't be visible",
+				SourceBranch: "trunk",
+				WebURL:       "https://gitlab.com/profclems/glab/-/merge_requests/4",
+			},
+			output:      "https://gitlab.com/profclems/glab/-/merge_requests/4",
+			outputToTTY: false,
 		},
 	}
 	streams, _, _, _ := iostreams.Test()
 	for _, tC := range testCases {
 		t.Run(tC.name, func(t *testing.T) {
-			got := DisplayMR(streams.Color(), tC.mr)
+			got := DisplayMR(streams.Color(), tC.mr, tC.outputToTTY)
 			assert.Equal(t, tC.output, got)
 		})
 	}

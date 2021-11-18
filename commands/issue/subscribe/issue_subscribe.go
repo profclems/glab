@@ -45,7 +45,7 @@ func NewCmdSubscribe(f *cmdutils.Factory) *cobra.Command {
 				}
 
 				fmt.Fprintln(f.IO.StdErr, c.GreenCheck(), "Subscribed")
-				fmt.Fprintln(f.IO.StdOut, issueutils.DisplayIssue(c, issue))
+				fmt.Fprintln(f.IO.StdOut, issueutils.DisplayIssue(c, issue, f.IO.IsaTTY))
 			}
 			return nil
 		},

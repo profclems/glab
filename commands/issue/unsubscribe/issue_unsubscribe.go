@@ -46,7 +46,7 @@ func NewCmdUnsubscribe(f *cmdutils.Factory) *cobra.Command {
 				}
 
 				fmt.Fprintln(f.IO.StdErr, c.RedCheck(), "Unsubscribed")
-				fmt.Fprintln(f.IO.StdOut, issueutils.DisplayIssue(c, issue))
+				fmt.Fprintln(f.IO.StdOut, issueutils.DisplayIssue(c, issue, f.IO.IsaTTY))
 			}
 			return nil
 		},

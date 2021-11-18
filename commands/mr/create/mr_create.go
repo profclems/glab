@@ -550,7 +550,7 @@ func createRun(opts *CreateOpts) error {
 			return err
 		}
 
-		fmt.Fprintln(out, mrutils.DisplayMR(c, mr))
+		fmt.Fprintln(out, mrutils.DisplayMR(c, mr, opts.IO.IsaTTY))
 		return nil
 	}
 
