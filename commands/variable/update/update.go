@@ -1,4 +1,4 @@
-package set
+package update
 
 import (
 	"errors"
@@ -15,7 +15,7 @@ import (
 	"github.com/xanzy/go-gitlab"
 )
 
-type SetOpts struct {
+type UpdateOpts struct {
 	HTTPClient func() (*gitlab.Client, error)
 	IO         *iostreams.IOStreams
 	BaseRepo   func() (glrepo.Interface, error)
@@ -29,24 +29,23 @@ type SetOpts struct {
 	Group     string
 }
 
-func NewCmdSet(f *cmdutils.Factory, runE func(opts *SetOpts) error) *cobra.Command {
-	opts := &SetOpts{
+func NewCmdSet(f *cmdutils.Factory, runE func(opts *UpdateOpts) error) *cobra.Command {
+	opts := &UpdateOpts{
 		IO: f.IO,
 	}
 
 	cmd := &cobra.Command{
-		Use:     "set <key> <value>",
-		Short:   "Create a new project or group variable",
-		Aliases: []string{"new", "create"},
-		Args:    cobra.RangeArgs(1, 2),
+		Use:   "update <key> <value>",
+		Short: "Update an existing project or group variable",
+		Args:  cobra.RangeArgs(1, 2),
 		Example: heredoc.Doc(`
-			$ glab variable set WITH_ARG "some value"
-			$ glab variable set FROM_FLAG -v "some value"
-			$ glab variable set FROM_ENV_WITH_ARG "${ENV_VAR}"
-			$ glab variable set FROM_ENV_WITH_FLAG -v"${ENV_VAR}"
-			$ glab variable set FROM_FILE < secret.txt
-			$ cat file.txt | glab variable set SERVER_TOKEN
-			$ cat token.txt | glab variable set GROUP_TOKEN -g mygroup --scope=prod
+			$ glab variable update WITH_ARG "some value"
+			$ glab variable update FROM_FLAG -v "some value"
+			$ glab variable update FROM_ENV_WITH_ARG "${ENV_VAR}"
+			$ glab variable update FROM_ENV_WITH_FLAG -v"${ENV_VAR}"
+			$ glab variable update FROM_FILE < secret.txt
+			$ cat file.txt | glab variable update SERVER_TOKEN
+			$ cat token.txt | glab variable update GROUP_TOKEN -g mygroup --scope=prod
 		`),
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
 			// Supports repo override
@@ -86,7 +85,7 @@ func NewCmdSet(f *cmdutils.Factory, runE func(opts *SetOpts) error) *cobra.Comma
 				err = runE(opts)
 				return
 			}
-			err = setRun(opts)
+			err = updateRun(opts)
 			return
 		},
 	}
@@ -100,49 +99,58 @@ func NewCmdSet(f *cmdutils.Factory, runE func(opts *SetOpts) error) *cobra.Comma
 	return cmd
 }
 
-func setRun(opts *SetOpts) error {
+func updateRun(opts *UpdateOpts) error {
 	c := opts.IO.Color()
 	httpClient, err := opts.HTTPClient()
 	if err != nil {
 		return err
 	}
 
-	if opts.Group != "" {
-		// creating group-level variable
-		createVarOpts := &gitlab.CreateGroupVariableOptions{
-			Key:          gitlab.String(opts.Key),
-			Value:        gitlab.String(opts.Value),
-			VariableType: gitlab.VariableType(gitlab.VariableTypeValue(opts.Type)),
-			Masked:       gitlab.Bool(opts.Masked),
-			Protected:    gitlab.Bool(opts.Protected),
-		}
-		_, err = api.CreateGroupVariable(httpClient, opts.Group, createVarOpts)
-		if err != nil {
-			return err
-		}
-
-		fmt.Fprintf(opts.IO.StdOut, "%s Created variable %s for group %s\n", c.GreenCheck(), opts.Key, opts.Group)
-		return nil
-	}
-
-	// creating project-level variable
 	baseRepo, err := opts.BaseRepo()
 	if err != nil {
 		return err
 	}
-	createVarOpts := &gitlab.CreateProjectVariableOptions{
-		Key:              gitlab.String(opts.Key),
-		Value:            gitlab.String(opts.Value),
-		EnvironmentScope: gitlab.String(opts.Scope),
-		Masked:           gitlab.Bool(opts.Masked),
-		Protected:        gitlab.Bool(opts.Protected),
-		VariableType:     gitlab.VariableType(gitlab.VariableTypeValue(opts.Type)),
-	}
-	_, err = api.CreateProjectVariable(httpClient, baseRepo.FullName(), createVarOpts)
-	if err != nil {
-		return err
+
+	if opts.Group == "" {
+		// update project-level variable
+		updateProjectVarOpts := &gitlab.UpdateProjectVariableOptions{
+			Value:            gitlab.String(opts.Value),
+			VariableType:     gitlab.VariableType(gitlab.VariableTypeValue(opts.Type)),
+			Masked:           gitlab.Bool(opts.Masked),
+			Protected:        gitlab.Bool(opts.Protected),
+			EnvironmentScope: gitlab.String(opts.Scope),
+		}
+
+		_, err = api.UpdateProjectVariable(httpClient, baseRepo.FullName(), opts.Key, updateProjectVarOpts)
+		if err != nil {
+			return err
+		}
+
+		fmt.Fprintf(opts.IO.StdOut,
+			"%s Updated variable %s for project %s with scope %s\n",
+			c.GreenCheck(),
+			opts.Key,
+			baseRepo.FullName(),
+			opts.Scope)
+
+	} else {
+		// update group-level variable
+		updateGroupVarOpts := &gitlab.UpdateGroupVariableOptions{
+			Value:            gitlab.String(opts.Value),
+			VariableType:     gitlab.VariableType(gitlab.VariableTypeValue(opts.Type)),
+			Masked:           gitlab.Bool(opts.Masked),
+			Protected:        gitlab.Bool(opts.Protected),
+			EnvironmentScope: gitlab.String(opts.Scope),
+		}
+
+		_, err = api.UpdateGroupVariable(httpClient, opts.Group, opts.Key, updateGroupVarOpts)
+		if err != nil {
+			return err
+		}
+
+		fmt.Fprintf(opts.IO.StdOut, "%s Updated variable %s for group %s\n", c.GreenCheck(), opts.Key, opts.Group)
 	}
 
-	fmt.Fprintf(opts.IO.StdOut, "%s Created variable %s for %s with scope %s\n", c.GreenCheck(), opts.Key, baseRepo.FullName(), opts.Scope)
 	return nil
+
 }

@@ -53,6 +53,28 @@ var DeleteProjectVariable = func(client *gitlab.Client, projectID interface{}, k
 	return nil
 }
 
+var UpdateProjectVariable = func(client *gitlab.Client, projectID interface{}, key string, opts *gitlab.UpdateProjectVariableOptions) (*gitlab.ProjectVariable, error) {
+	if client == nil {
+		client = apiClient.Lab()
+	}
+
+	var filter = func(request *retryablehttp.Request) error {
+		q := request.URL.Query()
+		q.Add("filter[environment_scope]", *opts.EnvironmentScope)
+
+		request.URL.RawQuery = q.Encode()
+
+		return nil
+	}
+
+	vars, _, err := client.ProjectVariables.UpdateVariable(projectID, key, opts, filter)
+	if err != nil {
+		return nil, err
+	}
+
+	return vars, nil
+}
+
 var ListGroupVariables = func(client *gitlab.Client, groupID interface{}, opts *gitlab.ListGroupVariablesOptions) ([]*gitlab.GroupVariable, error) {
 	if client == nil {
 		client = apiClient.Lab()
@@ -89,4 +111,17 @@ var DeleteGroupVariable = func(client *gitlab.Client, groupID interface{}, key s
 	}
 
 	return nil
+}
+
+var UpdateGroupVariable = func(client *gitlab.Client, groupID interface{}, key string, opts *gitlab.UpdateGroupVariableOptions) (*gitlab.GroupVariable, error) {
+	if client == nil {
+		client = apiClient.Lab()
+	}
+
+	vars, _, err := client.GroupVariables.UpdateVariable(groupID, key, opts)
+	if err != nil {
+		return nil, err
+	}
+
+	return vars, nil
 }
