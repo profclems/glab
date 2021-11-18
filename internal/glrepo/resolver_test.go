@@ -8,6 +8,8 @@ import (
 	"github.com/profclems/glab/api"
 	"github.com/profclems/glab/pkg/git"
 	"github.com/profclems/glab/pkg/prompt"
+
+	"github.com/hashicorp/go-multierror"
 	"github.com/stretchr/testify/assert"
 	"github.com/xanzy/go-gitlab"
 )
@@ -200,12 +202,13 @@ func Test_resolveNetwork(t *testing.T) {
 		rem := *rem
 
 		api.GetProject = func(_ *gitlab.Client, ProjectID interface{}) (*gitlab.Project, error) {
-			return nil, errors.New("error")
+			return nil, assert.AnError
 		}
 
 		err := resolveNetwork(&rem)
 
-		assert.EqualError(t, err, "error")
+		assert.Error(t, err)
+		assert.True(t, errors.Is(err, assert.AnError))
 		assert.Len(t, rem.network, 0)
 	})
 
@@ -565,7 +568,7 @@ func Test_BaseRepo(t *testing.T) {
 		assert.EqualError(t, err, "could not prompt")
 	})
 
-	t.Run("Consult the network, call fails", func(t *testing.T) {
+	t.Run("Consult the network, all calls fail", func(t *testing.T) {
 		api.GetProject = func(_ *gitlab.Client, projectID interface{}) (*gitlab.Project, error) {
 			return nil, assert.AnError
 		}
@@ -581,8 +584,35 @@ func Test_BaseRepo(t *testing.T) {
 
 		// Prompt must be true otherwise we won't reach the code we want to test
 		_, err := localRem.BaseRepo(true)
-		t.Log(err)
-		assert.Equal(t, err, assert.AnError)
+		multierr := err.(*multierror.Error)
+		assert.Len(t, multierr.Errors, 2)
+		assert.True(t, errors.Is(err, assert.AnError), "Unexpected error type")
+	})
+
+	t.Run("Consult the network, some, but not all, calls fail", func(t *testing.T) {
+		api.GetProject = func(_ *gitlab.Client, projectID interface{}) (*gitlab.Project, error) {
+			if projectID == "profclems/glab" {
+				return &gitlab.Project{
+					ID:                1,
+					PathWithNamespace: "profclems/glab",
+					HTTPURLToRepo:     "https://gitlab.com/profclems/glab",
+				}, nil
+			}
+			return nil, assert.AnError
+		}
+		localRem := rem()
+
+		originRemote := &Remote{
+			Remote: &git.Remote{Name: "origin"},
+			Repo:   NewWithHost("maxice8", "glab", "gitlab.com"),
+		}
+
+		localRem.remotes = append(localRem.remotes, originRemote)
+		localRem.network = nil
+
+		// Prompt must be true otherwise we won't reach the code we want to test
+		_, err := localRem.BaseRepo(true)
+		assert.NoError(t, err)
 	})
 }
 

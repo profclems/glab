@@ -2,6 +2,7 @@ package glrepo
 
 import (
 	"errors"
+	"fmt"
 	"sort"
 	"strings"
 
@@ -9,6 +10,7 @@ import (
 	"github.com/profclems/glab/pkg/git"
 	"github.com/profclems/glab/pkg/prompt"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/xanzy/go-gitlab"
 )
 
@@ -39,15 +41,21 @@ func ResolveRemotesToRepos(remotes Remotes, client *gitlab.Client, base string) 
 
 func resolveNetwork(result *ResolvedRemotes) error {
 	// Loop over at most 5 (maxRemotesForLookup)
+	var errs error
+	anySuccess := false
 	for i := 0; i < len(result.remotes) && i < maxRemotesForLookup; i++ {
 		networkResult, err := api.GetProject(result.apiClient, result.remotes[i].FullName())
 		if err == nil {
 			result.network = append(result.network, *networkResult)
+			anySuccess = true
 		} else {
-			return err
+			errs = multierror.Append(errs, fmt.Errorf("%s: %w", result.remotes[i].FullName(), err))
 		}
 	}
-	return nil
+	if anySuccess {
+		return nil
+	}
+	return errs
 }
 
 type ResolvedRemotes struct {
