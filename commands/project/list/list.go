@@ -14,10 +14,14 @@ import (
 )
 
 type Options struct {
-	OrderBy string
-	Sort    string
-	PerPage int
-	Page    int
+	OrderBy       string
+	Sort          string
+	PerPage       int
+	Page          int
+	FilterAll     bool
+	FilterOwned   bool
+	FilterMember  bool
+	FilterStarred bool
 
 	BaseRepo   func() (glrepo.Interface, error)
 	HTTPClient func() (*gitlab.Client, error)
@@ -30,7 +34,7 @@ func NewCmdList(f *cmdutils.Factory) *cobra.Command {
 	}
 	var repoListCmd = &cobra.Command{
 		Use:   "list",
-		Short: `Get list of your repositories.`,
+		Short: `Get list of repositories.`,
 		Example: heredoc.Doc(`
 	$ glab repo list
 	`),
@@ -51,6 +55,10 @@ func NewCmdList(f *cmdutils.Factory) *cobra.Command {
 	repoListCmd.Flags().StringVarP(&opts.Sort, "sort", "s", "", "Return repositories sorted in asc or desc order")
 	repoListCmd.Flags().IntVarP(&opts.Page, "page", "p", 1, "Page number")
 	repoListCmd.Flags().IntVarP(&opts.PerPage, "per-page", "P", 30, "Number of items to list per page.")
+	repoListCmd.Flags().BoolVarP(&opts.FilterAll, "all", "a", false, "List all projects on the instance")
+	repoListCmd.Flags().BoolVarP(&opts.FilterOwned, "mine", "m", true, "Only list projects you own")
+	repoListCmd.Flags().BoolVar(&opts.FilterMember, "member", false, "Only list projects which you are a member")
+	repoListCmd.Flags().BoolVar(&opts.FilterStarred, "starred", false, "Only list starred projects")
 	return repoListCmd
 }
 
@@ -64,9 +72,20 @@ func runE(opts *Options) error {
 	}
 
 	l := &gitlab.ListProjectsOptions{
-		OrderBy:        gitlab.String(opts.OrderBy),
-		MinAccessLevel: gitlab.AccessLevel(50), // Only projects you own
+		OrderBy: gitlab.String(opts.OrderBy),
 	}
+
+	// Other filters only valid if FilterAll not true
+	if !opts.FilterAll {
+		if opts.FilterOwned {
+			l.Owned = gitlab.Bool(opts.FilterOwned)
+		} else if opts.FilterStarred {
+			l.Starred = gitlab.Bool(opts.FilterStarred)
+		} else if opts.FilterMember {
+			l.Membership = gitlab.Bool(opts.FilterMember)
+		}
+	}
+
 	if opts.Sort != "" {
 		l.Sort = gitlab.String(opts.Sort)
 	}
@@ -86,6 +105,7 @@ func runE(opts *Options) error {
 	table := tableprinter.NewTablePrinter()
 	for _, prj := range projects {
 		table.AddCell(c.Blue(prj.PathWithNamespace))
+		table.AddCell(prj.SSHURLToRepo)
 		table.AddCell(prj.Description)
 		table.EndRow()
 	}
