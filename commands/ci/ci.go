@@ -1,6 +1,7 @@
 package ci
 
 import (
+	jobArtifactCmd "github.com/profclems/glab/commands/ci/artifact"
 	pipeDeleteCmd "github.com/profclems/glab/commands/ci/delete"
 	legacyCICmd "github.com/profclems/glab/commands/ci/legacyci"
 	ciLintCmd "github.com/profclems/glab/commands/ci/lint"
@@ -34,5 +35,6 @@ func NewCmdCI(f *cmdutils.Factory) *cobra.Command {
 	ciCmd.AddCommand(pipeStatusCmd.NewCmdStatus(f))
 	ciCmd.AddCommand(pipeRetryCmd.NewCmdRetry(f))
 	ciCmd.AddCommand(pipeRunCmd.NewCmdRun(f))
+	ciCmd.AddCommand(jobArtifactCmd.NewCmdRun(f))
 	return ciCmd
 }
