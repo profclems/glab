@@ -8,20 +8,9 @@ import (
 	"github.com/MakeNowJust/heredoc"
 	"github.com/profclems/glab/api"
 	"github.com/profclems/glab/commands/cmdutils"
-	"github.com/profclems/glab/internal/glrepo"
-	"github.com/profclems/glab/pkg/iostreams"
 	"github.com/spf13/cobra"
 	"github.com/xanzy/go-gitlab"
 )
-
-type TraceOpts struct {
-	Branch string
-	JobID  int
-
-	BaseRepo   func() (glrepo.Interface, error)
-	HTTPClient func() (*gitlab.Client, error)
-	IO         *iostreams.IOStreams
-}
 
 func NewCmdRun(f *cmdutils.Factory) *cobra.Command {
 	var jobArtifactCmd = &cobra.Command{
