@@ -62,6 +62,8 @@ func NewCmdRoot(f *cmdutils.Factory, version, buildDate string) *cobra.Command {
 			NO_COLOR: set to any value to avoid printing ANSI escape sequences for color output.
 
 			FORCE_HYPERLINKS: set to 1 to force hyperlinks to be output, even when not outputing to a TTY
+
+			GLAB_CONFIG_DIR: set to a directory path to override the global configuration location 
 		`),
 			"help:feedback": heredoc.Docf(`
 			Encountered a bug or want to suggest a feature?

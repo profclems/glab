@@ -293,7 +293,7 @@ Get a GitLab access token at <https://gitlab.com/-/profile/personal_access_token
 
 ## Configuration
 
-`glab` follows the XDG Base Directory [Spec](https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html): global configuration file is saved at `~/.config/glab-cli`. Local configuration file is saved at `.git/glab-cli` in the current working git directory.
+By default, `glab` follows the XDG Base Directory [Spec](https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html): global configuration file is saved at `~/.config/glab-cli`. Local configuration file is saved at `.git/glab-cli` in the current working git directory. Advanced workflows may override the location of the global configuration by setting the `GLAB_CONFIG_DIR` environment variable.
 
 **To set configuration globally**
 
