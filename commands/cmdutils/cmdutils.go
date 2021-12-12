@@ -530,3 +530,27 @@ func (ua *UserAssignments) UsersFromAddRemove(
 	}
 	return assignedIDs, actions, nil
 }
+
+func ConfirmTransfer() error {
+	const (
+		performTransferLabel = "Confirm repository transfer"
+		abortTransferLabel   = "Abort repository transfer"
+	)
+
+	options := []string{abortTransferLabel, performTransferLabel}
+
+	var confirmTransfer string
+	err := prompt.Select(&confirmTransfer, "confirmation", "Do you wish to proceed with the repository transfer?", options)
+	if err != nil {
+		return fmt.Errorf("could not prompt: %w", err)
+	}
+
+	switch confirmTransfer {
+	case performTransferLabel:
+		return nil
+	case abortTransferLabel:
+		return fmt.Errorf("user aborted operation")
+	default:
+		return fmt.Errorf("invalid value: %s", confirmTransfer)
+	}
+}
