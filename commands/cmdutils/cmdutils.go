@@ -83,6 +83,9 @@ func ListGitLabTemplates(tmplType string) ([]string, error) {
 	}
 
 	for _, file := range fileNames {
+		if strings.HasPrefix(file, ".") || !strings.HasSuffix(file, ".md") {
+			continue
+		}
 		files = append(files, strings.TrimSuffix(file, ".md"))
 	}
 	return files, nil
