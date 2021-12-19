@@ -30,6 +30,7 @@ type ListOptions struct {
 	TargetBranch string
 	Search       string
 	Mine         bool
+	Group        string
 
 	// issue states
 	State  string
@@ -135,6 +136,7 @@ func NewCmdList(f *cmdutils.Factory, runE func(opts *ListOptions) error) *cobra.
 	mrListCmd.Flags().BoolVarP(&opts.Mine, "mine", "", false, "Get only merge requests assigned to me")
 	_ = mrListCmd.Flags().MarkHidden("mine")
 	_ = mrListCmd.Flags().MarkDeprecated("mine", "use --assignee=@me")
+	mrListCmd.Flags().StringVarP(&opts.Group, "group", "g", "", "Get MRs from group and it's subgroups")
 
 	return mrListCmd
 }
@@ -223,10 +225,15 @@ func listRun(opts *ListOptions) error {
 			reviewerIds = append(reviewerIds, user.ID)
 		}
 	}
+	title := utils.NewListTitle(opts.TitleQualifier + " merge request")
+	title.RepoName = repo.FullName()
 
 	if len(assigneeIds) > 0 || len(reviewerIds) > 0 {
 		mergeRequests, err = api.ListMRsWithAssigneesOrReviewers(apiClient, repo.FullName(), l, assigneeIds, reviewerIds)
 
+	} else if opts.Group != "" {
+		mergeRequests, err = api.ListGroupMRs(apiClient, opts.Group, api.ProjectListMROptionsToGroup(l))
+		title.RepoName = opts.Group
 	} else {
 		mergeRequests, err = api.ListMRs(apiClient, repo.FullName(), l)
 	}
@@ -234,8 +241,6 @@ func listRun(opts *ListOptions) error {
 		return err
 	}
 
-	title := utils.NewListTitle(opts.TitleQualifier + " merge request")
-	title.RepoName = repo.FullName()
 	title.Page = l.Page
 	title.ListActionType = opts.ListType
 	title.CurrentPageTotal = len(mergeRequests)
