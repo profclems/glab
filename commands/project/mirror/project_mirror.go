@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/MakeNowJust/heredoc"
 	"github.com/profclems/glab/api"
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/internal/glrepo"
@@ -21,11 +20,11 @@ type MirrorOptions struct {
 	ProtectedBranchesOnly bool
 	AllowDivergence       bool
 	ProjectID             int
-	ProjectName           string
 
-	APIClient *gitlab.Client
-	IO        *iostreams.IOStreams
-	Repo      glrepo.Interface
+	IO         *iostreams.IOStreams
+	BaseRepo   glrepo.Interface
+	APIClient  func() (*gitlab.Client, error)
+	httpClient *gitlab.Client
 }
 
 func NewCmdMirror(f *cmdutils.Factory) *cobra.Command {
@@ -34,23 +33,42 @@ func NewCmdMirror(f *cmdutils.Factory) *cobra.Command {
 	}
 
 	var projectMirrorCmd = &cobra.Command{
-		Use:   "mirror [flags]",
+		Use:   "mirror [ID | URL | PATH] [flags]",
 		Short: "Mirror a project/repository",
 		Long:  `Mirrors a project/repository to the specified location using pull or push method.`,
-		Args:  cobra.ExactArgs(1),
-		Example: heredoc.Doc(`
-			# Mirror a project/repository
-			# TODO: Add Examples
-		`),
+		Args:  cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var err error
 
-			opts.ProjectName = args[0]
-			if len(strings.Split(opts.ProjectName, "/")) != 2 {
-				return cmdutils.WrapError(
-					errors.New("ill-formatted argument project/repository"),
-					"argument should be in the form of project/repository",
-				)
+			opts.APIClient = f.HttpClient
+
+			if len(args) > 0 {
+				opts.BaseRepo, err = glrepo.FromFullName(args[0])
+				if err != nil {
+					return err
+				}
+
+				opts.APIClient = func() (*gitlab.Client, error) {
+					if opts.httpClient != nil {
+						return opts.httpClient, nil
+					}
+					cfg, err := f.Config()
+					if err != nil {
+						return nil, err
+					}
+					c, err := api.NewClientWithCfg(opts.BaseRepo.RepoHost(), cfg, false)
+					if err != nil {
+						return nil, err
+					}
+					opts.httpClient = c.Lab()
+					return opts.httpClient, nil
+				}
+
+			} else {
+				opts.BaseRepo, err = f.BaseRepo()
+				if err != nil {
+					return err
+				}
 			}
 
 			if opts.Direction != "pull" && opts.Direction != "push" {
@@ -69,18 +87,17 @@ func NewCmdMirror(f *cmdutils.Factory) *cobra.Command {
 
 			opts.URL = strings.TrimSpace(opts.URL)
 
-			apiClient, err := f.HttpClient()
+			opts.httpClient, err = opts.APIClient()
 			if err != nil {
 				return err
 			}
-			opts.APIClient = apiClient
 
-			project, err := api.GetProject(apiClient, opts.ProjectName)
+			project, err := opts.BaseRepo.Project(opts.httpClient)
 			if err != nil {
-				return cmdutils.WrapError(err, "project/repository not found")
+				return err
 			}
 			opts.ProjectID = project.ID
-			return runProjectMirror(f, &opts)
+			return runProjectMirror(&opts)
 		},
 	}
 	projectMirrorCmd.Flags().StringVar(&opts.URL, "url", "", "The target URL to which the repository is mirrored.")
@@ -95,16 +112,15 @@ func NewCmdMirror(f *cmdutils.Factory) *cobra.Command {
 	return projectMirrorCmd
 }
 
-func runProjectMirror(f *cmdutils.Factory, opts *MirrorOptions) error {
-
+func runProjectMirror(opts *MirrorOptions) error {
 	if opts.Direction == "push" {
-		return createPushMirror(f, opts)
+		return createPushMirror(opts)
 	} else {
-		return createPullMirror(f, opts)
+		return createPullMirror(opts)
 	}
 }
 
-func createPushMirror(f *cmdutils.Factory, opts *MirrorOptions) error {
+func createPushMirror(opts *MirrorOptions) error {
 	var pm *gitlab.ProjectMirror
 	var err error
 	var pushOptions = api.CreatePushMirrorOptions{
@@ -114,41 +130,41 @@ func createPushMirror(f *cmdutils.Factory, opts *MirrorOptions) error {
 		KeepDivergentRefs:     opts.AllowDivergence,
 	}
 	pm, err = api.CreatePushMirror(
-		opts.APIClient,
+		opts.httpClient,
 		opts.ProjectID,
 		&pushOptions,
 	)
 	if err != nil {
 		return cmdutils.WrapError(err, "Failed to create Push Mirror")
 	}
-	greenCheck := f.IO.Color().Green("✓")
+	greenCheck := opts.IO.Color().Green("✓")
 	fmt.Fprintf(
-		f.IO.StdOut,
+		opts.IO.StdOut,
 		"%s Created Push Mirror for %s (%d) on GitLab at %s (%d)\n",
-		greenCheck, pm.URL, pm.ID, opts.ProjectName, opts.ProjectID,
+		greenCheck, pm.URL, pm.ID, opts.BaseRepo.FullName(), opts.ProjectID,
 	)
 	return err
 }
 
-func createPullMirror(f *cmdutils.Factory, opts *MirrorOptions) error {
+func createPullMirror(opts *MirrorOptions) error {
 	var pullOptions = api.CreatePullMirrorOptions{
 		Url:                   opts.URL,
 		Enabled:               opts.Enabled,
 		OnlyProtectedBranches: opts.ProtectedBranchesOnly,
 	}
 	err := api.CreatePullMirror(
-		opts.APIClient,
+		opts.httpClient,
 		opts.ProjectID,
 		&pullOptions,
 	)
 	if err != nil {
 		return cmdutils.WrapError(err, "Failed to create Pull Mirror")
 	}
-	greenCheck := f.IO.Color().Green("✓")
+	greenCheck := opts.IO.Color().Green("✓")
 	fmt.Fprintf(
-		f.IO.StdOut,
+		opts.IO.StdOut,
 		"%s Created Pull Mirror for %s on GitLab at %s (%d)\n",
-		greenCheck, opts.URL, opts.ProjectName, opts.ProjectID,
+		greenCheck, opts.URL, opts.BaseRepo.FullName(), opts.ProjectID,
 	)
 	return err
 }
