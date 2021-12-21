@@ -29,6 +29,7 @@ type ListOptions struct {
 	Milestone   string
 	Mine        bool
 	Search      string
+	Group       string
 
 	// issue states
 	State        string
@@ -124,6 +125,7 @@ func NewCmdList(f *cmdutils.Factory, runE func(opts *ListOptions) error) *cobra.
 	issueListCmd.Flags().BoolVarP(&opts.Confidential, "confidential", "C", false, "Filter by confidential issues")
 	issueListCmd.Flags().IntVarP(&opts.Page, "page", "p", 1, "Page number")
 	issueListCmd.Flags().IntVarP(&opts.PerPage, "per-page", "P", 30, "Number of items to list per page. (default 30)")
+	issueListCmd.Flags().StringVarP(&opts.Group, "group", "g", "", "Get issues from group and it's subgroups")
 
 	issueListCmd.Flags().BoolP("opened", "o", false, "Get only opened issues")
 	_ = issueListCmd.Flags().MarkHidden("opened")
@@ -214,13 +216,22 @@ func listRun(opts *ListOptions) error {
 		opts.ListType = "search"
 	}
 
-	issues, err := api.ListIssues(apiClient, repo.FullName(), listOpts)
-	if err != nil {
-		return err
-	}
-
+	var issues []*gitlab.Issue
 	title := utils.NewListTitle(opts.TitleQualifier + " issue")
 	title.RepoName = repo.FullName()
+	if opts.Group != "" {
+		issues, err = api.ListGroupIssues(apiClient, opts.Group, api.ProjectListIssueOptionsToGroup(listOpts))
+		if err != nil {
+			return err
+		}
+		title.RepoName = opts.Group
+	} else {
+		issues, err = api.ListIssues(apiClient, repo.FullName(), listOpts)
+		if err != nil {
+			return err
+		}
+	}
+
 	title.Page = listOpts.Page
 	title.ListActionType = opts.ListType
 	title.CurrentPageTotal = len(issues)
