@@ -111,12 +111,9 @@ func (s *IOStreams) StartPager() error {
 			pagerEnv = append(pagerEnv[0:i], pagerEnv[i+1:]...)
 		}
 	}
-	if _, ok := os.LookupEnv("LESS"); !ok {
-		pagerEnv = append(pagerEnv, "LESS=FRX")
-	}
-	if _, ok := os.LookupEnv("LV"); !ok {
-		pagerEnv = append(pagerEnv, "LV=-c")
-	}
+
+	pagerEnv = append(pagerEnv, "LESS=FrX")
+	pagerEnv = append(pagerEnv, "LV=-c")
 
 	pagerCmd := exec.Command(pagerArgs[0], pagerArgs[1:]...)
 	pagerCmd.Env = pagerEnv
