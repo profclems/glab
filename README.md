@@ -138,9 +138,9 @@ Make sure you have [snap installed on your Linux Distro](https://snapcraft.io/do
 1. `sudo snap connect glab:ssh-keys` to grant ssh access
 
 #### Arch Linux
-`glab` is available through the [gitlab-glab-bin](https://aur.archlinux.org/packages/gitlab-glab-bin/) package on the AUR or download and install an archive from the [releases page](https://github.com/profclems/glab/releases/latest). Arch Linux also supports [snap](https://snapcraft.io/docs/installing-snap-on-arch-linux).
+`glab` is available through the [community/glab](https://archlinux.org/packages/community/x86_64/glab/) package or download and install an archive from the [releases page](https://github.com/profclems/glab/releases/latest). Arch Linux also supports [snap](https://snapcraft.io/docs/installing-snap-on-arch-linux).
 ```sh
-yay -Sy gitlab-glab-bin
+yay -Sy glab
 ```
 or any other [AUR helper](https://wiki.archlinux.org/index.php/AUR_helpers) of your choice.
 
