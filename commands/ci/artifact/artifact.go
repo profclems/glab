@@ -38,24 +38,38 @@ func NewCmdRun(f *cmdutils.Factory) *cobra.Command {
 				return err
 			}
 
-			artifact, _ := api.DownloadArtifactJob(apiClient, repo.FullName(), args[0], &gitlab.DownloadArtifactsFileOptions{Job: &args[1]})
+			artifact, err := api.DownloadArtifactJob(apiClient, repo.FullName(), args[0], &gitlab.DownloadArtifactsFileOptions{Job: &args[1]})
+			if err != nil {
+				return err
+			}
 
-			zr, _ := zip.NewReader(artifact, artifact.Size())
-			os.Mkdir(p, 0777)
+			zr, err := zip.NewReader(artifact, artifact.Size())
+			if err != nil {
+				return err
+			}
+
+			if err := os.Mkdir(p, 0755); err != nil {
+				return err
+			}
+
 			for _, v := range zr.File {
 				if v.FileInfo().IsDir() {
-					os.Mkdir(p+v.Name, 0777)
+					if err := os.Mkdir(p+v.Name, v.Mode()); err != nil {
+						return err
+					}
 				} else {
-					srcFile, _ := zr.Open(v.Name)
+					srcFile, err := zr.Open(v.Name)
+					if err != nil {
+						return err
+					}
 					defer srcFile.Close()
 					dstFile, err := os.OpenFile(p+v.Name, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, v.Mode())
 					if err != nil {
-						panic(err)
+						return err
 					}
 					io.Copy(dstFile, srcFile)
 				}
 			}
-
 			return nil
 		},
 	}
