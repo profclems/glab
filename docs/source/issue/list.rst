@@ -36,6 +36,7 @@ Options
       --author string          Filter issue by author <username>
   -c, --closed                 Get only closed issues
   -C, --confidential           Filter by confidential issues
+  -g, --group string           Get issues from group and it's subgroups
       --in string              search in {title|description} (default "title,description")
   -l, --label strings          Filter issue by label <name>
   -m, --milestone string       Filter issue by milestone <id>

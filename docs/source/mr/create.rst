@@ -34,6 +34,7 @@ Options
 
       --allow-collaboration    Allow commits from other members
   -a, --assignee usernames     Assign merge request to people by their usernames
+      --copy-issue-labels      Copy labels from issue to the merge request. Used with --related-issue
       --create-source-branch   Create source branch if it does not exist
   -d, --description string     Supply a description for merge request
       --draft                  Mark merge request as a draft
@@ -44,8 +45,11 @@ Options
   -m, --milestone string       The global ID or title of a milestone to assign
       --no-editor              Don't open editor to enter description. If set to true, uses prompt. Default is false
       --push                   Push committed changes after creating merge request. Make sure you have committed changes
+  -i, --related-issue string   Create merge request for an issue. The merge request title will be created from the issue if --title is not provided.
       --remove-source-branch   Remove Source Branch on merge
+      --reviewer usernames     Request review from users by their usernames
   -s, --source-branch string   The Branch you are creating the merge request. Default is the current branch.
+      --squash-before-merge    Squash commits into a single commit when merging
   -b, --target-branch string   The target or base branch into which you want your code merged
   -t, --title string           Supply a title for merge request
   -w, --web                    continue merge request creation on web browser

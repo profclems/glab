@@ -22,6 +22,8 @@ Examples
 
   $ glab ci run
   $ glab ci run -b trunk
+  $ glab ci run -b trunk --variables MYKEY:some_value
+   	$ glab ci run -b trunk --variables MYKEY:some_value --variables KEY2:another_value
   
 
 Options
