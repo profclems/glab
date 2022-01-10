@@ -67,7 +67,9 @@ func NewCmdRun(f *cmdutils.Factory) *cobra.Command {
 					if err != nil {
 						return err
 					}
-					io.Copy(dstFile, srcFile)
+					if _, err := io.Copy(dstFile, srcFile); err != nil {
+						return err
+					}
 				}
 			}
 			return nil
