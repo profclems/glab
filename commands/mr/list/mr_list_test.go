@@ -174,25 +174,44 @@ func TestMergeRequestList_tty(t *testing.T) {
 }
 
 func TestMergeRequestList_tty_withFlags(t *testing.T) {
-	fakeHTTP := httpmock.New()
-	defer fakeHTTP.Verify(t)
+	t.Run("repo", func(t *testing.T) {
+		fakeHTTP := httpmock.New()
+		defer fakeHTTP.Verify(t)
 
-	fakeHTTP.RegisterResponder("GET", "/projects/OWNER/REPO/merge_requests",
-		httpmock.NewStringResponse(200, `[]`))
+		fakeHTTP.RegisterResponder("GET", "/projects/OWNER/REPO/merge_requests",
+			httpmock.NewStringResponse(200, `[]`))
 
-	fakeHTTP.RegisterResponder("GET", "/users",
-		httpmock.NewStringResponse(200, `[{"id" : 1, "iid" : 1, "username": "john_smith"}]`))
+		fakeHTTP.RegisterResponder("GET", "/users",
+			httpmock.NewStringResponse(200, `[{"id" : 1, "iid" : 1, "username": "john_smith"}]`))
 
-	output, err := runCommand(fakeHTTP, true, "--opened -P1 -p100 -a someuser -l bug -m1", nil, "")
-	if err != nil {
-		t.Errorf("error running command `issue list`: %v", err)
-	}
+		output, err := runCommand(fakeHTTP, true, "--opened -P1 -p100 -a someuser -l bug -m1", nil, "")
+		if err != nil {
+			t.Errorf("error running command `issue list`: %v", err)
+		}
 
-	cmdtest.Eq(t, output.Stderr(), "")
-	cmdtest.Eq(t, output.String(), `No open merge requests match your search in OWNER/REPO
+		cmdtest.Eq(t, output.Stderr(), "")
+		cmdtest.Eq(t, output.String(), `No open merge requests match your search in OWNER/REPO
 
 
 `)
+	})
+	t.Run("group", func(t *testing.T) {
+		fakeHTTP := httpmock.New()
+		defer fakeHTTP.Verify(t)
+
+		fakeHTTP.RegisterResponder("GET", "/groups/GROUP/merge_requests",
+			httpmock.NewStringResponse(200, `[]`))
+
+		output, err := runCommand(fakeHTTP, true, "--group GROUP", nil, "")
+		if err != nil {
+			t.Errorf("error running command `mr list`: %v", err)
+		}
+
+		cmdtest.Eq(t, output.Stderr(), "")
+		cmdtest.Eq(t, output.String(), `No open merge requests available on GROUP
+
+`)
+	})
 }
 
 func makeHyperlink(linkText, targetURL string) string {
