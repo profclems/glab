@@ -693,7 +693,7 @@ func EnvKeyEquivalence(key string) []string {
 	case "host":
 		return []string{"GITLAB_HOST", "GITLAB_URI", "GL_HOST"}
 	case "token":
-		return []string{"GITLAB_TOKEN", "OAUTH_TOKEN"}
+		return []string{"GITLAB_TOKEN", "GITLAB_ACCESS_TOKEN", "OAUTH_TOKEN"}
 	case "no_prompt":
 		return []string{"NO_PROMPT", "PROMPT_DISABLED"}
 	case "editor", "visual", "glab_editor":
