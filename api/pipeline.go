@@ -1,6 +1,7 @@
 package api
 
 import (
+	"bytes"
 	"errors"
 	"io"
 	"sort"
@@ -370,4 +371,19 @@ var CreatePipeline = func(client *gitlab.Client, projectID interface{}, opts *gi
 	}
 	pipe, _, err := client.Pipelines.CreatePipeline(projectID, opts)
 	return pipe, err
+}
+
+var DownloadArtifactJob = func(client *gitlab.Client, repo string, ref string, opts *gitlab.DownloadArtifactsFileOptions) (*bytes.Reader, error) {
+	if client == nil {
+		client = apiClient.Lab()
+	}
+
+	if opts == nil {
+		opts = &gitlab.DownloadArtifactsFileOptions{}
+	}
+	jobs, _, err := client.Jobs.DownloadArtifactsFile(repo, ref, opts, nil)
+	if err != nil {
+		return nil, err
+	}
+	return jobs, nil
 }
