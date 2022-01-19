@@ -36,6 +36,9 @@ type CloneOptions struct {
 	Host              string
 	Protocol          string
 
+	Page    int
+	PerPage int
+
 	IO        *iostreams.IOStreams
 	APIClient *api.Client
 	Config    func() (config.Config, error)
@@ -138,6 +141,8 @@ Clone a GitLab repository/project
 	repoCloneCmd.Flags().BoolVarP(&opts.WithIssuesEnabled, "with-issues-enabled", "I", false, "Limit by projects with issues feature enabled. Default is false. Used with --group flag")
 	repoCloneCmd.Flags().BoolVarP(&opts.WithMREnabled, "with-mr-enabled", "M", false, "Limit by projects with issues feature enabled. Default is false. Used with --group flag")
 	repoCloneCmd.Flags().BoolVarP(&opts.WithShared, "with-shared", "S", false, "Include projects shared to this group. Default is false. Used with --group flag")
+	repoCloneCmd.Flags().IntVarP(&opts.Page, "page", "", 1, "Page number")
+	repoCloneCmd.Flags().IntVarP(&opts.PerPage, "per-page", "", 30, "Number of items to list per page")
 
 	repoCloneCmd.Flags().SortFlags = false
 	repoCloneCmd.SetFlagErrorFunc(func(cmd *cobra.Command, err error) error {
@@ -174,7 +179,13 @@ func groupClone(opts *CloneOptions, ctxOpts *ContextOpts) error {
 	if opts.Visibility != "" {
 		ListGroupProjectOpts.Visibility = gitlab.Visibility(gitlab.VisibilityValue(opts.Visibility))
 	}
-	ListGroupProjectOpts.PerPage = 100 //TODO: Allow user to specify the page and limit
+	ListGroupProjectOpts.PerPage = 100
+	if opts.PerPage != 0 {
+		ListGroupProjectOpts.PerPage = opts.PerPage
+	}
+	if opts.Page != 0 {
+		ListGroupProjectOpts.Page = opts.Page
+	}
 	projects, err := api.ListGroupProjects(opts.APIClient.Lab(), opts.GroupName, ListGroupProjectOpts)
 	if err != nil {
 		return err
