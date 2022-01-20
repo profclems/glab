@@ -332,7 +332,7 @@ func isFilesystemPath(p string) bool {
 }
 
 // ToplevelDir returns the top-level directory path of the current repository
-func ToplevelDir() (string, error) {
+var ToplevelDir = func() (string, error) {
 	showCmd := exec.Command("git", "rev-parse", "--show-toplevel")
 	output, err := run.PrepareCmd(showCmd).Output()
 	return firstLine(output), err
