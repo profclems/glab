@@ -11,12 +11,12 @@ import (
 
 func NewCmdTransfer(f *cmdutils.Factory) *cobra.Command {
 	var repoTransferCmd = &cobra.Command{
-		Use:   "transfer <command> [flags]",
+		Use:   "transfer [repo] [flags]",
 		Short: `Transfer a repository to a new namespace.`,
 		Example: heredoc.Doc(`
 			$ glab repo transfer profclems/glab --target-namespace notprofclems
 		`),
-		Args: cobra.MaximumNArgs(2),
+		Args: cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var err error
 
@@ -37,7 +37,7 @@ func NewCmdTransfer(f *cmdutils.Factory) *cobra.Command {
 				return err
 			}
 
-			dontPromptForConfirmation, err := cmd.Flags().GetBool("danger-cannot-be-undone")
+			dontPromptForConfirmation, err := cmd.Flags().GetBool("yes")
 			if err != nil {
 				return err
 			}
@@ -86,6 +86,8 @@ func NewCmdTransfer(f *cmdutils.Factory) *cobra.Command {
 
 	repoTransferCmd.Flags().BoolP("yes", "y", false, "Danger: Skip confirmation prompt and force transfer operation. Transfer cannot be undone.")
 	repoTransferCmd.Flags().StringP("target-namespace", "t", "", "The namespace where your project should be transferred to")
+
+	_ = repoTransferCmd.MarkFlagRequired("target-namespace")
 
 	return repoTransferCmd
 }
