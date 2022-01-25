@@ -3,13 +3,13 @@
 glab repo create
 ----------------
 
-Create a new Gitlab project/repository
+Create a new GitLab project/repository
 
 Synopsis
 ~~~~~~~~
 
 
-Create a new GitHub repository.
+Create a new GitLab repository.
 
 ::
 
@@ -46,6 +46,7 @@ Options
   -p, --private                Make project private: visible only to project members
   -P, --public                 Make project public: visible without any authentication
       --readme                 Initialize project with README.md
+      --remoteName origin      Remote name for the Git repository you're in. If not provided, origin by default. (default "origin")
   -t, --tag stringArray        The list of tags for the project.
 
 Options inherited from parent commands

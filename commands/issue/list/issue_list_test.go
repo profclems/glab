@@ -143,22 +143,42 @@ func TestIssueList_tty(t *testing.T) {
 }
 
 func TestIssueList_tty_withFlags(t *testing.T) {
-	fakeHTTP := httpmock.New()
-	defer fakeHTTP.Verify(t)
+	t.Run("project", func(t *testing.T) {
+		fakeHTTP := httpmock.New()
+		defer fakeHTTP.Verify(t)
 
-	fakeHTTP.RegisterResponder("GET", "/projects/OWNER/REPO/issues",
-		httpmock.NewStringResponse(200, `[]`))
+		fakeHTTP.RegisterResponder("GET", "/projects/OWNER/REPO/issues",
+			httpmock.NewStringResponse(200, `[]`))
 
-	output, err := runCommand(fakeHTTP, true, "--opened -P1 -p100 --confidential -a someuser -l bug -m1", nil, "")
-	if err != nil {
-		t.Errorf("error running command `issue list`: %v", err)
-	}
+		output, err := runCommand(fakeHTTP, true, "--opened -P1 -p100 --confidential -a someuser -l bug -m1", nil, "")
+		if err != nil {
+			t.Errorf("error running command `issue list`: %v", err)
+		}
 
-	cmdtest.Eq(t, output.Stderr(), "")
-	cmdtest.Eq(t, output.String(), `No open issues match your search in OWNER/REPO
+		cmdtest.Eq(t, output.Stderr(), "")
+		cmdtest.Eq(t, output.String(), `No open issues match your search in OWNER/REPO
 
 
 `)
+	})
+	t.Run("group", func(t *testing.T) {
+		fakeHTTP := httpmock.New()
+		defer fakeHTTP.Verify(t)
+
+		fakeHTTP.RegisterResponder("GET", "/groups/GROUP/issues",
+			httpmock.NewStringResponse(200, `[]`))
+
+		output, err := runCommand(fakeHTTP, true, "--group GROUP", nil, "")
+		if err != nil {
+			t.Errorf("error running command `issue list`: %v", err)
+		}
+
+		cmdtest.Eq(t, output.Stderr(), "")
+		cmdtest.Eq(t, output.String(), `No open issues match your search in GROUP
+
+
+`)
+	})
 }
 
 func TestIssueList_tty_mine(t *testing.T) {

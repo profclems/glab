@@ -138,11 +138,10 @@ Make sure you have [snap installed on your Linux Distro](https://snapcraft.io/do
 1. `sudo snap connect glab:ssh-keys` to grant ssh access
 
 #### Arch Linux
-`glab` is available through the [gitlab-glab-bin](https://aur.archlinux.org/packages/gitlab-glab-bin/) package on the AUR or download and install an archive from the [releases page](https://github.com/profclems/glab/releases/latest). Arch Linux also supports [snap](https://snapcraft.io/docs/installing-snap-on-arch-linux).
+`glab` is available through the [community/glab](https://archlinux.org/packages/community/x86_64/glab/) package or download and install an archive from the [releases page](https://github.com/profclems/glab/releases/latest). Arch Linux also supports [snap](https://snapcraft.io/docs/installing-snap-on-arch-linux).
 ```sh
-yay -Sy gitlab-glab-bin
+pacman -S glab
 ```
-or any other [AUR helper](https://wiki.archlinux.org/index.php/AUR_helpers) of your choice.
 
 #### KISS Linux
 > WARNING: It seems that KISS Linux may no longer be actively maintained, so links to its web domain have been removed from this README.
@@ -293,7 +292,7 @@ Get a GitLab access token at <https://gitlab.com/-/profile/personal_access_token
 
 ## Configuration
 
-`glab` follows the XDG Base Directory [Spec](https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html): global configuration file is saved at `~/.config/glab-cli`. Local configuration file is saved at `.git/glab-cli` in the current working git directory.
+By default, `glab` follows the XDG Base Directory [Spec](https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html): global configuration file is saved at `~/.config/glab-cli`. Local configuration file is saved at `.git/glab-cli` in the current working git directory. Advanced workflows may override the location of the global configuration by setting the `GLAB_CONFIG_DIR` environment variable.
 
 **To set configuration globally**
 

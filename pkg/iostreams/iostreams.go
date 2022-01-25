@@ -111,7 +111,10 @@ func (s *IOStreams) StartPager() error {
 			pagerEnv = append(pagerEnv[0:i], pagerEnv[i+1:]...)
 		}
 	}
-	if _, ok := os.LookupEnv("LESS"); !ok {
+
+	if s.shouldDisplayHyperlinks() {
+		pagerEnv = append(pagerEnv, "LESS=FrX")
+	} else if _, ok := os.LookupEnv("LESS"); !ok {
 		pagerEnv = append(pagerEnv, "LESS=FRX")
 	}
 	if _, ok := os.LookupEnv("LV"); !ok {

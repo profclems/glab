@@ -35,7 +35,7 @@ dockers:
       - 'profclems/glab:{{ .Tag }}-amd64'
       - 'ghcr.io/profclems/glab:{{ .Tag }}-amd64'
     dockerfile: Dockerfile
-    use_buildx: true
+    use: buildx
     build_flag_templates:
       - "--pull"
       - "--label=org.opencontainers.image.created={{.Date}}"
@@ -50,7 +50,7 @@ dockers:
       - 'profclems/glab:{{ .Tag }}-arm64'
       - 'ghcr.io/profclems/glab:{{ .Tag }}-arm64'
     dockerfile: Dockerfile
-    use_buildx: true
+    use: buildx
     build_flag_templates:
       - "--pull"
       - "--label=org.opencontainers.image.created={{.Date}}"

@@ -31,8 +31,10 @@ Subcommands
    :glob:
    :maxdepth: 0
 
+   delete <delete>
    list <list>
    set <set>
+   update <update>
    
 
 

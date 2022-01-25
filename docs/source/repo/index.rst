@@ -30,6 +30,7 @@ Subcommands
    create <create>
    delete <delete>
    fork <fork>
+   mirror <mirror>
    search <search>
    view <view>
    

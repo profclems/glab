@@ -35,6 +35,7 @@ Subcommands
    delete <delete>
    lint <lint>
    list <list>
+   retry <retry>
    run <run>
    status <status>
    trace <trace>

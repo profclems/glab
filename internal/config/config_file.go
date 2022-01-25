@@ -18,6 +18,10 @@ var configError error
 
 // ConfigDir returns the config directory
 func ConfigDir() string {
+	glabDir := os.Getenv("GLAB_CONFIG_DIR")
+	if glabDir != "" {
+		return glabDir
+	}
 	usrConfigHome := os.Getenv("XDG_CONFIG_HOME")
 	if usrConfigHome == "" {
 		usrConfigHome = os.Getenv("HOME")
