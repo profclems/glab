@@ -8,8 +8,8 @@ import (
 	repoCmdCreate "github.com/profclems/glab/commands/project/create"
 	repoCmdDelete "github.com/profclems/glab/commands/project/delete"
 	repoCmdFork "github.com/profclems/glab/commands/project/fork"
-	repoCmdMirror "github.com/profclems/glab/commands/project/mirror"
 	repoCmdList "github.com/profclems/glab/commands/project/list"
+	repoCmdMirror "github.com/profclems/glab/commands/project/mirror"
 	repoCmdSearch "github.com/profclems/glab/commands/project/search"
 	repoCmdView "github.com/profclems/glab/commands/project/view"
 
