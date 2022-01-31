@@ -1362,7 +1362,7 @@ func TestListGitLabTemplates(t *testing.T) {
 		{
 			name:          "Get all the issues templates",
 			give:          "issue_templates",
-			wantTemplates: []string{"Feature Request", "Bug"},
+			wantTemplates: []string{"Bug", "Feature Request"},
 		},
 		{
 			name:          "Get all the issues templates",
