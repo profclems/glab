@@ -13,6 +13,7 @@ import (
 	"github.com/profclems/glab/pkg/git"
 	"github.com/profclems/glab/pkg/prompt"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/xanzy/go-gitlab"
 )
 
@@ -1349,4 +1350,34 @@ func Test_ConfirmSubmission(t *testing.T) {
 			})
 		}
 	})
+}
+
+func TestListGitLabTemplates(t *testing.T) {
+	tests := []struct {
+		name          string
+		give          string
+		wantTemplates []string
+		wantErr       bool
+	}{
+		{
+			name:          "Get all the issues templates",
+			give:          "issue_templates",
+			wantTemplates: []string{"Bug", "Feature Request"},
+		},
+		{
+			name:          "Get all the issues templates",
+			give:          "merge_request_templates",
+			wantTemplates: []string{"Default"},
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			git.ToplevelDir = func() (string, error) { return "../../test/testdata", nil }
+			gotTemplates, gotErr := ListGitLabTemplates(test.give)
+			require.Equal(t, test.wantErr, (gotErr != nil))
+			assert.EqualValues(t, test.wantTemplates, gotTemplates, "Templates got didn't match")
+		})
+	}
+
 }
