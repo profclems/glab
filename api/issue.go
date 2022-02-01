@@ -192,3 +192,29 @@ var LinkIssues = func(client *gitlab.Client, projectID interface{}, issueIDD int
 
 	return issueLink.SourceIssue, issueLink.TargetIssue, nil
 }
+
+var SetIssueTimeEstimate = func(client *gitlab.Client, projectID interface{}, issueIDD int, opts *gitlab.SetTimeEstimateOptions) (*gitlab.TimeStats, error) {
+	if client == nil {
+		client = apiClient.Lab()
+	}
+
+	timeStats, _, err := client.Issues.SetTimeEstimate(projectID, issueIDD, opts)
+	if err != nil {
+		return nil, err
+	}
+
+	return timeStats, nil
+}
+
+var AddIssueTimeSpent = func(client *gitlab.Client, projectID interface{}, issueIDD int, opts *gitlab.AddSpentTimeOptions) (*gitlab.TimeStats, error) {
+	if client == nil {
+		client = apiClient.Lab()
+	}
+
+	timeStats, _, err := client.Issues.AddSpentTime(projectID, issueIDD, opts)
+	if err != nil {
+		return nil, err
+	}
+
+	return timeStats, nil
+}
