@@ -35,6 +35,7 @@ type CreateOpts struct {
 	LinkedIssues  []int
 	IssueLinkType string
 	TimeEstimate  string
+	TimeSpent     string
 
 	MilestoneFlag string
 
@@ -135,7 +136,8 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 	issueCreateCmd.Flags().BoolVar(&opts.Web, "web", false, "continue issue creation with web interface")
 	issueCreateCmd.Flags().IntSliceVarP(&opts.LinkedIssues, "linked-issues", "", []int{}, "The IIDs of issues that this issue links to")
 	issueCreateCmd.Flags().StringVarP(&opts.IssueLinkType, "link-type", "", "relates_to", "Type for the issue link")
-	issueCreateCmd.Flags().StringVarP(&opts.TimeEstimate, "estimate", "e", "", "Set time estimate for the issue")
+	issueCreateCmd.Flags().StringVarP(&opts.TimeEstimate, "time-estimate", "e", "", "Set time estimate for the issue")
+	issueCreateCmd.Flags().StringVarP(&opts.TimeSpent, "time-spent", "s", "", "Set time spent for the issue")
 
 	return issueCreateCmd
 }
@@ -369,6 +371,15 @@ func postCreateActions(apiClient *gitlab.Client, issue *gitlab.Issue, opts *Crea
 		fmt.Fprintln(opts.IO.StdErr, "- Adding time estimate ", opts.TimeEstimate)
 		_, err := api.SetIssueTimeEstimate(apiClient, repo.FullName(), issue.IID, &gitlab.SetTimeEstimateOptions{
 			Duration: gitlab.String(opts.TimeEstimate),
+		})
+		if err != nil {
+			return err
+		}
+	}
+	if opts.TimeSpent != "" {
+		fmt.Fprintln(opts.IO.StdErr, "- Adding time spent ", opts.TimeSpent)
+		_, err := api.AddIssueTimeSpent(apiClient, repo.FullName(), issue.IID, &gitlab.AddSpentTimeOptions{
+			Duration: gitlab.String(opts.TimeSpent),
 		})
 		if err != nil {
 			return err
