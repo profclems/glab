@@ -54,7 +54,7 @@ case $(uname -s) in
 esac
 
 printf "Fetching latest version\n"
-latest="$(curl -sL 'https://api.github.com/repos/profclems/glab/releases/latest' | grep 'tag_name' | grep --only 'v[0-9\.]\+' | cut -c 2-)"
+latest="$(curl -sL 'https://api.github.com/repos/profclems/glab/releases/latest' | grep 'tag_name' | grep -o 'v[0-9\.]\+' | cut -c 2-)"
 tempFolder="/tmp/glab_v${latest}"
 
 printf -- "Found version %s\n" "${latest}"
