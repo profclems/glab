@@ -17,6 +17,7 @@ import (
 	mrCmd "github.com/profclems/glab/commands/mr"
 	projectCmd "github.com/profclems/glab/commands/project"
 	releaseCmd "github.com/profclems/glab/commands/release"
+	snippetCmd "github.com/profclems/glab/commands/snippet"
 	sshCmd "github.com/profclems/glab/commands/ssh-key"
 	updateCmd "github.com/profclems/glab/commands/update"
 	userCmd "github.com/profclems/glab/commands/user"
@@ -113,6 +114,7 @@ func NewCmdRoot(f *cmdutils.Factory, version, buildDate string) *cobra.Command {
 	rootCmd.AddCommand(userCmd.NewCmdUser(f))
 	rootCmd.AddCommand(variableCmd.NewVariableCmd(f))
 	rootCmd.AddCommand(apiCmd.NewCmdApi(f, nil))
+	rootCmd.AddCommand(snippetCmd.NewCmdSnippet(f))
 
 	rootCmd.Flags().BoolP("version", "v", false, "show glab version information")
 	return rootCmd
