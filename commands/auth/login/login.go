@@ -321,7 +321,7 @@ func hostnameValidator(v interface{}) error {
 	if len(strings.TrimSpace(val)) < 1 {
 		return errors.New("a value is required")
 	}
-	re := regexp.MustCompile(`^(([a-z0-9]|[a-z0-9][a-z0-9\-]*[a-z0-9])\.)*([a-z0-9]|[a-z0-9][a-z0-9\-]*[a-z0-9])(:[0-9]+)?$`)
+	re := regexp.MustCompile(`^(([a-z0-9]|[a-z0-9][a-z0-9\-]*[a-z0-9])\.)*([a-z0-9]|[a-z0-9][a-z0-9\-]*[a-z0-9])(:[0-9]+)?(\/[a-z0-9]*)*$`)
 	if !re.MatchString(val) {
 		return fmt.Errorf("invalid hostname %q", val)
 	}
