@@ -97,12 +97,12 @@ Available for download via [WinGet](https://github.com/microsoft/winget-cli), [s
 
 #### WinGet
 ```sh
-winget install glab
+winget install glab.glab
 ```
 
 Updating (WinGet):
 ```sh
-winget install glab
+winget install glab.glab
 ```
 
 #### Scoop
