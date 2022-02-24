@@ -21,7 +21,7 @@ Examples
 ::
 
   $ glab pipeline list
-  $ glab pipeline list --state=failed
+  $ glab pipeline list --status=failed
   
 
 Options

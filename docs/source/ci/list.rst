@@ -21,7 +21,7 @@ Examples
 ::
 
   $ glab ci list
-  $ glab ci list --state=failed
+  $ glab ci list --status=failed
   
 
 Options
