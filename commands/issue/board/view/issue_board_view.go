@@ -29,6 +29,11 @@ type issueBoardViewOptions struct {
 	State     string
 }
 
+type boardMeta struct {
+	id    int
+	group *gitlab.Group
+}
+
 func NewCmdView(f *cmdutils.Factory) *cobra.Command {
 	var opts = &issueBoardViewOptions{}
 	var viewCmd = &cobra.Command{
@@ -63,99 +68,34 @@ func NewCmdView(f *cmdutils.Factory) *cobra.Command {
 				return err
 			}
 
-			// get group issue boards for each ancestor group returned:
+			// get issue boards related to project and parent groups
 			// https://docs.gitlab.com/ee/api/group_boards.html#list-all-group-issue-boards-in-a-group
-			projectGroupIssueBoards := []*gitlab.GroupIssueBoard{}
-			for _, projectGroup := range projectGroups {
-				groupIssueBoards, err := api.ListGroupIssueBoards(apiClient, projectGroup.ID, &gitlab.ListGroupIssueBoardsOptions{})
-				if err != nil {
-					return err
-				}
-				projectGroupIssueBoards = append(groupIssueBoards, projectGroupIssueBoards...)
-			}
+			projectIssueBoards, err := getProjectIssueBoards()
+			projectGroupIssueBoards, err := getGroupIssueBoards(projectGroups)
 
-			projectIssueBoards, err := api.ListProjectIssueBoards(apiClient, repo.FullName(), &gitlab.ListIssueBoardsOptions{})
+			// prompt user to select issue board
+			selectedBoard, err := selectBoard(projectIssueBoards, projectGroupIssueBoards)
 			if err != nil {
-				return fmt.Errorf("error retrieving issue board: %w", err)
+				return fmt.Errorf("error selecting issue board: %w", err)
 			}
 
-			type info struct {
-				id    int
-				group *gitlab.Group
-			}
-
-			boardSelectionStr := []string{}
-			boardInfo := map[string]info{}
-			for _, board := range projectGroupIssueBoards {
-				boardSelectionStr = append(boardSelectionStr, fmt.Sprintf("%s%*s", board.Name, 50-len(board.Name), "(Group)"))
-				boardInfo[board.Name] = info{id: board.ID, group: board.Group}
-			}
-			for _, board := range projectIssueBoards {
-				boardSelectionStr = append(boardSelectionStr, fmt.Sprintf("%s%*s", board.Name, 50-len(board.Name), "(Project)"))
-				boardInfo[board.Name] = info{id: board.ID}
-			}
-
-			var selectedOption string
-			prompt := &survey.Select{
-				Message: "Select Board:",
-				Options: boardSelectionStr,
-			}
-			err = survey.AskOne(prompt, &selectedOption)
+			boardMetaMap, err := parseBoardMeta(projectIssueBoards, projectGroupIssueBoards)
 			if err != nil {
-				return err
-			}
-			selectedBoard := strings.Split(selectedOption, " ")[0]
-
-			var boardLists []*gitlab.BoardList
-			if boardInfo[selectedBoard].group != nil {
-				boardLists, err = api.GetGroupIssueBoardLists(apiClient, boardInfo[selectedBoard].group.ID,
-					boardInfo[selectedBoard].id, &gitlab.ListGroupIssueBoardListsOptions{})
-				if err != nil {
-					return err
-				}
+				return fmt.Errorf("error getting issue board metadata: %w", err)
 			}
 
-			if boardInfo[selectedBoard].group == nil {
-				boardLists, err = api.GetPojectIssueBoardLists(apiClient, repo.FullName(),
-					boardInfo[selectedBoard].id, &gitlab.GetIssueBoardListsOptions{})
-				if err != nil {
-					return err
-				}
+			boardLists, err := getBoardLists(selectedBoard, boardMetaMap)
+			if err != nil {
+				return fmt.Errorf("error getting issue board lists: %w", err)
 			}
-
-			// manually add 'opened' and 'closed' lists before and after fetched lists
-			opened := &gitlab.BoardList{
-				Label: &gitlab.Label{
-					Name:      "Open",
-					Color:     "#fabd2f",
-					TextColor: "#000000",
-				},
-				Position: 0,
-			}
-			boardLists = append([]*gitlab.BoardList{opened}, boardLists...)
-
-			closed := &gitlab.BoardList{
-				Label: &gitlab.Label{
-					Name:      "Closed",
-					Color:     "#8ec07c",
-					TextColor: "#000000",
-				},
-				Position: len(boardLists),
-			}
-			boardLists = append(boardLists, closed)
 
 			root := tview.NewFlex()
-			issues := []*gitlab.Issue{}
 			for _, list := range boardLists {
-				if list.Label == nil {
-					continue
-				}
-
+				opts.State = ""
 				var boardIssues, listTitle, listColor string
 
 				if list.Label == nil {
-					listTitle = "Unnamed"
-					listColor = "#FFA500" // orange
+					continue
 				}
 
 				if list.Label != nil {
@@ -165,91 +105,31 @@ func NewCmdView(f *cmdutils.Factory) *cobra.Command {
 
 				// automatically request using state for default "open" and "closed" lists
 				// this is required because these lists aren't returned with the board lists api call
-				if list.Label.Name == "Closed" {
+				switch list.Label.Name {
+				case "Closed":
 					opts.State = "closed"
-				}
-
-				if list.Label.Name == "Open" {
+				case "Open":
 					opts.State = "opened"
 				}
 
-				// "closed" and "open" are considered "state lists" since they
-				// need to be requested using state and not label
-				isStateList := list.Label.Name == "Open" || list.Label.Name == "Closed"
-
-				if boardInfo[selectedBoard].group != nil {
-					reqOpts, err := parseListGroupIssueOptions(opts)
+				issues := []*gitlab.Issue{}
+				if boardMetaMap[selectedBoard].group != nil {
+					groupID := boardMetaMap[selectedBoard].group.ID
+					issues, err = getGroupBoardIssues(groupID, opts)
 					if err != nil {
-						return err
-					}
-					issues, err = api.ListGroupIssues(apiClient, boardInfo[selectedBoard].group.ID, reqOpts)
-					if err != nil {
-						return err
+						return fmt.Errorf("error getting issue board lists: %w", err)
 					}
 				}
 
-				if boardInfo[selectedBoard].group == nil {
-					reqOpts, err := parseListProjectIssueOptions(opts)
+				if boardMetaMap[selectedBoard].group == nil {
+					issues, err = getProjectBoardIssues(opts)
 					if err != nil {
-						return err
-					}
-					issues, err = api.ListProjectIssues(apiClient, repo.FullName(), reqOpts)
-					if err != nil {
-						return err
+						return fmt.Errorf("error getting issue board lists: %w", err)
 					}
 				}
 
-				if err != nil {
-					return fmt.Errorf("error retrieving list issues: %w", err)
-				}
-
+				boardIssues = filterIssues(boardLists, issues, list, opts)
 				bx := tview.NewTextView().SetDynamicColors(true)
-
-			next:
-				for _, issue := range issues {
-					// skip issues labeled for other board lists when populating the "open" list
-					if opts.State == "opened" && isStateList {
-						for _, boardList := range boardLists {
-							for _, issueLabel := range issue.Labels {
-								if issueLabel == boardList.Label.Name {
-									continue next
-								}
-							}
-						}
-					}
-
-					// skip all issues without the "closed" state for the "closed" list
-					if opts.State == "closed" && isStateList {
-						if issue.State != "closed" {
-							continue next
-						}
-					}
-
-					// filter labeled issues into matching label board lists
-					if !isStateList {
-						var hasListLabel bool
-						for _, issueLabel := range issue.Labels {
-							if issueLabel == list.Label.Name {
-								hasListLabel = true
-							}
-						}
-
-						if !hasListLabel {
-							continue next
-						}
-					}
-
-					var assignee, labelString string
-					if len(issue.Labels) > 0 {
-						labelString = buildLabelString(issue.LabelDetails)
-					}
-					if issue.Assignee != nil {
-						assignee = issue.Assignee.Username
-					}
-
-					boardIssues += fmt.Sprintf("[white::b]%s\n%s[green:-:-]#%d[darkgray] - %s\n\n",
-						issue.Title, labelString, issue.IID, assignee)
-				}
 				bx.SetText(boardIssues).SetWrap(true)
 				bx.SetBorder(true).SetTitle(listTitle).SetTitleColor(tcell.GetColor(listColor))
 				root.AddItem(bx, 0, 1, false)
@@ -337,4 +217,171 @@ func buildLabelString(labelDetails []*gitlab.LabelDetails) string {
 	}
 	labels += fmt.Sprintf("\n")
 	return labels
+}
+
+func selectBoard(projectIssueBoards []*gitlab.IssueBoard, projectGroupIssueBoards []*gitlab.GroupIssueBoard) (string, error) {
+	boardSelectionStr := []string{}
+	for _, board := range projectGroupIssueBoards {
+		boardSelectionStr = append(boardSelectionStr, fmt.Sprintf("%s%*s", board.Name, 50-len(board.Name), "(Group)"))
+	}
+	for _, board := range projectIssueBoards {
+		boardSelectionStr = append(boardSelectionStr, fmt.Sprintf("%s%*s", board.Name, 50-len(board.Name), "(Project)"))
+	}
+
+	var selectedOption string
+	prompt := &survey.Select{
+		Message: "Select Board:",
+		Options: boardSelectionStr,
+	}
+	err := survey.AskOne(prompt, &selectedOption)
+	if err != nil {
+		return "", err
+	}
+	return strings.Split(selectedOption, " ")[0], nil
+}
+
+func parseBoardMeta(projectIssueBoards []*gitlab.IssueBoard, projectGroupIssueBoards []*gitlab.GroupIssueBoard) (map[string]boardMeta, error) {
+	boardMetaMap := map[string]boardMeta{}
+	for _, board := range projectGroupIssueBoards {
+		boardMetaMap[board.Name] = boardMeta{id: board.ID, group: board.Group}
+	}
+	for _, board := range projectIssueBoards {
+		boardMetaMap[board.Name] = boardMeta{id: board.ID}
+	}
+	return boardMetaMap, nil
+}
+
+func getProjectIssueBoards() ([]*gitlab.IssueBoard, error) {
+	projectIssueBoards, err := api.ListProjectIssueBoards(apiClient, repo.FullName(), &gitlab.ListIssueBoardsOptions{})
+	if err != nil {
+		return nil, fmt.Errorf("error retrieving issue board: %w", err)
+	}
+	return projectIssueBoards, nil
+}
+
+func getGroupIssueBoards(projectGroups []*gitlab.ProjectGroup) ([]*gitlab.GroupIssueBoard, error) {
+	projectGroupIssueBoards := []*gitlab.GroupIssueBoard{}
+	for _, projectGroup := range projectGroups {
+		groupIssueBoards, err := api.ListGroupIssueBoards(apiClient, projectGroup.ID, &gitlab.ListGroupIssueBoardsOptions{})
+		if err != nil {
+			return nil, fmt.Errorf("error retrieving issue board: %w", err)
+		}
+		projectGroupIssueBoards = append(groupIssueBoards, projectGroupIssueBoards...)
+	}
+	return projectGroupIssueBoards, nil
+}
+
+func getBoardLists(board string, boardMetaMap map[string]boardMeta) ([]*gitlab.BoardList, error) {
+	boardLists := []*gitlab.BoardList{}
+	var err error
+
+	if boardMetaMap[board].group != nil {
+		boardLists, err = api.GetGroupIssueBoardLists(apiClient, boardMetaMap[board].group.ID,
+			boardMetaMap[board].id, &gitlab.ListGroupIssueBoardListsOptions{})
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if boardMetaMap[board].group == nil {
+		boardLists, err = api.GetPojectIssueBoardLists(apiClient, repo.FullName(),
+			boardMetaMap[board].id, &gitlab.GetIssueBoardListsOptions{})
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	// add empty 'opened' and 'closed' lists before and after fetched lists
+	// these are used later when reading the issues into the table view
+	opened := &gitlab.BoardList{
+		Label: &gitlab.Label{
+			Name:      "Open",
+			Color:     "#fabd2f",
+			TextColor: "#000000",
+		},
+		Position: 0,
+	}
+	boardLists = append([]*gitlab.BoardList{opened}, boardLists...)
+
+	closed := &gitlab.BoardList{
+		Label: &gitlab.Label{
+			Name:      "Closed",
+			Color:     "#8ec07c",
+			TextColor: "#000000",
+		},
+		Position: len(boardLists),
+	}
+	boardLists = append(boardLists, closed)
+
+	return boardLists, nil
+}
+
+func getGroupBoardIssues(groupID int, opts *issueBoardViewOptions) ([]*gitlab.Issue, error) {
+	reqOpts, err := parseListGroupIssueOptions(opts)
+	if err != nil {
+		return nil, err
+	}
+	issues, err := api.ListGroupIssues(apiClient, groupID, reqOpts)
+	if err != nil {
+		return nil, fmt.Errorf("error retrieving list issues: %w", err)
+	}
+	return issues, nil
+}
+
+func getProjectBoardIssues(opts *issueBoardViewOptions) ([]*gitlab.Issue, error) {
+	reqOpts, err := parseListProjectIssueOptions(opts)
+	if err != nil {
+		return nil, err
+	}
+	issues, err := api.ListProjectIssues(apiClient, repo.FullName(), reqOpts)
+	if err != nil {
+		return nil, fmt.Errorf("error retrieving list issues: %w", err)
+	}
+	return issues, nil
+}
+
+func filterIssues(boardLists []*gitlab.BoardList, issues []*gitlab.Issue, list *gitlab.BoardList, opts *issueBoardViewOptions) string {
+	var boardIssues string
+next:
+	for _, issue := range issues {
+		switch opts.State {
+		// skip all issues without the "closed" state for the "closed" list
+		case "closed":
+			if issue.State != "closed" {
+				continue next
+			}
+		// skip issues labeled for other board lists when populating the "open" list
+		case "opened":
+			for _, boardList := range boardLists {
+				for _, issueLabel := range issue.Labels {
+					if issueLabel == boardList.Label.Name {
+						continue next
+					}
+				}
+			}
+		// filter labeled issues into matching label board lists
+		default:
+			var hasListLabel bool
+			for _, issueLabel := range issue.Labels {
+				if issueLabel == list.Label.Name {
+					hasListLabel = true
+				}
+			}
+			if !hasListLabel || issue.State == "closed" {
+				continue next
+			}
+		}
+
+		var assignee, labelString string
+		if len(issue.Labels) > 0 {
+			labelString = buildLabelString(issue.LabelDetails)
+		}
+		if issue.Assignee != nil {
+			assignee = issue.Assignee.Username
+		}
+
+		boardIssues += fmt.Sprintf("[white::b]%s\n%s[green:-:-]#%d[darkgray] - %s\n\n",
+			issue.Title, labelString, issue.IID, assignee)
+	}
+	return boardIssues
 }
