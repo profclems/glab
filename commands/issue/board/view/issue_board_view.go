@@ -30,7 +30,7 @@ type issueBoardViewOptions struct {
 }
 
 func NewCmdView(f *cmdutils.Factory) *cobra.Command {
-	var opts = &IssueBoardViewOptions{}
+	var opts = &issueBoardViewOptions{}
 	var viewCmd = &cobra.Command{
 		Use:   "view [flags]",
 		Short: `View project issue board.`,
@@ -145,7 +145,7 @@ func NewCmdView(f *cmdutils.Factory) *cobra.Command {
 			boardLists = append(boardLists, closed)
 
 			root := tview.NewFlex()
-			var issues []*gitlab.Issue
+			issues := []*gitlab.Issue{}
 			for _, list := range boardLists {
 				if list.Label == nil {
 					continue
@@ -173,19 +173,9 @@ func NewCmdView(f *cmdutils.Factory) *cobra.Command {
 					opts.State = "opened"
 				}
 
-				// "closed" and "open" are considered special lists since they
+				// "closed" and "open" are considered "state lists" since they
 				// need to be requested using state and not label
-				isSpecialList := list.Label.Name == "Open" || list.Label.Name == "Closed"
-
-				// append list name label to labels from cli
-				reqLabels := opts.Labels
-				if reqLabels != "" && !isSpecialList {
-					reqLabels = reqLabels + "," + list.Label.Name
-				}
-
-				if reqLabels == "" && !isSpecialList {
-					reqLabels = list.Label.Name
-				}
+				isStateList := list.Label.Name == "Open" || list.Label.Name == "Closed"
 
 				if boardInfo[selectedBoard].group != nil {
 					reqOpts, err := parseListGroupIssueOptions(opts)
@@ -214,7 +204,41 @@ func NewCmdView(f *cmdutils.Factory) *cobra.Command {
 				}
 
 				bx := tview.NewTextView().SetDynamicColors(true)
+
+			next:
 				for _, issue := range issues {
+					// skip issues labeled for other board lists when populating the "open" list
+					if opts.State == "opened" && isStateList {
+						for _, boardList := range boardLists {
+							for _, issueLabel := range issue.Labels {
+								if issueLabel == boardList.Label.Name {
+									continue next
+								}
+							}
+						}
+					}
+
+					// skip all issues without the "closed" state for the "closed" list
+					if opts.State == "closed" && isStateList {
+						if issue.State != "closed" {
+							continue next
+						}
+					}
+
+					// filter labeled issues into matching label board lists
+					if !isStateList {
+						var hasListLabel bool
+						for _, issueLabel := range issue.Labels {
+							if issueLabel == list.Label.Name {
+								hasListLabel = true
+							}
+						}
+
+						if !hasListLabel {
+							continue next
+						}
+					}
+
 					var assignee, labelPrint string
 					if len(issue.Labels) > 0 {
 						labelPrint = "(" + strings.Join(issue.Labels, ", ") + ")"
@@ -231,7 +255,8 @@ func NewCmdView(f *cmdutils.Factory) *cobra.Command {
 				root.AddItem(bx, 0, 1, false)
 			}
 
-			root.SetBorderPadding(1, 1, 2, 2).SetBorder(true).SetTitle(fmt.Sprintf(" %s • Boards • %s ", selectedBoard, project.NameWithNamespace))
+			root.SetBorderPadding(1, 1, 2, 2).SetBorder(true).SetTitle(
+				fmt.Sprintf(" %s • Boards • %s ", selectedBoard, project.NameWithNamespace))
 			screen, err := tcell.NewScreen()
 			if err != nil {
 				return err
