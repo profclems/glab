@@ -22,12 +22,11 @@ var (
 	repo      glrepo.Interface
 )
 
-type IssueBoardViewOptions struct {
-	AssigneeUsername string
-	AssigneeID       int
-	Labels           string
-	Milestone        string
-	State            string
+type issueBoardViewOptions struct {
+	Assignee  string
+	Labels    string
+	Milestone string
+	State     string
 }
 
 func NewCmdView(f *cmdutils.Factory) *cobra.Command {
@@ -223,7 +222,9 @@ func NewCmdView(f *cmdutils.Factory) *cobra.Command {
 					if issue.Assignee != nil {
 						assignee = issue.Assignee.Username
 					}
-					boardIssues += fmt.Sprintf("[white]%s\n[blue]%s\n[green]#%d[white] - %s\n\n", issue.Title, labelPrint, issue.IID, assignee)
+
+					boardIssues += fmt.Sprintf("[white::b]%s\n%s[green:-:-]#%d[darkgray] - %s\n\n",
+						issue.Title, labelPrint, issue.IID, assignee)
 				}
 				bx.SetText(boardIssues).SetWrap(true)
 				bx.SetBorder(true).SetTitle(listTitle).SetTitleColor(tcell.GetColor(listColor))
@@ -243,11 +244,9 @@ func NewCmdView(f *cmdutils.Factory) *cobra.Command {
 		},
 	}
 
-	viewCmd.Flags().StringVarP(&opts.AssigneeUsername, "assignee-username", "u", "", "Filter board issues by assignee username")
-	viewCmd.Flags().IntVarP(&opts.AssigneeID, "assignee-id", "i", 0, "Filter board issues by assignee id")
+	viewCmd.Flags().StringVarP(&opts.Assignee, "assignee", "a", "", "Filter board issues by assignee username")
 	viewCmd.Flags().StringVarP(&opts.Labels, "labels", "l", "", "Filter board issues by labels (comma separated)")
 	viewCmd.Flags().StringVarP(&opts.Milestone, "milestone", "m", "", "Filter board issues by milestone")
-	viewCmd.Flags().StringVarP(&opts.State, "state", "s", "", "Filter board issues by state")
 	return viewCmd
 }
 
@@ -256,14 +255,8 @@ func parseListProjectIssueOptions(opts *IssueBoardViewOptions) (*gitlab.ListProj
 		return &gitlab.ListProjectIssuesOptions{}, fmt.Errorf("can't request assigneeID and assigneeUsername simultaneously")
 	}
 
-	reqOpts := &gitlab.ListProjectIssuesOptions{}
-
-	if opts.AssigneeID != 0 {
-		reqOpts.AssigneeID = &opts.AssigneeID
-	}
-
-	if opts.AssigneeUsername != "" {
-		reqOpts.AssigneeUsername = &opts.AssigneeUsername
+	if opts.Assignee != "" {
+		reqOpts.AssigneeUsername = &opts.Assignee
 	}
 
 	if opts.Labels != "" {
@@ -285,14 +278,8 @@ func parseListGroupIssueOptions(opts *IssueBoardViewOptions) (*gitlab.ListGroupI
 		return &gitlab.ListGroupIssuesOptions{}, fmt.Errorf("can't request assigneeID and assigneeUsername simultaneously")
 	}
 
-	reqOpts := &gitlab.ListGroupIssuesOptions{}
-
-	if opts.AssigneeID != 0 {
-		reqOpts.AssigneeID = &opts.AssigneeID
-	}
-
-	if opts.AssigneeUsername != "" {
-		reqOpts.AssigneeUsername = &opts.AssigneeUsername
+	if opts.Assignee != "" {
+		reqOpts.AssigneeUsername = &opts.Assignee
 	}
 
 	if opts.Labels != "" {
