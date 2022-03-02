@@ -239,16 +239,16 @@ func NewCmdView(f *cmdutils.Factory) *cobra.Command {
 						}
 					}
 
-					var assignee, labelPrint string
+					var assignee, labelString string
 					if len(issue.Labels) > 0 {
-						labelPrint = "(" + strings.Join(issue.Labels, ", ") + ")"
+						labelString = buildLabelString(issue.LabelDetails)
 					}
 					if issue.Assignee != nil {
 						assignee = issue.Assignee.Username
 					}
 
 					boardIssues += fmt.Sprintf("[white::b]%s\n%s[green:-:-]#%d[darkgray] - %s\n\n",
-						issue.Title, labelPrint, issue.IID, assignee)
+						issue.Title, labelString, issue.IID, assignee)
 				}
 				bx.SetText(boardIssues).SetWrap(true)
 				bx.SetBorder(true).SetTitle(listTitle).SetTitleColor(tcell.GetColor(listColor))
@@ -275,9 +275,10 @@ func NewCmdView(f *cmdutils.Factory) *cobra.Command {
 	return viewCmd
 }
 
-func parseListProjectIssueOptions(opts *IssueBoardViewOptions) (*gitlab.ListProjectIssuesOptions, error) {
-	if opts.AssigneeID != 0 && opts.AssigneeUsername != "" {
-		return &gitlab.ListProjectIssuesOptions{}, fmt.Errorf("can't request assigneeID and assigneeUsername simultaneously")
+func parseListProjectIssueOptions(opts *issueBoardViewOptions) (*gitlab.ListProjectIssuesOptions, error) {
+	withLabelDetails := true
+	reqOpts := &gitlab.ListProjectIssuesOptions{
+		WithLabelDetails: &withLabelDetails,
 	}
 
 	if opts.Assignee != "" {
@@ -298,9 +299,10 @@ func parseListProjectIssueOptions(opts *IssueBoardViewOptions) (*gitlab.ListProj
 	return reqOpts, nil
 }
 
-func parseListGroupIssueOptions(opts *IssueBoardViewOptions) (*gitlab.ListGroupIssuesOptions, error) {
-	if opts.AssigneeID != 0 && opts.AssigneeUsername != "" {
-		return &gitlab.ListGroupIssuesOptions{}, fmt.Errorf("can't request assigneeID and assigneeUsername simultaneously")
+func parseListGroupIssueOptions(opts *issueBoardViewOptions) (*gitlab.ListGroupIssuesOptions, error) {
+	withLabelDetails := true
+	reqOpts := &gitlab.ListGroupIssuesOptions{
+		WithLabelDetails: &withLabelDetails,
 	}
 
 	if opts.Assignee != "" {
@@ -326,4 +328,13 @@ func recoverPanic(app *tview.Application) {
 		app.Stop()
 		log.Fatalf("%s\n%s\n", r, string(debug.Stack()))
 	}
+}
+
+func buildLabelString(labelDetails []*gitlab.LabelDetails) string {
+	var labels string
+	for _, ld := range labelDetails {
+		labels += fmt.Sprintf("[white:%s:-]%s[white:-:-] ", ld.Color, ld.Name)
+	}
+	labels += fmt.Sprintf("\n")
+	return labels
 }
