@@ -109,7 +109,7 @@ hosts:
   ✓ API calls for gitlab.alpinelinux.org are made over https protocol
   ✓ REST API Endpoint: https://gitlab.alpinelinux.org/api/v4/
   ✓ GraphQL Endpoint: https://gitlab.alpinelinux.org/api/graphql/
-  ✓ Token: ********************
+  ✓ Token: **************************
 `, cfgFile),
 		},
 		{
@@ -197,14 +197,14 @@ hosts:
   ✓ API calls for gitlab.alpinelinux.org are made over https protocol
   ✓ REST API Endpoint: https://gitlab.alpinelinux.org/api/v4/
   ✓ GraphQL Endpoint: https://gitlab.alpinelinux.org/api/graphql/
-  ✓ Token: ********************
+  ✓ Token: **************************
 another.host
   x another.host: api call failed: GET https://another.host/api/v4/user: 401 {message: invalid token}
   ✓ Git operations for another.host configured to use ssh protocol.
   ✓ API calls for another.host are made over https protocol
   ✓ REST API Endpoint: https://another.host/api/v4/
   ✓ GraphQL Endpoint: https://another.host/api/graphql/
-  ✓ Token: ********************
+  ✓ Token: **************************
   ! Invalid token provided
 gl.io
   x gl.io: api call failed: GET https://gl.io/api/v4/user: 401 {message: no token provided}
