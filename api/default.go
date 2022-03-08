@@ -8,5 +8,5 @@ var DefaultListLimit = 30
 //
 // TODO: check if token has minimum scopes required by glab
 func IsValidToken(token string) bool {
-    return (len(token) == 26 && token[:6] == "glpat-") || len(token) == 20
+	return (len(token) == 26 && token[:6] == "glpat-") || len(token) == 20
 }
