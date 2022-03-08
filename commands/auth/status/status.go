@@ -116,7 +116,7 @@ func statusRun(opts *StatusOpts) error {
 				c.GreenCheck(), c.Bold(graphQLEndpoint))
 		}
 		if token != "" {
-			tokenDisplay := "********************"
+			tokenDisplay := "**************************"
 			if opts.ShowToken {
 				tokenDisplay = token
 			}
