@@ -81,6 +81,10 @@ hosts:
     token: xxxxxxxxxxxxxxxxxxxx
     git_protocol: ssh
     api_protocol: https
+  gitlab.foo.bar:
+    token: glpat-xxxxxxxxxxxxxxxxxxxx
+    git_protocol: ssh
+    api_protocol: https
   another.host:
     token: isinvalid
   gl.io:
@@ -98,7 +102,7 @@ hosts:
 		stderr  string
 	}{
 		{
-			name: "hostname set",
+			name: "hostname set with old token format",
 			opts: &StatusOpts{
 				Hostname: "gitlab.alpinelinux.org",
 			},
@@ -113,6 +117,21 @@ hosts:
 `, cfgFile),
 		},
 		{
+			name: "hostname set with new token format",
+			opts: &StatusOpts{
+				Hostname: "gitlab.foo.bar",
+			},
+			wantErr: false,
+			stderr: fmt.Sprintf(`gitlab.foo.bar
+  ✓ Logged in to gitlab.foo.bar as john_doe (%s)
+  ✓ Git operations for gitlab.foo.bar configured to use ssh protocol.
+  ✓ API calls for gitlab.foo.bar are made over https protocol
+  ✓ REST API Endpoint: https://gitlab.foo.bar/api/v4/
+  ✓ GraphQL Endpoint: https://gitlab.foo.bar/api/graphql/
+  ✓ Token: **************************
+`, cfgFile),
+		},
+		{
 			name: "instance not authenticated",
 			opts: &StatusOpts{
 				Hostname: "invalid.instance",
@@ -122,16 +141,24 @@ hosts:
 		},
 	}
 
-	fakeHTTP := httpmock.New()
+	fakeHTTP := &httpmock.Mocker{
+		MatchURL: httpmock.HostAndPath,
+	}
 	defer fakeHTTP.Verify(t)
 
-	fakeHTTP.RegisterResponder("GET", "/user", httpmock.NewStringResponse(200, `
+	fakeHTTP.RegisterResponder("GET", "https://gitlab.alpinelinux.org/api/v4/user", httpmock.NewStringResponse(200, `
 		{
   			"username": "john_smith"
 		}
 	`))
+	fakeHTTP.RegisterResponder("GET", "https://gitlab.foo.bar/api/v4/user", httpmock.NewStringResponse(200, `
+		{
+  			"username": "john_doe"
+		}
+	`))
+
 	client := func(token, hostname string) (*api.Client, error) {
-		return api.TestClient(&http.Client{Transport: fakeHTTP}, token, "", false)
+		return api.TestClient(&http.Client{Transport: fakeHTTP}, token, hostname, false)
 	}
 	// FIXME: something fishy is occurring here as without making a first call to client function, httpMock does not work
 	_, _ = client("", "gitlab.com")
