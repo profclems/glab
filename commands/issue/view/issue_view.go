@@ -104,9 +104,9 @@ func NewCmdView(f *cmdutils.Factory) *cobra.Command {
 		},
 	}
 
-	issueViewCmd.Flags().BoolVarP(&opts.ShowComments, "comments", "c", false, "Show mr comments and activities")
+	issueViewCmd.Flags().BoolVarP(&opts.ShowComments, "comments", "c", false, "Show issue comments and activities")
 	issueViewCmd.Flags().BoolVarP(&opts.ShowSystemLogs, "system-logs", "s", false, "Show system activities / logs")
-	issueViewCmd.Flags().BoolVarP(&opts.Web, "web", "w", false, "Open mr in a browser. Uses default browser or browser specified in BROWSER variable")
+	issueViewCmd.Flags().BoolVarP(&opts.Web, "web", "w", false, "Open issue in a browser. Uses default browser or browser specified in BROWSER variable")
 	issueViewCmd.Flags().IntVarP(&opts.CommentPageNumber, "page", "p", 1, "Page number")
 	issueViewCmd.Flags().IntVarP(&opts.CommentLimit, "per-page", "P", 20, "Number of items to list per page")
 
