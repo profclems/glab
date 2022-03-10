@@ -672,6 +672,10 @@ func generateMRCompareURL(opts *CreateOpts) (string, error) {
 		// this uses the slash commands to add assignees to the description
 		description += fmt.Sprintf("\n/assign %s", strings.Join(opts.Assignees, ", "))
 	}
+	if len(opts.Reviewers) > 0 {
+		// this uses the slash commands to add reviewers to the description
+		description += fmt.Sprintf("\n/reviewer %s", strings.Join(opts.Reviewers, ", "))
+	}
 	if opts.MileStone != 0 {
 		// this uses the slash commands to add milestone to the description
 		description += fmt.Sprintf("\n/milestone %%%d", opts.MileStone)
