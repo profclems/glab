@@ -35,16 +35,12 @@ var DeleteProjectVariable = func(client *gitlab.Client, projectID interface{}, k
 		client = apiClient.Lab()
 	}
 
-	var filter = func(request *retryablehttp.Request) error {
-		q := request.URL.Query()
-		q.Add("filter[environment_scope]", scope)
-
-		request.URL.RawQuery = q.Encode()
-
-		return nil
+	opts := gitlab.RemoveProjectVariableOptions{}
+	if scope != "" {
+		opts.Filter = &gitlab.VariableFilter{EnvironmentScope: scope}
 	}
 
-	_, err := client.ProjectVariables.RemoveVariable(projectID, key, filter)
+	_, err := client.ProjectVariables.RemoveVariable(projectID, key, &opts)
 
 	if err != nil {
 		return err
