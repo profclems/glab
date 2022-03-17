@@ -111,7 +111,7 @@ var ListMRsWithAssigneesOrReviewers = func(client *gitlab.Client, projectID inte
 
 	mrs := make([]*gitlab.MergeRequest, 0)
 	for _, id := range assigneeIds {
-		opts.AssigneeID = gitlab.Int(id)
+		opts.AssigneeID = gitlab.AssigneeID(id)
 		assingeMrs, err := ListMRs(client, projectID, opts)
 		if err != nil {
 			return nil, err
@@ -120,7 +120,7 @@ var ListMRsWithAssigneesOrReviewers = func(client *gitlab.Client, projectID inte
 	}
 	opts.AssigneeID = nil // reset because it's Assignee OR Reviewer
 	for _, id := range reviewerIds {
-		opts.ReviewerID = gitlab.Int(id)
+		opts.ReviewerID = gitlab.ReviewerID(id)
 		reviewerMrs, err := ListMRs(client, projectID, opts)
 		if err != nil {
 			return nil, err
