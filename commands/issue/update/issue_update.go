@@ -114,7 +114,7 @@ func NewCmdUpdate(f *cmdutils.Factory) *cobra.Command {
 				}
 			}
 			if cmd.Flags().Changed("unassign") {
-				l.AssigneeIDs = &[]int{0} // 0 or an empty int[] is the documented way to unassign
+				l.AssigneeIDs = nil
 				actions = append(actions, "unassigned all users")
 			}
 			if ua != nil {
