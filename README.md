@@ -22,7 +22,7 @@ Table of Contents
 * [Demo](#demo)
 * [Documentation](#documentation)
 * [Installation](#installation)
-  * [Quick Install)](#quick-install)
+  * [Quick Install](#quick-install)
   * [Windows](#windows)
     * [WinGet](#winget)
     * [Scoop](#scoop)
