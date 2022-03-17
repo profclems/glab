@@ -82,7 +82,7 @@ func NewCmdView(f *cmdutils.Factory) *cobra.Command {
 				var boardIssues string
 				issues, err = api.ListIssues(apiClient, repo.FullName(), &gitlab.ListProjectIssuesOptions{
 					State:  gitlab.String("opened"),
-					Labels: gitlab.Labels{list.Label.Name},
+					Labels: &gitlab.Labels{list.Label.Name},
 				})
 				if err != nil {
 					return fmt.Errorf("error retrieving list issues: %w", err)
