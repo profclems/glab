@@ -35,7 +35,7 @@ const (
 // Follows the format officially supported by GitLab
 // https://docs.gitlab.com/ee/user/project/description_templates.html#setting-a-default-template-for-issues-and-merge-requests.
 //
-// TODO: load from remote repository if repo is overriden by -R flag
+// TODO: load from remote repository if repo is overridden by -R flag
 func LoadGitLabTemplate(tmplType, tmplName string) (string, error) {
 	wdir, err := git.ToplevelDir()
 	if err != nil {

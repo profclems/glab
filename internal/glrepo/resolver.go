@@ -89,7 +89,7 @@ func (r *ResolvedRemotes) BaseRepo(interactive bool) (Interface, error) {
 			}
 			// Rewrite resolution, ignore the error as this will keep working
 			// in the future we might add a warning that we couldn't rewrite
-			// it for compatiblity
+			// it for compatibility
 			_ = git.SetRemoteResolution(r.Name, "base:"+r.Resolved)
 
 			return NewWithHost(repo.RepoOwner(), repo.RepoName(), r.RepoHost()), nil

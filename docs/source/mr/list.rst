@@ -39,7 +39,7 @@ Options
 
   -A, --all                    Get all merge requests
   -a, --assignee strings       Get only merge requests assigned to users
-      --author string          Fitler merge request by Author <username>
+      --author string          Filter merge request by Author <username>
   -c, --closed                 Get only closed merge requests
   -d, --draft                  Filter by draft merge requests
   -g, --group string           Get MRs from group and it's subgroups

@@ -340,7 +340,7 @@ glab config set editor vim --host gitlab.example.org
 
   NO_COLOR: set to any value to avoid printing ANSI escape sequences for color output.
 
-  FORCE_HYPERLINKS: set to 1 to force hyperlinks to be output, even when not outputing to a TTY
+  FORCE_HYPERLINKS: set to 1 to force hyperlinks to be output, even when not outputting to a TTY
   ```
 
 ## What about [Lab]?

@@ -54,7 +54,7 @@ type TableCell struct {
 
 type TableRow struct {
 	Cells []*TableCell
-	// Separator is the seperator for columns in the table. Default is " "
+	// Separator is the separator for columns in the table. Default is " "
 	Separator string
 }
 

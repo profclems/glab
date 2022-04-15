@@ -188,7 +188,7 @@ func TestParseURL(t *testing.T) {
 				}
 			} else {
 				if err != nil {
-					t.Errorf("unexpcted error %s", err)
+					t.Errorf("unexpected error %s", err)
 				}
 				if u.Scheme != tt.want.Scheme {
 					t.Errorf("expected scheme %q, got %q", tt.want.Scheme, u.Scheme)
