@@ -395,3 +395,11 @@ var ListPipelineTriggers = func(client *gitlab.Client, projectID interface{}, op
 	triggers, _, err := client.PipelineTriggers.ListPipelineTriggers(projectID, opts)
 	return triggers, err
 }
+
+var RunPipelineTrigger = func(client *gitlab.Client, projectID interface{}, opts *gitlab.RunPipelineTriggerOptions) (*gitlab.Pipeline, error) {
+	if client == nil {
+		client = apiClient.Lab()
+	}
+	pipe, _, err := client.PipelineTriggers.RunPipelineTrigger(projectID, opts)
+	return pipe, err
+}
