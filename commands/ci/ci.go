@@ -11,6 +11,7 @@ import (
 	pipeRunCmd "github.com/profclems/glab/commands/ci/run"
 	pipeStatusCmd "github.com/profclems/glab/commands/ci/status"
 	ciTraceCmd "github.com/profclems/glab/commands/ci/trace"
+	triggerPipeCmd "github.com/profclems/glab/commands/ci/trigger"
 	ciViewCmd "github.com/profclems/glab/commands/ci/view"
 	"github.com/profclems/glab/commands/cmdutils"
 
@@ -38,5 +39,6 @@ func NewCmdCI(f *cmdutils.Factory) *cobra.Command {
 	ciCmd.AddCommand(pipeRunCmd.NewCmdRun(f))
 	ciCmd.AddCommand(jobArtifactCmd.NewCmdRun(f))
 	ciCmd.AddCommand(listPipeTriggerCmd.NewCmdRun(f))
+	ciCmd.AddCommand(triggerPipeCmd.NewCmdRun(f))
 	return ciCmd
 }
