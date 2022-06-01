@@ -6,6 +6,7 @@ import (
 	legacyCICmd "github.com/profclems/glab/commands/ci/legacyci"
 	ciLintCmd "github.com/profclems/glab/commands/ci/lint"
 	pipeListCmd "github.com/profclems/glab/commands/ci/list"
+	listPipeTriggerCmd "github.com/profclems/glab/commands/ci/list_triggers"
 	pipeRetryCmd "github.com/profclems/glab/commands/ci/retry"
 	pipeRunCmd "github.com/profclems/glab/commands/ci/run"
 	pipeStatusCmd "github.com/profclems/glab/commands/ci/status"
@@ -36,5 +37,6 @@ func NewCmdCI(f *cmdutils.Factory) *cobra.Command {
 	ciCmd.AddCommand(pipeRetryCmd.NewCmdRetry(f))
 	ciCmd.AddCommand(pipeRunCmd.NewCmdRun(f))
 	ciCmd.AddCommand(jobArtifactCmd.NewCmdRun(f))
+	ciCmd.AddCommand(listPipeTriggerCmd.NewCmdRun(f))
 	return ciCmd
 }
