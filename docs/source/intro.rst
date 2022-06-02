@@ -17,7 +17,7 @@ Core Commands
 
 -  ``glab mr [list, create, close, reopen, delete, ...]``
 -  ``glab issue [list, create, close, reopen, delete, ...]``
--  ``glab pipeline [list, delete, ci status, ci view, ...]``
+-  ``glab pipeline [list, delete, status, view, ...]``
 -  ``glab release``
 -  ``glab repo``
 -  ``glab label``
