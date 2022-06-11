@@ -160,7 +160,7 @@ func inputCapture(app *tview.Application, root *tview.Pages, navi navigator, inp
 				return nil
 			}
 		}
-		if !modalVisible && !logsVisible {
+		if !modalVisible && !logsVisible && len(jobs) > 0 {
 			curJob = navi.Navigate(jobs, event)
 			root.SendToFront("jobs-" + curJob.Name)
 			if inputCh == nil {
