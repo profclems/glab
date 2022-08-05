@@ -98,23 +98,27 @@ func NewCmdRetry(f *cmdutils.Factory) *cobra.Command {
 					continue
 
 				default: // "running", "failed", "created"
-					// look for any failed jobs
-					failed := false
-					jobs, err := api.GetPipelineJobs(apiClient, lastPipeline.ID, repo.FullName())
-					if err != nil {
-						return err
-					}
-					for j := range jobs {
-						if jobs[j].Status == "failed" {
-							if jobs[j].AllowFailure {
-								fmt.Fprintf(f.IO.StdErr, "failed job (%s) allows failure, ignoring", jobs[i].WebURL)
-								continue
-							}
+					failed := lastPipeline.Status == "failed"
 
-							failed = true
-							break
+					if !failed {
+						// look for any failed jobs
+						jobs, err := api.GetPipelineJobs(apiClient, lastPipeline.ID, repo.FullName())
+						if err != nil {
+							return err
+						}
+						for j := range jobs {
+							if jobs[j].Status == "failed" {
+								if jobs[j].AllowFailure {
+									fmt.Fprintf(f.IO.StdErr, "failed job (%s) allows failure, ignoring", jobs[i].WebURL)
+									continue
+								}
+
+								failed = true
+								break
+							}
 						}
 					}
+
 					if !failed {
 						continue // continue main loop, nothing to retry
 					}
@@ -127,7 +131,7 @@ func NewCmdRetry(f *cmdutils.Factory) *cobra.Command {
 				}
 				attempts[lastPipeline.ID] = count + 1
 
-				fmt.Fprintf(f.IO.StdOut, "retrying pipeline (%s)", lastPipeline.WebURL)
+				fmt.Fprintf(f.IO.StdOut, "retrying pipeline (%s)\n", lastPipeline.WebURL)
 				_, err = api.RetryPipeline(apiClient, lastPipeline.ID, repo.FullName())
 				if err != nil {
 					fmt.Fprintf(f.IO.StdErr, "failed to retry pipeline (%s): %+v", lastPipeline.WebURL, err)
