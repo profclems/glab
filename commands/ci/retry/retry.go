@@ -1,6 +1,7 @@
 package retry
 
 import (
+	"errors"
 	"fmt"
 	"time"
 
@@ -8,6 +9,7 @@ import (
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/pkg/git"
 	"github.com/profclems/glab/pkg/utils"
+	"github.com/xanzy/go-gitlab"
 
 	"github.com/MakeNowJust/heredoc"
 	"github.com/spf13/cobra"
@@ -77,10 +79,16 @@ func NewCmdRetry(f *cmdutils.Factory) *cobra.Command {
 
 				lastPipeline, err := api.GetLastPipeline(apiClient, repo.FullName(), branch)
 				if err != nil {
+					var response *gitlab.ErrorResponse
+					if errors.As(err, &response) {
+						if response.Response.StatusCode == 401 {
+							return errors.New("unauthorized, try \"glab auth login\"")
+						}
+					}
+					fmt.Fprintf(f.IO.StdOut, "No pipelines running or available on %q branch: %+v\n", branch, err)
 					if follow {
 						continue
 					}
-					fmt.Fprintf(f.IO.StdOut, "No pipelines running or available on %s branch\n", branch)
 					return err
 				}
 
