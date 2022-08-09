@@ -16,17 +16,38 @@ import (
 	"github.com/xanzy/go-gitlab"
 )
 
-// tally tracks how many times a job or pipeline has been run, and
-// some statistics of how long the job took to complete.
+// tally tracks how many times jobs or pipelines have been run, and other statistics.
 type tally struct {
 	Count int
+
+	// time span included in this tally
+	Earliest time.Time
+	Latest   time.Time
+
+	// duration of jobs/pipelines in this tally
 	Max   time.Duration
 	Min   time.Duration
 	Total time.Duration
 }
 
-func (t *tally) Add(duration time.Duration) {
+var zero time.Time
+
+func (t *tally) Add(start *time.Time, duration time.Duration) {
 	t.Count++
+
+	if start != nil {
+		if t.Earliest.Equal(zero) || t.Earliest.After(*start) {
+			t.Earliest = *start
+		}
+		if start.After(t.Latest) {
+			t.Latest = *start
+		}
+	}
+
+	if duration == 0 {
+		return
+	}
+
 	t.Total += duration
 	if duration > t.Max {
 		t.Max = duration
@@ -34,6 +55,13 @@ func (t *tally) Add(duration time.Duration) {
 	if t.Min == 0 || duration < t.Min {
 		t.Min = duration
 	}
+}
+
+func formatTime(t time.Time) string {
+	if t.Equal(zero) {
+		return ""
+	}
+	return t.Format(time.Stamp)
 }
 
 // statusTally tracks a tally for each job/pipeline status.
@@ -128,9 +156,30 @@ func NewCmdTally(f *cmdutils.Factory) *cobra.Command {
 				return err
 			}
 
-			pipes, err := api.ListProjectPipelines(apiClient, repo.FullName(), opt)
-			if err != nil {
-				return err
+			format := "2006-01-02" // parse time flags with this
+			span := map[string]*time.Time{}
+			for _, flag := range []string{"since", "until"} {
+				val, err := cmd.Flags().GetString(flag)
+				if err != nil {
+					return err
+				}
+				if val == "" {
+					continue
+				}
+				when, err := time.Parse(format, val)
+				if err != nil {
+					return fmt.Errorf("failed to parse flag (%s) value (%q)", flag, val)
+				}
+				span[flag] = &when
+			}
+			if len(span) > 0 {
+				ascending := "asc"
+				opt.Sort = &ascending
+
+				if span["since"] != nil {
+					// we can ignore pipelines last updated before the span we're interested in
+					opt.UpdatedAfter = span["since"]
+				}
 			}
 
 			type tallyKey struct {
@@ -138,55 +187,89 @@ func NewCmdTally(f *cmdutils.Factory) *cobra.Command {
 				Job string // if "", tally is for a pipeline
 			}
 
-			branchStat := map[tallyKey]statusTally{}
+			// track all statuses
+			stats := map[tallyKey]*tally{}
+			// break down by status
+			statusStats := map[tallyKey]statusTally{}
 
 			addStats := func(key tallyKey, status string, start, end *time.Time) {
 				// initialize tally
-				if branchStat[key] == nil {
-					branchStat[key] = statusTally{}
+				if stats[key] == nil {
+					stats[key] = &tally{}
+					statusStats[key] = statusTally{}
 				}
-				if branchStat[key][status] == nil {
-					branchStat[key][status] = &tally{}
+				if statusStats[key][status] == nil {
+					statusStats[key][status] = &tally{}
 				}
+
 				if end != nil && start != nil {
-					branchStat[key][status].Add(end.Sub(*start))
+					stats[key].Add(start, end.Sub(*start))
+					statusStats[key][status].Add(start, end.Sub(*start))
 				} else {
-					branchStat[key][status].Add(0) // increase count but not duration
+					stats[key].Add(start, 0)
+					statusStats[key][status].Add(start, 0) // increase count but not duration
 				}
 			}
 
-			for i := range pipes {
-				if doPipelines {
-					key := tallyKey{Ref: pipes[i].Ref}
-					status := pipes[i].Status
-					addStats(key, status, pipes[i].CreatedAt, pipes[i].UpdatedAt)
+			// fetch multiple pages, if necessary
+			keepGoing := len(span) > 0
+			for keepGoing {
+				pipes, err := api.ListProjectPipelines(apiClient, repo.FullName(), opt)
+				if err != nil {
+					return err
+				}
+				if len(pipes) == 0 {
+					keepGoing = false
 				}
 
-				if doJobs {
-					job, err := api.GetPipelineJobs(apiClient, pipes[i].ID, repo.FullName())
-					if err != nil {
-						return err
+				for i := range pipes {
+					if span["until"] != nil && !pipes[i].CreatedAt.Before(*span["until"]) {
+						keepGoing = false
+						break
 					}
 
-					for j := range job {
-						key := tallyKey{
-							Ref: pipes[i].Ref,
-							Job: job[j].Name,
-						}
-						status := job[j].Status
-						if job[j].FinishedAt != nil {
-							addStats(key, status, job[j].StartedAt, job[j].FinishedAt)
-						}
-					} // end each job in pipeline
-				} // end tally job
+					if span["since"] != nil && span["since"].After(*pipes[i].CreatedAt) {
+						// pipeline precedes span
+						continue
+					}
 
-			} // end loop each pipeline
+					if doPipelines {
+						key := tallyKey{Ref: pipes[i].Ref}
+						status := pipes[i].Status
+						addStats(key, status, pipes[i].CreatedAt, pipes[i].UpdatedAt)
+					}
+
+					if doJobs {
+						job, err := api.GetPipelineJobs(apiClient, pipes[i].ID, repo.FullName())
+						if err != nil {
+							return err
+						}
+
+						for j := range job {
+							key := tallyKey{
+								Ref: pipes[i].Ref,
+								Job: job[j].Name,
+							}
+							status := job[j].Status
+							if job[j].FinishedAt != nil {
+								addStats(key, status, job[j].StartedAt, job[j].FinishedAt)
+							}
+						} // end each job in pipeline
+					} // end tally job
+				} // end loop each pipeline
+
+				// advance page
+				opt.Page++
+			} // end page loop
 
 			// prepare to write comma-separated values
 			w := csv.NewWriter(os.Stdout)
 			head := []string{
 				"branch",
 				"job",
+				"count",
+				"earliest",
+				"latest",
 			}
 			for _, status := range statusList {
 				head = append(head,
@@ -197,10 +280,13 @@ func NewCmdTally(f *cmdutils.Factory) *cobra.Command {
 				)
 			}
 			w.Write(head)
-			for key, stat := range branchStat {
+			for key, stat := range statusStats {
 				col := []string{
 					key.Ref,
 					key.Job,
+					strconv.Itoa(stats[key].Count),
+					formatTime(stats[key].Earliest),
+					formatTime(stats[key].Latest),
 				}
 				for _, status := range statusList {
 					col = append(col,
@@ -223,12 +309,13 @@ func NewCmdTally(f *cmdutils.Factory) *cobra.Command {
 		},
 	}
 
-	tallyCmd.Flags().StringP("status", "s", "", fmt.Sprintf("Tally pipelines with status: {%s}", strings.Join(statusList, "|")))
-	tallyCmd.Flags().IntP("per-page", "P", 30, "Number of recent pipelines to tally.")
-
 	tallyCmd.Flags().StringP("branch", "b", "", "Limit tally to pipelines on a particular branch.")
 	tallyCmd.Flags().BoolP("job", "j", true, "Tally statistics for jobs.")
-	tallyCmd.Flags().BoolP("pipeline", "", true, "Tally statistics for pipelines.")
+	tallyCmd.Flags().IntP("per-page", "P", 30, "Number of recent pipelines to tally.")
+	tallyCmd.Flags().Bool("pipeline", true, "Tally statistics for pipelines.")
+	tallyCmd.Flags().String("since", "", "Tally pipelines starting at or after this date.")
+	tallyCmd.Flags().StringP("status", "s", "", fmt.Sprintf("Tally pipelines with status: {%s}", strings.Join(statusList, "|")))
+	tallyCmd.Flags().String("until", "", "Tally pipelines starting strictly before this date.")
 
 	return tallyCmd
 }
