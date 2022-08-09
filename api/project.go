@@ -73,6 +73,17 @@ var ListGroupProjects = func(client *gitlab.Client, groupID interface{}, opts *g
 	return project, nil
 }
 
+var ListProjectGroups = func(client *gitlab.Client, projectID interface{}, opts *gitlab.ListProjectGroupOptions) ([]*gitlab.ProjectGroup, error) {
+	if client == nil {
+		client = apiClient.Lab()
+	}
+	groups, _, err := client.Projects.ListProjectsGroups(projectID, opts)
+	if err != nil {
+		return nil, err
+	}
+	return groups, nil
+}
+
 var ListProjectMembers = func(client *gitlab.Client, projectID interface{}, opts *gitlab.ListProjectMembersOptions) ([]*gitlab.ProjectMember, error) {
 	if client == nil {
 		client = apiClient.Lab()
