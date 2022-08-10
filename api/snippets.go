@@ -12,11 +12,11 @@ var CreateSnippet = func(
 		client = apiClient.Lab()
 	}
 
-	snipet, _, err := client.Snippets.CreateSnippet(opts)
+	snippet, _, err := client.Snippets.CreateSnippet(opts)
 	if err != nil {
 		return nil, err
 	}
-	return snipet, err
+	return snippet, err
 }
 
 // CreateProjectSnippet inside the project
@@ -29,9 +29,9 @@ var CreateProjectSnippet = func(
 		client = apiClient.Lab()
 	}
 
-	snipet, _, err := client.ProjectSnippets.CreateSnippet(projectID, opts)
+	snippet, _, err := client.ProjectSnippets.CreateSnippet(projectID, opts)
 	if err != nil {
 		return nil, err
 	}
-	return snipet, err
+	return snippet, err
 }

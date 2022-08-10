@@ -14,7 +14,7 @@ import (
 func Test_WriteFile(t *testing.T) {
 	dir, err := ioutil.TempDir("", "")
 	if err != nil {
-		t.Skipf("unexpected error while creating temporay directory = %s", err)
+		t.Skipf("unexpected error while creating temporary directory = %s", err)
 	}
 	t.Cleanup(func() {
 		os.RemoveAll(dir)

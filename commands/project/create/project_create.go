@@ -61,7 +61,7 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 func runCreateProject(cmd *cobra.Command, args []string, f *cmdutils.Factory) error {
 	var (
 		projectPath string
-		visiblity   gitlab.VisibilityValue
+		visibility   gitlab.VisibilityValue
 		err         error
 		isPath      bool
 		namespaceID int
@@ -141,11 +141,11 @@ func runCreateProject(cmd *cobra.Command, args []string, f *cmdutils.Factory) er
 	description, _ := cmd.Flags().GetString("description")
 
 	if internal, _ := cmd.Flags().GetBool("internal"); internal {
-		visiblity = gitlab.InternalVisibility
+		visibility = gitlab.InternalVisibility
 	} else if private, _ := cmd.Flags().GetBool("private"); private {
-		visiblity = gitlab.PrivateVisibility
+		visibility = gitlab.PrivateVisibility
 	} else if public, _ := cmd.Flags().GetBool("public"); public {
-		visiblity = gitlab.PublicVisibility
+		visibility = gitlab.PublicVisibility
 	}
 
 	tags, _ := cmd.Flags().GetStringArray("tag")
@@ -160,8 +160,8 @@ func runCreateProject(cmd *cobra.Command, args []string, f *cmdutils.Factory) er
 		InitializeWithReadme: gitlab.Bool(readme),
 	}
 
-	if visiblity != "" {
-		opts.Visibility = &visiblity
+	if visibility != "" {
+		opts.Visibility = &visibility
 	}
 
 	if namespaceID != 0 {

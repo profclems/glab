@@ -74,7 +74,7 @@ func MRCheckErrors(mr *gitlab.MergeRequest, err MRCheckErrOptions) error {
 	}
 
 	if err.MergePrivilege && !mr.User.CanMerge {
-		return fmt.Errorf("you do not have enough priviledges to merge this merge request")
+		return fmt.Errorf("you do not have enough privileges to merge this merge request")
 	}
 
 	if err.Conflict && mr.HasConflicts {

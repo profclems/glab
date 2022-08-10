@@ -178,7 +178,7 @@ func Test_MRCheckErrors(t *testing.T) {
 			errOpts: MRCheckErrOptions{
 				MergePrivilege: true,
 			},
-			output: "you do not have enough priviledges to merge this merge request",
+			output: "you do not have enough privileges to merge this merge request",
 		},
 		{
 			name: "conflicts",
