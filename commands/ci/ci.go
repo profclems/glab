@@ -9,6 +9,7 @@ import (
 	pipeRetryCmd "github.com/profclems/glab/commands/ci/retry"
 	pipeRunCmd "github.com/profclems/glab/commands/ci/run"
 	pipeStatusCmd "github.com/profclems/glab/commands/ci/status"
+	"github.com/profclems/glab/commands/ci/tally"
 	ciTraceCmd "github.com/profclems/glab/commands/ci/trace"
 	ciViewCmd "github.com/profclems/glab/commands/ci/view"
 	"github.com/profclems/glab/commands/cmdutils"
@@ -36,5 +37,6 @@ func NewCmdCI(f *cmdutils.Factory) *cobra.Command {
 	ciCmd.AddCommand(pipeRetryCmd.NewCmdRetry(f))
 	ciCmd.AddCommand(pipeRunCmd.NewCmdRun(f))
 	ciCmd.AddCommand(jobArtifactCmd.NewCmdRun(f))
+	ciCmd.AddCommand(tally.NewCmdTally(f))
 	return ciCmd
 }
