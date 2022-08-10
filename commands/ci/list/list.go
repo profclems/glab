@@ -21,8 +21,9 @@ func NewCmdList(f *cmdutils.Factory) *cobra.Command {
 	$ glab ci list
 	$ glab ci list --status=failed
 	`),
-		Long: ``,
-		Args: cobra.ExactArgs(0),
+		Long:    ``,
+		Aliases: []string{"ls"},
+		Args:    cobra.ExactArgs(0),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var err error
 			var titleQualifier string

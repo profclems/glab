@@ -59,6 +59,35 @@ func DisplayMultiplePipelines(s *iostreams.IOStreams, p []*gitlab.PipelineInfo, 
 	return "No Pipelines available on " + projectID
 }
 
+func DisplayMultipleTriggers(s *iostreams.IOStreams, triggers []*gitlab.PipelineTrigger) string {
+	c := s.Color()
+
+	table := tableprinter.NewTablePrinter()
+
+	if len(triggers) > 0 {
+
+		for _, trigger := range triggers {
+			duration := ""
+			name := "unknown owner"
+			if trigger.CreatedAt != nil {
+				duration = c.Magenta("(" + utils.TimeToPrettyTimeAgo(*trigger.CreatedAt) + ")")
+			}
+
+			if trigger.Owner != nil {
+				name = trigger.Owner.Name
+			}
+
+			line := c.Green(fmt.Sprintf("[%s] • #%s", name, trigger.ID))
+
+			table.AddRow(line, trigger.ID, duration)
+		}
+
+		return table.Render()
+	}
+
+	return "" // empty message is provided by the title
+}
+
 func RunTraceSha(ctx context.Context, apiClient *gitlab.Client, w io.Writer, pid interface{}, sha, name string) error {
 	job, err := api.PipelineJobWithSha(apiClient, pid, sha, name)
 	if err != nil || job == nil {
