@@ -192,11 +192,11 @@ func listRun(opts *ListOptions) error {
 		opts.ListType = "search"
 	}
 	if len(opts.Labels) != 0 {
-		listOpts.Labels = opts.Labels
+		*listOpts.Labels = gitlab.Labels(opts.Labels)
 		opts.ListType = "search"
 	}
 	if len(opts.NotLabels) != 0 {
-		listOpts.NotLabels = opts.NotLabels
+		*listOpts.NotLabels = gitlab.Labels(opts.NotLabels)
 		opts.ListType = "search"
 	}
 	if opts.Milestone != "" {

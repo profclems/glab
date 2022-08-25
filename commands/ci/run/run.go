@@ -82,7 +82,7 @@ func NewCmdRun(f *cmdutils.Factory) *cobra.Command {
 			}
 
 			c := &gitlab.CreatePipelineOptions{
-				Variables: pipelineVars,
+				Variables: &pipelineVars,
 			}
 
 			if m, _ := cmd.Flags().GetString("branch"); m != "" {

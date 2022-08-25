@@ -337,7 +337,7 @@ func createRun(opts *CreateOpts) error {
 		}
 
 		if len(opts.Milestone) > 0 {
-			createOpts.Milestones = opts.Milestone
+			createOpts.Milestones = &opts.Milestone
 		}
 
 		release, _, err = client.Releases.CreateRelease(repo.FullName(), createOpts)
@@ -362,7 +362,7 @@ func createRun(opts *CreateOpts) error {
 		}
 
 		if len(opts.Milestone) > 0 {
-			updateOpts.Milestones = opts.Milestone
+			updateOpts.Milestones = &opts.Milestone
 		}
 
 		release, _, err = client.Releases.UpdateRelease(repo.FullName(), opts.TagName, updateOpts)

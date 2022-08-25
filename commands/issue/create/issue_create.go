@@ -316,7 +316,7 @@ func createRun(opts *CreateOpts) error {
 
 	if action == cmdutils.SubmitAction {
 		issueCreateOpts.Title = gitlab.String(opts.Title)
-		issueCreateOpts.Labels = opts.Labels
+		*issueCreateOpts.Labels = gitlab.Labels(opts.Labels)
 		issueCreateOpts.Description = &opts.Description
 		if opts.IsConfidential {
 			issueCreateOpts.Confidential = gitlab.Bool(opts.IsConfidential)

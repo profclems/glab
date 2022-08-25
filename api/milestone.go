@@ -45,7 +45,7 @@ type ListMilestonesOptions struct {
 
 func (opts *ListMilestonesOptions) ListProjectMilestonesOptions() *gitlab.ListMilestonesOptions {
 	projectOpts := &gitlab.ListMilestonesOptions{
-		IIDs:   opts.IIDs,
+		IIDs:   &opts.IIDs,
 		State:  opts.State,
 		Title:  opts.Title,
 		Search: opts.Search,
@@ -57,7 +57,7 @@ func (opts *ListMilestonesOptions) ListProjectMilestonesOptions() *gitlab.ListMi
 
 func (opts *ListMilestonesOptions) ListGroupMilestonesOptions() *gitlab.ListGroupMilestonesOptions {
 	groupOpts := &gitlab.ListGroupMilestonesOptions{
-		IIDs:                    opts.IIDs,
+		IIDs:                    &opts.IIDs,
 		State:                   opts.State,
 		Title:                   opts.Title,
 		Search:                  opts.Search,

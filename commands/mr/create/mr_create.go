@@ -285,7 +285,7 @@ func createRun(opts *CreateOpts) error {
 		}
 
 		if opts.CopyIssueLabels {
-			mrCreateOpts.Labels = issue.Labels
+			*mrCreateOpts.Labels = issue.Labels
 		}
 		opts.Description = fmt.Sprintf("Closes #%d", issue.IID)
 		opts.Title = fmt.Sprintf("Resolve \"%s\"", issue.Title)
@@ -500,7 +500,7 @@ func createRun(opts *CreateOpts) error {
 
 	// These actions need to be done here, after the `Add metadata` prompt because
 	// they are metadata that can be modified by the prompt
-	mrCreateOpts.Labels = append(mrCreateOpts.Labels, opts.Labels...)
+	*mrCreateOpts.Labels = append(*mrCreateOpts.Labels, opts.Labels...)
 
 	if len(opts.Assignees) > 0 {
 		users, err := api.UsersByNames(labClient, opts.Assignees)

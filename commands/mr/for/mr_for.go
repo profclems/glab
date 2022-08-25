@@ -105,7 +105,7 @@ func NewCmdFor(f *cmdutils.Factory) *cobra.Command {
 			l := &gitlab.CreateMergeRequestOptions{}
 			l.Title = gitlab.String(mergeTitle)
 			l.Description = gitlab.String(fmt.Sprintf("Closes #%d", issue.IID))
-			l.Labels = gitlab.Labels{mergeLabel}
+			*l.Labels = gitlab.Labels{mergeLabel}
 			l.SourceBranch = gitlab.String(sourceBranch)
 			l.TargetBranch = gitlab.String(targetBranch)
 			if milestone, _ := cmd.Flags().GetInt("milestone"); milestone != -1 {
@@ -118,7 +118,7 @@ func NewCmdFor(f *cmdutils.Factory) *cobra.Command {
 				l.RemoveSourceBranch = gitlab.Bool(true)
 			}
 			if withLables, _ := cmd.Flags().GetBool("with-labels"); withLables {
-				l.Labels = issue.Labels
+				*l.Labels = issue.Labels
 			}
 
 			if a, _ := cmd.Flags().GetString("assignee"); a != "" {
@@ -129,7 +129,7 @@ func NewCmdFor(f *cmdutils.Factory) *cobra.Command {
 					j := utils.StringToInt(i)
 					t2 = append(t2, j)
 				}
-				l.AssigneeIDs = t2
+				l.AssigneeIDs = &t2
 			}
 
 			mr, err := api.CreateMR(apiClient, repo.FullName(), l)

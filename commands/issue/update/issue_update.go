@@ -85,11 +85,11 @@ func NewCmdUpdate(f *cmdutils.Factory) *cobra.Command {
 			}
 			if m, _ := cmd.Flags().GetStringSlice("label"); len(m) != 0 {
 				actions = append(actions, fmt.Sprintf("added labels %s", strings.Join(m, " ")))
-				l.AddLabels = gitlab.Labels(m)
+				*l.AddLabels = gitlab.Labels(m)
 			}
 			if m, _ := cmd.Flags().GetStringSlice("unlabel"); len(m) != 0 {
 				actions = append(actions, fmt.Sprintf("removed labels %s", strings.Join(m, " ")))
-				l.RemoveLabels = gitlab.Labels(m)
+				*l.RemoveLabels = gitlab.Labels(m)
 			}
 			if m, _ := cmd.Flags().GetBool("public"); m {
 				actions = append(actions, "made public")
@@ -114,7 +114,7 @@ func NewCmdUpdate(f *cmdutils.Factory) *cobra.Command {
 				}
 			}
 			if cmd.Flags().Changed("unassign") {
-				l.AssigneeIDs = []int{0} // 0 or an empty int[] is the documented way to unassign
+				l.AssigneeIDs = nil
 				actions = append(actions, "unassigned all users")
 			}
 			if ua != nil {
