@@ -39,6 +39,11 @@ if ! _can_install; then
 fi
 
 machine=$(uname -m)
+case ${machine} in
+    aarch64)
+        machine="arm64"
+        ;;
+esac
 
 case $(uname -s) in
     Linux)
