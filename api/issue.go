@@ -45,6 +45,50 @@ var GetIssue = func(client *gitlab.Client, projectID interface{}, issueID int) (
 	return issue, nil
 }
 
+var ProjectListIssueOptionsToGroup = func(l *gitlab.ListProjectIssuesOptions) *gitlab.ListGroupIssuesOptions {
+	return &gitlab.ListGroupIssuesOptions{
+		ListOptions:        l.ListOptions,
+		State:              l.State,
+		Labels:             l.Labels,
+		NotLabels:          l.NotLabels,
+		WithLabelDetails:   l.WithLabelDetails,
+		IIDs:               l.IIDs,
+		Milestone:          l.Milestone,
+		Scope:              l.Scope,
+		AuthorID:           l.AuthorID,
+		NotAuthorID:        l.NotAuthorID,
+		AssigneeID:         l.AssigneeID,
+		NotAssigneeID:      l.NotAssigneeID,
+		AssigneeUsername:   l.AssigneeUsername,
+		MyReactionEmoji:    l.MyReactionEmoji,
+		NotMyReactionEmoji: l.NotMyReactionEmoji,
+		OrderBy:            l.OrderBy,
+		Sort:               l.Sort,
+		Search:             l.Search,
+		In:                 l.In,
+		CreatedAfter:       l.CreatedAfter,
+		CreatedBefore:      l.CreatedBefore,
+		UpdatedAfter:       l.UpdatedAfter,
+		UpdatedBefore:      l.UpdatedBefore,
+		IssueType:          l.IssueType,
+	}
+}
+
+var ListGroupIssues = func(client *gitlab.Client, groupID interface{}, opts *gitlab.ListGroupIssuesOptions) ([]*gitlab.Issue, error) {
+	if client == nil {
+		client = apiClient.Lab()
+	}
+	if opts.PerPage == 0 {
+		opts.PerPage = DefaultListLimit
+	}
+	issues, _, err := client.Issues.ListGroupIssues(groupID, opts)
+	if err != nil {
+		return nil, err
+	}
+
+	return issues, nil
+}
+
 var ListIssues = func(client *gitlab.Client, projectID interface{}, opts *gitlab.ListProjectIssuesOptions) ([]*gitlab.Issue, error) {
 	if client == nil {
 		client = apiClient.Lab()
@@ -147,4 +191,30 @@ var LinkIssues = func(client *gitlab.Client, projectID interface{}, issueIDD int
 	}
 
 	return issueLink.SourceIssue, issueLink.TargetIssue, nil
+}
+
+var SetIssueTimeEstimate = func(client *gitlab.Client, projectID interface{}, issueIDD int, opts *gitlab.SetTimeEstimateOptions) (*gitlab.TimeStats, error) {
+	if client == nil {
+		client = apiClient.Lab()
+	}
+
+	timeStats, _, err := client.Issues.SetTimeEstimate(projectID, issueIDD, opts)
+	if err != nil {
+		return nil, err
+	}
+
+	return timeStats, nil
+}
+
+var AddIssueTimeSpent = func(client *gitlab.Client, projectID interface{}, issueIDD int, opts *gitlab.AddSpentTimeOptions) (*gitlab.TimeStats, error) {
+	if client == nil {
+		client = apiClient.Lab()
+	}
+
+	timeStats, _, err := client.Issues.AddSpentTime(projectID, issueIDD, opts)
+	if err != nil {
+		return nil, err
+	}
+
+	return timeStats, nil
 }

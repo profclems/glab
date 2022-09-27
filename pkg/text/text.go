@@ -12,6 +12,8 @@ const ansi = "[\u001B\u009B][[\\]()#;?]*(?:(?:(?:[a-zA-Z\\d]*(?:;[a-zA-Z\\d]*)*)
 
 var re = regexp.MustCompile(ansi)
 
+var hyperlinkOSCRegexp = regexp.MustCompile("\u001B\\]8;[^;]*;.*?\u001B\\\\")
+
 // Join joins the list of the string with the delim provided.
 // Returns an empty string for empty list
 func Join(list []string, delim string) string {
@@ -28,7 +30,7 @@ func Join(list []string, delim string) string {
 
 // Strip strips the string of all colors
 func Strip(s string) string {
-	return re.ReplaceAllString(s, "")
+	return re.ReplaceAllString(hyperlinkOSCRegexp.ReplaceAllString(s, ""), "")
 }
 
 // StringWidth returns the actual width of the string without colors

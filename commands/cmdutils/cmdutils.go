@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -83,8 +84,12 @@ func ListGitLabTemplates(tmplType string) ([]string, error) {
 	}
 
 	for _, file := range fileNames {
+		if strings.HasPrefix(file, ".") || !strings.HasSuffix(file, ".md") {
+			continue
+		}
 		files = append(files, strings.TrimSuffix(file, ".md"))
 	}
+	sort.Slice(files, func(i, j int) bool { return files[i] < files[j] })
 	return files, nil
 }
 
@@ -174,13 +179,14 @@ func LabelsPrompt(response *[]string, apiClient *gitlab.Client, repoRemote *glre
 
 func MilestonesPrompt(response *int, apiClient *gitlab.Client, repoRemote *glrepo.Remote, io *iostreams.IOStreams) (err error) {
 	var milestoneOptions []string
-	milestoneMap := map[string]*gitlab.Milestone{}
+	milestoneMap := map[string]int{}
 
-	lOpts := &gitlab.ListMilestonesOptions{
-		State: gitlab.String("active"),
+	lOpts := &api.ListMilestonesOptions{
+		IncludeParentMilestones: gitlab.Bool(true),
+		State:                   gitlab.String("active"),
+		PerPage:                 100,
 	}
-	lOpts.PerPage = 100
-	milestones, err := api.ListMilestones(apiClient, repoRemote.FullName(), lOpts)
+	milestones, err := api.ListAllMilestones(apiClient, repoRemote.FullName(), lOpts)
 	if err != nil {
 		return err
 	}
@@ -191,7 +197,7 @@ func MilestonesPrompt(response *int, apiClient *gitlab.Client, repoRemote *glrep
 
 	for i := range milestones {
 		milestoneOptions = append(milestoneOptions, milestones[i].Title)
-		milestoneMap[milestones[i].Title] = milestones[i]
+		milestoneMap[milestones[i].Title] = milestones[i].ID
 	}
 
 	var selectedMilestone string
@@ -199,7 +205,7 @@ func MilestonesPrompt(response *int, apiClient *gitlab.Client, repoRemote *glrep
 	if err != nil {
 		return err
 	}
-	*response = milestoneMap[selectedMilestone].ID
+	*response = milestoneMap[selectedMilestone]
 
 	return nil
 }
@@ -359,7 +365,7 @@ func ParseMilestone(apiClient *gitlab.Client, repo glrepo.Interface, milestoneTi
 		return milestoneID, nil
 	}
 
-	milestone, err := api.MilestoneByTitle(apiClient, repo.FullName(), milestoneTitle)
+	milestone, err := api.ProjectMilestoneByTitle(apiClient, repo.FullName(), milestoneTitle)
 	if err != nil {
 		return 0, err
 	}
@@ -528,4 +534,28 @@ func (ua *UserAssignments) UsersFromAddRemove(
 		assignedIDs = []int{0}
 	}
 	return assignedIDs, actions, nil
+}
+
+func ConfirmTransfer() error {
+	const (
+		performTransferLabel = "Confirm repository transfer"
+		abortTransferLabel   = "Abort repository transfer"
+	)
+
+	options := []string{abortTransferLabel, performTransferLabel}
+
+	var confirmTransfer string
+	err := prompt.Select(&confirmTransfer, "confirmation", "Do you wish to proceed with the repository transfer?", options)
+	if err != nil {
+		return fmt.Errorf("could not prompt: %w", err)
+	}
+
+	switch confirmTransfer {
+	case performTransferLabel:
+		return nil
+	case abortTransferLabel:
+		return fmt.Errorf("user aborted operation")
+	default:
+		return fmt.Errorf("invalid value: %s", confirmTransfer)
+	}
 }

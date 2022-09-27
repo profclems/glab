@@ -3,15 +3,13 @@ package set
 import (
 	"errors"
 	"fmt"
-	"io/ioutil"
-	"regexp"
-	"strings"
 
 	"github.com/profclems/glab/pkg/iostreams"
 
 	"github.com/MakeNowJust/heredoc"
 	"github.com/profclems/glab/api"
 	"github.com/profclems/glab/commands/cmdutils"
+	"github.com/profclems/glab/commands/variable/variableutils"
 	"github.com/profclems/glab/internal/glrepo"
 	"github.com/spf13/cobra"
 	"github.com/xanzy/go-gitlab"
@@ -29,16 +27,12 @@ type SetOpts struct {
 	Protected bool
 	Masked    bool
 	Group     string
-
-	ValueSet bool
 }
 
 func NewCmdSet(f *cmdutils.Factory, runE func(opts *SetOpts) error) *cobra.Command {
 	opts := &SetOpts{
 		IO: f.IO,
 	}
-
-	validKeyMsg := "A valid key must have no more than 255 characters; only A-Z, a-z, 0-9, and _ are allowed"
 
 	cmd := &cobra.Command{
 		Use:     "set <key> <value>",
@@ -61,17 +55,14 @@ func NewCmdSet(f *cmdutils.Factory, runE func(opts *SetOpts) error) *cobra.Comma
 
 			opts.Key = args[0]
 
-			if !isValidKey(opts.Key) {
-				err = cmdutils.FlagError{Err: fmt.Errorf("invalid key provided.\n%s", validKeyMsg)}
+			if !variableutils.IsValidKey(opts.Key) {
+				err = cmdutils.FlagError{Err: fmt.Errorf("invalid key provided.\n%s", variableutils.ValidKeyMsg)}
 				return
 			}
 
 			if opts.Value != "" && len(args) == 2 {
-				if opts.Value != "" {
-					err = cmdutils.FlagError{Err: errors.New("specify value either by second positional argument or --value flag")}
-					return
-				}
-				opts.Value = args[1]
+				err = cmdutils.FlagError{Err: errors.New("specify value either by second positional argument or --value flag")}
+				return
 			}
 
 			if cmd.Flags().Changed("scope") && opts.Group != "" {
@@ -79,8 +70,7 @@ func NewCmdSet(f *cmdutils.Factory, runE func(opts *SetOpts) error) *cobra.Comma
 				return
 			}
 
-			opts.ValueSet = cmd.Flags().Changed("value") || len(args) == 2
-			opts.Value, err = getValue(opts)
+			opts.Value, err = variableutils.GetValue(opts.Value, opts.IO, args)
 			if err != nil {
 				return
 			}
@@ -116,8 +106,9 @@ func setRun(opts *SetOpts) error {
 	if err != nil {
 		return err
 	}
+
 	if opts.Group != "" {
-		// creating project-level variable
+		// creating group-level variable
 		createVarOpts := &gitlab.CreateGroupVariableOptions{
 			Key:          gitlab.String(opts.Key),
 			Value:        gitlab.String(opts.Value),
@@ -134,7 +125,7 @@ func setRun(opts *SetOpts) error {
 		return nil
 	}
 
-	// creating group-level variable
+	// creating project-level variable
 	baseRepo, err := opts.BaseRepo()
 	if err != nil {
 		return err
@@ -152,36 +143,6 @@ func setRun(opts *SetOpts) error {
 		return err
 	}
 
-	fmt.Fprintf(opts.IO.StdOut, "%s Created variable %s for %s\n", c.GreenCheck(), opts.Key, baseRepo.FullName())
+	fmt.Fprintf(opts.IO.StdOut, "%s Created variable %s for %s with scope %s\n", c.GreenCheck(), opts.Key, baseRepo.FullName(), opts.Scope)
 	return nil
-}
-
-func getValue(opts *SetOpts) (string, error) {
-	if opts.Value != "" || opts.ValueSet {
-		return opts.Value, nil
-	}
-
-	if opts.IO.IsInTTY {
-		return "", &cmdutils.FlagError{Err: errors.New("no value specified but nothing on STDIN")}
-	}
-
-	// read value from STDIN if not provided
-	defer opts.IO.In.Close()
-	value, err := ioutil.ReadAll(opts.IO.In)
-	if err != nil {
-		return "", fmt.Errorf("failed to read value from STDIN: %w", err)
-	}
-	return strings.TrimSpace(string(value)), nil
-}
-
-// isValidKey checks if a key is valid if it follows the following criteria:
-// must have no more than 255 characters;
-// only A-Z, a-z, 0-9, and _ are allowed
-func isValidKey(key string) bool {
-	// check if key falls within range of 1-255
-	if len(key) > 255 || len(key) < 1 {
-		return false
-	}
-	keyRE := regexp.MustCompile(`^[A-Za-z0-9_]+$`)
-	return keyRE.MatchString(key)
 }

@@ -26,7 +26,7 @@ func DisplayIssueList(streams *iostreams.IOStreams, issues []*gitlab.Issue, proj
 	table := tableprinter.NewTablePrinter()
 	table.SetIsTTY(streams.IsOutputTTY())
 	for _, issue := range issues {
-		table.AddCell(IssueState(c, issue))
+		table.AddCell(streams.Hyperlink(IssueState(c, issue), issue.WebURL))
 		table.AddCell(issue.Title)
 
 		if len(issue.Labels) > 0 {
@@ -42,12 +42,15 @@ func DisplayIssueList(streams *iostreams.IOStreams, issues []*gitlab.Issue, proj
 	return table.Render()
 }
 
-func DisplayIssue(c *iostreams.ColorPalette, i *gitlab.Issue) string {
+func DisplayIssue(c *iostreams.ColorPalette, i *gitlab.Issue, isTTY bool) string {
 	duration := utils.TimeToPrettyTimeAgo(*i.CreatedAt)
 	issueID := IssueState(c, i)
 
-	return fmt.Sprintf("%s %s (%s)\n %s\n",
-		issueID, i.Title, duration, i.WebURL)
+	if isTTY {
+		return fmt.Sprintf("%s %s (%s)\n %s\n", issueID, i.Title, duration, i.WebURL)
+	} else {
+		return i.WebURL
+	}
 }
 
 func IssueState(c *iostreams.ColorPalette, i *gitlab.Issue) (issueID string) {

@@ -40,6 +40,51 @@ var GetMR = func(client *gitlab.Client, projectID interface{}, mrID int, opts *g
 	return mr, nil
 }
 
+var ListGroupMRs = func(client *gitlab.Client, groupID interface{}, opts *gitlab.ListGroupMergeRequestsOptions) ([]*gitlab.MergeRequest, error) {
+	if client == nil {
+		client = apiClient.Lab()
+	}
+	if opts.PerPage == 0 {
+		opts.PerPage = DefaultListLimit
+	}
+
+	mrs, _, err := client.MergeRequests.ListGroupMergeRequests(groupID, opts)
+	if err != nil {
+		return nil, err
+	}
+
+	return mrs, nil
+}
+
+var ProjectListMROptionsToGroup = func(l *gitlab.ListProjectMergeRequestsOptions) *gitlab.ListGroupMergeRequestsOptions {
+	return &gitlab.ListGroupMergeRequestsOptions{
+		ListOptions:            l.ListOptions,
+		State:                  l.State,
+		OrderBy:                l.OrderBy,
+		Sort:                   l.Sort,
+		Milestone:              l.Milestone,
+		View:                   l.View,
+		Labels:                 l.Labels,
+		NotLabels:              l.NotLabels,
+		WithLabelsDetails:      l.WithLabelsDetails,
+		WithMergeStatusRecheck: l.WithMergeStatusRecheck,
+		CreatedAfter:           l.CreatedAfter,
+		CreatedBefore:          l.CreatedBefore,
+		UpdatedAfter:           l.UpdatedAfter,
+		UpdatedBefore:          l.UpdatedBefore,
+		Scope:                  l.Scope,
+		AuthorID:               l.AuthorID,
+		AssigneeID:             l.AssigneeID,
+		ReviewerID:             l.ReviewerID,
+		ReviewerUsername:       l.ReviewerUsername,
+		MyReactionEmoji:        l.MyReactionEmoji,
+		SourceBranch:           l.SourceBranch,
+		TargetBranch:           l.TargetBranch,
+		Search:                 l.Search,
+		WIP:                    l.WIP,
+	}
+}
+
 var ListMRs = func(client *gitlab.Client, projectID interface{}, opts *gitlab.ListProjectMergeRequestsOptions) ([]*gitlab.MergeRequest, error) {
 	if client == nil {
 		client = apiClient.Lab()

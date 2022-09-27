@@ -33,6 +33,8 @@ type IOStreams struct {
 	spinner *spinner.Spinner
 
 	backgroundColor string
+
+	displayHyperlinks string
 }
 
 func Init() *IOStreams {
@@ -54,6 +56,7 @@ func Init() *IOStreams {
 		IsaTTY:            stdoutIsTTY,
 		IsErrTTY:          stderrIsTTY,
 		is256ColorEnabled: Is256ColorSupported(),
+		displayHyperlinks: "never",
 	}
 
 	if stdin, ok := ioStream.In.(*os.File); ok {
@@ -108,7 +111,10 @@ func (s *IOStreams) StartPager() error {
 			pagerEnv = append(pagerEnv[0:i], pagerEnv[i+1:]...)
 		}
 	}
-	if _, ok := os.LookupEnv("LESS"); !ok {
+
+	if s.shouldDisplayHyperlinks() {
+		pagerEnv = append(pagerEnv, "LESS=FrX")
+	} else if _, ok := os.LookupEnv("LESS"); !ok {
 		pagerEnv = append(pagerEnv, "LESS=FRX")
 	}
 	if _, ok := os.LookupEnv("LV"); !ok {
@@ -198,6 +204,32 @@ func (s *IOStreams) BackgroundColor() string {
 		return "none"
 	}
 	return s.backgroundColor
+}
+
+func (s *IOStreams) SetDisplayHyperlinks(displayHyperlinks string) {
+	s.displayHyperlinks = displayHyperlinks
+}
+
+func (s *IOStreams) shouldDisplayHyperlinks() bool {
+	switch s.displayHyperlinks {
+	case "always":
+		return true
+	case "auto":
+		return s.IsaTTY && s.pagerProcess == nil
+	default:
+		return false
+	}
+}
+
+func (s *IOStreams) Hyperlink(displayText, targetURL string) string {
+	if !s.shouldDisplayHyperlinks() {
+		return displayText
+	}
+
+	openSequence := fmt.Sprintf("\x1b]8;;%s\x1b\\", targetURL)
+	closeSequence := "\x1b]8;;\x1b\\"
+
+	return openSequence + displayText + closeSequence
 }
 
 func Test() (streams *IOStreams, in *bytes.Buffer, out *bytes.Buffer, errOut *bytes.Buffer) {

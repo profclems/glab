@@ -1,7 +1,7 @@
 # Contributing
 
 [legal]: https://help.github.com/articles/github-terms-of-service/#6-contributions-under-repository-license
-[license]: ../LICENSE
+[license]: LICENSE
 
 Hi! Thanks for your interest in contributing to this project!
 
@@ -25,7 +25,7 @@ Please avoid:
 ## Building the project
 
 Prerequisites:
-- Go 1.13+
+- Go 1.16+
 
 Build with: `make` or `go build -o bin/glab ./cmd/glab/main.go`
 
@@ -121,7 +121,7 @@ Fixes #025
 ```
 
 Contributions to this project are made available to public under the [project's open source license][license].
-Please note that this project adheres to a [Contributor Code of Conduct](https://github.com/profclems/glab/tree/trunk/.github/CODE_OF_CONDUCT.md). By participating in this project you agree to abide by its terms.
+Please note that this project adheres to a [Contributor Code of Conduct](https://github.com/profclems/glab/tree/trunk/CODE_OF_CONDUCT.md). By participating in this project you agree to abide by its terms.
 
 Manual pages are auto-generated from source on every release. You do not need to submit pull requests for documentation specifically; manual pages for commands will automatically get updated after your pull requests gets accepted.
 

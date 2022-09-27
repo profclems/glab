@@ -38,6 +38,27 @@ func MigrateOldConfig() error {
 	if err := migrateUserConfigs(".glab-cli/config", cfg, false); err != nil {
 		return err
 	}
+
+	// move local config from {currentDir}/.glab-cli/config to {currentDir}/.git/glab-cli
+	oldLocalCfgFile := OldLocalConfigFile()
+	if CheckFileExists(oldLocalCfgFile) {
+		log.Println("- Migrating local config dir from", oldLocalCfgFile, "to", LocalConfigFile())
+		newLocalPath := LocalConfigDir()
+		if !CheckPathExists(filepath.Join(newLocalPath...)) {
+			if err := os.MkdirAll(filepath.Join(newLocalPath...), os.ModePerm); err != nil {
+				return fmt.Errorf("failed to create new local config dir: %v", err)
+			}
+		}
+		err = copy(oldLocalCfgFile, LocalConfigFile())
+		if err != nil {
+			return err
+		}
+		// backup old local config file
+		err = BackupConfigFile(oldLocalCfgFile)
+		if err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
@@ -214,4 +235,14 @@ func writeConfig(cfg Config, key, value string, isGlobal bool) (nCfg Config, err
 		err = nCfg.Set("", key, value)
 	}
 	return
+}
+
+func copy(src string, dst string) error {
+	// Read all content of src to data
+	data, err := ioutil.ReadFile(src)
+	if err != nil {
+		return err
+	}
+	// Write data to dst
+	return WriteFile(dst, data, 0600)
 }

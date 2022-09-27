@@ -47,6 +47,8 @@ func NewCmdRun(f *cmdutils.Factory) *cobra.Command {
 		Example: heredoc.Doc(`
 	$ glab ci run
 	$ glab ci run -b trunk
+	$ glab ci run -b trunk --variables MYKEY:some_value
+  	$ glab ci run -b trunk --variables MYKEY:some_value --variables KEY2:another_value
 	`),
 		Long: ``,
 		Args: cobra.ExactArgs(0),
@@ -70,7 +72,7 @@ func NewCmdRun(f *cmdutils.Factory) *cobra.Command {
 					if !re.MatchString(v) {
 						return fmt.Errorf("Bad pipeline variable : \"%s\" should be of format KEY:VALUE", v)
 					}
-					s := strings.Split(v, ":")
+					s := strings.SplitN(v, ":", 2)
 					pipelineVars = append(pipelineVars, &gitlab.PipelineVariable{
 						Key:          s[0],
 						Value:        s[1],

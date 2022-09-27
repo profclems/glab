@@ -5,7 +5,12 @@ import (
 	"fmt"
 	"net/url"
 	"os"
+	"regexp"
 	"strings"
+
+	"github.com/AlecAivazis/survey/v2"
+	"github.com/profclems/glab/commands/issue/issueutils"
+	"github.com/profclems/glab/pkg/prompt"
 
 	"github.com/profclems/glab/pkg/iostreams"
 
@@ -13,12 +18,10 @@ import (
 	"github.com/profclems/glab/internal/config"
 	"github.com/profclems/glab/internal/glrepo"
 
-	"github.com/AlecAivazis/survey/v2"
 	"github.com/profclems/glab/api"
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/commands/mr/mrutils"
 	"github.com/profclems/glab/pkg/git"
-	"github.com/profclems/glab/pkg/prompt"
 	"github.com/profclems/glab/pkg/utils"
 	"github.com/spf13/cobra"
 	"github.com/xanzy/go-gitlab"
@@ -32,22 +35,28 @@ type CreateOpts struct {
 	TargetTrackingBranch  string
 	Labels                []string
 	Assignees             []string
+	Reviewers             []string
 	MileStone             int
 	MilestoneFlag         string
 	MRCreateTargetProject string
 
+	RelatedIssue    string
+	CopyIssueLabels bool
+
 	CreateSourceBranch bool
 	RemoveSourceBranch bool
 	AllowCollaboration bool
+	SquashBeforeMerge  bool
 
-	Autofill      bool
-	IsDraft       bool
-	IsWIP         bool
-	ShouldPush    bool
-	NoEditor      bool
-	IsInteractive bool
-	Yes           bool
-	Web           bool
+	Autofill       bool
+	FillCommitBody bool
+	IsDraft        bool
+	IsWIP          bool
+	ShouldPush     bool
+	NoEditor       bool
+	IsInteractive  bool
+	Yes            bool
+	Web            bool
 
 	IO       *iostreams.IOStreams
 	Branch   func() (string, error)
@@ -84,6 +93,7 @@ func NewCmdCreate(f *cmdutils.Factory, runE func(opts *CreateOpts) error) *cobra
 			$ glab mr create -a username -t "fix annoying bug"
 			$ glab mr create -f --draft --label RFC
 			$ glab mr create --fill --yes --web
+			$ glab mr create --fill --fill-commit-body --yes
 		`),
 		Args: cobra.ExactArgs(0),
 		PreRun: func(cmd *cobra.Command, args []string) {
@@ -121,10 +131,17 @@ func NewCmdCreate(f *cmdutils.Factory, runE func(opts *CreateOpts) error) *cobra
 			if cmd.Flags().Changed("wip") && cmd.Flags().Changed("draft") {
 				return &cmdutils.FlagError{Err: errors.New("specify either of --draft or --wip")}
 			}
+			if !opts.Autofill && opts.FillCommitBody {
+				return &cmdutils.FlagError{Err: errors.New("--fill-commit-body should be used with --fill")}
+			}
 			// Remove this once --yes does more than just skip the prompts that --web happen to skip
 			// by design
 			if opts.Yes && opts.Web {
 				return &cmdutils.FlagError{Err: errors.New("--web already skips all prompts currently skipped by --yes")}
+			}
+
+			if opts.CopyIssueLabels && opts.RelatedIssue == "" {
+				return &cmdutils.FlagError{Err: errors.New("--copy-issue-labels can only be used with --related-issue")}
 			}
 
 			if runE != nil {
@@ -135,6 +152,7 @@ func NewCmdCreate(f *cmdutils.Factory, runE func(opts *CreateOpts) error) *cobra
 		},
 	}
 	mrCreateCmd.Flags().BoolVarP(&opts.Autofill, "fill", "f", false, "Do not prompt for title/description and just use commit info")
+	mrCreateCmd.Flags().BoolVarP(&opts.FillCommitBody, "fill-commit-body", "", false, "Fill description with each commit body when multiple commits. Can only be used with --fill")
 	mrCreateCmd.Flags().BoolVarP(&opts.IsDraft, "draft", "", false, "Mark merge request as a draft")
 	mrCreateCmd.Flags().BoolVarP(&opts.IsWIP, "wip", "", false, "Mark merge request as a work in progress. Alternative to --draft")
 	mrCreateCmd.Flags().BoolVarP(&opts.ShouldPush, "push", "", false, "Push committed changes after creating merge request. Make sure you have committed changes")
@@ -142,22 +160,35 @@ func NewCmdCreate(f *cmdutils.Factory, runE func(opts *CreateOpts) error) *cobra
 	mrCreateCmd.Flags().StringVarP(&opts.Description, "description", "d", "", "Supply a description for merge request")
 	mrCreateCmd.Flags().StringSliceVarP(&opts.Labels, "label", "l", []string{}, "Add label by name. Multiple labels should be comma separated")
 	mrCreateCmd.Flags().StringSliceVarP(&opts.Assignees, "assignee", "a", []string{}, "Assign merge request to people by their `usernames`")
+	mrCreateCmd.Flags().StringSliceVarP(&opts.Reviewers, "reviewer", "", []string{}, "Request review from users by their `usernames`")
 	mrCreateCmd.Flags().StringVarP(&opts.SourceBranch, "source-branch", "s", "", "The Branch you are creating the merge request. Default is the current branch.")
 	mrCreateCmd.Flags().StringVarP(&opts.TargetBranch, "target-branch", "b", "", "The target or base branch into which you want your code merged")
 	mrCreateCmd.Flags().BoolVarP(&opts.CreateSourceBranch, "create-source-branch", "", false, "Create source branch if it does not exist")
 	mrCreateCmd.Flags().StringVarP(&opts.MilestoneFlag, "milestone", "m", "", "The global ID or title of a milestone to assign")
 	mrCreateCmd.Flags().BoolVarP(&opts.AllowCollaboration, "allow-collaboration", "", false, "Allow commits from other members")
 	mrCreateCmd.Flags().BoolVarP(&opts.RemoveSourceBranch, "remove-source-branch", "", false, "Remove Source Branch on merge")
+	mrCreateCmd.Flags().BoolVarP(&opts.SquashBeforeMerge, "squash-before-merge", "", false, "Squash commits into a single commit when merging")
 	mrCreateCmd.Flags().BoolVarP(&opts.NoEditor, "no-editor", "", false, "Don't open editor to enter description. If set to true, uses prompt. Default is false")
 	mrCreateCmd.Flags().StringP("head", "H", "", "Select another head repository using the `OWNER/REPO` or `GROUP/NAMESPACE/REPO` format or the project ID or full URL")
 	mrCreateCmd.Flags().BoolVarP(&opts.Yes, "yes", "y", false, "Skip submission confirmation prompt, with --fill it skips all optional prompts")
 	mrCreateCmd.Flags().BoolVarP(&opts.Web, "web", "w", false, "continue merge request creation on web browser")
+	mrCreateCmd.Flags().BoolVarP(&opts.CopyIssueLabels, "copy-issue-labels", "", false, "Copy labels from issue to the merge request. Used with --related-issue")
+	mrCreateCmd.Flags().StringVarP(&opts.RelatedIssue, "related-issue", "i", "", "Create merge request for an issue. The merge request title will be created from the issue if --title is not provided.")
 
 	mrCreateCmd.Flags().StringVarP(&opts.MRCreateTargetProject, "target-project", "", "", "Add target project by id or OWNER/REPO or GROUP/NAMESPACE/REPO")
 	_ = mrCreateCmd.Flags().MarkHidden("target-project")
 	_ = mrCreateCmd.Flags().MarkDeprecated("target-project", "Use --repo instead")
 
 	return mrCreateCmd
+}
+
+func parseIssue(apiClient *gitlab.Client, opts *CreateOpts) (*gitlab.Issue, error) {
+	issue, _, err := issueutils.IssueFromArg(apiClient, opts.BaseRepo, opts.RelatedIssue)
+	if err != nil {
+		return nil, err
+	}
+
+	return issue, nil
 }
 
 func createRun(opts *CreateOpts) error {
@@ -210,7 +241,7 @@ func createRun(opts *CreateOpts) error {
 		return cmdutils.SilentError
 	}
 
-	headRepoRemote, err := repoRemote(labClient, opts, headRepo, opts.SourceProject, "glab-head")
+	headRepoRemote, err := repoRemote(opts, headRepo, opts.SourceProject, "glab-head")
 	if err != nil {
 		return nil
 	}
@@ -221,7 +252,7 @@ func createRun(opts *CreateOpts) error {
 	if glrepo.IsSame(baseRepo, headRepo) {
 		baseRepoRemote = headRepoRemote
 	} else {
-		baseRepoRemote, err = repoRemote(labClient, opts, baseRepo, opts.TargetProject, "glab-base")
+		baseRepoRemote, err = repoRemote(opts, baseRepo, opts.TargetProject, "glab-base")
 		if err != nil {
 			return nil
 		}
@@ -236,7 +267,7 @@ func createRun(opts *CreateOpts) error {
 
 	if opts.CreateSourceBranch && opts.SourceBranch == "" {
 		opts.SourceBranch = utils.ReplaceNonAlphaNumericChars(opts.Title, "-")
-	} else if opts.SourceBranch == "" {
+	} else if opts.SourceBranch == "" && opts.RelatedIssue == "" {
 		opts.SourceBranch, err = opts.Branch()
 		if err != nil {
 			return err
@@ -244,93 +275,128 @@ func createRun(opts *CreateOpts) error {
 	}
 
 	if opts.TargetBranch == "" {
-		opts.TargetBranch = getTargetBranch(baseRepoRemote, opts.SourceBranch)
+		opts.TargetBranch = getTargetBranch(baseRepoRemote)
 	}
 
-	opts.TargetTrackingBranch = fmt.Sprintf("%s/%s", baseRepoRemote.Name, opts.TargetBranch)
-	if opts.SourceBranch == opts.TargetBranch && glrepo.IsSame(baseRepo, headRepo) {
-		fmt.Fprintf(opts.IO.StdErr, "You must be on a different branch other than %q\n", opts.TargetBranch)
-		return cmdutils.SilentError
-	}
-
-	if opts.Autofill {
-		if err = mrBodyAndTitle(opts); err != nil {
+	if opts.RelatedIssue != "" {
+		issue, err := parseIssue(labClient, opts)
+		if err != nil {
 			return err
 		}
-		_, err = api.GetCommit(labClient, baseRepo.FullName(), opts.TargetBranch)
-		if err != nil {
-			return fmt.Errorf("target branch %s does not exist on remote. Specify target branch with --target-branch flag",
-				opts.TargetBranch)
+
+		if opts.CopyIssueLabels {
+			mrCreateOpts.Labels = issue.Labels
+		}
+		opts.Description = fmt.Sprintf("Closes #%d", issue.IID)
+		opts.Title = fmt.Sprintf("Resolve \"%s\"", issue.Title)
+		if !opts.IsDraft && !opts.IsWIP {
+			opts.IsDraft = true
 		}
 
-		opts.ShouldPush = true
-	} else if opts.IsInteractive {
-		var templateName string
-		var templateContents string
-		if opts.Description == "" {
-			if opts.NoEditor {
-				err = prompt.AskMultiline(&opts.Description, "description", "Description:", "")
+		if opts.SourceBranch == "" {
+			sourceBranch := fmt.Sprintf("%d-%s", issue.IID, utils.ReplaceNonAlphaNumericChars(strings.ToLower(issue.Title), "-"))
+			branchOpts := &gitlab.CreateBranchOptions{
+				Branch: &sourceBranch,
+				Ref:    &opts.TargetBranch,
+			}
+
+			_, err = api.CreateBranch(labClient, baseRepo.FullName(), branchOpts)
+			if err != nil {
+				for branchErr, branchCount := err, 1; branchErr != nil; branchCount++ {
+					sourceBranch = fmt.Sprintf("%d-%s-%d", issue.IID, strings.ReplaceAll(strings.ToLower(issue.Title), " ", "-"), branchCount)
+					_, branchErr = api.CreateBranch(labClient, baseRepo.FullName(), branchOpts)
+				}
+			}
+			opts.SourceBranch = sourceBranch
+		}
+	} else {
+		opts.TargetTrackingBranch = fmt.Sprintf("%s/%s", baseRepoRemote.Name, opts.TargetBranch)
+		if opts.SourceBranch == opts.TargetBranch && glrepo.IsSame(baseRepo, headRepo) {
+			fmt.Fprintf(opts.IO.StdErr, "You must be on a different branch other than %q\n", opts.TargetBranch)
+			return cmdutils.SilentError
+		}
+
+		if opts.Autofill {
+			if err = mrBodyAndTitle(opts); err != nil {
+				return err
+			}
+			_, err = api.GetCommit(labClient, baseRepo.FullName(), opts.TargetBranch)
+			if err != nil {
+				return fmt.Errorf("target branch %s does not exist on remote. Specify target branch with --target-branch flag",
+					opts.TargetBranch)
+			}
+
+			opts.ShouldPush = true
+		} else if opts.IsInteractive {
+			var templateName string
+			var templateContents string
+			if opts.Description == "" {
+				if opts.NoEditor {
+					err = prompt.AskMultiline(&opts.Description, "description", "Description:", "")
+					if err != nil {
+						return err
+					}
+				} else {
+					templateResponse := struct {
+						Index int
+					}{}
+					templateNames, err := cmdutils.ListGitLabTemplates(cmdutils.MergeRequestTemplate)
+					if err != nil {
+						return fmt.Errorf("error getting templates: %w", err)
+					}
+
+					templateNames = append(templateNames, "Open a blank merge request")
+
+					selectQs := []*survey.Question{
+						{
+							Name: "index",
+							Prompt: &survey.Select{
+								Message: "Choose a template",
+								Options: templateNames,
+							},
+						},
+					}
+
+					if err := prompt.Ask(selectQs, &templateResponse); err != nil {
+						return fmt.Errorf("could not prompt: %w", err)
+					}
+					if templateResponse.Index != len(templateNames) {
+						templateName = templateNames[templateResponse.Index]
+						templateContents, err = cmdutils.LoadGitLabTemplate(cmdutils.MergeRequestTemplate, templateName)
+						if err != nil {
+							return fmt.Errorf("failed to get template contents: %w", err)
+						}
+					}
+				}
+			}
+
+			if opts.Title == "" {
+				err = prompt.AskQuestionWithInput(&opts.Title, "title", "Title:", "", true)
 				if err != nil {
 					return err
 				}
-			} else {
-				templateResponse := struct {
-					Index int
-				}{}
-				templateNames, err := cmdutils.ListGitLabTemplates(cmdutils.MergeRequestTemplate)
-				if err != nil {
-					return fmt.Errorf("error getting templates: %w", err)
-				}
-
-				templateNames = append(templateNames, "Open a blank merge request")
-
-				selectQs := []*survey.Question{
-					{
-						Name: "index",
-						Prompt: &survey.Select{
-							Message: "Choose a template",
-							Options: templateNames,
-						},
-					},
-				}
-
-				if err := prompt.Ask(selectQs, &templateResponse); err != nil {
-					return fmt.Errorf("could not prompt: %w", err)
-				}
-				if templateResponse.Index != len(templateNames) {
-					templateName = templateNames[templateResponse.Index]
-					templateContents, err = cmdutils.LoadGitLabTemplate(cmdutils.MergeRequestTemplate, templateName)
+			}
+			if opts.Description == "" {
+				if opts.NoEditor {
+					err = prompt.AskMultiline(&opts.Description, "description", "Description:", "")
 					if err != nil {
-						return fmt.Errorf("failed to get template contents: %w", err)
+						return err
+					}
+				} else {
+					editor, err := cmdutils.GetEditor(opts.Config)
+					if err != nil {
+						return err
+					}
+					err = cmdutils.EditorPrompt(&opts.Description, "Description", templateContents, editor)
+					if err != nil {
+						return err
 					}
 				}
 			}
 		}
+	}
 
-		if opts.Title == "" {
-			err = prompt.AskQuestionWithInput(&opts.Title, "title", "Title:", "", true)
-			if err != nil {
-				return err
-			}
-		}
-		if opts.Description == "" {
-			if opts.NoEditor {
-				err = prompt.AskMultiline(&opts.Description, "description", "Description:", "")
-				if err != nil {
-					return err
-				}
-			} else {
-				editor, err := cmdutils.GetEditor(opts.Config)
-				if err != nil {
-					return err
-				}
-				err = cmdutils.EditorPrompt(&opts.Description, "Description", templateContents, editor)
-				if err != nil {
-					return err
-				}
-			}
-		}
-	} else if opts.Title == "" {
+	if opts.Title == "" {
 		return fmt.Errorf("title can't be blank")
 	}
 
@@ -341,24 +407,31 @@ func createRun(opts *CreateOpts) error {
 			opts.Title = "WIP: " + opts.Title
 		}
 	}
-	mrCreateOpts.Title = gitlab.String(opts.Title)
-	mrCreateOpts.Description = gitlab.String(opts.Description)
-	mrCreateOpts.SourceBranch = gitlab.String(opts.SourceBranch)
-	mrCreateOpts.TargetBranch = gitlab.String(opts.TargetBranch)
+	mrCreateOpts.Title = &opts.Title
+	mrCreateOpts.Description = &opts.Description
+	mrCreateOpts.SourceBranch = &opts.SourceBranch
+	mrCreateOpts.TargetBranch = &opts.TargetBranch
+
 	if opts.AllowCollaboration {
 		mrCreateOpts.AllowCollaboration = gitlab.Bool(true)
 	}
+
 	if opts.RemoveSourceBranch {
 		mrCreateOpts.RemoveSourceBranch = gitlab.Bool(true)
 	}
+
+	if opts.SquashBeforeMerge {
+		mrCreateOpts.Squash = gitlab.Bool(true)
+	}
+
 	if opts.TargetProject != nil {
-		mrCreateOpts.TargetProjectID = gitlab.Int(opts.TargetProject.ID)
+		mrCreateOpts.TargetProjectID = &opts.TargetProject.ID
 	}
 
 	if opts.CreateSourceBranch {
 		lb := &gitlab.CreateBranchOptions{
-			Branch: gitlab.String(opts.SourceBranch),
-			Ref:    gitlab.String(opts.TargetBranch),
+			Branch: &opts.SourceBranch,
+			Ref:    &opts.TargetBranch,
 		}
 		fmt.Fprintln(opts.IO.StdErr, "\nCreating related branch...")
 		branch, err := api.CreateBranch(labClient, headRepo.FullName(), lb)
@@ -427,7 +500,7 @@ func createRun(opts *CreateOpts) error {
 
 	// These actions need to be done here, after the `Add metadata` prompt because
 	// they are metadata that can be modified by the prompt
-	mrCreateOpts.Labels = opts.Labels
+	mrCreateOpts.Labels = append(mrCreateOpts.Labels, opts.Labels...)
 
 	if len(opts.Assignees) > 0 {
 		users, err := api.UsersByNames(labClient, opts.Assignees)
@@ -435,6 +508,14 @@ func createRun(opts *CreateOpts) error {
 			return err
 		}
 		mrCreateOpts.AssigneeIDs = cmdutils.IDsFromUsers(users)
+	}
+
+	if len(opts.Reviewers) > 0 {
+		users, err := api.UsersByNames(labClient, opts.Reviewers)
+		if err != nil {
+			return err
+		}
+		mrCreateOpts.ReviewerIDs = cmdutils.IDsFromUsers(users)
 	}
 
 	if opts.MileStone != 0 {
@@ -469,7 +550,7 @@ func createRun(opts *CreateOpts) error {
 			return err
 		}
 
-		fmt.Fprintln(out, mrutils.DisplayMR(c, mr))
+		fmt.Fprintln(out, mrutils.DisplayMR(c, mr, opts.IO.IsaTTY))
 		return nil
 	}
 
@@ -501,7 +582,18 @@ func mrBodyAndTitle(opts *CreateOpts) error {
 		if opts.Description == "" {
 			var body strings.Builder
 			for i := len(commits) - 1; i >= 0; i-- {
-				fmt.Fprintf(&body, "- %s\n", commits[i].Title)
+				// adds 2 spaces for markdown line wrapping
+				fmt.Fprintf(&body, "- %s  \n", commits[i].Title)
+
+				if opts.FillCommitBody {
+					commitBody, err := git.CommitBody(commits[i].Sha)
+					if err != nil {
+						return err
+					}
+					re := regexp.MustCompile(`\r?\n\n`)
+					commitBody = re.ReplaceAllString(commitBody, "  \n")
+					fmt.Fprintf(&body, "%s\n", commitBody)
+				}
 			}
 			opts.Description = body.String()
 		}
@@ -580,6 +672,10 @@ func generateMRCompareURL(opts *CreateOpts) (string, error) {
 		// this uses the slash commands to add assignees to the description
 		description += fmt.Sprintf("\n/assign %s", strings.Join(opts.Assignees, ", "))
 	}
+	if len(opts.Reviewers) > 0 {
+		// this uses the slash commands to add reviewers to the description
+		description += fmt.Sprintf("\n/reviewer %s", strings.Join(opts.Reviewers, ", "))
+	}
 	if opts.MileStone != 0 {
 		// this uses the slash commands to add milestone to the description
 		description += fmt.Sprintf("\n/milestone %%%d", opts.MileStone)
@@ -592,9 +688,9 @@ func generateMRCompareURL(opts *CreateOpts) (string, error) {
 	}
 	u.Path += "/-/merge_requests/new"
 	u.RawQuery = fmt.Sprintf(
-		"utf8=✓&merge_request[title]=%s&merge_request[description]=%s&merge_request[source_branch]=%s&merge_request[target_branch]=%s&merge_request[source_project_id]=%d&merge_request[target_project_id]=%d",
-		opts.Title,
-		url.QueryEscape(description),
+		"merge_request[title]=%s&merge_request[description]=%s&merge_request[source_branch]=%s&merge_request[target_branch]=%s&merge_request[source_project_id]=%d&merge_request[target_project_id]=%d",
+		strings.ReplaceAll(url.PathEscape(opts.Title), "+", "%2B"),
+		strings.ReplaceAll(url.PathEscape(description), "+", "%2B"),
 		opts.SourceBranch,
 		opts.TargetBranch,
 		opts.SourceProject.ID,
@@ -632,7 +728,7 @@ func headRepoOverride(opts *CreateOpts, repo string) error {
 	return nil
 }
 
-func repoRemote(labClient *gitlab.Client, opts *CreateOpts, repo glrepo.Interface, project *gitlab.Project, remoteName string) (*glrepo.Remote, error) {
+func repoRemote(opts *CreateOpts, repo glrepo.Interface, project *gitlab.Project, remoteName string) (*glrepo.Remote, error) {
 	remotes, err := opts.Remotes()
 	if err != nil {
 		return nil, err
@@ -659,7 +755,7 @@ func repoRemote(labClient *gitlab.Client, opts *CreateOpts, repo glrepo.Interfac
 	return repoRemote, nil
 }
 
-func getTargetBranch(baseRepoRemote *glrepo.Remote, sourceBranch string) string {
+func getTargetBranch(baseRepoRemote *glrepo.Remote) string {
 	br, _ := git.GetDefaultBranch(baseRepoRemote.PushURL.String())
 	// we ignore the error since git.GetDefaultBranch returns master and an error
 	// if the default branch cannot be determined

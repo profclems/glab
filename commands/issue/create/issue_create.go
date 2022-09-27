@@ -34,6 +34,8 @@ type CreateOpts struct {
 	LinkedMR      int
 	LinkedIssues  []int
 	IssueLinkType string
+	TimeEstimate  string
+	TimeSpent     string
 
 	MilestoneFlag string
 
@@ -134,6 +136,8 @@ func NewCmdCreate(f *cmdutils.Factory) *cobra.Command {
 	issueCreateCmd.Flags().BoolVar(&opts.Web, "web", false, "continue issue creation with web interface")
 	issueCreateCmd.Flags().IntSliceVarP(&opts.LinkedIssues, "linked-issues", "", []int{}, "The IIDs of issues that this issue links to")
 	issueCreateCmd.Flags().StringVarP(&opts.IssueLinkType, "link-type", "", "relates_to", "Type for the issue link")
+	issueCreateCmd.Flags().StringVarP(&opts.TimeEstimate, "time-estimate", "e", "", "Set time estimate for the issue")
+	issueCreateCmd.Flags().StringVarP(&opts.TimeSpent, "time-spent", "s", "", "Set time spent for the issue")
 
 	return issueCreateCmd
 }
@@ -338,23 +342,50 @@ func createRun(opts *CreateOpts) error {
 		if err != nil {
 			return err
 		}
-		if len(opts.LinkedIssues) > 0 {
-			for _, targetIssueIID := range opts.LinkedIssues {
-				fmt.Fprintln(opts.IO.StdErr, "- Linking to issue ", targetIssueIID)
-				issue, _, err = api.LinkIssues(apiClient, repo.FullName(), issue.IID, &gitlab.CreateIssueLinkOptions{
-					TargetIssueIID: gitlab.String(strconv.Itoa(targetIssueIID)),
-					LinkType:       gitlab.String(opts.IssueLinkType),
-				})
-				if err != nil {
-					return err
-				}
-			}
+		if err := postCreateActions(apiClient, issue, opts, repo); err != nil {
+			return err
 		}
-		fmt.Fprintln(opts.IO.StdOut, issueutils.DisplayIssue(opts.IO.Color(), issue))
+
+		fmt.Fprintln(opts.IO.StdOut, issueutils.DisplayIssue(opts.IO.Color(), issue, opts.IO.IsaTTY))
 		return nil
 	}
 
 	return errors.New("expected to cancel, preview in browser, add metadata, or submit")
+}
+
+func postCreateActions(apiClient *gitlab.Client, issue *gitlab.Issue, opts *CreateOpts, repo glrepo.Interface) error {
+	if len(opts.LinkedIssues) > 0 {
+		var err error
+		for _, targetIssueIID := range opts.LinkedIssues {
+			fmt.Fprintln(opts.IO.StdErr, "- Linking to issue ", targetIssueIID)
+			issue, _, err = api.LinkIssues(apiClient, repo.FullName(), issue.IID, &gitlab.CreateIssueLinkOptions{
+				TargetIssueIID: gitlab.String(strconv.Itoa(targetIssueIID)),
+				LinkType:       gitlab.String(opts.IssueLinkType),
+			})
+			if err != nil {
+				return err
+			}
+		}
+	}
+	if opts.TimeEstimate != "" {
+		fmt.Fprintln(opts.IO.StdErr, "- Adding time estimate ", opts.TimeEstimate)
+		_, err := api.SetIssueTimeEstimate(apiClient, repo.FullName(), issue.IID, &gitlab.SetTimeEstimateOptions{
+			Duration: gitlab.String(opts.TimeEstimate),
+		})
+		if err != nil {
+			return err
+		}
+	}
+	if opts.TimeSpent != "" {
+		fmt.Fprintln(opts.IO.StdErr, "- Adding time spent ", opts.TimeSpent)
+		_, err := api.AddIssueTimeSpent(apiClient, repo.FullName(), issue.IID, &gitlab.AddSpentTimeOptions{
+			Duration: gitlab.String(opts.TimeSpent),
+		})
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func previewIssue(opts *CreateOpts) error {
@@ -368,7 +399,7 @@ func previewIssue(opts *CreateOpts) error {
 		return err
 	}
 
-	openURL, err := generateIssueWebURL(opts, repo)
+	openURL, err := generateIssueWebURL(opts)
 	if err != nil {
 		return err
 	}
@@ -380,7 +411,7 @@ func previewIssue(opts *CreateOpts) error {
 	return utils.OpenInBrowser(openURL, browser)
 }
 
-func generateIssueWebURL(opts *CreateOpts, repo glrepo.Interface) (string, error) {
+func generateIssueWebURL(opts *CreateOpts) (string, error) {
 	description := opts.Description
 
 	if len(opts.Labels) > 0 {
@@ -402,7 +433,7 @@ func generateIssueWebURL(opts *CreateOpts, repo glrepo.Interface) (string, error
 	}
 	if opts.Weight != 0 {
 		// this uses the slash commands to add weight to the description
-		description += fmt.Sprintf("\n/weight %%%d", opts.Weight)
+		description += fmt.Sprintf("\n/weight %d", opts.Weight)
 	}
 	if opts.IsConfidential {
 		// this uses the slash commands to add confidential to the description
@@ -415,8 +446,8 @@ func generateIssueWebURL(opts *CreateOpts, repo glrepo.Interface) (string, error
 	}
 	u.Path += "/-/issues/new"
 	u.RawQuery = fmt.Sprintf(
-		"utf8=✓&issue[title]=%s&issue[description]=%s",
-		opts.Title,
-		url.QueryEscape(description))
+		"issue[title]=%s&issue[description]=%s",
+		strings.ReplaceAll(url.PathEscape(opts.Title), "+", "%2B"),
+		strings.ReplaceAll(url.PathEscape(description), "+", "%2B"))
 	return u.String(), nil
 }

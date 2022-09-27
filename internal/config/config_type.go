@@ -7,7 +7,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/profclems/glab/internal/glinstance"
+	"github.com/profclems/glab/pkg/glinstance"
 
 	"errors"
 
@@ -45,7 +45,7 @@ type HostConfig struct {
 	Host string
 }
 
-// This type implements a low-level get/set config that is backed by an in-memory tree of Yaml
+// ConfigMap type implements a low-level get/set config that is backed by an in-memory tree of Yaml
 // nodes. It allows us to interact with a yaml-based config programmatically, preserving any
 // comments that were present when the yaml was parsed.
 type ConfigMap struct {
@@ -201,6 +201,15 @@ func NewBlankRoot() *yaml.Node {
 						HeadComment: "Allow glab to automatically check for updates and notify you when there are new updates",
 						Kind:        yaml.ScalarNode,
 						Value:       "check_update",
+					},
+					{
+						Kind:  yaml.ScalarNode,
+						Value: "false",
+					},
+					{
+						HeadComment: "Whether or not to display hyperlink escapes when listing things like issues or MRs",
+						Kind:        yaml.ScalarNode,
+						Value:       "display_hyperlinks",
 					},
 					{
 						Kind:  yaml.ScalarNode,
@@ -684,7 +693,7 @@ func EnvKeyEquivalence(key string) []string {
 	case "host":
 		return []string{"GITLAB_HOST", "GITLAB_URI", "GL_HOST"}
 	case "token":
-		return []string{"GITLAB_TOKEN", "OAUTH_TOKEN"}
+		return []string{"GITLAB_TOKEN", "GITLAB_ACCESS_TOKEN", "OAUTH_TOKEN"}
 	case "no_prompt":
 		return []string{"NO_PROMPT", "PROMPT_DISABLED"}
 	case "editor", "visual", "glab_editor":

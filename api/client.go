@@ -14,7 +14,7 @@ import (
 	"time"
 
 	"github.com/profclems/glab/internal/config"
-	"github.com/profclems/glab/internal/glinstance"
+	"github.com/profclems/glab/pkg/glinstance"
 	"github.com/xanzy/go-gitlab"
 )
 
@@ -71,7 +71,7 @@ func RefreshClient() {
 	}
 }
 
-// GetAPIClient returns the global DotEnv instance.
+// GetClient returns the global Client instance.
 func GetClient() *Client {
 	return apiClient
 }

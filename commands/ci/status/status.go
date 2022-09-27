@@ -114,7 +114,7 @@ func NewCmdStatus(f *cmdutils.Factory) *cobra.Command {
 				if !f.IO.IsOutputTTY() || !f.IO.PromptEnabled() {
 					break
 				}
-				if runningPipeline.Status == "running" && live {
+				if (runningPipeline.Status == "pending" || runningPipeline.Status == "running") && live {
 					runningPipeline, err = api.GetLastPipeline(apiClient, repo.FullName(), branch)
 					if err != nil {
 						return err

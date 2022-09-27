@@ -54,7 +54,7 @@ func NewCmdReopen(f *cmdutils.Factory) *cobra.Command {
 				}
 
 				fmt.Fprintf(out, "%s Reopened Issue #%d\n", c.GreenCheck(), issue.IID)
-				fmt.Fprintln(out, issueutils.DisplayIssue(c, issue))
+				fmt.Fprintln(out, issueutils.DisplayIssue(c, issue, f.IO.IsaTTY))
 			}
 			return nil
 		},

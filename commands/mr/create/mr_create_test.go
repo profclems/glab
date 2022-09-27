@@ -278,4 +278,37 @@ like this
 resolves #1
 `, opts.Description)
 	})
+	t.Run("given-fill-commit-body", func(t *testing.T) {
+		opts = &CreateOpts{
+			SourceBranch:         "mr-autofill-test-br",
+			TargetBranch:         "master",
+			TargetTrackingBranch: "origin/master",
+		}
+		cs, csTeardown := test.InitCmdStubber()
+		defer csTeardown()
+
+		cs.Stub("d1sd2e,chore: some tidying\nd2asa3,docs: more changes to more things")
+		cs.Stub("Here, I am adding some commit body.\nLittle longer\n\nResolves #1\n")
+		cs.Stub("another body for another commit\ncloses 1234\n")
+
+		opts := *opts
+		opts.FillCommitBody = true
+
+		if err := mrBodyAndTitle(&opts); err != nil {
+			t.Errorf("unexpected error: %v", err)
+			return
+		}
+
+		assert.Equal(t, "mr autofill test br", opts.Title)
+		assert.Equal(t, `- docs: more changes to more things  
+Here, I am adding some commit body.
+Little longer  
+Resolves #1
+
+- chore: some tidying  
+another body for another commit
+closes 1234
+
+`, opts.Description)
+	})
 }

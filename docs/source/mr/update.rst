@@ -39,6 +39,7 @@ Options
   -r, --ready                  Mark merge request as ready to be reviewed and merged
       --remove-source-branch   Remove Source Branch on merge
       --reviewer strings       request review from users by their usernames, prefix with '!' or '-' to remove from existing reviewers, '+' to add, otherwise replace existing reviewers with given users
+      --squash-before-merge    Toggles the option to squash commits into a single commit when merging
       --target-branch string   set target branch
   -t, --title string           Title of merge request
       --unassign               unassign all users

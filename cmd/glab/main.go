@@ -20,8 +20,8 @@ import (
 	"github.com/profclems/glab/commands/help"
 	"github.com/profclems/glab/commands/update"
 	"github.com/profclems/glab/internal/config"
-	"github.com/profclems/glab/internal/glinstance"
 	"github.com/profclems/glab/internal/run"
+	"github.com/profclems/glab/pkg/glinstance"
 	"github.com/profclems/glab/pkg/tableprinter"
 	"github.com/profclems/glab/pkg/utils"
 
@@ -87,6 +87,12 @@ func main() {
 
 	if promptDisabled, _ := cfg.Get("", "no_prompt"); promptDisabled != "" {
 		cmdFactory.IO.SetPrompt(promptDisabled)
+	}
+
+	if forceHyperlinks := os.Getenv("FORCE_HYPERLINKS"); forceHyperlinks != "" && forceHyperlinks != "0" {
+		cmdFactory.IO.SetDisplayHyperlinks("always")
+	} else if displayHyperlinks, _ := cfg.Get("", "display_hyperlinks"); displayHyperlinks == "true" {
+		cmdFactory.IO.SetDisplayHyperlinks("auto")
 	}
 
 	var expandedArgs []string
@@ -156,7 +162,7 @@ func main() {
 }
 
 func printError(streams *iostreams.IOStreams, err error, cmd *cobra.Command, debug, shouldExit bool) {
-	if err == cmdutils.SilentError {
+	if errors.Is(err, cmdutils.SilentError) {
 		return
 	}
 	color := streams.Color()

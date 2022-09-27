@@ -47,4 +47,5 @@ test/testdata-*
 coverage*
 vendor
 log.txt.glab-cli
+.git
 /docs/mdx

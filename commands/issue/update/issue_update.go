@@ -146,7 +146,7 @@ func NewCmdUpdate(f *cmdutils.Factory) *cobra.Command {
 				fmt.Fprintln(out, c.GreenCheck(), s)
 			}
 
-			fmt.Fprintln(out, issueutils.DisplayIssue(c, issue))
+			fmt.Fprintln(out, issueutils.DisplayIssue(c, issue, f.IO.IsaTTY))
 			return nil
 		},
 	}

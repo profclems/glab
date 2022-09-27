@@ -52,7 +52,7 @@ func NewCmdUnsubscribe(f *cmdutils.Factory) *cobra.Command {
 				}
 
 				fmt.Fprintf(f.IO.StdOut, "%s You have successfully unsubscribed from merge request !%d\n", c.RedCheck(), mr.IID)
-				fmt.Fprintln(f.IO.StdOut, mrutils.DisplayMR(c, mr))
+				fmt.Fprintln(f.IO.StdOut, mrutils.DisplayMR(c, mr, f.IO.IsaTTY))
 			}
 
 			return nil

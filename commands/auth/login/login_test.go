@@ -190,9 +190,8 @@ func Test_hostnameValidator(t *testing.T) {
 			expected: "a value is required",
 		},
 		{
-			name:     "invalid-hostname-slash",
-			hostname: "local/host",
-			expected: `invalid hostname "local/host"`,
+			name:     "valid-hostname-slash",
+			hostname: "localhost:9999/host",
 		},
 		{
 			name:     "hostname-with-valid-port",

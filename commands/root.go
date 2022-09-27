@@ -1,6 +1,8 @@
 package commands
 
 import (
+	"errors"
+
 	"github.com/MakeNowJust/heredoc"
 	aliasCmd "github.com/profclems/glab/commands/alias"
 	apiCmd "github.com/profclems/glab/commands/api"
@@ -15,6 +17,8 @@ import (
 	mrCmd "github.com/profclems/glab/commands/mr"
 	projectCmd "github.com/profclems/glab/commands/project"
 	releaseCmd "github.com/profclems/glab/commands/release"
+	snippetCmd "github.com/profclems/glab/commands/snippet"
+	sshCmd "github.com/profclems/glab/commands/ssh-key"
 	updateCmd "github.com/profclems/glab/commands/update"
 	userCmd "github.com/profclems/glab/commands/user"
 	variableCmd "github.com/profclems/glab/commands/variable"
@@ -24,7 +28,7 @@ import (
 	"github.com/spf13/pflag"
 )
 
-// RootCmd is the main root/parent command
+// NewCmdRoot is the main root/parent command
 func NewCmdRoot(f *cmdutils.Factory, version, buildDate string) *cobra.Command {
 	c := f.IO.Color()
 	var rootCmd = &cobra.Command{
@@ -57,6 +61,10 @@ func NewCmdRoot(f *cmdutils.Factory, version, buildDate string) *cobra.Command {
 			NO_PROMPT: set to 1 (true) or 0 (false) to disable and enable prompts respectively
 
 			NO_COLOR: set to any value to avoid printing ANSI escape sequences for color output.
+
+			FORCE_HYPERLINKS: set to 1 to force hyperlinks to be output, even when not outputing to a TTY
+
+			GLAB_CONFIG_DIR: set to a directory path to override the global configuration location 
 		`),
 			"help:feedback": heredoc.Docf(`
 			Encountered a bug or want to suggest a feature?
@@ -74,7 +82,7 @@ func NewCmdRoot(f *cmdutils.Factory, version, buildDate string) *cobra.Command {
 	})
 	rootCmd.SetUsageFunc(help.RootUsageFunc)
 	rootCmd.SetFlagErrorFunc(func(cmd *cobra.Command, err error) error {
-		if err == pflag.ErrHelp {
+		if errors.Is(err, pflag.ErrHelp) {
 			return err
 		}
 		return &cmdutils.FlagError{Err: err}
@@ -102,9 +110,11 @@ func NewCmdRoot(f *cmdutils.Factory, version, buildDate string) *cobra.Command {
 	rootCmd.AddCommand(pipelineCmd.NewCmdCI(f))
 	rootCmd.AddCommand(projectCmd.NewCmdRepo(f))
 	rootCmd.AddCommand(releaseCmd.NewCmdRelease(f))
+	rootCmd.AddCommand(sshCmd.NewCmdSSHKey(f))
 	rootCmd.AddCommand(userCmd.NewCmdUser(f))
 	rootCmd.AddCommand(variableCmd.NewVariableCmd(f))
 	rootCmd.AddCommand(apiCmd.NewCmdApi(f, nil))
+	rootCmd.AddCommand(snippetCmd.NewCmdSnippet(f))
 
 	rootCmd.Flags().BoolP("version", "v", false, "show glab version information")
 	return rootCmd

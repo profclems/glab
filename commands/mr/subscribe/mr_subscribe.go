@@ -52,7 +52,7 @@ func NewCmdSubscribe(f *cmdutils.Factory) *cobra.Command {
 				}
 
 				fmt.Fprintf(f.IO.StdOut, "%s You have successfully subscribed to merge request !%d\n", c.GreenCheck(), mr.IID)
-				fmt.Fprintln(f.IO.StdOut, mrutils.DisplayMR(c, mr))
+				fmt.Fprintln(f.IO.StdOut, mrutils.DisplayMR(c, mr, f.IO.IsaTTY))
 			}
 
 			return nil

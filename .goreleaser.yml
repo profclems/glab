@@ -35,7 +35,7 @@ dockers:
       - 'profclems/glab:{{ .Tag }}-amd64'
       - 'ghcr.io/profclems/glab:{{ .Tag }}-amd64'
     dockerfile: Dockerfile
-    use_buildx: true
+    use: buildx
     build_flag_templates:
       - "--pull"
       - "--label=org.opencontainers.image.created={{.Date}}"
@@ -50,7 +50,7 @@ dockers:
       - 'profclems/glab:{{ .Tag }}-arm64'
       - 'ghcr.io/profclems/glab:{{ .Tag }}-arm64'
     dockerfile: Dockerfile
-    use_buildx: true
+    use: buildx
     build_flag_templates:
       - "--pull"
       - "--label=org.opencontainers.image.created={{.Date}}"
@@ -119,7 +119,7 @@ nfpms:
     vendor: Clement Sam
     homepage: https://github.com/profclems/glab
     maintainer: Clement Sam <clementsam75@gmail.com>
-    description: An open source gitlab cli tool
+    description: An open source GitLab CLI tool
     license: MIT
     formats:
       - apk
@@ -127,8 +127,6 @@ nfpms:
       - rpm
     dependencies:
       - git
-    # Override default /usr/local/bin destination for binaries
-    # Since glab is already archived in the bin directory it would install in /usr/bin/glab
     bindir: /usr
     contents:
       - src: "./share/man/man1/glab*.1"

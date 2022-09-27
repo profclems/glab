@@ -9,7 +9,7 @@ import (
 	"github.com/profclems/glab/api"
 	"github.com/profclems/glab/commands/cmdutils"
 	"github.com/profclems/glab/internal/config"
-	"github.com/profclems/glab/internal/glinstance"
+	"github.com/profclems/glab/pkg/glinstance"
 	"github.com/spf13/cobra"
 )
 
@@ -116,7 +116,7 @@ func statusRun(opts *StatusOpts) error {
 				c.GreenCheck(), c.Bold(graphQLEndpoint))
 		}
 		if token != "" {
-			tokenDisplay := "********************"
+			tokenDisplay := "**************************"
 			if opts.ShowToken {
 				tokenDisplay = token
 			}

@@ -9,7 +9,12 @@ import (
 )
 
 func NewCmdCompletion(io *iostreams.IOStreams) *cobra.Command {
-	var shellType string
+	var (
+		shellType string
+
+		// description will not be added if true
+		excludeDesc = false
+	)
 
 	var completionCmd = &cobra.Command{
 		Use:   "completion",
@@ -23,6 +28,14 @@ For example, for bash you could add this to your '~/.bash_profile':
 
 	eval "$(glab completion -s bash)"
 
+Generate a %[1]s_gh%[1]s completion script and put it somewhere in your %[1]s$fpath%[1]s:
+				gh completion -s zsh > /usr/local/share/zsh/site-functions/_gh
+			Ensure that the following is present in your %[1]s~/.zshrc%[1]s:
+				autoload -U compinit
+				compinit -i
+			
+			Zsh version 5.7 or later is recommended.
+
 When installing glab through a package manager, however, it's possible that
 no additional shell configuration is necessary to gain completion support. 
 For Homebrew, see <https://docs.brew.sh/Shell-Completion>
@@ -33,13 +46,19 @@ For Homebrew, see <https://docs.brew.sh/Shell-Completion>
 
 			switch shellType {
 			case "bash":
-				return rootCmd.GenBashCompletion(out)
+				return rootCmd.GenBashCompletionV2(out, !excludeDesc)
 			case "zsh":
+				if excludeDesc {
+					return rootCmd.GenZshCompletionNoDesc(out)
+				}
 				return rootCmd.GenZshCompletion(out)
 			case "powershell":
-				return rootCmd.GenPowerShellCompletion(out)
+				if excludeDesc {
+					return rootCmd.GenPowerShellCompletion(out)
+				}
+				return rootCmd.GenPowerShellCompletionWithDesc(out)
 			case "fish":
-				return rootCmd.GenFishCompletion(out, true)
+				return rootCmd.GenFishCompletion(out, !excludeDesc)
 			default:
 				return fmt.Errorf("unsupported shell type %q", shellType)
 			}
@@ -47,5 +66,6 @@ For Homebrew, see <https://docs.brew.sh/Shell-Completion>
 	}
 
 	completionCmd.Flags().StringVarP(&shellType, "shell", "s", "bash", "Shell type: {bash|zsh|fish|powershell}")
+	completionCmd.Flags().BoolVarP(&excludeDesc, "no-desc", "", false, "Do not include shell completion description")
 	return completionCmd
 }
