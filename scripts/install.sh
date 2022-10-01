@@ -31,7 +31,7 @@ _can_install() {
 if ! _can_install && [ "$(id -u)" != 0 ]; then
   printf "Run script as sudo\n"
   exit 1
-fi
+f2
 
 if ! _can_install; then
   printf -- "Can't install to %s\n" "${BINDIR}"
